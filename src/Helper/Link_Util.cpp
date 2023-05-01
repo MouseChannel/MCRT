@@ -44,3 +44,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateAccelerationStructureKHR(
     auto func = (PFN_vkCreateAccelerationStructureKHR)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->Get_handle(), "vkCreateAccelerationStructureKHR");
     return func(device, pCreateInfo, pAllocator, pAccelerationStructure);
 }
+VKAPI_ATTR VkDeviceAddress VKAPI_CALL vkGetAccelerationStructureDeviceAddressKHR(
+    VkDevice device,
+    const VkAccelerationStructureDeviceAddressInfoKHR* pInfo)
+{
+    auto func = (PFN_vkGetAccelerationStructureDeviceAddressKHR)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->Get_handle(), "vkGetAccelerationStructureDeviceAddressKHR");
+    return func(device, pInfo);
+}

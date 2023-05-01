@@ -31,13 +31,14 @@ public:
     {
         return vertexs.size();
     }
-   constexpr static std::vector<ObjInstance> obj_instances;
-   constexpr static std::vector<std::shared_ptr<Model>> models;
+    static std::vector<ObjInstance> obj_instances;
+    static std::vector<std::shared_ptr<Model>> models;
 
 private:
     std::vector<VertexObj> vertexs;
     std::shared_ptr<Buffer> vertexs_buffer;
     std::shared_ptr<Buffer> indices_buffer;
 };
+
 
 } // namespace MCRT

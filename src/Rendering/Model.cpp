@@ -3,7 +3,8 @@
 #include "Tool/tiny_obj_loader.hpp"
 #include "Wrapper/Buffer.hpp"
 namespace MCRT {
-
+std::vector<ObjInstance> Model::obj_instances;
+std::vector<std::shared_ptr<Model>> Model::models;
 Model::Model(std::string obj_path, std::string_view texture_path)
 {
     tinyobj::ObjReader reader;

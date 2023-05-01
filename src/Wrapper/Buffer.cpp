@@ -160,6 +160,17 @@ std::shared_ptr<Buffer> Buffer::CreateDeviceBuffer(void* data,
 
     return device_buffer;
 }
+std::shared_ptr<Buffer> Buffer::create_buffer(void* data, size_t size, vk::BufferUsageFlags usage)
+{
+    std::shared_ptr<Buffer> res;
+    res.reset(new Buffer(size,
+                         usage,
+                         vk::MemoryPropertyFlagBits::eHostVisible,
+                         true));
+    if (data)
+        res->Update(data, size);
+    return res;
+}
 vk::DeviceAddress Buffer::get_address()
 {
     vk::BufferDeviceAddressInfo address_info;

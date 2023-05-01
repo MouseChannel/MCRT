@@ -16,6 +16,12 @@ public:
     }
     [[nodiscard]] vk::DeviceAddress get_address();
     static std::shared_ptr<Buffer> CreateDeviceBuffer(void* data, size_t size, vk::BufferUsageFlags usage);
+    static std::shared_ptr<Buffer> create_buffer(void* data, size_t size, vk::BufferUsageFlags usage);
+    template <typename T>
+    static std::shared_ptr<Buffer> create_buffer(std::vector<T> data_, vk::BufferUsageFlags usage)
+    {
+        return create_buffer(data_.data(), sizeof(T) * data_.size(), usage);
+    }
 
 private:
     struct MemoryInfo {

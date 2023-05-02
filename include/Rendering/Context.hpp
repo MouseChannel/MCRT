@@ -14,6 +14,7 @@ class Sampler;
 class Debugger;
 class AccelerationStructure_Bottom;
 class AS_Builder;
+class RT_Pipeline;
 class Context : public Instance_base<Context> {
 public:
     //   Context() = default;
@@ -68,6 +69,7 @@ private:
     std::shared_ptr<Model> m_model;
     std::vector<std::shared_ptr<AccelerationStructure_Bottom>> m_accelerate_structures;
     std::shared_ptr<AS_Builder> m_as_builder;
+    std::shared_ptr<RT_Pipeline> m_rt_pipeline;
 };
 
 } // namespace MCRT

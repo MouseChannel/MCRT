@@ -17,14 +17,14 @@ Sampler::Sampler()
         .setMipmapMode(vk::SamplerMipmapMode::eLinear);
     m_handle = Get_Context_Singleton()
                    ->get_device()
-                   ->Get_handle()
+                   ->get_handle()
                    .createSampler(create_info);
 }
 Sampler::~Sampler()
 {
     Get_Context_Singleton()
         ->get_device()
-        ->Get_handle()
+        ->get_handle()
         .destroySampler(m_handle);
 }
 }

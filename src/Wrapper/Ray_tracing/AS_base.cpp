@@ -17,11 +17,11 @@ void AccelerationStructure::build(std::shared_ptr<Buffer> scratch_buffer)
     Context::Get_Singleton()->get_debugger()->set_name(dst_buffer, "dst_buffer");
     as_create_info.setType(m_type)
         .setSize(size_info.accelerationStructureSize)
-        .setBuffer(dst_buffer->Get_handle());
+        .setBuffer(dst_buffer->get_handle());
     // create   structure_handle here
     m_handle = Context::Get_Singleton()
                    ->get_device()
-                   ->Get_handle()
+                   ->get_handle()
                    .createAccelerationStructureKHR(as_create_info);
     // fill build_info part_2
     build_info.setDstAccelerationStructure(m_handle)

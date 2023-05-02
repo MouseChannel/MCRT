@@ -19,7 +19,7 @@ protected:
     }
 
 public:
-    [[nodiscard]] T& Get_handle()
+    [[nodiscard]] T& get_handle()
     {
         // assert(m_handle);
         return m_handle;

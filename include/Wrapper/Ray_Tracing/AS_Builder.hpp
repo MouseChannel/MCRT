@@ -31,10 +31,10 @@ public:
     void add_blas_obj(std::shared_ptr<Model> obj);
 
     void build_tlas();
-    // [[nodiscard("missing tlas")]] auto& get_tlas()
-    // {
-    //     return build_top_as.as;
-    // }
+    [[nodiscard("missing tlas")]] auto& get_tlas()
+    {
+        return top_as;
+    }
 
 private:
     std::vector<std::shared_ptr<AccelerationStructure_Bottom>> m_accelerate_structures;

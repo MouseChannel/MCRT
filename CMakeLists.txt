@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(MCRT VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 20)
+
 # add_compile_options("< <<<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
 include(cmake/FindVulkan.cmake)
 include(cmake/FindGLFW.cmake)
@@ -8,11 +9,31 @@ include(cmake/FindIMGUI.cmake)
 target_link_libraries(imgui glfw Vulkan)
 
 find_program(GLSLANGV ${VULKAN_DIR}/Bin/glslangValidator.exe REQUIRED)
+file(GLOB_RECURSE RGEN ${CMAKE_SOURCE_DIR}/shader/*.rgen)
+file(GLOB_RECURSE RCHIT ${CMAKE_SOURCE_DIR}/shader/*.rchit)
+file(GLOB_RECURSE RMISS ${CMAKE_SOURCE_DIR}/shader/*.rmiss)
+list(APPEND ALL_RT_SHADER ${RGEN} ${RCHIT} ${RMISS})
 message(STATUS "run glslangValidator to compile shaders ...")
-execute_process(COMMAND ${GLSLANGV} -V ${CMAKE_SOURCE_DIR}/Shader/vert.vert -o ${CMAKE_SOURCE_DIR}/Shader/vert.spv)
-execute_process(COMMAND ${GLSLANGV} -V ${CMAKE_SOURCE_DIR}/Shader/frag.frag -o ${CMAKE_SOURCE_DIR}/Shader/frag.spv)
+message("-----all ray tracing shader------ ")
+
+foreach(var ${ALL_RT_SHADER})
+    message(${var})
+    get_filename_component(file_name ${var} NAME)
+
+    string(CONCAT name ${file_name} .spv)
+
+    # message(${name})
+    execute_process(COMMAND ${GLSLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/spv/${name})
+endforeach()
+
+message("---------------------------------")
+
+# message(${USER_LIBS_PATH})
+
+# execute_process(COMMAND ${GLSLANGV} -V ${CMAKE_SOURCE_DIR}/Shader/frag.frag -o ${CMAKE_SOURCE_DIR}/Shader/frag.spv)
 message(STATUS "compile shader OK")
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include)
+
 # include(cmake/FindSrc.cmake)
 file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src *.cpp)
 

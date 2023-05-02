@@ -32,11 +32,11 @@ Image::Image(uint32_t width,
         .setTiling(tiling)
         .setSamples(sample);
 
-    m_handle = device->Get_handle().createImage(create_info);
+    m_handle = device->get_handle().createImage(create_info);
     AllocateMemory();
     Get_Context_Singleton()
         ->get_device()
-        ->Get_handle()
+        ->get_handle()
         .bindImageMemory(
             m_handle,
             memory,
@@ -72,7 +72,7 @@ void Image::Create_ImageView(vk::Format format)
         .setSubresourceRange(range);
     image_view = Get_Context_Singleton()
                      ->get_device()
-                     ->Get_handle()
+                     ->get_handle()
                      .createImageView(
                          view_create_info);
 }
@@ -81,7 +81,7 @@ void Image::AllocateMemory()
 {
     auto image_memory_requirement = Get_Context_Singleton()
                                         ->get_device()
-                                        ->Get_handle()
+                                        ->get_handle()
                                         .getImageMemoryRequirements(m_handle);
     auto memory_index = FindMemoryTypeIndex(image_memory_requirement.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
     vk::MemoryAllocateInfo allocate_info;
@@ -89,7 +89,7 @@ void Image::AllocateMemory()
         .setMemoryTypeIndex(memory_index);
     memory = Get_Context_Singleton()
                  ->get_device()
-                 ->Get_handle()
+                 ->get_handle()
                  .allocateMemory(allocate_info);
 }
 uint32_t Image::FindMemoryTypeIndex(std::uint32_t requirement_type,
@@ -164,14 +164,14 @@ void Image::FillImageData(size_t size, void* data)
             .setImageExtent({ width, height, 1 })
             .setBufferRowLength(0)
             .setImageSubresource(subsource);
-        cmd_buffer.copyBufferToImage(image_buffer->Get_handle(), m_handle, vk::ImageLayout::eTransferDstOptimal, region);
+        cmd_buffer.copyBufferToImage(image_buffer->get_handle(), m_handle, vk::ImageLayout::eTransferDstOptimal, region);
     });
 }
 Image::~Image()
 {
     auto& device = Get_Context_Singleton()
                        ->get_device()
-                       ->Get_handle();
+                       ->get_handle();
     device.destroyImageView(image_view);
     if (need_delete) {
 

@@ -13,7 +13,7 @@ Device::Device()
 
     auto& instance = Get_Context_Singleton()->get_instance();
 
-    auto avalible_physical_device = instance->Get_handle().enumeratePhysicalDevices();
+    auto avalible_physical_device = instance->get_handle().enumeratePhysicalDevices();
     physical_device = avalible_physical_device[0];
 
     std::cout << "device extension: " << std::endl;
@@ -39,6 +39,8 @@ Device::Device()
         .setQueueCount(1)
         .setQueueFamilyIndex(queue_family_indices.graphic_queue.value());
 
+    vk::PhysicalDeviceFeatures normal_feature;
+    normal_feature.setShaderStorageImageMultisample(true);
     vk::PhysicalDeviceVulkan12Features buffer_address_feature;
     buffer_address_feature.setBufferDeviceAddress(true);
     vk::PhysicalDeviceRayTracingPipelineFeaturesKHR rt_feature;
@@ -52,6 +54,8 @@ Device::Device()
     create_info
         .setQueueCreateInfos(queue_create_info)
         .setPEnabledExtensionNames(deviceRequiredExtensions)
+        .setPEnabledFeatures(&normal_feature)
+
         .setPNext(&ray_query_feature);
 
     ;
@@ -80,7 +84,7 @@ void Device::QueryQueueFamilyIndices()
         if (property.queueFlags | vk::QueueFlagBits::eGraphics) {
             queue_family_indices.graphic_queue = i;
         }
-        if (physical_device.getSurfaceSupportKHR(i, surface->Get_handle())) {
+        if (physical_device.getSurfaceSupportKHR(i, surface->get_handle())) {
             queue_family_indices.present_queue = i;
         }
         if (queue_family_indices.Complete()) {

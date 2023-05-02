@@ -10,11 +10,11 @@ CommandBuffer::CommandBuffer()
     auto command_pool = Get_Context_Singleton()->get_commandpool();
     allocate_info.setCommandBufferCount(1)
         .setLevel(vk::CommandBufferLevel::ePrimary)
-        .setCommandPool(command_pool->Get_handle());
+        .setCommandPool(command_pool->get_handle());
 
     m_handle = Get_Context_Singleton()
                    ->get_device()
-                   ->Get_handle()
+                   ->get_handle()
                    .allocateCommandBuffers(allocate_info)[0];
 }
 CommandBuffer::~CommandBuffer()

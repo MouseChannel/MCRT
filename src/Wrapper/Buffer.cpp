@@ -26,7 +26,7 @@ Buffer::Buffer(size_t size,
 Buffer::~Buffer()
 {
 
-    auto& device = Get_Context_Singleton()->get_device()->Get_handle();
+    auto& device = Get_Context_Singleton()->get_device()->get_handle();
     device.destroyBuffer(m_handle);
     device.freeMemory(memory);
     // vkDestroyBuffer(device, m_handle, nullptr);
@@ -39,7 +39,7 @@ void Buffer::CreateBuffer(size_t size, vk::BufferUsageFlags usage)
         .setSharingMode(vk::SharingMode::eExclusive);
     m_handle = Get_Context_Singleton()
                    ->get_device()
-                   ->Get_handle()
+                   ->get_handle()
                    .createBuffer(allocate_info);
 }
 Buffer::MemoryInfo Buffer::QueryMemoryInfo(vk::MemoryPropertyFlags property)
@@ -47,7 +47,7 @@ Buffer::MemoryInfo Buffer::QueryMemoryInfo(vk::MemoryPropertyFlags property)
     MemoryInfo info;
     auto requirements = Get_Context_Singleton()
                             ->get_device()
-                            ->Get_handle()
+                            ->get_handle()
                             .getBufferMemoryRequirements(m_handle);
     // auto re = requirements.
     info.size = requirements.size;
@@ -79,7 +79,7 @@ void Buffer::AllocateMemory()
 
     memory = Get_Context_Singleton()
                  ->get_device()
-                 ->Get_handle()
+                 ->get_handle()
                  .allocateMemory(allocate_info);
     int a = 0;
 }
@@ -87,7 +87,7 @@ void Buffer::BindMemory2Buffer()
 {
     Get_Context_Singleton()
         ->get_device()
-        ->Get_handle()
+        ->get_handle()
         .bindBufferMemory(m_handle,
                           memory,
                           0);
@@ -96,7 +96,7 @@ void Buffer::Map(uint32_t offset, uint32_t size)
 {
     mapped_data = Get_Context_Singleton()
                       ->get_device()
-                      ->Get_handle()
+                      ->get_handle()
                       .mapMemory(memory,
                                  offset,
                                  size);
@@ -105,7 +105,7 @@ void Buffer::Unmap()
 {
     Get_Context_Singleton()
         ->get_device()
-        ->Get_handle()
+        ->get_handle()
         .unmapMemory(memory);
 }
 void Buffer::Update(void* data, size_t size)
@@ -153,8 +153,8 @@ std::shared_ptr<Buffer> Buffer::CreateDeviceBuffer(void* data,
             .setDstOffset(0)
             .setSrcOffset(0);
         cmd_buffer.copyBuffer(
-            host_buffer->Get_handle(),
-            device_buffer->Get_handle(),
+            host_buffer->get_handle(),
+            device_buffer->get_handle(),
             regin);
     });
 
@@ -177,7 +177,7 @@ vk::DeviceAddress Buffer::get_address()
     address_info.setBuffer(m_handle);
     return Get_Context_Singleton()
         ->get_device()
-        ->Get_handle()
+        ->get_handle()
         .getBufferAddress(
             address_info);
 }

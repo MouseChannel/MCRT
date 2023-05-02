@@ -4,8 +4,6 @@
 #include "Wrapper/Instance.hpp"
 #include <vulkan/vulkan.hpp>
 
-
-
 namespace MCRT {
 class Debugger {
 public:
@@ -28,13 +26,12 @@ public:
     {
         vk::DebugUtilsObjectNameInfoEXT info;
         auto native = obj->get_c_type();
-        auto type = obj->Get_handle().objectType;
+        auto type = obj->get_handle().objectType;
         info.setObjectHandle((uint64_t)native)
             .setPObjectName(name.c_str())
             .setObjectType(type);
-        vkSetDebugUtilsObjectNameEXT(Context::Get_Singleton()->get_device()->Get_handle(),
-            (VkDebugUtilsObjectNameInfoEXT*)&info);
-         
+        vkSetDebugUtilsObjectNameEXT(Context::Get_Singleton()->get_device()->get_handle(),
+                                     (VkDebugUtilsObjectNameInfoEXT*)&info);
     }
 
 private:

@@ -35,7 +35,7 @@ vk::DeviceAddress AccelerationStructure_Bottom::get_address()
     address_info.setAccelerationStructure(m_handle);
     return Context::Get_Singleton()
         ->get_device()
-        ->Get_handle()
+        ->get_handle()
         .getAccelerationStructureAddressKHR(address_info);
 }
 void AccelerationStructure_Bottom::object_to_vkGeometryKHR(std::shared_ptr<Model> obj)
@@ -86,7 +86,7 @@ void AccelerationStructure_Bottom::fill_build_info()
 
     size_info = Context::Get_Singleton()
                     ->get_device()
-                    ->Get_handle()
+                    ->get_handle()
                     .getAccelerationStructureBuildSizesKHR(vk::AccelerationStructureBuildTypeKHR::eDevice,
                                                            build_info,
                                                            prim_count);

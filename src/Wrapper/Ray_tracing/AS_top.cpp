@@ -47,7 +47,7 @@ void AccelerationStructure_Top::fill_build_info()
     range_info.setPrimitiveCount(instances.size());
     size_info = Context::Get_Singleton()
                     ->get_device()
-                    ->Get_handle()
+                    ->get_handle()
                     .getAccelerationStructureBuildSizesKHR(vk::AccelerationStructureBuildTypeKHR ::eDevice,
                                                            build_info,
                                                            instances.size());

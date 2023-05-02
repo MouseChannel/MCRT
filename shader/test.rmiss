@@ -5,7 +5,6 @@ void main()
 {
 
     // gl_launchId
-    
+
     // gl_fr
-    
 }

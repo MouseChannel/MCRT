@@ -23,7 +23,7 @@ DescriptorPool::DescriptorPool(std::vector<std::tuple<vk::DescriptorType, uint32
         .setMaxSets(swapchain_size);
     m_handle = Get_Context_Singleton()
                    ->get_device()
-                   ->Get_handle()
+                   ->get_handle()
                    .createDescriptorPool(create_info);
 }
 
@@ -31,7 +31,7 @@ DescriptorPool::~DescriptorPool()
 {
     Get_Context_Singleton()
         ->get_device()
-        ->Get_handle()
+        ->get_handle()
         .destroyDescriptorPool(m_handle);
 }
 

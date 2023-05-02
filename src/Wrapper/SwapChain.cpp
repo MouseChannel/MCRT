@@ -36,16 +36,16 @@ SwapChain::SwapChain()
         .setImageArrayLayers(1)
         .setPresentMode(vk::PresentModeKHR::eFifo)
         .setPreTransform(surfaceInfo.transform)
-        .setSurface(surface->Get_handle())
+        .setSurface(surface->get_handle())
         .setQueueFamilyIndices(queue_family_index_v)
         .setImageSharingMode(share_mode);
-    m_handle = Get_Context_Singleton()->get_device()->Get_handle().createSwapchainKHR(createInfo);
+    m_handle = Get_Context_Singleton()->get_device()->get_handle().createSwapchainKHR(createInfo);
 }
 SwapChain::~SwapChain()
 {
     Get_Context_Singleton()
         ->get_device()
-        ->Get_handle()
+        ->get_handle()
         .destroySwapchainKHR(m_handle);
 }
 
@@ -53,7 +53,7 @@ void SwapChain::Query_info()
 {
     surfaceInfo.format = Query_surface_Format();
     auto surface = Get_Context_Singleton()->get_surface();
-    auto capability = Get_Context_Singleton()->get_device()->Get_Physical_device().getSurfaceCapabilitiesKHR(surface->Get_handle());
+    auto capability = Get_Context_Singleton()->get_device()->Get_Physical_device().getSurfaceCapabilitiesKHR(surface->get_handle());
     //   capability.maxImageCount = 3;
 
     //   capability.minImageCount = 1;
@@ -66,8 +66,7 @@ void SwapChain::Query_info()
     surfaceInfo.transform = capability.currentTransform;
     surfaceInfo.extent = Query_surface_Extent(capability, 800, 800);
 }
-vk::Extent2D SwapChain::Query_surface_Extent(const vk::SurfaceCapabilitiesKHR& capability, int windowWidth,
-    int windowHeight)
+vk::Extent2D SwapChain::Query_surface_Extent(const vk::SurfaceCapabilitiesKHR& capability, int windowWidth, int windowHeight)
 {
     if (capability.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         return capability.currentExtent;
@@ -83,7 +82,7 @@ vk::SurfaceFormatKHR SwapChain::Query_surface_Format()
 {
     auto physical_device = Get_Context_Singleton()->get_device()->Get_Physical_device();
     auto surface = Get_Context_Singleton()->get_surface();
-    auto available_format = physical_device.getSurfaceFormatsKHR(surface->Get_handle());
+    auto available_format = physical_device.getSurfaceFormatsKHR(surface->get_handle());
     for (auto& format : available_format) {
         if (format.format == vk::Format::eR8G8B8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
             return format;

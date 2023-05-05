@@ -15,7 +15,8 @@ DescriptorSet::DescriptorSet(std::shared_ptr<DescriptorPool> descriptorPool, vk:
     std::vector<vk::DescriptorSetLayout> descriptor_layouts(swapchain_size, setLayouts);
     allocate_info.setDescriptorPool(descriptorPool->get_handle())
         .setSetLayouts(descriptor_layouts)
-        .setDescriptorSetCount(swapchain_size);
+        // TODO swapchain_size
+        .setDescriptorSetCount(1);
     m_handle = Get_Context_Singleton()
                    ->get_device()
                    ->get_handle()

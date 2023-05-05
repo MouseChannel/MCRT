@@ -173,13 +173,17 @@ std::shared_ptr<Buffer> Buffer::create_buffer(void* data, size_t size, vk::Buffe
 }
 vk::DeviceAddress Buffer::get_address()
 {
-    vk::BufferDeviceAddressInfo address_info;
-    address_info.setBuffer(m_handle);
-    return Get_Context_Singleton()
-        ->get_device()
-        ->get_handle()
-        .getBufferAddress(
-            address_info);
+    if (m_buffer_address == 0) {
+
+        vk::BufferDeviceAddressInfo address_info;
+        address_info.setBuffer(m_handle);
+        m_buffer_address = Get_Context_Singleton()
+                               ->get_device()
+                               ->get_handle()
+                               .getBufferAddress(
+                                   address_info);
+    }
+    return m_buffer_address;
 }
 
 } // namespace MCRT

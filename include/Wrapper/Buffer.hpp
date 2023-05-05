@@ -33,6 +33,7 @@ private:
     vk::BufferUsageFlags m_usage;
     bool permanent { false };
     void* mapped_data { nullptr };
+    vk::DeviceAddress m_buffer_address { 0 };
     void Map(uint32_t offset, uint32_t size);
     void Unmap();
     void CreateBuffer(size_t size, vk::BufferUsageFlags usage);

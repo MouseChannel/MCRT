@@ -39,28 +39,47 @@ Device::Device()
         .setQueueCount(1)
         .setQueueFamilyIndex(queue_family_indices.graphic_queue.value());
 
+    vk::StructureChain<vk::DeviceCreateInfo,
+                       vk::PhysicalDeviceVulkan12Features,
+                       vk::PhysicalDeviceRayTracingPipelineFeaturesKHR,
+                       vk::PhysicalDeviceAccelerationStructureFeaturesKHR,
+                       vk::PhysicalDeviceRayQueryFeaturesKHR>
+        _features;
+    _features.get<vk::PhysicalDeviceVulkan12Features>()
+        .setBufferDeviceAddress(true);
+    _features.get<vk::PhysicalDeviceRayTracingPipelineFeaturesKHR>()
+        .setRayTracingPipeline(true);
+    _features.get<vk::PhysicalDeviceAccelerationStructureFeaturesKHR>()
+        .setAccelerationStructure(true);
+    _features.get<vk::PhysicalDeviceRayQueryFeaturesKHR>()
+        .setRayQuery(true);
     vk::PhysicalDeviceFeatures normal_feature;
     normal_feature.setShaderStorageImageMultisample(true);
-    vk::PhysicalDeviceVulkan12Features buffer_address_feature;
-    buffer_address_feature.setBufferDeviceAddress(true);
-    vk::PhysicalDeviceRayTracingPipelineFeaturesKHR rt_feature;
-    rt_feature.setRayTracingPipeline(true).setPNext(&buffer_address_feature);
-    vk::PhysicalDeviceAccelerationStructureFeaturesKHR as_feature;
-    as_feature.setAccelerationStructure(true).setPNext(&rt_feature);
-    vk::PhysicalDeviceRayQueryFeaturesKHR ray_query_feature;
-    ray_query_feature.setRayQuery(true).setPNext(&as_feature);
 
-    vk::DeviceCreateInfo create_info;
-    create_info
-        .setQueueCreateInfos(queue_create_info)
+    auto& _create_info = _features.get();
+    _create_info.setQueueCreateInfos(queue_create_info)
         .setPEnabledExtensionNames(deviceRequiredExtensions)
-        .setPEnabledFeatures(&normal_feature)
+        .setPEnabledFeatures(&normal_feature);
 
-        .setPNext(&ray_query_feature);
+    // vk::PhysicalDeviceVulkan12Features buffer_address_feature;
+    // buffer_address_feature.setBufferDeviceAddress(true);
+    // vk::PhysicalDeviceRayTracingPipelineFeaturesKHR rt_feature;
+    // rt_feature.setRayTracingPipeline(true).setPNext(&buffer_address_feature);
+    // vk::PhysicalDeviceAccelerationStructureFeaturesKHR as_feature;
+    // as_feature.setAccelerationStructure(true).setPNext(&rt_feature);
+    // vk::PhysicalDeviceRayQueryFeaturesKHR ray_query_feature;
+    // ray_query_feature.setRayQuery(true).setPNext(&as_feature);
 
-    ;
+    // vk::StructureChain<vk::DeviceCreateInfo, vk>
+    // vk::DeviceCreateInfo create_info;
+    // create_info
+    //     .setQueueCreateInfos(queue_create_info)
+    //     .setPEnabledExtensionNames(deviceRequiredExtensions)
+    //     .setPEnabledFeatures(&normal_feature)
 
-    m_handle = physical_device.createDevice(create_info);
+    //     .setPNext(&ray_query_feature);
+
+    m_handle = physical_device.createDevice(_create_info);
 
     graphic_queue = m_handle.getQueue(queue_family_indices.graphic_queue.value(), 0);
     present_queue = m_handle.getQueue(queue_family_indices.present_queue.value(), 0);

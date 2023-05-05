@@ -5,31 +5,34 @@
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/DescriptorPool.hpp"
 #include "Wrapper/Device.hpp"
+#include "Wrapper/Instance.hpp"
 #include "Wrapper/RenderPass.hpp"
 #include "Wrapper/SwapChain.hpp"
 
-namespace MoCheng3D {
-ImGuiContext::ImGuiContext() { }
+namespace MCRT {
+ImGuiContext::ImGuiContext()
+{
+}
 void ImGuiContext::create_descriptor_pool()
 {
     using type = vk::DescriptorType;
     vk::DescriptorPoolSize pool_sizes[] = { { type::eSampler, 1000 },
-        { type::eCombinedImageSampler, 1000 },
-        { type::eStorageImage, 1000 },
-        { type::eUniformTexelBuffer, 1000 },
-        { type::eStorageTexelBuffer, 1000 },
-        { type::eUniformBuffer, 1000 },
-        { type::eStorageBuffer, 1000 },
-        { type::eUniformBufferDynamic, 1000 },
-        { type::eStorageBufferDynamic, 1000 },
-        { type::eInputAttachment, 1000 } };
+                                            { type::eCombinedImageSampler, 1000 },
+                                            { type::eStorageImage, 1000 },
+                                            { type::eUniformTexelBuffer, 1000 },
+                                            { type::eStorageTexelBuffer, 1000 },
+                                            { type::eUniformBuffer, 1000 },
+                                            { type::eStorageBuffer, 1000 },
+                                            { type::eUniformBufferDynamic, 1000 },
+                                            { type::eStorageBufferDynamic, 1000 },
+                                            { type::eInputAttachment, 1000 } };
     vk::DescriptorPoolCreateInfo create_info;
     create_info.setPoolSizes(pool_sizes)
         .setPoolSizeCount(IM_ARRAYSIZE(pool_sizes))
         .setMaxSets(1000 * IM_ARRAYSIZE(pool_sizes))
         .setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
 
-    descriptor_pool = Context::Get_Singleton()->Get_Device()->Get_handle().createDescriptorPool(create_info);
+    descriptor_pool = Context::Get_Singleton()->get_device()->get_handle().createDescriptorPool(create_info);
 }
 void ImGuiContext::Init(std::shared_ptr<Window> window)
 {
@@ -45,25 +48,25 @@ void ImGuiContext::Init(std::shared_ptr<Window> window)
     auto& context = Context::Get_Singleton();
     ImGui_ImplGlfw_InitForVulkan(window->get_window(), true);
     ImGui_ImplVulkan_InitInfo init_info = {};
-    init_info.Instance = context->Get_Instance()->Get_handle();
-    init_info.PhysicalDevice = context->Get_Device()->Get_Physical_device();
-    init_info.Device = context->Get_Device()->Get_handle();
-    init_info.QueueFamily = context->Get_Device()->get_queuefamily_index().graphic_queue.value();
-    init_info.Queue = context->Get_Device()->Get_Graphic_queue();
+    init_info.Instance = context->get_instance()->get_handle();
+    init_info.PhysicalDevice = context->get_device()->Get_Physical_device();
+    init_info.Device = context->get_device()->get_handle();
+    init_info.QueueFamily = context->get_device()->get_queuefamily_index().graphic_queue.value();
+    init_info.Queue = context->get_device()->Get_Graphic_queue();
     init_info.PipelineCache = nullptr;
     init_info.DescriptorPool = descriptor_pool;
-    init_info.Subpass
-        = 0;
+    init_info.Subpass = 0;
     init_info.MinImageCount = 2;
-    init_info.ImageCount = context->Get_SwapChain()->Get_Swapchain_Image_size();
-    init_info.MSAASamples = (VkSampleCountFlagBits)context->Get_Device()->Get_sampler_count();
+    init_info.ImageCount = context->get_swapchain()->Get_Swapchain_Image_size();
+    init_info.MSAASamples = (VkSampleCountFlagBits)vk::SampleCountFlagBits::e1;
+    // (VkSampleCountFlagBits)context->get_device()->Get_sampler_count();
     init_info.Allocator = nullptr;
     init_info.CheckVkResultFn = nullptr;
-    ImGui_ImplVulkan_Init(&init_info, context->Get_RenderPass()->Get_handle());
+    ImGui_ImplVulkan_Init(&init_info, context->get_renderpass()->get_handle());
     // upload font
     {
 
-        CommandManager::ExecuteCmd(context->Get_Device()->Get_Graphic_queue(), [&](auto cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd); });
+        CommandManager::ExecuteCmd(context->get_device()->Get_Graphic_queue(), [&](auto cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd); });
 
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
@@ -88,11 +91,11 @@ void ImGuiContext::Update(std::shared_ptr<CommandBuffer> cmd)
     }
     ImGui::Render();
     ImDrawData* draw_data = ImGui::GetDrawData();
-    ImGui_ImplVulkan_RenderDrawData(draw_data, cmd->Get_handle());
+    ImGui_ImplVulkan_RenderDrawData(draw_data, cmd->get_handle());
 }
 ImGuiContext::~ImGuiContext()
 {
-    Context::Get_Singleton()->Get_Device()->Get_handle().destroyDescriptorPool(descriptor_pool);
+    Context::Get_Singleton()->get_device()->get_handle().destroyDescriptorPool(descriptor_pool);
     ImGui_ImplVulkan_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();

@@ -1,5 +1,7 @@
 #include "Wrapper/Instance.hpp"
+#include "Helper/Link_Util.hpp"
 #include "glfw/glfw3.h"
+
 namespace MCRT {
 
 auto Instance::get_required_extension()
@@ -50,8 +52,20 @@ Instance::Instance()
 
     create_info.setPApplicationInfo(&app_info)
         .setPEnabledLayerNames(vaild_layer)
-        .setPEnabledExtensionNames(glfw_extension);
+        .setPEnabledExtensionNames(glfw_extension)
+        .setPNext(&features);
     m_handle = vk::createInstance(create_info);
+    //
+    using severity_bit = vk::DebugUtilsMessageSeverityFlagBitsEXT;
+    using message_bit = vk::DebugUtilsMessageTypeFlagBitsEXT;
+    vk::DebugUtilsMessengerCreateInfoEXT debug_create_info;
+    debug_create_info
+        .setMessageSeverity(severity_bit::eError | severity_bit::eWarning | severity_bit::eInfo)
+        .setMessageType(message_bit::eGeneral | message_bit::ePerformance | message_bit::eValidation | message_bit::eDeviceAddressBinding)
+        .setPfnUserCallback(&debugCallBack);
+
+    // m_handle.createDebugUtilsMessengerEXT()
+    m_debugger = m_handle.createDebugUtilsMessengerEXT(debug_create_info);
 }
 
 } // namespace MCRT

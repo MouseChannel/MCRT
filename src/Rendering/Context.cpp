@@ -1,14 +1,20 @@
 #include "Rendering/Context.hpp"
 #include "Helper/Debugger.hpp"
+#include "Helper/DescriptorManager.hpp"
 #include "Helper/Ray_Tracing/RT_Manager.hpp"
 #include "Rendering/GLFW_Window.hpp"
 #include "Rendering/Model.hpp"
+#include "Rendering/RT_Context.hpp"
+#include "Rendering/Render_Context.hpp"
+#include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Command_Pool.hpp"
+#include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Instance.hpp"
 #include "Wrapper/Pipeline/RT_pipeline.hpp"
 #include "Wrapper/Ray_Tracing/AS_Builder.hpp"
 #include "Wrapper/Ray_Tracing/AS_bottom.hpp"
+#include "Wrapper/RenderPass.hpp"
 #include "Wrapper/Sampler.hpp"
 #include "Wrapper/SwapChain.hpp"
 #include "Wrapper/Window_Surface.hpp"
@@ -21,22 +27,91 @@ void Context::init(std::shared_ptr<Window> window)
     m_instance.reset(new Instance);
     m_surface.reset(new Surface);
     m_device.reset(new Device);
-    m_swapchain.reset(new SwapChain);
     m_command_pool.reset(new CommandPool);
+    m_command_buffer.reset(new CommandBuffer);
+    m_swapchain.reset(new SwapChain);
+    m_renderpass.reset(new RenderPass);
     m_debugger.reset(new Debugger);
     m_sampler.reset(new Sampler);
     // m_debugger->set_buffer_name(m_command_pool, "rer");
 
     m_model.reset(new Model("D:/MoChengRT/assets/model.obj",
                             "D:/MoChengRT/assets/model.png"));
+    contexts.push_back(std::shared_ptr<RenderContext> { new RenderContext(m_device) });
+    contexts.push_back(std::shared_ptr<RT_Context> { new RT_Context(m_device) });
 
-    AS_Builder::Get_Singleton()->add_blas_obj(m_model);
+    contexts[1]->prepare();
+    // for (auto& i : contexts) {
+    //     i->prepare();
+    // }
+    // AS_Builder::Get_Singleton()->add_blas_obj(m_model);
 
-    AS_Builder::Get_Singleton()->build_blas();
-    AS_Builder::Get_Singleton()->build_tlas();
-    create_rt_descriptor_set();
+    // AS_Builder::Get_Singleton()->build_blas();
+    // AS_Builder::Get_Singleton()->build_tlas();
+    // create_rt_descriptor_set();
 
-    m_rt_pipeline.reset(new RT_Pipeline);
+    // m_rt_pipeline.reset(new RT_Pipeline);
+    // createRt_shader_binding_table();
+    // m_render_context.reset(new RenderContext(m_device));
+    // m_render_context->prepare();
+
+    // std::align(size_t align, size_t sz, void *&ptr, size_t &space)
     int a = 0;
+}
+std::shared_ptr<Image> Context::get_out_image()
+{
+    return contexts[1]->get_out_image();
+}
+std::shared_ptr<RenderPass> Context::get_renderpass()
+{
+    return m_render_context->Get_render_pass();
+}
+std::shared_ptr<CommandBuffer>
+Context::BeginGraphicFrame()
+{
+    get_device()->get_handle().waitIdle();
+    auto& render_context = contexts[0];
+    auto cmd = render_context->BeginFrame();
+    {
+    }
+    return cmd;
+}
+
+std::shared_ptr<CommandBuffer>
+Context::BeginRTFrame()
+{
+    get_device()->get_handle().waitIdle();
+    auto& rt_context = contexts[1];
+    auto cmd = rt_context->BeginFrame();
+    {
+        vk::CommandBuffer _cmd = cmd->get_handle();
+        _cmd.bindPipeline(vk::PipelineBindPoint ::eRayTracingKHR, rt_context->get_pipeline()->get_handle());
+        _cmd.bindDescriptorSets(vk::PipelineBindPoint ::eRayTracingKHR,
+                                rt_context->get_pipeline()->get_layout(),
+                                0,
+                                { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Ray_Tracing)->get_handle() },
+                                {});
+        rt_context->record_command(cmd);
+    }
+    return cmd;
+}
+void Context::EndGraphicFrame()
+{
+    m_render_context->Submit();
+    // m_render_context->EndFrame();
+}
+void Context::EndRTFrame()
+{
+    auto& rt_context = contexts[1];
+    rt_context->Submit();
+    // rt_context->EndFrame();
+}
+std::shared_ptr<CommandBuffer> Context::Begin_Frame()
+{
+    return BeginRTFrame();
+}
+void Context::EndFrame()
+{
+    EndRTFrame();
 }
 } // namespace MCRT

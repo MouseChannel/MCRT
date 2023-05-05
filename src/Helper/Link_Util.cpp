@@ -64,3 +64,56 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateRayTracingPipelinesKHR(
     auto func = (PFN_vkCreateRayTracingPipelinesKHR)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkCreateRayTracingPipelinesKHR");
     return func(device, deferredOperation, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
 }
+VKAPI_ATTR VkResult VKAPI_CALL vkGetRayTracingShaderGroupHandlesKHR(
+    VkDevice device,
+    VkPipeline pipeline,
+    uint32_t firstGroup,
+    uint32_t groupCount,
+    size_t dataSize,
+    void* pData)
+{
+    auto func = (PFN_vkGetRayTracingShaderGroupHandlesKHR)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()
+                                                                                  ->get_device()
+                                                                                  ->get_handle(),
+                                                                              "vkGetRayTracingShaderGroupHandlesKHR");
+    return func(device, pipeline, firstGroup, groupCount, dataSize, pData);
+}
+VKAPI_ATTR void VKAPI_CALL vkCmdTraceRaysKHR(
+    VkCommandBuffer commandBuffer,
+    const VkStridedDeviceAddressRegionKHR* pRaygenShaderBindingTable,
+    const VkStridedDeviceAddressRegionKHR* pMissShaderBindingTable,
+    const VkStridedDeviceAddressRegionKHR* pHitShaderBindingTable,
+    const VkStridedDeviceAddressRegionKHR* pCallableShaderBindingTable,
+    uint32_t width,
+    uint32_t height,
+    uint32_t depth)
+{
+    auto func = (PFN_vkCmdTraceRaysKHR)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()
+                                                               ->get_device()
+                                                               ->get_handle(),
+                                                           "vkCmdTraceRaysKHR");
+    return func(commandBuffer, pRaygenShaderBindingTable, pMissShaderBindingTable, pHitShaderBindingTable, pCallableShaderBindingTable, width, height, depth);
+}
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallBack(
+    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    VkDebugUtilsMessageTypeFlagsEXT messageType,
+    VkDebugUtilsMessengerCallbackDataEXT const* pCallbackData,
+    void*)
+{
+    std::cout << pCallbackData->pMessage << std::endl;
+
+    return VK_FALSE;
+}
+VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
+    VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pMessenger)
+{
+    auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
+        instance,
+        "vkCreateDebugUtilsMessengerEXT");
+
+    if (func != nullptr) {
+        return func(instance, pCreateInfo, pAllocator, pMessenger);
+    } else {
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
+    }
+}

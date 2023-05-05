@@ -6,6 +6,10 @@ class RT_Pipeline : public Pipeline_base {
 public:
     RT_Pipeline();
     ~RT_Pipeline();
+    vk::PipelineLayout get_layout() override
+    {
+        return layout;
+    }
 
 private:
     std::vector<std::shared_ptr<ShaderModule>> shader_modules;

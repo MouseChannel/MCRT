@@ -50,21 +50,11 @@ namespace MCRT {
 //     descriptorSet_rt_binding_map.emplace_back(res);
 //     // binding.s
 // }
-void Descriptor_Manager::CreateDescriptorPool()
+void Descriptor_Manager::CreateDescriptorPool(Which_Set which_set)
 {
-    // assert(!descriptorSet_buffer_binding_map.empty());
     std::map<vk::DescriptorType, uint32_t> type_map;
-    // for (auto& i : descriptorSet_buffer_binding_map) {
 
-    //     auto type = i.binding.descriptorType;
-    //     type_map[type]++;
-    // }
-    // for (auto& i : descriptorSet_image_binding_map) {
-
-    //     auto type = i.binding.descriptorType;
-    //     type_map[type]++;
-    // }
-    for (auto& i : descriptor_set_binding) {
+    for (auto& i : descriptor_set_binding[which_set]) {
 
         auto type = i.binding.descriptorType;
         type_map[type]++;
@@ -73,46 +63,92 @@ void Descriptor_Manager::CreateDescriptorPool()
     for (auto& i : type_map) {
         type_arr.emplace_back(std::tuple<vk::DescriptorType, uint32_t> { i.first, 10 });
     }
-    descriptorPool.reset(new DescriptorPool(type_arr));
+    descriptorPools[which_set].reset(new DescriptorPool(type_arr));
 }
-std::vector<vk::DescriptorSetLayoutBinding>& Descriptor_Manager::Get_layout_bindings()
+// std::vector<vk::DescriptorSetLayoutBinding>& Descriptor_Manager::Get_layout_bindings()
+// {
+//     // assert(!descriptorSet_buffer_binding_map.empty());
+//     if (graphic_layout_bindings.empty()) {
+//         for (auto& i : descriptor_graphic_set_binding) {
+//             graphic_layout_bindings.emplace_back(i.binding);
+//         }
+//         // for (auto& i : descriptorSet_buffer_binding_map) {
+//         //     layout_bindings.emplace_back(i.binding);
+//         // }
+//         // for (auto& i : descriptorSet_image_binding_map) {
+//         //     layout_bindings.emplace_back(i.binding);
+//         // }
+//         // for (auto& i : descriptorSet_rt_binding_map) {
+//         //     layout_bindings.emplace_back(i.binding);
+//         // }
+//     }
+//     return graphic_layout_bindings;
+// }
+std::vector<vk::DescriptorSetLayoutBinding>& Descriptor_Manager::Get_layout_bindings(Which_Set which_set)
 {
     // assert(!descriptorSet_buffer_binding_map.empty());
-    if (layout_bindings.empty()) {
-        for (auto& i : descriptor_set_binding) {
-            layout_bindings.emplace_back(i.binding);
+    if (layout_bindings[which_set].empty()) {
+        for (auto& i : descriptor_set_binding[which_set]) {
+            layout_bindings[which_set].emplace_back(i.binding);
         }
-        // for (auto& i : descriptorSet_buffer_binding_map) {
-        //     layout_bindings.emplace_back(i.binding);
-        // }
-        // for (auto& i : descriptorSet_image_binding_map) {
-        //     layout_bindings.emplace_back(i.binding);
-        // }
-        // for (auto& i : descriptorSet_rt_binding_map) {
-        //     layout_bindings.emplace_back(i.binding);
-        // }
     }
-    return layout_bindings;
+    return layout_bindings[which_set];
 }
-vk::DescriptorSetLayout& Descriptor_Manager::Get_DescriptorSet_layout()
+// std::vector<vk::DescriptorSetLayoutBinding>& Descriptor_Manager::Get_RT_layout_bindings()
+// {
+//     // assert(!descriptorSet_buffer_binding_map.empty());
+//     if (rt_layout_bindings.empty()) {
+//         for (auto& i : rt_descriptor_set_binding) {
+//             rt_layout_bindings.emplace_back(i.binding);
+//         }
+//     }
+//     return rt_layout_bindings;
+// }
+// vk::DescriptorSetLayout& Descriptor_Manager::Get_DescriptorSet_layout()
+// {
+//     if (!graphic_descriptor_layout) {
+//         vk::DescriptorSetLayoutCreateInfo layout_create_info;
+//         layout_create_info.setBindings(Get_layout_bindings());
+//         graphic_descriptor_layout = Context::Get_Singleton()
+//                                         ->get_device()
+//                                         ->get_handle()
+//                                         .createDescriptorSetLayout(layout_create_info);
+//     }
+//     return graphic_descriptor_layout;
+// }
+vk::DescriptorSetLayout& Descriptor_Manager::Get_DescriptorSet_layout(Which_Set which_set)
 {
-    if (!descriptor_layout) {
+    if (!descriptor_set_layouts[which_set]) {
         vk::DescriptorSetLayoutCreateInfo layout_create_info;
-        layout_create_info.setBindings(Get_layout_bindings());
-        descriptor_layout = Context::Get_Singleton()
-                                ->get_device()
-                                ->get_handle()
-                                .createDescriptorSetLayout(layout_create_info);
+        layout_create_info.setBindings(Get_layout_bindings(which_set));
+        descriptor_set_layouts[which_set] = Context::Get_Singleton()
+                                                ->get_device()
+                                                ->get_handle()
+                                                .createDescriptorSetLayout(layout_create_info);
     }
-    return descriptor_layout;
+    return descriptor_set_layouts[which_set];
 }
-void Descriptor_Manager::CreateUpdateDescriptorSet()
+
+// vk::DescriptorSetLayout Descriptor_Manager::get_RT_DescriptorSet_layout()
+// {
+//     if (!descriptor_RT_layout) {
+//         vk::DescriptorSetLayoutCreateInfo layout_create_info;
+//         layout_create_info.setBindings(Get_layout_bindings());
+//         descriptor_RT_layout = Context::Get_Singleton()
+//                                    ->get_device()
+//                                    ->get_handle()
+//                                    .createDescriptorSetLayout(layout_create_info);
+//     }
+//     return descriptor_RT_layout;
+// }
+
+void Descriptor_Manager::CreateUpdateDescriptorSet(Which_Set which_set)
 {
-    descriptorSet.reset(new DescriptorSet(descriptorPool, Get_DescriptorSet_layout()));
-    for (auto& i : descriptor_set_binding) {
+    descriptorSets[which_set].reset(new DescriptorSet(descriptorPools[which_set], Get_DescriptorSet_layout(which_set)));
+    for (auto& i : descriptor_set_binding[which_set]) {
         auto binding = i.binding;
 
-        descriptorSet->Update(i.data, binding.binding, binding.descriptorType);
+        descriptorSets[which_set]->Update(i.data, binding.binding, binding.descriptorType);
     }
     // for (auto& i : descriptorSet_buffer_binding_map) {
     //     auto binding = i.binding;
@@ -134,15 +170,18 @@ void Descriptor_Manager::CreateUpdateDescriptorSet()
 Descriptor_Manager::~Descriptor_Manager()
 {
     layout_bindings.clear();
-    descriptorSet.reset();
+    for (auto& descriptorSet : descriptorSets)
+        descriptorSet.reset();
     auto& de = Context::Get_Singleton();
-    Context::Get_Singleton()
-        ->get_device()
-        ->get_handle()
-        .destroyDescriptorSetLayout(Get_DescriptorSet_layout());
+    for (auto& i : descriptor_set_layouts)
+        Context::Get_Singleton()
+            ->get_device()
+            ->get_handle()
+            .destroyDescriptorSetLayout(i);
 
     // descriptorSet_buffer_binding_map.clear();
     // descriptorSet_image_binding_map.clear();
-    descriptorPool.reset();
+    for (auto& descriptorPool : descriptorPools)
+        descriptorPool.reset();
 }
 }

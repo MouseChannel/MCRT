@@ -57,7 +57,7 @@ RT_Pipeline::RT_Pipeline()
     vk::PipelineLayoutCreateInfo layout_create_info;
 
     layout_create_info.setSetLayouts(Descriptor_Manager::Get_Singleton()
-                                         ->Get_DescriptorSet_layout())
+                                         ->Get_DescriptorSet_layout(Descriptor_Manager::Ray_Tracing))
         .setPushConstantRanges(push_contant);
     layout = Context::Get_Singleton()
                  ->get_device()

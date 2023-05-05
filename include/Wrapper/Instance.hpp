@@ -5,9 +5,10 @@ namespace MCRT {
 class Instance : public Component<vk::Instance, Instance> {
 
 public:
-  Instance();
+    Instance();
 
 private:
-  auto get_required_extension();
+    auto get_required_extension();
+    vk::DebugUtilsMessengerEXT m_debugger;
 };
 } // namespace MCRT

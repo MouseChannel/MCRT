@@ -1,5 +1,5 @@
 file(GLOB_RECURSE IMGUILIB ./ *.cpp)
-set(IMGUIDIR "D:/MoCheng3D/imgui")
+set(IMGUIDIR "D:/imgui")
 add_library(imguiLib ${IMGUILIB})
  
  

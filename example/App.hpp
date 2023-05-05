@@ -13,6 +13,6 @@ public:
 private:
   std::shared_ptr<Window> window;
 
-  // std::unique_ptr<ImGuiContext> imgui;
+  std::unique_ptr<ImGuiContext> imgui;
 };
 } // namespace MCRT

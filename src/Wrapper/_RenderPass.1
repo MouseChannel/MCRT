@@ -1,0 +1,71 @@
+#include "Wrapper/_RenderPass.hpp"
+#include "Wrapper/Device.hpp"
+namespace MCRT {
+RenderPass::RenderPass()
+{
+    std::vector<vk::AttachmentDescription> all_attachments;
+    // vk::AttachmentReference colorAttachmentRef;
+
+    vk::AttachmentDescription color_attachment;
+    color_attachment.setFormat(vk::Format ::eR32G32B32A32Sfloat)
+        .setSamples(vk::SampleCountFlagBits ::e1)
+        .setLoadOp(vk::AttachmentLoadOp ::eClear)
+        .setStoreOp(vk::AttachmentStoreOp ::eStore)
+        .setStencilLoadOp(vk::AttachmentLoadOp ::eDontCare)
+        .setStencilStoreOp(vk::AttachmentStoreOp ::eDontCare)
+        .setInitialLayout(vk::ImageLayout ::eGeneral)
+        .setFinalLayout(vk::ImageLayout ::eGeneral);
+    vk::AttachmentReference color_reference;
+    color_reference.setAttachment(all_attachments.size())
+        .setLayout(vk::ImageLayout ::eColorAttachmentOptimal);
+    all_attachments.push_back(color_attachment);
+    // colorAttachmentRef  = color_reference;
+
+    vk::AttachmentDescription depth_attachment;
+
+    depth_attachment.setFormat(vk::Format ::eX8D24UnormPack32)
+        .setSamples(vk::SampleCountFlagBits ::e1)
+        .setLoadOp(vk::AttachmentLoadOp ::eClear)
+        .setStoreOp(vk::AttachmentStoreOp ::eStore)
+        .setStencilLoadOp(vk::AttachmentLoadOp ::eDontCare)
+        .setStencilStoreOp(vk::AttachmentStoreOp ::eDontCare)
+        .setInitialLayout(vk::ImageLayout ::eDepthStencilAttachmentOptimal)
+        .setFinalLayout(vk::ImageLayout ::eDepthStencilAttachmentOptimal);
+    vk::AttachmentReference depth_reference;
+    depth_reference.setAttachment(all_attachments.size())
+        .setLayout(vk::ImageLayout ::eDepthAttachmentOptimal);
+    all_attachments.push_back(depth_attachment);
+    // subpass
+    std::vector<vk::SubpassDescription> subpasses;
+    std::vector<vk::SubpassDependency> subpassDependencies;
+
+    vk::SubpassDescription subpass;
+    subpass.setPipelineBindPoint(vk::PipelineBindPoint ::eGraphics)
+        .setColorAttachments(color_reference)
+        .setPDepthStencilAttachment(&depth_reference);
+    vk::SubpassDependency dependence;
+    dependence.setSrcSubpass(VK_SUBPASS_EXTERNAL)
+        .setSrcSubpass(0)
+        .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+        .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+        .setSrcAccessMask(vk::AccessFlagBits::eNone)
+        .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);
+
+    vk::RenderPassCreateInfo create_info;
+    create_info.setAttachments(all_attachments)
+        .setSubpasses(subpass)
+        .setDependencies(dependence);
+
+    m_handle = Context::Get_Singleton()
+                   ->get_device()
+                   ->get_handle()
+                   .createRenderPass(create_info);
+}
+RenderPass::~RenderPass()
+{
+    Context::Get_Singleton()
+        ->get_device()
+        ->get_handle()
+        .destroyRenderPass(m_handle);
+}
+}

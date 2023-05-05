@@ -30,5 +30,17 @@ void CommandBuffer::End()
 {
     m_handle.end();
 }
+void CommandBuffer::Reset()
+{
+    m_handle.reset();
+}
+void CommandBuffer::BeginRenderPass(vk::RenderPassBeginInfo renderPassInfo, vk::SubpassContents content)
+{
+    m_handle.beginRenderPass(renderPassInfo, content);
+}
+void CommandBuffer::EndRenderPass()
+{
+    m_handle.endRenderPass();
+}
 
 } // namespace MCRT

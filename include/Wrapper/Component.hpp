@@ -28,5 +28,9 @@ public:
     {
         return static_cast<typename T::NativeType>(m_handle);
     }
+    ~Component()
+    {
+        std::cout << typeid(K).name() << std::endl;
+    }
 };
 } // namespace MCRT

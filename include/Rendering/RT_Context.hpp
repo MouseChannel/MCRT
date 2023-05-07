@@ -3,8 +3,13 @@
 #include "Wrapper/CommandBuffer.hpp"
 // #include "Wrapper/Pipeline/Pipeline_base.hpp"
 // #include "Wrapper/Pipeline/RT_pipeline.hpp"
+#include "Helper/Uniform_Manager.hpp"
+#include "Helper/math.hpp"
 #include <memory>
 #include <vector>
+// #include "shader/Data_struct.h"
+#include "Helper/Shader_Data_Convert.h"
+
 
 namespace MCRT {
 class Device;
@@ -14,6 +19,7 @@ class Framebuffer;
 class Model;
 class RT_Pipeline;
 class Image;
+// struct V_P_Matrix;
 // class RenderTarget;
 class RT_Context : public Context_base {
 public:
@@ -22,9 +28,13 @@ public:
         e_out_image = 1
 
     };
+    enum Global_Binding {
+        e_vp_matrix,
+
+    };
     RT_Context(std::shared_ptr<Device> device);
     ~RT_Context();
-    std::shared_ptr<RenderPass> &Get_render_pass() override
+    std::shared_ptr<RenderPass>& Get_render_pass() override
     {
         return m_renderpass;
     }
@@ -54,18 +64,15 @@ public:
     void add_objs(std::vector<std::shared_ptr<Model>> objs);
 
 private:
-    // void Prepare_RenderPass(std::vector<std::shared_ptr<RenderTarget>>& render_targets) override;
-    // void create_renderpass();
-    // void create_framebuffer();
     void create_shader_bind_table();
+    void create_uniform_buffer();
 
+    std::shared_ptr<Uniform_Stuff<V_P_Matrix::shader_data>> vp_matrix;
     std::shared_ptr<RenderPass> m_renderpass;
 
     std::shared_ptr<Framebuffer> m_framebuffer;
     std::shared_ptr<CommandBuffer> m_command_buffer;
     std::vector<std::shared_ptr<RenderTarget>> render_targets;
-    // std::shared_ptr<Image> color_image;
-    // std::shared_ptr<Image> depth_image;
     std::shared_ptr<Device> m_device;
     std::shared_ptr<RT_Pipeline> m_rt_pipeline;
     // shader bind table
@@ -80,6 +87,7 @@ private:
     std::shared_ptr<Buffer> m_SBT_buffer_rmiss;
 
     std::shared_ptr<Buffer> m_SBT_buffer_rhit;
-};
 
+    std::shared_ptr<Buffer> m_V_P_UBO;
+};
 }

@@ -27,6 +27,7 @@ void Context_base::Prepare_RenderPass()
         render_pass->Add_Attachment_description(render_target->Get_attachment_description());
     }
     render_pass->Build();
+    
 }
 std::shared_ptr<CommandBuffer> Context_base::Begin_Record_Command_Buffer()
 {

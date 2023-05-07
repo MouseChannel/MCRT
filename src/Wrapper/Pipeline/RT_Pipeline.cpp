@@ -16,9 +16,9 @@ RT_Pipeline::RT_Pipeline()
         eShaderGroupCount
     };
     shader_modules.resize(eShaderGroupCount);
-    shader_modules[eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/spv/test.rgen.spv"));
-    shader_modules[eMiss].reset(new ShaderModule("D:/MoChengRT/shader/spv/test.rmiss.spv"));
-    shader_modules[eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/spv/test.rchit.spv"));
+    shader_modules[eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/test.rgen.spv"));
+    shader_modules[eMiss].reset(new ShaderModule("D:/MoChengRT/shader/test.rmiss.spv"));
+    shader_modules[eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/test.rchit.spv"));
 
     std::vector<vk::PipelineShaderStageCreateInfo>
         stages(eShaderGroupCount);
@@ -56,8 +56,16 @@ RT_Pipeline::RT_Pipeline()
         .setSize(12);
     vk::PipelineLayoutCreateInfo layout_create_info;
 
-    layout_create_info.setSetLayouts(Descriptor_Manager::Get_Singleton()
-                                         ->Get_DescriptorSet_layout(Descriptor_Manager::Ray_Tracing))
+    std::vector<vk::DescriptorSetLayout> descriptor_layouts {
+        Descriptor_Manager::Get_Singleton()
+            ->Get_DescriptorSet_layout(Descriptor_Manager::Ray_Tracing),
+        Descriptor_Manager::Get_Singleton()
+            ->Get_DescriptorSet_layout(Descriptor_Manager::Global),
+
+        // Descriptor_Manager::Get_Singleton()
+        //     ->Get_DescriptorSet_layout(Descriptor_Manager::e_tlas)
+    };
+    layout_create_info.setSetLayouts(descriptor_layouts)
         .setPushConstantRanges(push_contant);
     layout = Context::Get_Singleton()
                  ->get_device()

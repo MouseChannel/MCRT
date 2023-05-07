@@ -67,11 +67,13 @@ void RenderContext::Prepare_Framebuffer()
 }
 void RenderContext::prepare_descriptorset()
 {
+    // todo descriptorset_layout
     Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(Context::Get_Singleton()->get_out_image(),
                                                             0,
                                                             vk::DescriptorType ::eCombinedImageSampler,
                                                             vk::ShaderStageFlagBits::eFragment,
-                                                            Descriptor_Manager::Graphic);
+                                                            Descriptor_Manager::Graphic
+                                                            );
     Descriptor_Manager::Get_Singleton()
         ->CreateDescriptorPool(Descriptor_Manager::Graphic);
     Descriptor_Manager::Get_Singleton()

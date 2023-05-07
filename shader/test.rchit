@@ -4,7 +4,8 @@
 void main()
 {
 
-    // gl_launchId
-
+    gl_LaunchIDEXT;
+    gl_WorldRayOriginEXT;
+    gl_WorldToObjectEXT;
     // gl_fr
 }

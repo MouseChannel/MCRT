@@ -27,32 +27,32 @@ DescriptorSet::~DescriptorSet()
 {
 }
 
-void DescriptorSet::Update(std::variant<std::shared_ptr<Buffer>,
-                                        std::shared_ptr<Image>,
-                                        std::shared_ptr<AccelerationStructure>> data,
-                           uint32_t binding_index,
-                           vk::DescriptorType descriptor_type)
-{
-    enum { buffer,
-           image,
-           as };
-    // auto& ee = data;
-    // auto data_buffer = std::get<0>(data);
-    if (auto data_buffer = std::get_if<buffer>(&data)) {
-        Update((std::shared_ptr<Buffer>)data_buffer->get(),
-               binding_index,
-               descriptor_type);
-    } else if (auto data_image = std::get_if<image>(&data)) {
-        Update((std::shared_ptr<Image>)data_image->get(),
-               binding_index,
-               descriptor_type);
+// void DescriptorSet::Update(std::variant<std::shared_ptr<Buffer>,
+//                                         std::shared_ptr<Image>,
+//                                         std::shared_ptr<AccelerationStructure>> data,
+//                            uint32_t binding_index,
+//                            vk::DescriptorType descriptor_type)
+// {
+//     enum { buffer,
+//            image,
+//            as };
+//     // auto& ee = data;
+//     // auto data_buffer = std::get<0>(data);
+//     if (auto data_buffer = std::get_if<buffer>(&data)) {
+//         Update((std::shared_ptr<Buffer>)data_buffer->get(),
+//                binding_index,
+//                descriptor_type);
+//     } else if (auto data_image = std::get_if<image>(&data)) {
+//         Update((std::shared_ptr<Image>)data_image->get(),
+//                binding_index,
+//                descriptor_type);
 
-    } else if (auto data_as = std::get_if<as>(&data)) {
-        Update((std::shared_ptr<AccelerationStructure>)data_as->get(),
-               binding_index,
-               descriptor_type);
-    }
-}
+//     } else if (auto data_as = std::get_if<as>(&data)) {
+//         Update((std::shared_ptr<AccelerationStructure>)data_as->get(),
+//                binding_index,
+//                descriptor_type);
+//     }
+// }
 void DescriptorSet::Update(std::shared_ptr<Buffer> buffer, uint32_t binding_index, vk::DescriptorType descriptor_type)
 {
     for (int i = 0; i < m_handle.size(); i++) {

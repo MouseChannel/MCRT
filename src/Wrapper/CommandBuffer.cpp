@@ -11,7 +11,7 @@ CommandBuffer::CommandBuffer()
     allocate_info.setCommandBufferCount(1)
         .setLevel(vk::CommandBufferLevel::ePrimary)
         .setCommandPool(command_pool->get_handle());
-
+// allocate_info.commandBufferCount
     m_handle = Get_Context_Singleton()
                    ->get_device()
                    ->get_handle()

@@ -86,10 +86,20 @@ Context::BeginRTFrame()
     {
         vk::CommandBuffer _cmd = cmd->get_handle();
         _cmd.bindPipeline(vk::PipelineBindPoint ::eRayTracingKHR, rt_context->get_pipeline()->get_handle());
+        std::vector<vk::DescriptorSet> descriptor_sets {
+            // descriptor_sets.push_back(
+            Descriptor_Manager::Get_Singleton()
+                ->get_DescriptorSet(Descriptor_Manager::Ray_Tracing)
+                ->get_handle()[0],
+
+            Descriptor_Manager::Get_Singleton()
+                ->get_DescriptorSet(Descriptor_Manager::Global)
+                ->get_handle()[0]
+        };
         _cmd.bindDescriptorSets(vk::PipelineBindPoint ::eRayTracingKHR,
                                 rt_context->get_pipeline()->get_layout(),
                                 0,
-                                { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Ray_Tracing)->get_handle() },
+                                descriptor_sets ,
                                 {});
         rt_context->record_command(cmd);
     }

@@ -4,7 +4,6 @@
 #include "Wrapper/Image.hpp"
 #include "Wrapper/SwapChain.hpp"
 
-
 namespace MCRT {
 RT_Color_RenderTarget::RT_Color_RenderTarget(std::shared_ptr<Image> image,
                                              vk::AttachmentDescription des)
@@ -16,13 +15,15 @@ std::unique_ptr<RT_Color_RenderTarget> RT_Color_RenderTarget::Create()
 {
 
     std::shared_ptr<Image> color_image { new Image(800,
-                                                   800,
+                                                   749,
                                                    vk::Format::eR32G32B32A32Sfloat,
                                                    vk::ImageType::e2D,
                                                    vk::ImageTiling::eOptimal,
                                                    vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled,
                                                    vk::ImageAspectFlagBits::eColor,
                                                    vk::SampleCountFlagBits::e1) };
+
+    color_image->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
     vk::AttachmentDescription des;
     // auto la = Context::Get_Singleton()->Get_SwapChain()->Get_handle().
 

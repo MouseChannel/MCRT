@@ -11,8 +11,10 @@ class SwapChain;
 class RenderFrame;
 class RenderPass;
 class Fence;
+class ShaderModule;
 class CommandBuffer;
 class Graphic_Pipeline;
+class Buffer;
 class RenderContext : public Context_base {
 public:
     RenderContext(std::shared_ptr<Device> device);
@@ -41,7 +43,7 @@ public:
     }
     std::vector<std::shared_ptr<RenderTarget>>& Get_render_targets() override
     {
-        return render_frames[0]->Get_render_targets();
+        return all_rendertargets[0];
     }
     std::shared_ptr<Pipeline_base> get_pipeline() override;
     std::shared_ptr<RenderPass>& Get_render_pass() override
@@ -69,7 +71,7 @@ public:
     void record_command(std::shared_ptr<CommandBuffer> cmd) override;
 
 private:
-    bool enable_swapchain { false };
+    bool enable_swapchain { true };
     int render_frame_count { 1 };
     std::shared_ptr<Device> m_device;
     std::shared_ptr<SwapChain> m_swapchain;
@@ -78,10 +80,13 @@ private:
     // void Prepare_RenderPass(std::vector<std::shared_ptr<RenderTarget>>& render_targets);
     std::shared_ptr<RenderPass> m_renderpass;
     std::shared_ptr<Graphic_Pipeline> m_graphic_pipeline;
+    std::shared_ptr<ShaderModule> vert_shader, frag_shader;
     std::vector<std::shared_ptr<Fence>> fences;
     uint32_t current_frame { 0 };
     uint32_t current_index { 0 };
+    std::shared_ptr<Buffer> index_buffer, vertex_buffer, uv_buffer;
     std::shared_ptr<CommandBuffer> command_buffer;
+
     std::shared_ptr<CommandBuffer> Begin_Record_Command_Buffer();
     void End_Record_Command_Buffer();
 };

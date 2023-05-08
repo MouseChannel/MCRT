@@ -19,8 +19,8 @@ Framebuffer::Framebuffer(std::shared_ptr<RenderPass> renderpass, std::vector<std
     }
     create_info.setRenderPass(renderpass->get_handle())
         .setAttachments(image_views)
-        .setHeight(h)
-        .setWidth(w)
+        .setHeight(749)
+        .setWidth(800)
         .setLayers(1);
     m_handle = Get_Context_Singleton()
                    ->get_device()

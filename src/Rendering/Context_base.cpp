@@ -39,7 +39,8 @@ std::shared_ptr<CommandBuffer> Context_base::Begin_Record_Command_Buffer()
 
     // auto extent = Context::Get_Singleton()->get_swapchain()->Get_Extent2D();
     vk::Extent2D extent;
-    extent.setHeight(800)
+
+    extent.setHeight(749)
         .setWidth(800);
     rect.setOffset({ 0, 0 })
         .setExtent(extent);

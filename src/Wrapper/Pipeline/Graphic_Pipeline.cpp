@@ -1,5 +1,6 @@
 #include "Wrapper/Pipeline/Graphic_Pipeline.hpp"
 #include "Helper/DescriptorManager.hpp"
+#include "Rendering/RT_Context.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/RenderPass.hpp"
 #include "Wrapper/SwapChain.hpp"
@@ -10,18 +11,23 @@ Graphic_Pipeline::Graphic_Pipeline()
     //
     vk::PipelineLayoutCreateInfo layout_create_info {};
     // todo descriptor_set
-    layout_create_info.setSetLayouts(Descriptor_Manager::Get_Singleton()->Get_DescriptorSet_layout(Descriptor_Manager::Graphic));
+    layout_create_info.setSetLayouts(Descriptor_Manager::Get_Singleton()
+                                         ->Get_DescriptorSet_layout(Descriptor_Manager::Graphic));
     layout = Context::Get_Singleton()
                  ->get_device()
                  ->get_handle()
                  .createPipelineLayout(layout_create_info);
 
-    vk::GraphicsPipelineCreateInfo create_info;
-    vk::PipelineRasterizationStateCreateInfo rasterization_state;
-    rasterization_state.setCullMode(vk::CullModeFlagBits::eNone);
-    create_info.setLayout(layout)
-        .setPRasterizationState(&rasterization_state);
-    // .setRenderPass();
+    // vk::GraphicsPipelineCreateInfo create_info;
+    // vk::PipelineRasterizationStateCreateInfo rasterization_state;
+    // rasterization_state.setCullMode(vk::CullModeFlagBits::eBack);
+
+    // create_info.setLayout(layout)
+    //     .setPRasterizationState(&rasterization_state)
+    //     .setRenderPass(Context::Get_Singleton()
+    //                        ->get_context(Context::Graphic)
+    //                        ->Get_render_pass()
+    //                        ->get_handle());
 }
 Graphic_Pipeline::~Graphic_Pipeline()
 {
@@ -102,7 +108,7 @@ void Graphic_Pipeline::Add_Shader_Modules(vk::ShaderModule module, vk::ShaderSta
 }
 void Graphic_Pipeline::Make_Resterization()
 {
-    rasterization_info.setCullMode(vk::CullModeFlagBits::eBack)
+    rasterization_info.setCullMode(vk::CullModeFlagBits::eNone)
         .setFrontFace(vk::FrontFace::eClockwise)
         .setLineWidth(1)
         .setPolygonMode(vk::PolygonMode::eFill)
@@ -111,9 +117,7 @@ void Graphic_Pipeline::Make_Resterization()
 void Graphic_Pipeline::Make_MultiSample()
 {
     multi_sample.setSampleShadingEnable(false)
-        .setRasterizationSamples(Context::Get_Singleton()
-                                     ->get_device()
-                                     ->Get_sampler_count());
+        .setRasterizationSamples(vk::SampleCountFlagBits::e1);
 }
 void Graphic_Pipeline::Make_DepthTest()
 {

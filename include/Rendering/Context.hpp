@@ -26,6 +26,8 @@ class Context : public Instance_base<Context> {
 public:
     //   Context() = default;
     //   ~Context() = default;
+    enum Context_index { Graphic,
+                         Ray_tracing };
     void init(std::shared_ptr<Window>);
     [[nodiscard("Missing Instance")]] auto& get_instance()
     {
@@ -51,6 +53,10 @@ public:
     {
         return m_swapchain;
     }
+    void set_swapchain(std::shared_ptr<SwapChain> swapchain)
+    {
+        m_swapchain = swapchain;
+    }
     [[nodiscard("missing Sampler")]] auto& get_sampler()
     {
         return m_sampler;
@@ -72,10 +78,13 @@ public:
         return m_model;
     }
     std::shared_ptr<Image> get_out_image();
-
+    auto& get_context(Context_index index)
+    {
+        return contexts[index];
+    }
     [[nodiscard("missing renderpass")]] std::shared_ptr<RenderPass> get_renderpass();
     std::shared_ptr<CommandBuffer> Begin_Frame();
-void EndFrame();
+    void EndFrame();
     std::shared_ptr<CommandBuffer> BeginGraphicFrame();
     std::shared_ptr<CommandBuffer> BeginRTFrame();
 
@@ -97,8 +106,8 @@ private:
     std::vector<std::shared_ptr<AccelerationStructure_Bottom>> m_accelerate_structures;
     std::shared_ptr<AS_Builder> m_as_builder;
     std::shared_ptr<RT_Pipeline> m_rt_pipeline;
-    std::shared_ptr<RenderContext> m_render_context;
-    std::shared_ptr<RT_Context> m_RT_context;
+    // std::shared_ptr<RenderContext> m_render_context;
+    // std::shared_ptr<RT_Context> m_RT_context;
     std::vector<std::shared_ptr<Context_base>> contexts;
 };
 

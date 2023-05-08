@@ -19,13 +19,7 @@ void main()
 {
 
     // TODO: ef
-    //    int s1 = gl_VertexIndex;
-    uint ss = gl_LaunchIDEXT.y;
 
-    // gl_VertexIndex;
-    gl_LaunchSizeEXT.x;
-    gl_RayFlagsNoneEXT;
-    // debugPrintfEXT("message ");
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             // if (a[i][j] != 0) {
@@ -34,6 +28,8 @@ void main()
             // }
         }
     }
-    debugPrintfEXT("message %f %f %f\n", s.viewProj.data[0][0], s.viewProj.data[0][0], s.viewProj.data[0][0]);
-    uint s = gl_LaunchSizeEXT.x;
+
+    // debugPrintfEXT("message %f %f %f\n", prd.hitValue.x, prd.hitValue.y, prd.hitValue.xy);
+
+    imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(0, 1, 0, 1.0));
 }

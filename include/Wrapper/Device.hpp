@@ -27,6 +27,7 @@ public:
         "VK_KHR_swapchain",
 
         "VK_KHR_ray_query",
+        "VK_KHR_shader_non_semantic_info",
         "VK_KHR_deferred_host_operations",
         "VK_KHR_acceleration_structure",
         "VK_KHR_ray_tracing_pipeline",

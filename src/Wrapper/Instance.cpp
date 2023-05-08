@@ -29,7 +29,7 @@ Instance::Instance()
     std::vector<const char*> vaild_layer = { "VK_LAYER_KHRONOS_validation",
                                              "VK_LAYER_LUNARG_monitor" };
 
-    vk::ValidationFeaturesEXT features;
+    vk::ValidationFeaturesEXT features {};
     // vk::Feate
     auto debug = vk::ValidationFeatureEnableEXT::eDebugPrintf;
     std::vector<vk::ValidationFeatureDisableEXT> disables {

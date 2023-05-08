@@ -32,7 +32,7 @@ std::unique_ptr<Depth_RenderTarget> Depth_RenderTarget::Create()
 
     std::shared_ptr<Image> image { new Image(
         800,
-        800,
+        749,
         depth_format,
         vk::ImageType::e2D,
         vk::ImageTiling::eOptimal,

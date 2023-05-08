@@ -12,7 +12,9 @@ find_program(GLSLANGV ${VULKAN_DIR}/Bin/glslangValidator.exe REQUIRED)
 file(GLOB_RECURSE RGEN ${CMAKE_SOURCE_DIR}/shader/*.rgen)
 file(GLOB_RECURSE RCHIT ${CMAKE_SOURCE_DIR}/shader/*.rchit)
 file(GLOB_RECURSE RMISS ${CMAKE_SOURCE_DIR}/shader/*.rmiss)
-list(APPEND ALL_RT_SHADER ${RGEN} ${RCHIT} ${RMISS})
+file(GLOB_RECURSE VERT ${CMAKE_SOURCE_DIR}/shader/*.vert)
+file(GLOB_RECURSE FRAG ${CMAKE_SOURCE_DIR}/shader/*.frag)
+list(APPEND ALL_RT_SHADER ${RGEN} ${RCHIT} ${RMISS} ${VERT} ${FRAG})
 message(STATUS "run glslangValidator to compile shaders ...")
 message("-----all ray tracing shader------ ")
 
@@ -24,6 +26,8 @@ foreach(var ${ALL_RT_SHADER})
 
     # message(${name})
     execute_process(COMMAND ${GLSLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/spv/${name})
+
+    # execute_process(COMMAND ${GLSLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/${name})
 endforeach()
 
 message("---------------------------------")

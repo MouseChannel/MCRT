@@ -25,7 +25,8 @@ SwapChain::SwapChain()
 
     std::vector<uint32_t> queue_family_index_v;
     queue_family_index_v.assign(queue_family_index.begin(), queue_family_index.end());
-
+    // vk::Extent2D extent;
+    // extent.setHeight(800).setWidth(800);
     createInfo.setClipped(true)
         .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
         .setImageExtent(surfaceInfo.extent)

@@ -11,7 +11,7 @@ Surface::Surface()
     auto glfw_window = Get_Context_Singleton()->get_window();
 
     auto res = glfwCreateWindowSurface(vk_instance->get_handle(),
-                                       glfw_window->get_window(),
+                                       glfw_window->get_handle(),
                                        nullptr,
                                        (VkSurfaceKHR*)(&m_handle));
     if (res != VK_SUCCESS) {

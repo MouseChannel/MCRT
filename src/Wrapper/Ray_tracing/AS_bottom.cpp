@@ -45,22 +45,25 @@ void AccelerationStructure_Bottom::object_to_vkGeometryKHR(std::shared_ptr<Model
 
     auto vertexs_buffer = obj->get_vertex_buffer();
     auto indices_buffer = obj->get_indices_buffer();
-    vk::AccelerationStructureGeometryTrianglesDataKHR triangles;
-    vk::DeviceOrHostAddressConstKHR index_data;
 
-    index_data.setDeviceAddress(indices_buffer->get_address());
-    triangles.setIndexData(index_data)
-        .setIndexType(vk::IndexType::eUint32)
-        .setVertexData(vertexs_buffer->get_address())
-        .setVertexStride(sizeof(VertexObj))
-        .setVertexFormat(vk::Format::eR32G32B32Sfloat)
-        .setMaxVertex(obj->get_vertex_count());
-    vk::AccelerationStructureGeometryDataKHR geom_data;
-    geom_data.setTriangles(triangles);
+    // vk::DeviceOrHostAddressConstKHR index_data;
+
+    // index_data.setDeviceAddress(indices_buffer->get_address());
+    auto triangles = vk::AccelerationStructureGeometryTrianglesDataKHR()
+                         .setIndexData(vk::DeviceOrHostAddressConstKHR {}
+                                           .setDeviceAddress(indices_buffer->get_address()))
+                         .setIndexType(vk::IndexType::eUint32)
+                         .setVertexData(vertexs_buffer->get_address())
+                         .setVertexStride(sizeof(VertexObj))
+                         .setVertexFormat(vk::Format::eR32G32B32Sfloat)
+                         .setMaxVertex(obj->get_vertex_count());
+    // vk::AccelerationStructureGeometryDataKHR geom_data;
+    // geom_data.setTriangles(triangles);
     // as_geom
     vk::AccelerationStructureGeometryKHR as_geom;
     as_geom.setGeometryType(vk::GeometryTypeKHR::eTriangles)
-        .setGeometry(geom_data);
+        .setGeometry(vk::AccelerationStructureGeometryDataKHR {}
+                         .setTriangles(triangles));
     // offset
     vk::AccelerationStructureBuildRangeInfoKHR offset;
     offset.setFirstVertex(0)

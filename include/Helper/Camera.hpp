@@ -3,6 +3,7 @@
 #include "GLFW/glfw3.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <memory>
 
 namespace MCRT {
 // enum KEY {
@@ -27,22 +28,25 @@ public:
     {
         return m_pMatrx;
     }
-    // void Update();
 
-    // void
-    // move(KEY key);
+    [[nodiscard]] auto get_pos()
+    {
+        return m_position;
+    }
+    [[nodiscard]] auto get_front()
+    {
+        return m_front;
+    }
+    void init();
     void lookAt(glm::vec3 _pos, glm::vec3 _front, glm::vec3 _up);
+    // update view_matrix
     void update();
-
-    glm::mat4 getViewMatrix();
-
-    glm::mat4 getProjectMatrix();
 
     void setSpeed(float _speed)
     {
         m_speed = _speed;
     }
-
+    void move_update();
     void move(CAMERA_MOVE _mode);
 
     void pitch(float _yOffset);
@@ -54,17 +58,17 @@ public:
 
 private:
     float m_speed = 1.0f;
-    glm::vec3 m_position;
-    glm::vec3 m_front;
-    glm::vec3 m_up;
+    glm::vec3 m_position { 0, 0, 10 };
+    glm::vec3 m_front { 0, 0, -1 };
+    glm::vec3 m_up { 0, 1, 0 };
     glm::mat4 m_vMatrix;
     glm::mat4 m_pMatrx;
 
-    float m_pitch;
-    float m_yaw;
-    float m_sensitivity;
-    float m_xpos;
-    float m_ypos;
+    float m_pitch { 0 };
+    float m_yaw { -90 };
+    float m_sensitivity { 0.1 };
+    float m_xpos { 0 };
+    float m_ypos { 0 };
     bool m_firstMove;
 };
 

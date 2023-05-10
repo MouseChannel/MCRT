@@ -26,8 +26,11 @@ Instance::Instance()
     vk::ApplicationInfo app_info;
     app_info // .setApplicationVersion(VK_API_VERSION_1_3)
         .setApiVersion(VK_API_VERSION_1_3);
-    std::vector<const char*> vaild_layer = { "VK_LAYER_KHRONOS_validation",
-                                             "VK_LAYER_LUNARG_monitor" };
+    std::vector<const char*> vaild_layer = {
+        "VK_LAYER_KHRONOS_validation",
+        "VK_LAYER_LUNARG_monitor",
+        //  "VK_LAYER_KHRONOS_synchronization2"
+    };
 
     vk::ValidationFeaturesEXT features {};
     // vk::Feate

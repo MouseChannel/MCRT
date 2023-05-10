@@ -5,11 +5,12 @@
 // #include "Wrapper/Pipeline/RT_pipeline.hpp"
 #include "Helper/Uniform_Manager.hpp"
 #include "Helper/math.hpp"
+#include "Rendering/Host_Uniform.hpp"
 #include <memory>
 #include <vector>
-// #include "shader/Data_struct.h"
-#include "Helper/Shader_Data_Convert.h"
 
+// #include "shader/Data_struct.h"
+// #include "Helper/Shader_Data_Convert.h"
 
 namespace MCRT {
 class Device;
@@ -66,8 +67,9 @@ public:
 private:
     void create_shader_bind_table();
     void create_uniform_buffer();
+    void update_ubo(std::shared_ptr<CommandBuffer> cmd);
 
-    std::shared_ptr<Uniform_Stuff<V_P_Matrix::shader_data>> vp_matrix;
+    std::shared_ptr<Uniform_Stuff<Camera_data>> vp_matrix;
     std::shared_ptr<RenderPass> m_renderpass;
 
     std::shared_ptr<Framebuffer> m_framebuffer;
@@ -87,7 +89,7 @@ private:
     std::shared_ptr<Buffer> m_SBT_buffer_rmiss;
 
     std::shared_ptr<Buffer> m_SBT_buffer_rhit;
-
-    std::shared_ptr<Buffer> m_V_P_UBO;
+    int temp_id = 0;
+    // std::shared_ptr<Buffer> m_V_P_UBO;
 };
 }

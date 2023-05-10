@@ -46,7 +46,7 @@ void ImGuiContext::Init(std::shared_ptr<Window> window)
     ImGui::StyleColorsDark();
 
     auto& context = Context::Get_Singleton();
-    ImGui_ImplGlfw_InitForVulkan(window->get_window(), true);
+    ImGui_ImplGlfw_InitForVulkan(window->get_handle(), true);
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = context->get_instance()->get_handle();
     init_info.PhysicalDevice = context->get_device()->Get_Physical_device();

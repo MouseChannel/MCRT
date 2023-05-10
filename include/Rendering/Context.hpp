@@ -18,6 +18,7 @@ class Debugger;
 class AccelerationStructure_Bottom;
 class AS_Builder;
 class RT_Pipeline;
+class Camera;
 class Context_base;
 class RenderPass;
 class RT_Context;
@@ -82,6 +83,10 @@ public:
     {
         return contexts[index];
     }
+    [[nodiscard("missing camera")]] auto& get_camera()
+    {
+        return m_camera;
+    }
     [[nodiscard("missing renderpass")]] std::shared_ptr<RenderPass> get_renderpass();
     std::shared_ptr<CommandBuffer> Begin_Frame();
     void EndFrame();
@@ -109,6 +114,7 @@ private:
     // std::shared_ptr<RenderContext> m_render_context;
     // std::shared_ptr<RT_Context> m_RT_context;
     std::vector<std::shared_ptr<Context_base>> contexts;
+    std::shared_ptr<Camera> m_camera;
 };
 
 } // namespace MCRT

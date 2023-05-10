@@ -79,13 +79,14 @@ void Descriptor_Manager::CreateUpdateDescriptorSet(Which_Set which_set)
         auto& data_type = data.type();
         // auto d = decltype(data);
 
+        // auto type_id = typeid(std::shared_ptr<AccelerationStructure>();
         if (data_type == typeid(std::shared_ptr<Image>)) {
 
             descriptorSets[which_set]->Update(std::any_cast<std::shared_ptr<Image>>(data), binding.binding, binding.descriptorType);
         } else if (data_type == typeid(std::shared_ptr<Buffer>)) {
             descriptorSets[which_set]->Update(std::any_cast<std::shared_ptr<Buffer>>(data), binding.binding, binding.descriptorType);
-        } else if (data_type == typeid(std::shared_ptr<AccelerationStructure>)) {
-            descriptorSets[which_set]->Update(std::any_cast<std::shared_ptr<AccelerationStructure>>(data), binding.binding, binding.descriptorType);
+        } else if (data_type == typeid(std::shared_ptr<AccelerationStructure_Top>)) {
+            descriptorSets[which_set]->Update(std::any_cast<std::shared_ptr<AccelerationStructure_Top>>(data), binding.binding, binding.descriptorType);
         }
     }
 }

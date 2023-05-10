@@ -39,13 +39,18 @@ Device::Device()
         .setQueueCount(1)
         .setQueueFamilyIndex(queue_family_indices.graphic_queue.value());
 
+    // vk::PhysicalDeviceSynchronization2Features synchronizations_feature;
+    // synchronizations_feature.setSynchronization2(true);
     vk::StructureChain<vk::DeviceCreateInfo,
+                       vk::PhysicalDeviceSynchronization2Features,
                        vk::PhysicalDeviceVulkan12Features,
                        vk::PhysicalDeviceRayTracingPipelineFeaturesKHR,
                        vk::PhysicalDeviceAccelerationStructureFeaturesKHR,
                        vk::PhysicalDeviceRayQueryFeaturesKHR>
         _features;
+    _features.get<vk::PhysicalDeviceSynchronization2Features>().setSynchronization2(true);
     _features.get<vk::PhysicalDeviceVulkan12Features>()
+
         .setBufferDeviceAddress(true);
     _features.get<vk::PhysicalDeviceRayTracingPipelineFeaturesKHR>()
         .setRayTracingPipeline(true);

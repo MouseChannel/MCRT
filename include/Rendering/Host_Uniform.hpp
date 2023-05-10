@@ -1,7 +1,7 @@
 #include "glm/glm.hpp"
 struct V_P_Matrix {
     V_P_Matrix(glm::mat4 view, glm::mat4 project)
-        : viewProj(project * view)
+        : viewProj(view)
         , viewInverse(glm::inverse(view))
         , projInverse(glm::inverse(project))
 

@@ -9,15 +9,15 @@ namespace MCRT {
 void AccelerationStructure::build(std::shared_ptr<Buffer> scratch_buffer)
 {
 
-    vk::AccelerationStructureCreateInfoKHR as_create_info;
     dst_buffer = Buffer::CreateDeviceBuffer(nullptr,
                                             size_info.accelerationStructureSize,
                                             vk::BufferUsageFlagBits::eShaderDeviceAddress | vk::BufferUsageFlagBits::eAccelerationStructureStorageKHR);
 
     Context::Get_Singleton()->get_debugger()->set_name(dst_buffer, "dst_buffer");
-    as_create_info.setType(m_type)
-        .setSize(size_info.accelerationStructureSize)
-        .setBuffer(dst_buffer->get_handle());
+    auto as_create_info = vk::AccelerationStructureCreateInfoKHR {}
+                              .setType(m_type)
+                              .setSize(size_info.accelerationStructureSize)
+                              .setBuffer(dst_buffer->get_handle());
     // create   structure_handle here
     m_handle = Context::Get_Singleton()
                    ->get_device()
@@ -34,15 +34,23 @@ void AccelerationStructure::build(std::shared_ptr<Buffer> scratch_buffer)
                                    // build  here
                                    cmd_buffer.buildAccelerationStructuresKHR(build_info, &range_info);
 
-                                   vk::MemoryBarrier barrier;
-                                   barrier.setSrcAccessMask(vk::AccessFlagBits::eAccelerationStructureWriteKHR)
-                                       .setDstAccessMask(vk::AccessFlagBits::eAccelerationStructureReadKHR);
-                                   cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eAccelerationStructureBuildKHR,
-                                                              vk::PipelineStageFlagBits::eAccelerationStructureBuildKHR,
-                                                              {},
-                                                              barrier,
-                                                              {},
-                                                              {});
+                                   vk::MemoryBarrier2 barrier;
+                                   barrier.setSrcStageMask(vk::PipelineStageFlagBits2::eAccelerationStructureBuildKHR)
+                                       .setSrcAccessMask(vk::AccessFlagBits2::eAccelerationStructureWriteKHR)
+                                       .setDstStageMask(vk::PipelineStageFlagBits2::eAccelerationStructureBuildKHR)
+                                       .setDstAccessMask(vk::AccessFlagBits2::eAccelerationStructureReadKHR);
+
+                                   cmd_buffer.pipelineBarrier2(vk::DependencyInfo {}.setMemoryBarriers(barrier));
+                                   //    vk::MemoryBarrier barrier1;
+                                   //    barrier1
+                                   //        .setSrcAccessMask(vk::AccessFlagBits::eAccelerationStructureWriteKHR)
+                                   //        .setDstAccessMask(vk::AccessFlagBits::eAccelerationStructureReadKHR);
+                                   //    cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eAccelerationStructureBuildKHR,
+                                   //                               vk::PipelineStageFlagBits::eAccelerationStructureBuildKHR,
+                                   //                               {},
+                                   //                               barrier1,
+                                   //                               {},
+                                   //                               {});
                                });
 }
 }

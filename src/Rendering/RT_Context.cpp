@@ -2,6 +2,7 @@
 #include "Helper/math.hpp"
 
 // #include "Helper/Ray_Tracing/RT_Manager.hpp"
+#include "Helper/Camera.hpp"
 #include "Helper/Debugger.hpp"
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Uniform_Manager.hpp"
@@ -12,12 +13,14 @@
 #include "Rendering/Render_Target/RT_Color_RenderTarget.hpp"
 #include "Rendering/Render_Target/Render_Target.hpp"
 #include "Wrapper/Buffer.hpp"
+#include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/FrameBuffer.hpp"
 #include "Wrapper/Image.hpp"
 #include "Wrapper/Pipeline/RT_pipeline.hpp"
 #include "Wrapper/Ray_Tracing/AS_Builder.hpp"
 #include "Wrapper/RenderPass.hpp"
+#include "shader/Data_struct.h"
 
 namespace MCRT {
 RT_Context::RT_Context(std::shared_ptr<Device> device)
@@ -49,92 +52,6 @@ void RT_Context::add_objs(std::vector<std::shared_ptr<Model>> objs)
     AS_Builder::Get_Singleton()->build_tlas();
 }
 
-// void RT_Context::Prepare_RenderPass(std::vector<std::shared_ptr<RenderTarget>>& render_targets)
-// {
-// }
-// void RT_Context::create_renderpass()
-// {
-//     m_renderpass.reset(new RenderPass);
-//     std::vector<vk::AttachmentDescription> all_attachments;
-//     // vk::AttachmentReference colorAttachmentRef;
-
-//     vk::AttachmentDescription color_attachment;
-//     color_attachment.setFormat(vk::Format ::eR32G32B32A32Sfloat)
-//         .setSamples(vk::SampleCountFlagBits ::e1)
-//         .setLoadOp(vk::AttachmentLoadOp ::eClear)
-//         .setStoreOp(vk::AttachmentStoreOp ::eStore)
-//         .setStencilLoadOp(vk::AttachmentLoadOp ::eDontCare)
-//         .setStencilStoreOp(vk::AttachmentStoreOp ::eDontCare)
-//         .setInitialLayout(vk::ImageLayout ::eGeneral)
-//         .setFinalLayout(vk::ImageLayout ::eGeneral);
-//     m_renderpass->Add_Attachment_description(color_attachment);
-//     vk::AttachmentReference color_reference;
-//     color_reference.setAttachment(all_attachments.size())
-//         .setLayout(vk::ImageLayout ::eColorAttachmentOptimal);
-//     m_renderpass->Get_Subpass().setColorAttachments(color_reference);
-//     // all_attachments.push_back(color_attachment);
-//     // colorAttachmentRef  = color_reference;
-
-//     vk::AttachmentDescription depth_attachment;
-
-//     depth_attachment.setFormat(vk::Format ::eX8D24UnormPack32)
-//         .setSamples(vk::SampleCountFlagBits ::e1)
-//         .setLoadOp(vk::AttachmentLoadOp ::eClear)
-//         .setStoreOp(vk::AttachmentStoreOp ::eStore)
-//         .setStencilLoadOp(vk::AttachmentLoadOp ::eDontCare)
-//         .setStencilStoreOp(vk::AttachmentStoreOp ::eDontCare)
-//         .setInitialLayout(vk::ImageLayout ::eDepthStencilAttachmentOptimal)
-//         .setFinalLayout(vk::ImageLayout ::eDepthStencilAttachmentOptimal);
-//     m_renderpass->Add_Attachment_description(depth_attachment);
-//     vk::AttachmentReference depth_reference;
-//     depth_reference.setAttachment(all_attachments.size())
-//         .setLayout(vk::ImageLayout ::eDepthAttachmentOptimal);
-//     m_renderpass->Get_Subpass().setPDepthStencilAttachment(&depth_reference);
-//     // all_attachments.push_back(depth_attachment);
-//     // subpass
-//     std::vector<vk::SubpassDescription> subpasses;
-//     std::vector<vk::SubpassDependency> subpassDependencies;
-
-//     vk::SubpassDescription subpass;
-//     subpass.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
-//         .setColorAttachments(color_reference)
-//         .setPDepthStencilAttachment(&depth_reference);
-//     vk::SubpassDependency dependence;
-//     dependence.setSrcSubpass(VK_SUBPASS_EXTERNAL)
-//         .setSrcSubpass(0)
-//         .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-//         .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-//         .setSrcAccessMask(vk::AccessFlagBits::eNone)
-//         .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);
-
-//     m_renderpass->Build();
-// }
-// void RT_Context::create_framebuffer()
-// {
-//     std::vector<std::shared_ptr<Image>> images;
-//     for (auto i : render_targets) {
-//         images.push_back(i->Get_Image());
-//     }
-//     m_framebuffer.reset(new Framebuffer(m_renderpass, images));
-//     // color_image.reset(new Image(800,
-//     //                             800,
-//     //                             vk::Format::eR32G32B32A32Sfloat,
-//     //                             vk::ImageType::e2D,
-//     //                             vk::ImageTiling::eOptimal,
-//     //                             vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled,
-//     //                             vk::ImageAspectFlagBits::eColor,
-//     //                             vk::SampleCountFlagBits::e1));
-//     // depth_image.reset(new Image(800,
-//     //                             800,
-//     //                             vk::Format::eX8D24UnormPack32,
-//     //                             vk::ImageType::e2D,
-//     //                             vk::ImageTiling::eOptimal,
-//     //                             vk::ImageUsageFlagBits::eDepthStencilAttachment,
-//     //                             vk::ImageAspectFlagBits::eDepth,
-//     //                             vk::SampleCountFlagBits::e1));
-//     // m_framebuffer.reset(new Framebuffer(m_renderpass,
-//     //                                     { color_image, depth_image }));
-// }
 void RT_Context::create_shader_bind_table()
 {
     vk::PhysicalDeviceProperties2 a_;
@@ -255,33 +172,19 @@ void RT_Context::prepare_pipeline()
 }
 void RT_Context::create_uniform_buffer()
 {
-    glm::mat4 s {
-        1.432f,
-        6.764f,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
-    };
-
-    // struct MyStruct {
-    //     int a, b;
+    // V_P_Matrix vp_matrix_data {
+    //     Context::Get_Singleton()->get_camera()->Get_v_matrix(),
+    //     Context::Get_Singleton()->get_camera()->Get_p_matrix()
     // };
-    auto ss = s[0][0];
-    Mat4f a;
-    a.data[0][0] = 0.1f;
 
-    vp_matrix = UniformManager::make_uniform(V_P_Matrix { s, s }.to_shader_data(),
+    Camera_data camera_data {
+        // .camera_pos { glm::vec3 { 1, 2, 3 } },
+        // .s = 1,
+        // .rr = 4,
+        .viewInverse { glm::mat4 { 9999999 } },
+        .projInverse { glm::mat4 { 1 } }
+    };
+    vp_matrix = UniformManager::make_uniform(camera_data,
                                              vk::ShaderStageFlagBits::eRaygenKHR,
                                              vk::DescriptorType ::eUniformBuffer);
 }
@@ -298,8 +201,99 @@ void RT_Context::prepare()
     create_shader_bind_table();
     m_command_buffer.reset(new CommandBuffer);
 }
+void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
+{
+    auto ubo_usage_stage { vk::PipelineStageFlagBits::eRayTracingShaderKHR | vk::PipelineStageFlagBits::eVertexShader };
+
+    // Ensure that the modified UBO is not visible to previous frames.
+
+    auto before_barrier = vk::BufferMemoryBarrier2 {}
+                              .setSrcStageMask(vk::PipelineStageFlagBits2::eRayTracingShaderKHR | vk::PipelineStageFlagBits2::eVertexShader)
+                              .setSrcAccessMask(vk::AccessFlagBits2::eShaderRead)
+                              .setDstStageMask(vk::PipelineStageFlagBits2::eTransfer)
+                              .setDstAccessMask(vk::AccessFlagBits2::eTransferWrite)
+                              .setBuffer(vp_matrix->buffer->get_handle())
+                              .setSize(sizeof(Camera_data));
+
+    cmd->get_handle()
+        .pipelineBarrier2(vk::DependencyInfo()
+                              .setBufferMemoryBarriers(before_barrier));
+
+    glm::mat4 temp {
+        glm::vec4 { temp_id, 1, 1, 1 },
+        glm::vec4 { 1, 1, 1, 1 },
+        glm::vec4 { 1, 1, 1, 1 },
+        glm::vec4 { 1, 1, 1, 1 }
+    };
+
+    // std::cout << temp_id << std::endl;
+    temp_id++;
+    auto pos =
+        Context::Get_Singleton()
+            ->get_camera()
+            ->get_pos();
+    std::cout << pos.x << ' ' << pos.y << ' ' << pos.z << std::endl;
+    std::cout << "im here" << glm::inverse(Context::Get_Singleton()->get_camera()->Get_v_matrix())[0][0] << std::endl;
+
+    cmd->get_handle()
+        .updateBuffer<Camera_data>(vp_matrix->buffer->get_handle(),
+                                   0,
+                                   Camera_data {
+                                       .camera_pos { pos },
+                                       .camera_front { Context::Get_Singleton()->get_camera()->get_front() },
+                                       //    .camera_pos { pos },
+                                       .viewInverse {
+                                           glm::inverse(Context::Get_Singleton()
+                                                            ->get_camera()
+                                                            ->Get_v_matrix()) },
+                                       .projInverse {
+                                           glm::inverse(Context::Get_Singleton()
+                                                            ->get_camera()
+                                                            ->Get_p_matrix()) } });
+    // Making sure the updated UBO will be visible.
+
+    auto after_barrier = vk::BufferMemoryBarrier2 {}
+                             .setBuffer(vp_matrix->buffer->get_handle())
+                             .setSrcStageMask(vk::PipelineStageFlagBits2::eTransfer)
+                             .setSrcAccessMask(vk::AccessFlagBits2::eTransferWrite)
+                             .setDstStageMask(vk::PipelineStageFlagBits2::eRayTracingShaderKHR | vk::PipelineStageFlagBits2::eVertexShader)
+                             .setDstAccessMask(vk::AccessFlagBits2::eShaderRead)
+                             .setSize(sizeof(Camera_data));
+
+    cmd->get_handle()
+        .pipelineBarrier2(vk::DependencyInfo()
+                              .setBufferMemoryBarriers(after_barrier));
+}
 void RT_Context::record_command(std::shared_ptr<CommandBuffer> cmd)
 {
+    update_ubo(cmd);
+    cmd->get_handle()
+        .bindPipeline(vk::PipelineBindPoint ::eRayTracingKHR, get_pipeline()->get_handle());
+    std::vector<vk::DescriptorSet> descriptor_sets {
+        // descriptor_sets.push_back(
+        Descriptor_Manager::Get_Singleton()
+            ->get_DescriptorSet(Descriptor_Manager::Ray_Tracing)
+            ->get_handle()[0],
+
+        Descriptor_Manager::Get_Singleton()
+            ->get_DescriptorSet(Descriptor_Manager::Global)
+            ->get_handle()[0]
+    };
+
+    cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint ::eRayTracingKHR,
+                                         get_pipeline()->get_layout(),
+                                         0,
+                                         descriptor_sets,
+                                         {});
+
+    cmd->get_handle().pushConstants<PushContant_Ray>(get_pipeline()
+                                                         ->get_layout(),
+                                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR,
+                                                     0,
+                                                     PushContant_Ray {
+                                                         .clearColor { 1 },
+                                                         .lightPosition { 10.f, 15.f, 8.f },
+                                                         .lightIntensity = 100 });
     cmd->get_handle().traceRaysKHR(m_rgenRegion,
                                    m_missRegion,
                                    m_hitRegion,
@@ -316,11 +310,12 @@ std::shared_ptr<CommandBuffer> RT_Context::BeginFrame()
 void RT_Context::Submit()
 {
     m_command_buffer->End();
+
     auto queue = Context::Get_Singleton()->get_device()->Get_Graphic_queue();
     vk::SubmitInfo submit_info;
     submit_info.setCommandBuffers(m_command_buffer->get_handle());
     queue.submit(submit_info);
-    queue.waitIdle();
+    // queue.waitIdle();
 }
 void RT_Context::EndFrame()
 {

@@ -31,6 +31,7 @@ public:
         "VK_KHR_deferred_host_operations",
         "VK_KHR_acceleration_structure",
         "VK_KHR_ray_tracing_pipeline",
+        // VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME
 
         // "VK_EXT_buffer_device_address",
         // "VK_KHR_buffer_device_address"

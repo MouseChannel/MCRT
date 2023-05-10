@@ -3,6 +3,7 @@
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Shader_module.hpp"
+#include "shader/Data_struct.h"
 
 namespace MCRT {
 
@@ -53,7 +54,7 @@ RT_Pipeline::RT_Pipeline()
     vk::PushConstantRange push_contant;
     push_contant.setStageFlags(vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR)
         .setOffset(0)
-        .setSize(12);
+        .setSize(sizeof(PushContant_Ray));
     vk::PipelineLayoutCreateInfo layout_create_info;
 
     std::vector<vk::DescriptorSetLayout> descriptor_layouts {

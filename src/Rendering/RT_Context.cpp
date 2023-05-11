@@ -182,7 +182,19 @@ void RT_Context::create_uniform_buffer()
         // .s = 1,
         // .rr = 4,
         .viewInverse { glm::mat4 { 9999999 } },
-        .projInverse { glm::mat4 { 1 } }
+        .projInverse { glm::mat4 { 1 } },
+        .camera_pos {
+            Context::Get_Singleton()
+                ->get_camera()
+                ->get_pos(),
+            0,
+        },
+        .camera_front {
+            Context::Get_Singleton()
+                ->get_camera()
+                ->get_front(),
+            0,
+        },
     };
     vp_matrix = UniformManager::make_uniform(camera_data,
                                              vk::ShaderStageFlagBits::eRaygenKHR,
@@ -213,7 +225,7 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
                               .setDstStageMask(vk::PipelineStageFlagBits2::eTransfer)
                               .setDstAccessMask(vk::AccessFlagBits2::eTransferWrite)
                               .setBuffer(vp_matrix->buffer->get_handle())
-                              .setSize(sizeof(Camera_data));
+                              .setSize(VK_WHOLE_SIZE);
 
     cmd->get_handle()
         .pipelineBarrier2(vk::DependencyInfo()
@@ -233,23 +245,39 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
             ->get_camera()
             ->get_pos();
     std::cout << pos.x << ' ' << pos.y << ' ' << pos.z << std::endl;
-    std::cout << "im here" << glm::inverse(Context::Get_Singleton()->get_camera()->Get_v_matrix())[0][0] << std::endl;
-
+    auto front =
+        Context::Get_Singleton()
+            ->get_camera()
+            ->get_front();
+    std::cout << "camera_data_size" << sizeof(Camera_data) << "\nfloat_size: " << sizeof(float) << "\n vec3_size : "
+              << sizeof(glm::vec3) << "\n vec4_size: " << sizeof(glm::vec4)
+              << "\n mat4_size: " << sizeof(glm::mat4) << std::endl;
+    std::cout << "camera_front = " << sizeof(front) << ' ' << front.x << ' ' << front.y << ' ' << front.z << std::endl;
     cmd->get_handle()
-        .updateBuffer<Camera_data>(vp_matrix->buffer->get_handle(),
-                                   0,
-                                   Camera_data {
-                                       .camera_pos { pos },
-                                       .camera_front { Context::Get_Singleton()->get_camera()->get_front() },
-                                       //    .camera_pos { pos },
-                                       .viewInverse {
-                                           glm::inverse(Context::Get_Singleton()
-                                                            ->get_camera()
-                                                            ->Get_v_matrix()) },
-                                       .projInverse {
-                                           glm::inverse(Context::Get_Singleton()
-                                                            ->get_camera()
-                                                            ->Get_p_matrix()) } });
+        .updateBuffer<Camera_data>(
+            vp_matrix->buffer->get_handle(),
+            0,
+            Camera_data {
+                //    .camera_pos { pos },
+                .viewInverse {
+                    glm::inverse(Context::Get_Singleton()
+                                     ->get_camera()
+                                     ->Get_v_matrix()) },
+                .projInverse {
+                    glm::inverse(Context::Get_Singleton()
+                                     ->get_camera()
+                                     ->Get_p_matrix()) },
+                .camera_pos {
+                    Context::Get_Singleton()
+                        ->get_camera()
+                        ->get_pos(),
+                    0 },
+                .camera_front {
+                    Context::Get_Singleton()
+                        ->get_camera()
+                        ->get_front(),
+                    0 },
+            });
     // Making sure the updated UBO will be visible.
 
     auto after_barrier = vk::BufferMemoryBarrier2 {}
@@ -258,7 +286,7 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
                              .setSrcAccessMask(vk::AccessFlagBits2::eTransferWrite)
                              .setDstStageMask(vk::PipelineStageFlagBits2::eRayTracingShaderKHR | vk::PipelineStageFlagBits2::eVertexShader)
                              .setDstAccessMask(vk::AccessFlagBits2::eShaderRead)
-                             .setSize(sizeof(Camera_data));
+                             .setSize(VK_WHOLE_SIZE);
 
     cmd->get_handle()
         .pipelineBarrier2(vk::DependencyInfo()

@@ -2,11 +2,12 @@
 #extension GL_EXT_ray_tracing : require
 #extension GL_EXT_debug_printf : enable
 #extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
 // #extension GL_GOOGLE_cpp_style_line_direcitve :  require
 #include "Data_struct.h"
 
 #include "common.glsl"
-#include "common.h"
 
 layout(push_constant) uniform _PushContant_Ray
 {
@@ -24,55 +25,46 @@ void main()
     const vec2 pixelCenter = vec2(gl_LaunchIDEXT.xy) + vec2(0.5);
     const vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
     vec2 d = inUV * 2.0 - 1.0;
-    //
+
     vec2 texCoord = (vec2(gl_LaunchIDEXT.xy) + 0.5) / vec2(gl_LaunchSizeEXT.xy);
-    vec3 ray_origin = vec3(0, 0, 0);
-    vec3 ray_dir = get_camera_ray(45, 1, texCoord);
+    vec3 ray_origin = camera_data.camera_pos.xyz;
+    vec3 ray_dir = camera_data.camera_front.xyz + vec3(d, 0);
 
-    //
-    vec3 origin = camera_data.camera_pos;
-    vec4 n_origin = camera_data.viewInverse * vec4(0, 0, 0, 1);
-
-    vec4 target = camera_data.projInverse * vec4(d.x, d.y, 1, 1);
-
-    vec4 direction = camera_data.viewInverse * vec4(normalize(target.xyz), 0);
-    vec4 m_direction = camera_data.viewInverse * vec4(d, -1, 0);
-    vec3 mm_direction = normalize(camera_data.camera_front - camera_data.camera_pos) + (vec3(d, 0));
-    vec3 mmm_direction = normalize(mm_direction);
-    if (gl_LaunchIDEXT.x == 1 && gl_LaunchIDEXT.y == 1) {
-
-        // debugPrintfEXT("d =  %f %f %f %f %f %f \n", target.x, target.y, target.z, target2.x, target2.y, target2.z);
-        // debugPrintfEXT("pos %f ,%f ,%f, %f \n", origin.x, origin.y, origin.z, camera_data.viewInverse[0][0]);
-
-        debugPrintfEXT("npos %f ,%f ,%f, \n", camera_data.camera_front.x, camera_data.camera_front.y, camera_data.camera_front.z);
-        // debugPrintfEXT("message%f,%f,%f %f,\n", direction.x, direction.y, direction.z, direction.w);
-    }
     uint rayFlags = gl_RayFlagsNoneEXT;
     float tMin = 0.001;
     float tMax = 10000.0;
-
+    vec3 curWeight = vec3(1);
+    vec3 hitValue = vec3(0);
+    if (gl_LaunchIDEXT.x == 1 && gl_LaunchIDEXT.y == 1)
+        debugPrintfEXT("message from rgen %f %f %f\n", ray_origin.x, ray_origin.y, ray_origin.z);
     traceRayEXT(topLevelAS, // acceleration structure
                 rayFlags, // rayFlags
                 0xFF, // cullMask
                 0, // sbtRecordOffset
                 0, // sbtRecordStride
                 0, // missIndex
-                origin.xyz, // ray origin
+                ray_origin, // ray origin
                 tMin, // ray min range
-                mmm_direction.xyz, // ray direction
+                ray_dir, // ray direction
                 tMax, // ray max range
                 0 // payload (location = 0)
     );
+
+    while (prd.depth++ < 10 && false) {
+        traceRayEXT(topLevelAS, // acceleration structure
+                    rayFlags, // rayFlags
+                    0xFF, // cullMask
+                    0, // sbtRecordOffset
+                    0, // sbtRecordStride
+                    0, // missIndex
+                    ray_origin, // ray origin
+                    tMin, // ray min range
+                    ray_dir, // ray direction
+                    tMax, // ray max range
+                    0 // payload (location = 0)
+        );
+        hitValue += prd.hitValue * curWeight;
+        curWeight *= prd.weight;
+    }
     imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(prd.hitValue, 1.0));
-    vec4 outputColor = vec4(0.0, 0.0, 0.0, 1.0);
-    outputColor.r = float(gl_LaunchIDEXT.x) / float(gl_LaunchSizeEXT.x);
-    outputColor.g = float(gl_LaunchIDEXT.y) / float(gl_LaunchSizeEXT.y);
-    // imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(outputColor));
-
-    // if (gl_LaunchIDEXT.x == 1 && gl_LaunchIDEXT.y == 1) {
-
-    //     debugPrintfEXT("message%f,%f,%f,\n", direction.x, direction.y, direction.z);
-    // }
-    // debugPrintfEXT("message %f,%f,%f,%f,%f,%f,%f,%f, \n", s1[0], s1[1], s1[2], s1[3], s2[0], s2[1], s2[2], s2[3]);
-    // imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(0, 1, 0, 1.0));
 }

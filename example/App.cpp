@@ -15,7 +15,7 @@ void App::init()
     struct MyStruct1 {
         int s;
     } ss;
-    UniformManager::make_uniform(ss, vk::ShaderStageFlagBits::eAll, vk::DescriptorType::eUniformBuffer);
+    // UniformManager::make_uniform(ss, vk::ShaderStageFlagBits::eAll, vk::DescriptorType::eUniformBuffer);
 }
 void App::run()
 {

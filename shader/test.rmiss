@@ -10,9 +10,7 @@
 layout(location = 0) rayPayloadInEXT hitPayload prd;
 void main()
 {
-    prd.hitValue = vec3(0, 1, 0);
+    prd.hitValue = vec3(0.001);
 
-    // gl_launchId
-    // gl_LaunchIDEXT;
-    // gl_fr`
+    prd.depth = 100;
 }

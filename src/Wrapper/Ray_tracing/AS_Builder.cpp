@@ -22,7 +22,7 @@ void AS_Builder::add_blas_obj(std::shared_ptr<Model> obj)
     m_accelerate_structures.emplace_back(new AccelerationStructure_Bottom(obj));
     Model::obj_instances.emplace_back(ObjInstance { .obj_index = (int)Model::obj_instances.size() });
 }
- 
+
 void AS_Builder::build_blas()
 {
 
@@ -31,7 +31,9 @@ void AS_Builder::build_blas()
         max_scratch_sice = std::max(max_scratch_sice, i->get_scratch_size());
     }
     assert(max_scratch_sice > 0);
-    auto scratch_buffer = Buffer::create_buffer(nullptr, max_scratch_sice, vk::BufferUsageFlagBits::eShaderDeviceAddress | vk::BufferUsageFlagBits::eStorageBuffer);
+    auto scratch_buffer = Buffer::create_buffer(nullptr,
+                                                max_scratch_sice,
+                                                vk::BufferUsageFlagBits::eShaderDeviceAddress | vk::BufferUsageFlagBits::eStorageBuffer);
 
     auto count = m_accelerate_structures.size();
     std::vector<uint32_t> indices; // Indices of the BLAS to create
@@ -63,6 +65,6 @@ void AS_Builder::build_tlas()
                                                 top_as->get_scratch_size(),
                                                 vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress);
     top_as->build(scratch_buffer);
-} 
+}
 
 }

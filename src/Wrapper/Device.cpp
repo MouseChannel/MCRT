@@ -41,14 +41,19 @@ Device::Device()
 
     // vk::PhysicalDeviceSynchronization2Features synchronizations_feature;
     // synchronizations_feature.setSynchronization2(true);
+    // vk::PhysicalDeviceVulkan11Features rrrrr;
+    // rrrrr.set
+
     vk::StructureChain<vk::DeviceCreateInfo,
                        vk::PhysicalDeviceSynchronization2Features,
                        vk::PhysicalDeviceVulkan12Features,
                        vk::PhysicalDeviceRayTracingPipelineFeaturesKHR,
                        vk::PhysicalDeviceAccelerationStructureFeaturesKHR,
-                       vk::PhysicalDeviceRayQueryFeaturesKHR>
+                       vk::PhysicalDeviceRayQueryFeaturesKHR,
+                       vk::PhysicalDeviceShaderClockFeaturesKHR>
         _features;
-    _features.get<vk::PhysicalDeviceSynchronization2Features>().setSynchronization2(true);
+    _features.get<vk::PhysicalDeviceSynchronization2Features>()
+        .setSynchronization2(true);
     _features.get<vk::PhysicalDeviceVulkan12Features>()
 
         .setBufferDeviceAddress(true);
@@ -58,8 +63,12 @@ Device::Device()
         .setAccelerationStructure(true);
     _features.get<vk::PhysicalDeviceRayQueryFeaturesKHR>()
         .setRayQuery(true);
+    _features.get<vk::PhysicalDeviceShaderClockFeaturesKHR>()
+        .setShaderDeviceClock(true);
     vk::PhysicalDeviceFeatures normal_feature;
-    normal_feature.setShaderStorageImageMultisample(true);
+    normal_feature.setShaderInt64(true)
+        .setShaderFloat64(true)
+        .setShaderStorageImageMultisample(true);
 
     auto& _create_info = _features.get();
     _create_info.setQueueCreateInfos(queue_create_info)

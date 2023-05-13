@@ -2,6 +2,7 @@
 #include "Helper/Camera.hpp"
 #include "Helper/Debugger.hpp"
 #include "Helper/DescriptorManager.hpp"
+#include "Helper/Model_Loader/Obj_Loader.hpp"
 #include "Helper/Ray_Tracing/RT_Manager.hpp"
 #include "Rendering/GLFW_Window.hpp"
 #include "Rendering/Model.hpp"
@@ -36,17 +37,15 @@ void Context::init(std::shared_ptr<Window> window)
     m_sampler.reset(new Sampler);
     // m_debugger->set_buffer_name(m_command_pool, "rer");
 
+    Obj_loader::load_model("D:/MoChengRT/assets/mocheng.obj");
+
     m_camera.reset(new Camera);
     m_camera->init();
-    m_model.reset(new Model("D:/MoChengRT/assets/model.obj",
-                            "D:/MoChengRT/assets/model.png"));
     contexts.push_back(std::shared_ptr<RenderContext> { new RenderContext(m_device) });
     contexts.push_back(std::shared_ptr<RT_Context> { new RT_Context(m_device) });
 
     contexts[1]->prepare();
     contexts[0]->prepare();
-
-    int a = 0;
 }
 std::shared_ptr<Image> Context::get_out_image()
 {

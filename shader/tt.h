@@ -1,3 +1,0 @@
-struct TT {
-    int dd; 
-};

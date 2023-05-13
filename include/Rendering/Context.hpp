@@ -70,18 +70,25 @@ public:
     {
         return m_debugger;
     }
-    [[nodiscard("missing rt_pipeline")]] auto& get_rt_pipeline()
-    {
-        return m_rt_pipeline;
-    }
-    auto& get_obj()
-    {
-        return m_model;
-    }
+
     std::shared_ptr<Image> get_out_image();
-    auto& get_context(Context_index index)
+
+    auto get_rt_context()
     {
-        return contexts[index];
+        auto base = contexts[Context_index::Ray_tracing];
+        if (auto context = std::reinterpret_pointer_cast<RT_Context>(base); context != nullptr) {
+            return context;
+        }
+        throw std::runtime_error("it is not Ray_Tracing context");
+    }
+
+    auto get_graphic_context()
+    {
+        auto base = contexts[Context_index::Graphic];
+        if (auto context = std::reinterpret_pointer_cast<RenderContext>(base); context != nullptr) {
+            return context;
+        }
+        throw std::runtime_error("it is not Ray_Tracing context");
     }
     [[nodiscard("missing camera")]] auto& get_camera()
     {
@@ -107,6 +114,7 @@ private:
     std::shared_ptr<CommandBuffer> m_command_buffer;
     std::shared_ptr<Debugger> m_debugger;
     std::shared_ptr<Sampler> m_sampler;
+    std::shared_ptr<std::vector<Model>> m_models;
     std::shared_ptr<Model> m_model;
     std::vector<std::shared_ptr<AccelerationStructure_Bottom>> m_accelerate_structures;
     std::shared_ptr<AS_Builder> m_as_builder;

@@ -8,18 +8,19 @@
 
 #include "Data_struct.h"
 #include "common.glsl"
+#include "sampling.glsl"
 
 hitAttributeEXT vec2 attribs;
 
 layout(location = 0) rayPayloadInEXT hitPayload prd;
 
-layout(set = 0, binding = tlas) uniform accelerationStructureEXT topLevelAS;
+layout(set = 0, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
 
-// layout(set = 1, binding = eObjDescs, scalar) buffer _Address
-// {
-//     Address address[];
-// }
-// addresses;
+layout(set = 1, binding = e_obj_addresses, scalar) buffer _Address
+{
+    Address address[];
+}
+addresses;
 
 // layout(set = 0, binding = 2) readonly buffer _InstanceInfo
 // {
@@ -27,47 +28,60 @@ layout(set = 0, binding = tlas) uniform accelerationStructureEXT topLevelAS;
 //     int temp;
 // };
 
-// layout(buffer_reference, scalar) readonly buffer _Vertices
-// {
-//     Vertex vertices[];
-// };
-// layout(buffer_reference, scalar) buffer _Indices
-// {
-//     ivec3 indices[];
-// };
+layout(buffer_reference, scalar) readonly buffer _Vertices
+{
+    Vertex vertices[];
+};
+layout(buffer_reference, scalar) readonly buffer _Indices
+{
+    ivec3 indices[];
+};
+layout(buffer_reference, scalar) readonly buffer _Material
+{
+    Material material;
+};
+
 void main()
 {
 
-    // Address address = addresses.address[gl_InstanceCustomIndexEXT];
-    // _Vertices vertices = _Vertices(address.vertexAddress);
-    // _Indices indices = _Indices(address.indexAddress);
+    Address address = addresses.address[gl_InstanceCustomIndexEXT];
+    _Vertices vertices = _Vertices(address.vertexAddress);
+    _Indices indices = _Indices(address.indexAddress);
+    _Material material = _Material(address.materialAddress);
 
-    // ivec3 cur_indices = indices.indices[gl_PrimitiveID];
+    ivec3 cur_indices = indices.indices[gl_PrimitiveID];
 
-    // Vertex a = vertices.vertices[cur_indices.x];
+    Vertex a = vertices.vertices[cur_indices.x];
 
-    // Vertex b = vertices.vertices[cur_indices.y];
+    Vertex b = vertices.vertices[cur_indices.y];
 
-    // Vertex c = vertices.vertices[cur_indices.z];
+    Vertex c = vertices.vertices[cur_indices.z];
 
-    // const vec3 cur_world_pos = get_cur_world_position(a.pos,
-    //                                                   b.pos,
-    //                                                   c.pos,
-    //                                                   attribs,
-    //                                                   gl_ObjectToWorldEXT);
+    const vec3 cur_world_pos = get_cur_world_position(a.pos,
+                                                      b.pos,
+                                                      c.pos,
+                                                      attribs,
+                                                      gl_ObjectToWorldEXT);
 
-    // const vec3 cur_world_normal = get_cur_world_normal(a.nrm,
-    //                                                    b.nrm,
-    //                                                    c.nrm,
-    //                                                    attribs,
-    //                                                    gl_WorldToObjectEXT);
+    const vec3 cur_world_normal = get_cur_world_normal(a.nrm,
+                                                       b.nrm,
+                                                       c.nrm,
+                                                       attribs,
+                                                       gl_WorldToObjectEXT);
 
-    // debugPrintfEXT("message  %d %d\n", gl_LaunchIDEXT.x, gl_LaunchIDEXT.y);
-    if (gl_LaunchIDEXT.x == 390 && gl_LaunchIDEXT.y == 383) {
+    // Pick a random direction from here and keep going.
+    vec3 tangent, bitangent;
+    createCoordinateSystem(cur_world_normal, tangent, bitangent);
 
-        debugPrintfEXT("message from close hitworld_ray %f %f %f \n", gl_WorldRayOriginEXT.x, gl_WorldRayDirectionEXT.y, gl_WorldRayDirectionEXT.z);
+    vec3 rayDirection = samplingHemisphere(prd.seed, tangent, bitangent, cur_world_normal);
+    vec3 BRDF = material.material.color.xyz / M_PI;
+    float cos_theta = dot(rayDirection, cur_world_normal);
+    prd.rayOrigin = cur_world_pos;
+    prd.rayDirection = rayDirection;
+    prd.hitValue = material.material.emit.xyz * 3;
 
-        debugPrintfEXT("message from close hitobject_ray %f %f %f \n", gl_ObjectRayOriginEXT.x, gl_ObjectRayOriginEXT.y, gl_ObjectRayOriginEXT.z);
-    }
-    prd.hitValue = vec3(1, 0, 1);
+    prd.weight = BRDF * cos_theta / (1 / M_PI);
+    return;
+
+    // prd.hitValue = vec3(material.material.color);
 }

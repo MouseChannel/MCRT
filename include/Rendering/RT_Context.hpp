@@ -24,15 +24,6 @@ class Image;
 // class RenderTarget;
 class RT_Context : public Context_base {
 public:
-    enum RT_Binding {
-        e_tlas = 0,
-        e_out_image = 1
-
-    };
-    enum Global_Binding {
-        e_vp_matrix,
-
-    };
     RT_Context(std::shared_ptr<Device> device);
     ~RT_Context();
     std::shared_ptr<RenderPass>& Get_render_pass() override
@@ -62,15 +53,22 @@ public:
     }
     void record_command(std::shared_ptr<CommandBuffer>) override;
     std::vector<std::shared_ptr<RenderTarget>>& Get_render_targets() override;
-    void add_objs(std::vector<std::shared_ptr<Model>> objs);
+    void build_accelerate_structure();
+    void reset()
+    {
+        frame_id = 0;
+    }
 
 private:
     void create_shader_bind_table();
     void create_uniform_buffer();
     void update_ubo(std::shared_ptr<CommandBuffer> cmd);
 
-    std::shared_ptr<Uniform_Stuff<Camera_data>> vp_matrix;
+    std::shared_ptr<Uniform_Stuff<Camera_data>> camera_data;
+    std::shared_ptr<Uniform_Stuff<Address>> obj_data_address;
     std::shared_ptr<RenderPass> m_renderpass;
+    // std::vector<std::shared_ptr<Model>> m_objs;
+    std::vector<Address> m_objs_address;
 
     std::shared_ptr<Framebuffer> m_framebuffer;
     std::shared_ptr<CommandBuffer> m_command_buffer;
@@ -89,7 +87,8 @@ private:
     std::shared_ptr<Buffer> m_SBT_buffer_rmiss;
 
     std::shared_ptr<Buffer> m_SBT_buffer_rhit;
-    int temp_id = 0;
+
+    int frame_id = 0;
     // std::shared_ptr<Buffer> m_V_P_UBO;
 };
 }

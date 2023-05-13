@@ -8,6 +8,7 @@
 #include "Helper/Uniform_Manager.hpp"
 #include "Helper/math.hpp"
 #include "Rendering/Context_base.hpp"
+#include "Rendering/Model.hpp"
 #include "Rendering/Render_Target/Color_Render_Target.hpp"
 #include "Rendering/Render_Target/Depth_Render_Target.hpp"
 #include "Rendering/Render_Target/RT_Color_RenderTarget.hpp"
@@ -42,9 +43,11 @@ std::shared_ptr<Image> RT_Context::get_out_image()
 {
     return render_targets[0]->Get_Image();
 }
-void RT_Context::add_objs(std::vector<std::shared_ptr<Model>> objs)
+void RT_Context::build_accelerate_structure()
 {
-    for (auto obj : objs) {
+
+    Model::update_accelerate_structure_data();
+    for (auto obj : Model::models) {
         AS_Builder::Get_Singleton()->add_blas_obj(obj);
     }
 
@@ -141,22 +144,25 @@ void RT_Context::prepare_descriptorset()
 {
     Descriptor_Manager::Get_Singleton()
         ->Make_DescriptorSet(AS_Builder::Get_Singleton()->get_tlas(),
-                             RT_Binding::e_tlas,
+                             Ray_Tracing_Binding::e_tlas,
                              vk::DescriptorType::eAccelerationStructureKHR,
                              vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR,
                              Descriptor_Manager::Ray_Tracing);
 
     Descriptor_Manager::Get_Singleton()
         ->Make_DescriptorSet(render_targets[0]->Get_Image(),
-                             RT_Binding::e_out_image,
+                             Ray_Tracing_Binding::e_out_image,
                              vk::DescriptorType::eStorageImage,
                              vk::ShaderStageFlagBits::eRaygenKHR,
                              Descriptor_Manager::Ray_Tracing);
     Descriptor_Manager::Get_Singleton()
-        ->Make_DescriptorSet(vp_matrix->buffer,
-                             Global_Binding::e_vp_matrix,
-                             vp_matrix->type,
-                             vp_matrix->shader_stage,
+        ->Make_DescriptorSet(camera_data,
+                             Global_Binding::e_camera,
+                             Descriptor_Manager::Global);
+    // obj_data_address->
+    Descriptor_Manager::Get_Singleton()
+        ->Make_DescriptorSet(obj_data_address,
+                             Global_Binding::e_obj_addresses,
                              Descriptor_Manager::Global);
 
     Descriptor_Manager::Get_Singleton()->CreateDescriptorPool(Descriptor_Manager::Ray_Tracing);
@@ -177,7 +183,7 @@ void RT_Context::create_uniform_buffer()
     //     Context::Get_Singleton()->get_camera()->Get_p_matrix()
     // };
 
-    Camera_data camera_data {
+    Camera_data _camera_data {
         // .camera_pos { glm::vec3 { 1, 2, 3 } },
         // .s = 1,
         // .rr = 4,
@@ -196,15 +202,35 @@ void RT_Context::create_uniform_buffer()
             0,
         },
     };
-    vp_matrix = UniformManager::make_uniform(camera_data,
-                                             vk::ShaderStageFlagBits::eRaygenKHR,
-                                             vk::DescriptorType ::eUniformBuffer);
+
+    camera_data = UniformManager::make_uniform({ _camera_data },
+                                               vk::ShaderStageFlagBits::eRaygenKHR,
+                                               vk::DescriptorType ::eUniformBuffer);
+
+    m_objs_address.resize(Model::models.size());
+    for (auto& obj : Model::models) {
+
+        m_objs_address[obj->get_instance_index()] = Address {
+
+            .vertexAddress = obj->get_vertex_buffer()
+                                 ->get_address(),
+            .indexAddress = obj->get_indices_buffer()
+                                ->get_address(),
+            .materialAddress = obj->get_material_buffer()
+                                   ->get_address()
+        };
+    }
+
+    obj_data_address = UniformManager::make_uniform(m_objs_address,
+                                                    vk::ShaderStageFlagBits::eClosestHitKHR,
+                                                    vk::DescriptorType::eStorageBuffer);
 }
 
 void RT_Context::prepare()
 {
-    auto obj = Context::Get_Singleton()->get_obj();
-    add_objs({ obj });
+
+    build_accelerate_structure();
+
     // Context_base::prepare();
     fill_render_targets();
     create_uniform_buffer();
@@ -224,7 +250,7 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
                               .setSrcAccessMask(vk::AccessFlagBits2::eShaderRead)
                               .setDstStageMask(vk::PipelineStageFlagBits2::eTransfer)
                               .setDstAccessMask(vk::AccessFlagBits2::eTransferWrite)
-                              .setBuffer(vp_matrix->buffer->get_handle())
+                              .setBuffer(camera_data->buffer->get_handle())
                               .setSize(VK_WHOLE_SIZE);
 
     cmd->get_handle()
@@ -232,14 +258,14 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
                               .setBufferMemoryBarriers(before_barrier));
 
     glm::mat4 temp {
-        glm::vec4 { temp_id, 1, 1, 1 },
+        glm::vec4 { frame_id, 1, 1, 1 },
         glm::vec4 { 1, 1, 1, 1 },
         glm::vec4 { 1, 1, 1, 1 },
         glm::vec4 { 1, 1, 1, 1 }
     };
 
     // std::cout << temp_id << std::endl;
-    temp_id++;
+    frame_id++;
     auto pos =
         Context::Get_Singleton()
             ->get_camera()
@@ -255,7 +281,7 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
     std::cout << "camera_front = " << sizeof(front) << ' ' << front.x << ' ' << front.y << ' ' << front.z << std::endl;
     cmd->get_handle()
         .updateBuffer<Camera_data>(
-            vp_matrix->buffer->get_handle(),
+            camera_data->buffer->get_handle(),
             0,
             Camera_data {
                 //    .camera_pos { pos },
@@ -281,7 +307,7 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
     // Making sure the updated UBO will be visible.
 
     auto after_barrier = vk::BufferMemoryBarrier2 {}
-                             .setBuffer(vp_matrix->buffer->get_handle())
+                             .setBuffer(camera_data->buffer->get_handle())
                              .setSrcStageMask(vk::PipelineStageFlagBits2::eTransfer)
                              .setSrcAccessMask(vk::AccessFlagBits2::eTransferWrite)
                              .setDstStageMask(vk::PipelineStageFlagBits2::eRayTracingShaderKHR | vk::PipelineStageFlagBits2::eVertexShader)
@@ -319,9 +345,11 @@ void RT_Context::record_command(std::shared_ptr<CommandBuffer> cmd)
                                                      vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR,
                                                      0,
                                                      PushContant_Ray {
+                                                         .frame = frame_id,
                                                          .clearColor { 1 },
-                                                         .lightPosition { 10.f, 15.f, 8.f },
+                                                         .lightPosition { 10.f, 15.f, 8.f, 0 },
                                                          .lightIntensity = 100 });
+
     cmd->get_handle().traceRaysKHR(m_rgenRegion,
                                    m_missRegion,
                                    m_hitRegion,

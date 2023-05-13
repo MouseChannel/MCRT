@@ -25,20 +25,21 @@ using uint = unsigned int;
 #define END_ENUM()
 #endif
 
-BEGIN_ENUM(ray_tracing_binding)
-tlas = 0,
-    out_image = 1 END_ENUM();
+BEGIN_ENUM(Ray_Tracing_Binding)
+e_tlas = 0,
+    e_out_image = 1 END_ENUM();
 
-BEGIN_ENUM(global_binding)
-eGlobals = 0,
-    eObjDescs = 1,
+BEGIN_ENUM(Global_Binding)
+e_camera = 0,
+    e_obj_addresses = 1,
     eTextures = 2 END_ENUM();
 
 struct hitPayload {
     vec3 hitValue;
+
+    vec3 rayOrigin;
     uint seed;
     uint depth;
-    vec3 rayOrigin;
     vec3 rayDirection;
     vec3 weight;
 };
@@ -52,18 +53,20 @@ struct Camera_data {
 };
 
 struct PushContant_Ray {
+    int frame;
     vec4 clearColor;
-    vec3 lightPosition;
+    vec4 lightPosition;
     float lightIntensity;
     int lightType;
 };
 
 struct Address {
     // int txtOffset; // Texture index offset in the array of textures
+    uint64_t test_address;
     uint64_t vertexAddress; // Address of the Vertex buffer
     uint64_t indexAddress; // Address of the index buffer
     uint64_t materialAddress; // Address of the material buffer
-    uint64_t materialIndexAddress; // Address of the triangle material index buffer
+    uint64_t materialIndexAddress; // Address of the triangle material
 };
 struct Vertex // See ObjLoader, copy of VertexObj, could be compressed for device
 {
@@ -71,5 +74,10 @@ struct Vertex // See ObjLoader, copy of VertexObj, could be compressed for devic
     vec3 nrm;
     vec3 color;
     vec2 texCoord;
+};
+struct Material {
+
+    vec4 color;
+    vec4 emit;
 };
 #endif

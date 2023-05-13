@@ -8,21 +8,10 @@
 namespace MCRT {
 AccelerationStructure_Bottom::AccelerationStructure_Bottom(std::shared_ptr<Model> obj)
     : AccelerationStructure(vk::AccelerationStructureTypeKHR::eBottomLevel)
+    , obj_index(obj->get_instance_index())
+    , model_matrix(obj->get_transform())
+
 {
-    obj_index = 0;
-    model_matrix.setMatrix(std::array<std::array<float, 4>, 3> {
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0 });
     object_to_vkGeometryKHR(obj);
     fill_build_info();
 }
@@ -54,7 +43,7 @@ void AccelerationStructure_Bottom::object_to_vkGeometryKHR(std::shared_ptr<Model
                                            .setDeviceAddress(indices_buffer->get_address()))
                          .setIndexType(vk::IndexType::eUint32)
                          .setVertexData(vertexs_buffer->get_address())
-                         .setVertexStride(sizeof(VertexObj))
+                         .setVertexStride(sizeof(Vertex))
                          .setVertexFormat(vk::Format::eR32G32B32Sfloat)
                          .setMaxVertex(obj->get_vertex_count());
     // vk::AccelerationStructureGeometryDataKHR geom_data;

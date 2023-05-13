@@ -141,7 +141,7 @@ void RenderContext::prepare_pipeline()
     m_graphic_pipeline->Make_Blend();
     m_graphic_pipeline->Make_DepthTest();
 
-    m_graphic_pipeline->Build_Pipeline(Context::Get_Singleton()->get_context(Context::Graphic)->Get_render_pass());
+    m_graphic_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
 }
 void RenderContext::prepare()
 {

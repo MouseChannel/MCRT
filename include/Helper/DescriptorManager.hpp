@@ -1,5 +1,6 @@
 #pragma once
 #include "Helper/Instance_base.hpp"
+#include "Helper/Uniform_Manager.hpp"
 #include "Wrapper/Buffer.hpp"
 #include "Wrapper/Component.hpp"
 #include "Wrapper/Ray_Tracing/AS_top.hpp"
@@ -68,6 +69,14 @@ public:
         // descriptor_set_binding[]
         // add_descriptor_set_binding(which_set, data, binding);
         descriptor_set_binding[which_set].push_back({ data, binding, e_buffer });
+    }
+
+    template <typename T>
+    void Make_DescriptorSet(std::shared_ptr<Uniform_Stuff<T>> uniform_data,
+                            uint32_t binding_index,
+                            Which_Set which_set)
+    {
+        Make_DescriptorSet(uniform_data->buffer, binding_index, uniform_data->type, uniform_data->shader_stage, which_set);
     }
     template <typename T>
     void add_descriptor_set_binding(Which_Set which_set, std::shared_ptr<T> data, vk::DescriptorSetLayoutBinding binding)

@@ -8,10 +8,7 @@ struct geom_ready_data_top {
     vk::AccelerationStructureGeometryInstancesDataKHR instance_geom;
     vk::AccelerationStructureGeometryDataKHR top_as_geom_data;
     vk::AccelerationStructureGeometryKHR top_as_geom;
-    void fill()
-    {
-         
-    }
+ 
  };
 
 class AccelerationStructure_Top : public AccelerationStructure {

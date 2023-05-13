@@ -58,11 +58,12 @@ public:
 
 private:
     float m_speed = 1.0f;
-    glm::vec3 m_position { 0, 0, 10 };
+    glm::vec3 m_position { 0, 2, 10 };
     glm::vec3 m_front { 0, 0, -1 };
     glm::vec3 m_up { 0, 1, 0 };
     glm::mat4 m_vMatrix;
     glm::mat4 m_pMatrx;
+    // int cur_
 
     float m_pitch { 0 };
     float m_yaw { -90 };

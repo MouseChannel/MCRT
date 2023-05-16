@@ -41,28 +41,24 @@ public:
     {
         return fences[current_frame];
     }
-    std::vector<std::shared_ptr<RenderTarget>>& Get_render_targets() override
+    std::vector<std::shared_ptr<RenderTarget>>& Get_render_targets()
     {
         return all_rendertargets[0];
     }
     std::shared_ptr<Pipeline_base> get_pipeline() override;
-    std::shared_ptr<RenderPass>& Get_render_pass() override
+    std::shared_ptr<RenderPass>& Get_render_pass()  
     {
         return m_renderpass;
-    }
-    std::shared_ptr<Image> get_out_image() override
-    {
-        return nullptr;
     }
     std::shared_ptr<CommandBuffer> get_commandbuffer() override
     {
         return command_buffer;
     }
-    std::shared_ptr<Framebuffer>& get_framebuffer() override;
-    // void Prepare();
+    std::shared_ptr<Framebuffer>& get_framebuffer()  ;
+    void Prepare_RenderPass();
     void prepare() override;
-    void fill_render_targets() override;
-    void Prepare_Framebuffer() override;
+    void fill_render_targets();
+    void Prepare_Framebuffer();
     void prepare_descriptorset() override;
     void prepare_pipeline() override;
     std::shared_ptr<CommandBuffer> BeginFrame() override;
@@ -77,7 +73,6 @@ private:
     std::shared_ptr<SwapChain> m_swapchain;
     std::vector<std::vector<std::shared_ptr<RenderTarget>>> all_rendertargets;
     std::vector<std::unique_ptr<RenderFrame>> render_frames;
-    // void Prepare_RenderPass(std::vector<std::shared_ptr<RenderTarget>>& render_targets);
     std::shared_ptr<RenderPass> m_renderpass;
     std::shared_ptr<Graphic_Pipeline> m_graphic_pipeline;
     std::shared_ptr<ShaderModule> vert_shader, frag_shader;

@@ -9,4 +9,5 @@ void main()
     // debugPrintfEXT("message:%d  %f %f %f \n", gl_VertexIndex, inposition.x, inposition.y, inposition.z);
     gl_Position = vec4(inposition, 1.);
     outUV = inUV;
+
 }

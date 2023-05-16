@@ -4,6 +4,7 @@
 
 // Generate a random unsigned int from two unsigned int values, using 16 pairs
 // of rounds of the Tiny Encryption Algorithm. See Zafar, Olano, and Curtis,
+/*
 // "GPU Random Numbers via the Tiny Encryption Algorithm"
 uint tea(uint val0, uint val1)
 {
@@ -19,7 +20,6 @@ uint tea(uint val0, uint val1)
 
     return v0;
 }
-
 // Generate a random unsigned int in [0, 2^24) given the previous RNG state
 // using the Numerical Recipes linear congruential generator
 uint lcg(inout uint prev)
@@ -35,33 +35,34 @@ float rnd(inout uint prev)
 {
     return (float(lcg(prev)) / float(0x01000000));
 }
+*/
+
+vec3 pcg3d_random(uvec3 seed)
+{
+    seed = seed * 1664525u + 1013904223u;
+    seed.x += seed.y * seed.z;
+    seed.y += seed.z * seed.x;
+    seed.z += seed.x * seed.y;
+    seed ^= seed >> 16u;
+    seed.x += seed.y * seed.z;
+    seed.y += seed.z * seed.x;
+    seed.z += seed.x * seed.y;
+    // Generate a random float in [0, 1)
+    return vec3(seed) / float(0xffffffffu);
+    
+}
 
 //-------------------------------------------------------------------------------------------------
 // Sampling
 //-------------------------------------------------------------------------------------------------
-
-// Randomly sampling around +Z
-vec3 samplingHemisphere(inout uint seed, in vec3 x, in vec3 y, in vec3 z)
-{
-#define M_PI 3.141592
-
-    float r1 = rnd(seed);
-    float r2 = rnd(seed);
-    float sq = sqrt(1.0 - r2);
-
-    vec3 direction = vec3(cos(2 * M_PI * r1) * sq, sin(2 * M_PI * r1) * sq, sqrt(r2));
-    direction = direction.x * x + direction.y * y + direction.z * z;
-
-    return direction;
-}
-
-// Return the tangent and binormal from the incoming normal
-void createCoordinateSystem(in vec3 N, out vec3 Nt, out vec3 Nb)
+vec3 hemisphereSample_cos(in uvec3 seed)
 {
 
-    if (abs(N.x) > abs(N.y))
-        Nt = vec3(N.z, 0, -N.x) / sqrt(N.x * N.x + N.z * N.z);
-    else
-        Nt = vec3(0, -N.z, N.y) / sqrt(N.y * N.y + N.z * N.z);
-    Nb = cross(N, Nt);
+    vec3 pcg3d = pcg3d_random(seed);
+    float v = pcg3d.x;
+    float u = pcg3d.y;
+    float phi = v * 2.0 * PI;
+    float cosTheta = sqrt(1.0 - u);
+    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+    return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
 }

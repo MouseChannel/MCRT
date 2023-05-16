@@ -9,9 +9,9 @@ void App::init()
 {
     window.reset(new Window(800, 800));
     Context::Get_Singleton()->init(window);
-    // imgui.reset(new ImGuiContext);
-    //
-    // imgui->Init(window);
+    imgui.reset(new ImGuiContext);
+    
+    imgui->Init(window);
     struct MyStruct1 {
         int s;
     } ss;
@@ -23,7 +23,7 @@ void App::run()
     while (!window->Should_Close()) {
         window->PollEvents();
         auto cmd = context->Begin_Frame();
-        // imgui->Update(cmd);
+        imgui->Update(cmd);
         context->EndFrame();
         // context
 

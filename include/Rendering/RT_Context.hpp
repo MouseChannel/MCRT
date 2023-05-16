@@ -26,10 +26,10 @@ class RT_Context : public Context_base {
 public:
     RT_Context(std::shared_ptr<Device> device);
     ~RT_Context();
-    std::shared_ptr<RenderPass>& Get_render_pass() override
-    {
-        return m_renderpass;
-    }
+    // std::shared_ptr<RenderPass>& Get_render_pass() override
+    // {
+    //     return m_renderpass;
+    // }
     std::shared_ptr<Pipeline_base> get_pipeline() override;
 
     std::shared_ptr<CommandBuffer> get_commandbuffer() override
@@ -38,21 +38,18 @@ public:
             m_command_buffer.reset(new CommandBuffer);
         return m_command_buffer;
     }
-    std::shared_ptr<Image> get_out_image() override;
+    std::shared_ptr<Image> get_out_image();
     void prepare() override;
-    void fill_render_targets() override;
-    void Prepare_Framebuffer() override;
     void prepare_descriptorset() override;
     void prepare_pipeline() override;
     std::shared_ptr<CommandBuffer> BeginFrame() override;
     void Submit() override;
     void EndFrame() override;
-    [[nodiscard("missing framebuffer")]] std::shared_ptr<Framebuffer>& get_framebuffer() override
-    {
-        return m_framebuffer;
-    }
+    // [[nodiscard("missing framebuffer")]] std::shared_ptr<Framebuffer>& get_framebuffer() override
+    // {
+    //     return m_framebuffer;
+    // }
     void record_command(std::shared_ptr<CommandBuffer>) override;
-    std::vector<std::shared_ptr<RenderTarget>>& Get_render_targets() override;
     void build_accelerate_structure();
     void reset()
     {
@@ -66,13 +63,13 @@ private:
 
     std::shared_ptr<Uniform_Stuff<Camera_data>> camera_data;
     std::shared_ptr<Uniform_Stuff<Address>> obj_data_address;
-    std::shared_ptr<RenderPass> m_renderpass;
-    // std::vector<std::shared_ptr<Model>> m_objs;
+    // std::shared_ptr<RenderPass> m_renderpass;
     std::vector<Address> m_objs_address;
 
-    std::shared_ptr<Framebuffer> m_framebuffer;
+    // std::shared_ptr<Framebuffer> m_framebuffer;
     std::shared_ptr<CommandBuffer> m_command_buffer;
-    std::vector<std::shared_ptr<RenderTarget>> render_targets;
+    // std::vector<std::shared_ptr<RenderTarget>> render_targets;
+    std::shared_ptr<Image> m_out_image;
     std::shared_ptr<Device> m_device;
     std::shared_ptr<RT_Pipeline> m_rt_pipeline;
     // shader bind table

@@ -3,12 +3,14 @@
 #extension GL_GOOGLE_include_directive : enable
 #extension GL_EXT_debug_printf : enable
 #extension GL_EXT_scalar_block_layout : enable
+#extension GL_ARB_shader_clock : enable
+
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 #extension GL_EXT_buffer_reference2 : require
 
-#include "Data_struct.h"
-#include "common.glsl"
-#include "sampling.glsl"
+#include "../Data_struct.h"
+#include "../common.glsl"
+#include "../sampling.glsl"
 
 hitAttributeEXT vec2 attribs;
 
@@ -21,12 +23,6 @@ layout(set = 1, binding = e_obj_addresses, scalar) buffer _Address
     Address address[];
 }
 addresses;
-
-// layout(set = 0, binding = 2) readonly buffer _InstanceInfo
-// {
-//     // PrimMeshInfo primInfo[];
-//     int temp;
-// };
 
 layout(buffer_reference, scalar) readonly buffer _Vertices
 {
@@ -69,19 +65,32 @@ void main()
                                                        attribs,
                                                        gl_WorldToObjectEXT);
 
-    // Pick a random direction from here and keep going.
-    vec3 tangent, bitangent;
-    createCoordinateSystem(cur_world_normal, tangent, bitangent);
-
-    vec3 rayDirection = samplingHemisphere(prd.seed, tangent, bitangent, cur_world_normal);
-    vec3 BRDF = material.material.color.xyz / M_PI;
+    mat3 normal_coordinate = getNormalSpace(cur_world_normal);
+    uvec3 seed = uvec3(gl_LaunchIDEXT.xy, uint(clockARB()));
+    vec3 local_dir = hemisphereSample_cos(seed);
+    vec3 rayDirection = normal_coordinate * local_dir;
+    // Lambertian reflection
+    vec3 BRDF = material.material.color.xyz / PI;
     float cos_theta = dot(rayDirection, cur_world_normal);
+    float pdf = 1 / (2. * PI);
+    vec3 radiance = BRDF * cos_theta / pdf;
     prd.rayOrigin = cur_world_pos;
     prd.rayDirection = rayDirection;
-    prd.hitValue = material.material.emit.xyz * 3;
 
-    prd.weight = BRDF * cos_theta / (1 / M_PI);
-    return;
+    if (material.material.emit.x > 1e-6) {
 
-    // prd.hitValue = vec3(material.material.color);
+        prd.hitValue = material.material.emit.xyz * prd.weight;
+
+        prd.depth = 100;
+    }
+
+    prd.weight *= BRDF * cos_theta / pdf;
+    /*
+    simple path traing
+    shade(p)
+        if ray hit the light
+            return light_emit * BRDF * cosine / pdf
+        else if ray hit an object at q
+            return shade(q) * BRDF * cosine / pdf
+    */
 }

@@ -2,16 +2,22 @@
 
 #include "Data_struct.h"
 #endif
+#define PI 3.1415926
 
-// vec3 get_camera_ray(float fov, float aspect, vec2 point)
-// {
-//     float focalLength = 1.0 / tan(0.5 * fov * 3.14159265359 / 180.0);
-//     // compute position in the camera's image plane in range [-1.0, 1.0]
-//     vec2 pos = 2.0 * (point)-1;
-//     return normalize(vec3(pos.x * aspect, pos.y, -focalLength));
-
-//     // return vec3(1);
-// }
+float get_radian(float angel)
+{
+    return angel / 180. * PI;
+}
+vec3 get_camera_dir(vec2 launchID, vec2 launchSize, Camera_data camera_data)
+{
+    vec3 ray_origin = camera_data.camera_pos.xyz;
+    vec2 pixelCenter = vec2(launchID.xy) + vec2(0.5);
+    vec2 inUV = pixelCenter / vec2(launchSize.xy);
+    vec2 d = inUV * 2.0 - 1.0;
+    vec3 ray_dir = camera_data.camera_front.xyz * (1. / tan(get_radian(camera_data.fov_angel / 2.))) + vec3(d, 0);
+    ray_dir = (camera_data.viewInverse * vec4(normalize(ray_dir.xyz), 0)).xyz;
+    return ray_dir;
+}
 vec3 get_barycentrics(vec2 attribs)
 {
     return vec3(1.0 - attribs.x - attribs.y, attribs.x, attribs.y);
@@ -35,4 +41,14 @@ vec3 get_cur_world_normal(vec3 a_normal, vec3 b_normal, vec3 c_normal, vec2 attr
     vec3 cur_nrm = get_interpolation(a_normal, b_normal, c_normal, attribs);
     return normalize(vec3(cur_nrm * world_to_object));
 }
- 
+mat3 getNormalSpace(in vec3 normal)
+{
+    vec3 someVec = vec3(1.0, 0.0, 0.0);
+    float dd = dot(someVec, normal);
+    vec3 tangent = vec3(0.0, 1.0, 0.0);
+    if (1.0 - abs(dd) > 1e-6) {
+        tangent = normalize(cross(someVec, normal));
+    }
+    vec3 bitangent = cross(normal, tangent);
+    return mat3(tangent, bitangent, normal);
+}

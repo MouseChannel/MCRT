@@ -19,19 +19,9 @@ void Camera::init()
         camera->onMouseMove(xpos, ypos);
     });
 
-    // lookAt({ 0, 0, 10 },
-    //        { 0, 0, -1 },
-    //        { 0, 1, 0 });
-    // update();
+    setPerpective(60, 1, 0.1f, 100000);
 
-    setPerpective(45, 1, 0.1f, 100000);
-
-    // m_position = glm::vec3(0.0f, -1.0f, -7.0f);
-    // m_front = glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f));
-    // m_up = glm::vec3(1.0f, 0.0f, 0.0f);
-    // m_pMatrx = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 1000.0f);
-    // m_vMatrix = glm::mat4(1.0f);
-    // update();
+    m_vMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
 }
 
 void Camera::lookAt(glm::vec3 _pos, glm::vec3 _front, glm::vec3 _up)

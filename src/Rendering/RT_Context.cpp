@@ -31,17 +31,13 @@ RT_Context::RT_Context(std::shared_ptr<Device> device)
 RT_Context::~RT_Context()
 {
 }
-std::vector<std::shared_ptr<RenderTarget>>& RT_Context::Get_render_targets()
-{
-    return render_targets;
-}
 std::shared_ptr<Pipeline_base> RT_Context::get_pipeline()
 {
     return m_rt_pipeline;
 }
 std::shared_ptr<Image> RT_Context::get_out_image()
 {
-    return render_targets[0]->Get_Image();
+    return m_out_image;
 }
 void RT_Context::build_accelerate_structure()
 {
@@ -127,19 +123,7 @@ void RT_Context::create_shader_bind_table()
     m_SBT_buffer_rmiss->Update(rmiss_handles.data(), handleSize);
     m_SBT_buffer_rhit->Update(rhit_handles.data(), handleSize);
 }
-void RT_Context::fill_render_targets()
-{
-    render_targets.emplace_back(RT_Color_RenderTarget::Create());
-    render_targets.emplace_back(Depth_RenderTarget::Create());
-}
-void RT_Context::Prepare_Framebuffer()
-{
-    std::vector<std::shared_ptr<Image>> images;
-    for (auto i : render_targets) {
-        images.push_back(i->Get_Image());
-    }
-    m_framebuffer.reset(new Framebuffer(m_renderpass, images));
-}
+
 void RT_Context::prepare_descriptorset()
 {
     Descriptor_Manager::Get_Singleton()
@@ -150,7 +134,7 @@ void RT_Context::prepare_descriptorset()
                              Descriptor_Manager::Ray_Tracing);
 
     Descriptor_Manager::Get_Singleton()
-        ->Make_DescriptorSet(render_targets[0]->Get_Image(),
+        ->Make_DescriptorSet(m_out_image,
                              Ray_Tracing_Binding::e_out_image,
                              vk::DescriptorType::eStorageImage,
                              vk::ShaderStageFlagBits::eRaygenKHR,
@@ -187,8 +171,11 @@ void RT_Context::create_uniform_buffer()
         // .camera_pos { glm::vec3 { 1, 2, 3 } },
         // .s = 1,
         // .rr = 4,
-        .viewInverse { glm::mat4 { 9999999 } },
-        .projInverse { glm::mat4 { 1 } },
+        .viewInverse {
+            glm::inverse(Context::Get_Singleton()
+                             ->get_camera()
+                             ->Get_v_matrix()) },
+
         .camera_pos {
             Context::Get_Singleton()
                 ->get_camera()
@@ -201,6 +188,9 @@ void RT_Context::create_uniform_buffer()
                 ->get_front(),
             0,
         },
+        .fov_angel = Context::Get_Singleton()
+                         ->get_camera()
+                         ->get_fov_angel(),
     };
 
     camera_data = UniformManager::make_uniform({ _camera_data },
@@ -230,9 +220,18 @@ void RT_Context::prepare()
 {
 
     build_accelerate_structure();
+    m_out_image.reset(new Image(800,
+                                749,
+                                vk::Format::eR32G32B32A32Sfloat,
+                                vk::ImageType::e2D,
+                                vk::ImageTiling::eOptimal,
+                                vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled,
+                                vk::ImageAspectFlagBits::eColor,
+                                vk::SampleCountFlagBits::e1));
 
+    m_out_image->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
     // Context_base::prepare();
-    fill_render_targets();
+    // fill_render_targets();
     create_uniform_buffer();
     prepare_descriptorset();
     prepare_pipeline();
@@ -289,10 +288,7 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
                     glm::inverse(Context::Get_Singleton()
                                      ->get_camera()
                                      ->Get_v_matrix()) },
-                .projInverse {
-                    glm::inverse(Context::Get_Singleton()
-                                     ->get_camera()
-                                     ->Get_p_matrix()) },
+
                 .camera_pos {
                     Context::Get_Singleton()
                         ->get_camera()
@@ -303,6 +299,9 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
                         ->get_camera()
                         ->get_front(),
                     0 },
+                .fov_angel = Context::Get_Singleton()
+                                 ->get_camera()
+                                 ->get_fov_angel(),
             });
     // Making sure the updated UBO will be visible.
 

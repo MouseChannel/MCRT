@@ -41,8 +41,13 @@ void Obj_loader::load_model(std::string_view obj_path)
                 cur.emission[0],
                 cur.emission[1],
                 cur.emission[2],
-                0 }
+                0 },
+            .reflect = false
+
         };
+        if (shape.name == "behind_behind") {
+            cur_material.reflect = true;
+        }
 
         Model::models.emplace_back(new Model(shape.name, vertexs, indexs, cur_material));
     }

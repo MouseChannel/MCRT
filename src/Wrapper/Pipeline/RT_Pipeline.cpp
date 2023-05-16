@@ -17,9 +17,9 @@ RT_Pipeline::RT_Pipeline()
         eShaderGroupCount
     };
     shader_modules.resize(eShaderGroupCount);
-    shader_modules[eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/test.rgen.spv"));
-    shader_modules[eMiss].reset(new ShaderModule("D:/MoChengRT/shader/test.rmiss.spv"));
-    shader_modules[eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/test.rchit.spv"));
+    shader_modules[eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rgen.spv"));
+    shader_modules[eMiss].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rmiss.spv"));
+    shader_modules[eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rchit.spv"));
 
     std::vector<vk::PipelineShaderStageCreateInfo>
         stages(eShaderGroupCount);
@@ -63,8 +63,6 @@ RT_Pipeline::RT_Pipeline()
         Descriptor_Manager::Get_Singleton()
             ->Get_DescriptorSet_layout(Descriptor_Manager::Global),
 
-        // Descriptor_Manager::Get_Singleton()
-        //     ->Get_DescriptorSet_layout(Descriptor_Manager::e_tlas)
     };
     layout_create_info.setSetLayouts(descriptor_layouts)
         .setPushConstantRanges(push_contant);

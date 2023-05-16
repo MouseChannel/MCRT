@@ -25,7 +25,7 @@ foreach(var ${ALL_RT_SHADER})
     string(CONCAT name ${file_name} .spv)
 
     # message(${name})
-    execute_process(COMMAND ${GLSLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/spv/${name})
+    execute_process(COMMAND ${GLSLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/${name})
 
     # execute_process(COMMAND ${GLSLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/${name})
 endforeach()

@@ -4,6 +4,7 @@
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Model_Loader/Obj_Loader.hpp"
 #include "Helper/Ray_Tracing/RT_Manager.hpp"
+#include "Rendering/Compute_context.hpp"
 #include "Rendering/GLFW_Window.hpp"
 #include "Rendering/Model.hpp"
 #include "Rendering/RT_Context.hpp"
@@ -30,7 +31,7 @@ void Context::init(std::shared_ptr<Window> window)
     m_surface.reset(new Surface);
     m_device.reset(new Device);
     m_command_pool.reset(new CommandPool);
-    m_command_buffer.reset(new CommandBuffer);
+    // m_command_buffer.reset(new CommandBuffer);
     // m_swapchain.reset(new SwapChain);
     // m_renderpass.reset(new RenderPass);
     m_debugger.reset(new Debugger);
@@ -46,24 +47,21 @@ void Context::init(std::shared_ptr<Window> window)
 
     contexts[1]->prepare();
     contexts[0]->prepare();
-}
-std::shared_ptr<Image> Context::get_out_image()
-{
-    return contexts[1]->get_out_image();
+
+    contexts.push_back(std::shared_ptr<Compute_Context> { new Compute_Context });
+    contexts[2]->prepare();
 }
 std::shared_ptr<RenderPass> Context::get_renderpass()
 {
-    return contexts[Graphic]->Get_render_pass();
+    return get_graphic_context()->Get_render_pass();
 }
 
-std::shared_ptr<CommandBuffer>
-Context::BeginRTFrame()
+std::shared_ptr<CommandBuffer> Context::BeginRTFrame()
 {
     // get_device()->get_handle().waitIdle();
-    auto& rt_context = contexts[1];
+    auto& rt_context = contexts[Ray_tracing];
     auto cmd = rt_context->BeginFrame();
     {
-
         rt_context->record_command(cmd);
     }
     return cmd;
@@ -71,14 +69,13 @@ Context::BeginRTFrame()
 
 void Context::EndRTFrame()
 {
-    auto& rt_context = contexts[1];
+    auto& rt_context = contexts[Ray_tracing];
     rt_context->Submit();
-    // rt_context->EndFrame();
 }
 std::shared_ptr<CommandBuffer> Context::BeginGraphicFrame()
 {
     // get_device()->get_handle().waitIdle();
-    auto& render_context = contexts[0];
+    auto& render_context = contexts[Graphic];
     std::shared_ptr<CommandBuffer> cmd = render_context->BeginFrame();
     {
         render_context->record_command(cmd);
@@ -93,11 +90,27 @@ void Context::EndGraphicFrame()
     m_render_context->Submit();
     m_render_context->EndFrame();
 }
+std::shared_ptr<CommandBuffer> Context::BeginComputeFrame()
+{
+    auto& compute_context = contexts[2];
+    std::shared_ptr<CommandBuffer> cmd = compute_context->BeginFrame();
+    {
+        compute_context->record_command(cmd);
+    }
+    return cmd;
+}
+void Context::EndComputeFrame()
+{
+    auto& compute_context = contexts[2];
+    compute_context->Submit();
+}
 std::shared_ptr<CommandBuffer> Context::Begin_Frame()
 {
     m_camera->move_update();
     BeginRTFrame();
     EndRTFrame();
+    BeginComputeFrame();
+    EndComputeFrame();
     return BeginGraphicFrame();
 }
 void Context::EndFrame()

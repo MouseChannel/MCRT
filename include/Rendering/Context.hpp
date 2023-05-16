@@ -98,9 +98,11 @@ public:
     std::shared_ptr<CommandBuffer> Begin_Frame();
     void EndFrame();
     std::shared_ptr<CommandBuffer> BeginGraphicFrame();
+    std::shared_ptr<CommandBuffer> BeginComputeFrame();
     std::shared_ptr<CommandBuffer> BeginRTFrame();
 
     void EndGraphicFrame();
+    void EndComputeFrame();
     void EndRTFrame();
 
 private:
@@ -109,18 +111,9 @@ private:
     std::shared_ptr<Window> m_window;
     std::shared_ptr<Surface> m_surface;
     std::shared_ptr<SwapChain> m_swapchain;
-    std::shared_ptr<RenderPass> m_renderpass;
     std::shared_ptr<CommandPool> m_command_pool;
-    std::shared_ptr<CommandBuffer> m_command_buffer;
     std::shared_ptr<Debugger> m_debugger;
     std::shared_ptr<Sampler> m_sampler;
-    std::shared_ptr<std::vector<Model>> m_models;
-    std::shared_ptr<Model> m_model;
-    std::vector<std::shared_ptr<AccelerationStructure_Bottom>> m_accelerate_structures;
-    std::shared_ptr<AS_Builder> m_as_builder;
-    std::shared_ptr<RT_Pipeline> m_rt_pipeline;
-    // std::shared_ptr<RenderContext> m_render_context;
-    // std::shared_ptr<RT_Context> m_RT_context;
     std::vector<std::shared_ptr<Context_base>> contexts;
     std::shared_ptr<Camera> m_camera;
 };

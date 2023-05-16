@@ -42,14 +42,15 @@ struct hitPayload {
     uint depth;
     vec3 rayDirection;
     vec3 weight;
+    bool miss;
 };
 struct Camera_data {
-    // int s;
-    // int rr;
+
     mat4 viewInverse; // Camera inverse view matrix
-    mat4 projInverse;
+
     vec4 camera_pos;
     vec4 camera_front;
+    float fov_angel;
 };
 
 struct PushContant_Ray {
@@ -79,5 +80,6 @@ struct Material {
 
     vec4 color;
     vec4 emit;
+    bool reflect;
 };
 #endif

@@ -21,6 +21,7 @@ public:
         Graphic,
         Ray_Tracing,
         Global,
+        Compute,
         e_type_count
     };
     enum Type {
@@ -38,7 +39,7 @@ public:
                                Type type)
             : data(data)
             , binding(binding)
-            , type(type)
+            // , type(type)
         {
         }
         std::any data;

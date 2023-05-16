@@ -1,0 +1,22 @@
+#version 460
+#extension GL_EXT_debug_printf : enable
+
+layout(local_size_x = 4) in;
+layout(binding = 0) uniform Test
+{
+    int a;
+    int b;
+};
+void main()
+{
+    // gl_LocalInvocationID.x
+    debugPrintfEXT("message %d %d %d | %d |%d %d %d |\n",
+                   gl_LocalInvocationID.x,
+
+                   gl_LocalInvocationID.y,
+                   gl_LocalInvocationID.z,
+                   gl_WorkGroupID,
+                   gl_GlobalInvocationID.x,
+                   gl_GlobalInvocationID.y,
+                   gl_GlobalInvocationID.z);
+}

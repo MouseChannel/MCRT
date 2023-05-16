@@ -37,6 +37,10 @@ public:
     {
         return m_front;
     }
+    [[nodiscard]] auto get_fov_angel()
+    {
+        return m_fov_angel;
+    }
     void init();
     void lookAt(glm::vec3 _pos, glm::vec3 _front, glm::vec3 _up);
     // update view_matrix
@@ -66,6 +70,7 @@ private:
     // int cur_
 
     float m_pitch { 0 };
+    float m_fov_angel { 60 };
     float m_yaw { -90 };
     float m_sensitivity { 0.1 };
     float m_xpos { 0 };

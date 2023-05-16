@@ -1,5 +1,6 @@
 #include "Rendering/Render_Context.hpp"
 #include "Helper/DescriptorManager.hpp"
+#include "Rendering/RT_Context.hpp"
 #include "Rendering/Render_Frame.hpp"
 #include "Rendering/Render_Target/Color_Render_Target.hpp"
 #include "Rendering/Render_Target/Depth_Render_Target.hpp"
@@ -14,6 +15,7 @@
 #include "Wrapper/Semaphore.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/SwapChain.hpp"
+
 
 #include "Rendering/Render_Target/MultiSampler_Render_Target.hpp"
 
@@ -77,15 +79,29 @@ void RenderContext::Prepare_Framebuffer()
                                                    all_rendertargets[i]));
     }
 }
+void RenderContext::Prepare_RenderPass()
+{
+    Get_render_pass().reset(new RenderPass);
+    auto render_pass = Get_render_pass();
+    for (int i = 0; i < Get_render_targets().size(); i++) {
+        auto& render_target = Get_render_targets()[i];
+        auto& subpass = render_pass->Get_Subpass();
+        render_target->Make_Subpass(i, subpass);
+        render_pass->Add_Attachment_description(render_target->Get_attachment_description());
+    }
+    render_pass->Build();
+}
 void RenderContext::prepare_descriptorset()
 {
     // todo descriptorset_layout
+    Context::Get_Singleton()->get_rt_context()->get_out_image();
 
-    Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(Context::Get_Singleton()->get_out_image(),
-                                                            0,
-                                                            vk::DescriptorType ::eCombinedImageSampler,
-                                                            vk::ShaderStageFlagBits::eFragment,
-                                                            Descriptor_Manager::Graphic);
+    Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(
+        Context::Get_Singleton()->get_rt_context()->get_out_image(),
+        0,
+        vk::DescriptorType ::eCombinedImageSampler,
+        vk::ShaderStageFlagBits::eFragment,
+        Descriptor_Manager::Graphic);
     Descriptor_Manager::Get_Singleton()
         ->CreateDescriptorPool(Descriptor_Manager::Graphic);
     Descriptor_Manager::Get_Singleton()
@@ -145,7 +161,11 @@ void RenderContext::prepare_pipeline()
 }
 void RenderContext::prepare()
 {
-    Context_base::prepare();
+    fill_render_targets();
+    Prepare_RenderPass();
+    Prepare_Framebuffer();
+    prepare_descriptorset();
+    prepare_pipeline();
     std::vector<uint32_t> indices {
         0,
         1,

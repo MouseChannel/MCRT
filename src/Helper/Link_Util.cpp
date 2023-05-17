@@ -117,3 +117,45 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
         return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
 }
+
+VKAPI_ATTR void VKAPI_CALL vkGetQueueCheckpointData2NV(
+    VkQueue queue,
+    uint32_t* pCheckpointDataCount,
+    VkCheckpointData2NV* pCheckpointData)
+{
+
+    auto func = (PFN_vkGetQueueCheckpointData2NV)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkGetQueueCheckpointData2NV");
+
+    if (func != nullptr) {
+        func(queue, pCheckpointDataCount, pCheckpointData);
+    } else {
+        throw std::runtime_error("fail get point");
+    }
+}
+VKAPI_ATTR void VKAPI_CALL vkGetQueueCheckpointDataNV(
+    VkQueue queue,
+    uint32_t* pCheckpointDataCount,
+    VkCheckpointDataNV* pCheckpointData)
+{
+
+    auto func = (PFN_vkGetQueueCheckpointDataNV)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkGetQueueCheckpointDataNV");
+
+    if (func != nullptr) {
+        func(queue, pCheckpointDataCount, pCheckpointData);
+    } else {
+        throw std::runtime_error("fail get point");
+    }
+}
+
+VKAPI_ATTR void VKAPI_CALL vkCmdSetCheckpointNV(
+    VkCommandBuffer commandBuffer,
+    const void* pCheckpointMarker)
+{
+    auto func = (PFN_vkCmdSetCheckpointNV)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkCmdSetCheckpointNV");
+
+    if (func != nullptr) {
+        func(commandBuffer, pCheckpointMarker);
+    } else {
+        throw std::runtime_error("fail set point");
+    }
+}

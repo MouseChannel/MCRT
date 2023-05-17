@@ -52,9 +52,9 @@ void main()
         prd.depth++;
     }
 
-    if (gl_LaunchIDEXT.x == 100 && gl_LaunchIDEXT.y == 100) {
-        debugPrintfEXT("message %f %f %f \n", prd.hitValue.x, prd.hitValue.y, prd.hitValue.z);
-    }
+    // if (gl_LaunchIDEXT.x == 100 && gl_LaunchIDEXT.y == 100) {
+    //     debugPrintfEXT("message %f %f %f \n", prd.hitValue.x, prd.hitValue.y, prd.hitValue.z);
+    // }
     if (pcRay.frame > 0) {
         float a = 1.0f / float(pcRay.frame + 1);
         vec3 old_color = imageLoad(image, ivec2(gl_LaunchIDEXT.xy)).xyz;

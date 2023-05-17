@@ -48,7 +48,7 @@ Instance::Instance()
     //   disables);
     std::cout << "instance extension" << std::endl;
     for (auto i : vk::enumerateInstanceExtensionProperties()) {
-        std::cout << i.extensionName << std::endl;
+        // std::cout << i.extensionName << std::endl;
     }
 
     auto glfw_extension = get_required_extension();

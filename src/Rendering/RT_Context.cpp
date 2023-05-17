@@ -269,15 +269,15 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
         Context::Get_Singleton()
             ->get_camera()
             ->get_pos();
-    std::cout << pos.x << ' ' << pos.y << ' ' << pos.z << std::endl;
+    // std::cout << pos.x << ' ' << pos.y << ' ' << pos.z << std::endl;
     auto front =
         Context::Get_Singleton()
             ->get_camera()
             ->get_front();
-    std::cout << "camera_data_size" << sizeof(Camera_data) << "\nfloat_size: " << sizeof(float) << "\n vec3_size : "
-              << sizeof(glm::vec3) << "\n vec4_size: " << sizeof(glm::vec4)
-              << "\n mat4_size: " << sizeof(glm::mat4) << std::endl;
-    std::cout << "camera_front = " << sizeof(front) << ' ' << front.x << ' ' << front.y << ' ' << front.z << std::endl;
+    // std::cout << "camera_data_size" << sizeof(Camera_data) << "\nfloat_size: " << sizeof(float) << "\n vec3_size : "
+    //           << sizeof(glm::vec3) << "\n vec4_size: " << sizeof(glm::vec4)
+    //           << "\n mat4_size: " << sizeof(glm::mat4) << std::endl;
+    // std::cout << "camera_front = " << sizeof(front) << ' ' << front.x << ' ' << front.y << ' ' << front.z << std::endl;
     cmd->get_handle()
         .updateBuffer<Camera_data>(
             camera_data->buffer->get_handle(),
@@ -356,6 +356,8 @@ void RT_Context::record_command(std::shared_ptr<CommandBuffer> cmd)
                                    800,
                                    749,
                                    1);
+
+    Context::Get_Singleton()->get_debugger()->set_name(cmd, "ray tracing command_buffer");
 }
 std::shared_ptr<CommandBuffer> RT_Context::BeginFrame()
 {

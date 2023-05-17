@@ -31,9 +31,11 @@ public:
         "VK_KHR_deferred_host_operations",
         "VK_KHR_acceleration_structure",
         "VK_KHR_ray_tracing_pipeline",
+        VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME,
+        VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
         VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
         VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
-        VK_KHR_SHADER_CLOCK_EXTENSION_NAME
+        VK_KHR_SHADER_CLOCK_EXTENSION_NAME,
         // VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME
 
         // "VK_EXT_buffer_device_address",

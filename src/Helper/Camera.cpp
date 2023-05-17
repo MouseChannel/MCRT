@@ -133,7 +133,7 @@ void Camera::onMouseMove(double _xpos, double _ypos)
     if (glfwGetMouseButton(Context::Get_Singleton()->get_window()->get_handle(), GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS)
         return;
     // onMouseMove(m_xpos + 1.0, m_ypos);
-    std::cout << "on mouse 1" << std::endl;
+    // std::cout << "on mouse 1" << std::endl;
 
     // std::cout << _xpos << ' ' << _ypos << std::endl;
     if (m_firstMove) {
@@ -146,7 +146,7 @@ void Camera::onMouseMove(double _xpos, double _ypos)
     float _xOffset = _xpos - m_xpos;
     float _yOffset = -(_ypos - m_ypos);
 
-    std::cout << _xOffset << ' ' << _yOffset << std::endl;
+    // std::cout << _xOffset << ' ' << _yOffset << std::endl;
     m_xpos = _xpos;
     m_ypos = _ypos;
 

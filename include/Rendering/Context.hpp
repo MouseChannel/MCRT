@@ -21,6 +21,7 @@ class RT_Pipeline;
 class Camera;
 class Context_base;
 class RenderPass;
+class Compute_Context;
 class RT_Context;
 // class RenderC
 class Context : public Instance_base<Context> {
@@ -28,7 +29,8 @@ public:
     //   Context() = default;
     //   ~Context() = default;
     enum Context_index { Graphic,
-                         Ray_tracing };
+                         Ray_tracing,
+                         Compute };
     void init(std::shared_ptr<Window>);
     [[nodiscard("Missing Instance")]] auto& get_instance()
     {
@@ -80,6 +82,14 @@ public:
             return context;
         }
         throw std::runtime_error("it is not Ray_Tracing context");
+    }
+    auto get_compute_context()
+    {
+        auto base = contexts[Context_index::Compute];
+        if (auto context = std::reinterpret_pointer_cast<Compute_Context>(base); context != nullptr) {
+            return context;
+        }
+        throw std::runtime_error("it is not compute context");
     }
 
     auto get_graphic_context()

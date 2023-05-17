@@ -13,6 +13,7 @@
 #include "Wrapper/Command_Pool.hpp"
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Device.hpp"
+#include "Wrapper/Image.hpp"
 #include "Wrapper/Instance.hpp"
 #include "Wrapper/Pipeline/RT_pipeline.hpp"
 #include "Wrapper/Ray_Tracing/AS_Builder.hpp"
@@ -21,6 +22,7 @@
 #include "Wrapper/Sampler.hpp"
 #include "Wrapper/SwapChain.hpp"
 #include "Wrapper/Window_Surface.hpp"
+#include "vulkan/vulkan_to_string.hpp"
 
 namespace MCRT {
 
@@ -42,14 +44,14 @@ void Context::init(std::shared_ptr<Window> window)
 
     m_camera.reset(new Camera);
     m_camera->init();
-    contexts.push_back(std::shared_ptr<RenderContext> { new RenderContext(m_device) });
-    contexts.push_back(std::shared_ptr<RT_Context> { new RT_Context(m_device) });
+    contexts.resize(3);
+    contexts[Context_index::Compute] = std::shared_ptr<Compute_Context> { new Compute_Context };
+    contexts[Context_index::Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
+    contexts[Context_index::Graphic] = std::shared_ptr<RenderContext> { new RenderContext(m_device) };
 
-    contexts[1]->prepare();
-    contexts[0]->prepare();
-
-    contexts.push_back(std::shared_ptr<Compute_Context> { new Compute_Context });
-    contexts[2]->prepare();
+    contexts[Ray_tracing]->prepare();
+    contexts[Compute]->prepare();
+    contexts[Graphic]->prepare();
 }
 std::shared_ptr<RenderPass> Context::get_renderpass()
 {
@@ -62,6 +64,7 @@ std::shared_ptr<CommandBuffer> Context::BeginRTFrame()
     auto& rt_context = contexts[Ray_tracing];
     auto cmd = rt_context->BeginFrame();
     {
+        cmd->get_handle().setCheckpointNV(12);
         rt_context->record_command(cmd);
     }
     return cmd;
@@ -92,6 +95,8 @@ void Context::EndGraphicFrame()
 }
 std::shared_ptr<CommandBuffer> Context::BeginComputeFrame()
 {
+
+    // compute_context->record_command(cmd);
     auto& compute_context = contexts[2];
     std::shared_ptr<CommandBuffer> cmd = compute_context->BeginFrame();
     {
@@ -107,14 +112,21 @@ void Context::EndComputeFrame()
 std::shared_ptr<CommandBuffer> Context::Begin_Frame()
 {
     m_camera->move_update();
-    BeginRTFrame();
+    auto cmd = BeginRTFrame();
     EndRTFrame();
     BeginComputeFrame();
     EndComputeFrame();
+
     return BeginGraphicFrame();
 }
 void Context::EndFrame()
 {
+    auto ee = get_device()->Get_Graphic_queue().getCheckpointData2NV();
+    for (auto& i : ee) {
+        auto dd = vk::to_string(i.stage);
+        auto rr = *(Vertex*)i.pCheckpointMarker;
+        int eeee = 0;
+    }
     EndGraphicFrame();
 }
 } // namespace MCRT

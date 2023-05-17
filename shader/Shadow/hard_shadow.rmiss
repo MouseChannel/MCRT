@@ -13,7 +13,7 @@ void main()
 {
     // prd.hitValue = vec3(0.1, 0.1, 0.1);
     prd.miss = true;
-    debugPrintfEXT("message  from miss\n");
+    // debugPrintfEXT("message  from miss\n");
 
     // prd.depth = 100;
 }

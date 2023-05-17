@@ -18,7 +18,7 @@ Device::Device()
 
     std::cout << "device extension: " << std::endl;
     for (auto& i : physical_device.enumerateDeviceExtensionProperties()) {
-        std::cout << i.extensionName << std::endl;
+        // std::cout << i.extensionName << std::endl;
     }
 
     auto r = physical_device.getFeatures();
@@ -45,18 +45,22 @@ Device::Device()
     // rrrrr.set
 
     vk::StructureChain<vk::DeviceCreateInfo,
-                       vk::PhysicalDeviceSynchronization2Features,
+                       vk::PhysicalDeviceVulkan13Features,
                        vk::PhysicalDeviceVulkan12Features,
+                       vk::PhysicalDeviceVulkan11Features,
                        vk::PhysicalDeviceRayTracingPipelineFeaturesKHR,
                        vk::PhysicalDeviceAccelerationStructureFeaturesKHR,
                        vk::PhysicalDeviceRayQueryFeaturesKHR,
                        vk::PhysicalDeviceShaderClockFeaturesKHR>
         _features;
-    _features.get<vk::PhysicalDeviceSynchronization2Features>()
-        .setSynchronization2(true);
-    _features.get<vk::PhysicalDeviceVulkan12Features>()
+    // _features.get<vk::PhysicalDeviceSynchronization2Features>()
+    //     .setSynchronization2(true);
 
+    _features.get<vk::PhysicalDeviceVulkan12Features>()
         .setBufferDeviceAddress(true);
+    _features.get<vk::PhysicalDeviceVulkan13Features>()
+        .setMaintenance4(true)
+        .setSynchronization2(true);
     _features.get<vk::PhysicalDeviceRayTracingPipelineFeaturesKHR>()
         .setRayTracingPipeline(true);
     _features.get<vk::PhysicalDeviceAccelerationStructureFeaturesKHR>()
@@ -64,7 +68,8 @@ Device::Device()
     _features.get<vk::PhysicalDeviceRayQueryFeaturesKHR>()
         .setRayQuery(true);
     _features.get<vk::PhysicalDeviceShaderClockFeaturesKHR>()
-        .setShaderDeviceClock(true);
+        .setShaderDeviceClock(true)
+        .setShaderSubgroupClock(true);
     vk::PhysicalDeviceFeatures normal_feature;
     normal_feature.setShaderInt64(true)
         .setShaderFloat64(true)
@@ -97,6 +102,8 @@ Device::Device()
 
     graphic_queue = m_handle.getQueue(queue_family_indices.graphic_queue.value(), 0);
     present_queue = m_handle.getQueue(queue_family_indices.present_queue.value(), 0);
+    // auto res = physical_device.getQueueFamilyProperties2();
+    // int re = 0;
 }
 
 Device::~Device()

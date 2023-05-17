@@ -1,5 +1,6 @@
 #include "Rendering/Render_Context.hpp"
 #include "Helper/DescriptorManager.hpp"
+#include "Rendering/Compute_context.hpp"
 #include "Rendering/RT_Context.hpp"
 #include "Rendering/Render_Frame.hpp"
 #include "Rendering/Render_Target/Color_Render_Target.hpp"
@@ -15,7 +16,6 @@
 #include "Wrapper/Semaphore.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/SwapChain.hpp"
-
 
 #include "Rendering/Render_Target/MultiSampler_Render_Target.hpp"
 
@@ -39,7 +39,9 @@ RenderContext::RenderContext(std::shared_ptr<Device> device)
         fences.emplace_back(new Fence);
     }
 
-    command_buffer.reset(new CommandBuffer);
+    // command_buffer.reset(new CommandBuffer);
+    // command_buffer = Context::Get_Singleton()->get_compute_context()->get_commandbuffer();
+    int s = 0;
 }
 
 RenderContext::~RenderContext()
@@ -102,6 +104,13 @@ void RenderContext::prepare_descriptorset()
         vk::DescriptorType ::eCombinedImageSampler,
         vk::ShaderStageFlagBits::eFragment,
         Descriptor_Manager::Graphic);
+    Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(
+        Context::Get_Singleton()->get_rt_context()->get_out_image(),
+        1,
+        vk::DescriptorType ::eStorageImage,
+        vk::ShaderStageFlagBits::eFragment,
+        Descriptor_Manager::Graphic);
+
     Descriptor_Manager::Get_Singleton()
         ->CreateDescriptorPool(Descriptor_Manager::Graphic);
     Descriptor_Manager::Get_Singleton()
@@ -166,6 +175,9 @@ void RenderContext::prepare()
     Prepare_Framebuffer();
     prepare_descriptorset();
     prepare_pipeline();
+    // command_buffer = Context::Get_Singleton()->get_compute_context()->get_commandbuffer();
+    command_buffer.reset(new CommandBuffer);
+
     std::vector<uint32_t> indices {
         0,
         1,
@@ -258,9 +270,10 @@ std::shared_ptr<CommandBuffer> RenderContext::BeginFrame()
 std::shared_ptr<CommandBuffer> RenderContext::Begin_Record_Command_Buffer()
 {
 
+    // command_buffer = Context::Get_Singleton()->get_compute_context()->get_commandbuffer();
     auto& cmd = command_buffer;
 
-    cmd->Reset();
+    // cmd->Reset();
     auto render_pass = Get_render_pass();
     vk::RenderPassBeginInfo render_pass_begin_info;
     vk::Rect2D rect;
@@ -284,7 +297,7 @@ std::shared_ptr<CommandBuffer> RenderContext::Begin_Record_Command_Buffer()
                             ->Get_Framebuffer()
                             ->get_handle())
         .setClearValues(clear_values);
-    // auto pipeline = Context::Get_Singleton()->Get_Pipeline();
+
     cmd->Begin(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 
     cmd->BeginRenderPass(render_pass_begin_info, vk::SubpassContents::eInline);
@@ -308,6 +321,15 @@ void RenderContext::record_command(std::shared_ptr<CommandBuffer> cmd)
 
                                   {});
     cmd_handle.drawIndexed(6, 1, 0, 0, 0);
+
+    vk::MemoryBarrier2 memory_barrier;
+
+    memory_barrier.setSrcStageMask(vk::PipelineStageFlagBits2::eComputeShader)
+        .setSrcAccessMask(vk::AccessFlagBits2::eShaderStorageWrite)
+        .setDstStageMask(vk::PipelineStageFlagBits2::eFragmentShader)
+        .setDstAccessMask(vk::AccessFlagBits2::eShaderRead);
+    // cmd_handle.pipelineBarrier2(vk::DependencyInfo().setMemoryBarriers(memory_barrier));
+    Context::Get_Singleton()->get_debugger()->set_name(cmd, "render command_buffer");
 }
 
 //---

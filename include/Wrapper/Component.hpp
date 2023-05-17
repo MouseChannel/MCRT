@@ -30,7 +30,7 @@ public:
     }
     ~Component()
     {
-        std::cout << typeid(K).name() << std::endl;
+        // std::cout << typeid(K).name() << std::endl;
     }
 };
 } // namespace MCRT

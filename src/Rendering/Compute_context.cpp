@@ -1,6 +1,7 @@
 #include "Rendering/Compute_context.hpp"
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Uniform_Manager.hpp"
+#include "Rendering/RT_Context.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Pipeline/Compute_Pipeline.hpp"
@@ -16,6 +17,10 @@ std::shared_ptr<CommandBuffer> Compute_Context::get_commandbuffer()
     return m_command_buffer;
 }
 
+std::shared_ptr<Image> Compute_Context::get_out_image()
+{
+    return Context::Get_Singleton()->get_rt_context()->get_out_image();
+}
 void Compute_Context::create_uniform_buffer()
 {
 
@@ -26,7 +31,16 @@ void Compute_Context::create_uniform_buffer()
 
 void Compute_Context::prepare_descriptorset()
 {
-    Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(test_data, 0, Descriptor_Manager::Compute);
+    // Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(test_data, 0, Descriptor_Manager::Compute);
+    Descriptor_Manager::Get_Singleton()
+        ->Make_DescriptorSet(Context::Get_Singleton()
+                                 ->get_rt_context()
+                                 ->get_out_image(),
+                             1,
+                             vk::DescriptorType::eStorageImage,
+                             vk::ShaderStageFlagBits::eCompute,
+                             Descriptor_Manager::Compute);
+
     Descriptor_Manager::Get_Singleton()->CreateDescriptorPool(Descriptor_Manager::Compute);
     Descriptor_Manager::Get_Singleton()->CreateUpdateDescriptorSet(Descriptor_Manager::Compute);
 }
@@ -44,20 +58,44 @@ void Compute_Context::prepare()
 
 std::shared_ptr<CommandBuffer> Compute_Context::BeginFrame()
 {
+    // m_command_buffer->Reset();
     m_command_buffer->Begin(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
     return m_command_buffer;
+}
+void Compute_Context::set_barrier(std::shared_ptr<CommandBuffer> cmd)
+{
 }
 
 void Compute_Context::record_command(std::shared_ptr<CommandBuffer> cmd)
 {
+
     cmd->get_handle()
         .bindDescriptorSets(vk::PipelineBindPoint ::eCompute, m_compute_pipeline->get_layout(), 0, { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute)->get_handle()[0] }, {});
     cmd->get_handle()
         .bindPipeline(vk::PipelineBindPoint::eCompute,
                       m_compute_pipeline->get_handle());
 
+    vk::MemoryBarrier2 memory_barrier, memory_barrier2;
+    memory_barrier.setSrcStageMask(vk::PipelineStageFlagBits2::eRayTracingShaderKHR)
+        .setSrcAccessMask(vk::AccessFlagBits2::eShaderWrite)
+        .setDstStageMask(vk::PipelineStageFlagBits2::eComputeShader)
+        .setDstAccessMask(vk::AccessFlagBits2::eShaderRead);
+    memory_barrier2.setSrcStageMask(vk::PipelineStageFlagBits2::eComputeShader)
+        .setSrcAccessMask(vk::AccessFlagBits2::eShaderStorageWrite)
+        .setDstStageMask(vk::PipelineStageFlagBits2::eFragmentShader)
+        .setDstAccessMask(vk::AccessFlagBits2::eShaderStorageRead | vk::AccessFlagBits2::eShaderSampledRead);
+    std::vector<vk::MemoryBarrier2> barriers {
+        memory_barrier,
+        memory_barrier2
+    };
     cmd->get_handle()
-        .dispatch(10, 1, 1);
+        .dispatch(9, 1, 1);
+
+    Context::Get_Singleton()->get_debugger()->set_name(cmd, "compute command_buffer");
+    auto ee = get_out_image();
+    // cmd->get_handle().setCheckpointNV(testcheck);
+    cmd->get_handle()
+        .pipelineBarrier2(vk::DependencyInfo().setMemoryBarriers(barriers));
 }
 
 void Compute_Context::Submit()

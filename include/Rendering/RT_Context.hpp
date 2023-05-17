@@ -86,6 +86,7 @@ private:
     std::shared_ptr<Buffer> m_SBT_buffer_rhit;
 
     int frame_id = 0;
+    Vertex testcheck{.color{2,2,2}};
     // std::shared_ptr<Buffer> m_V_P_UBO;
 };
 }

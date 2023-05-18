@@ -49,7 +49,6 @@ vec3 pcg3d_random(uvec3 seed)
     seed.z += seed.x * seed.y;
     // Generate a random float in [0, 1)
     return vec3(seed) / float(0xffffffffu);
-    
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -62,7 +61,22 @@ vec3 hemisphereSample_cos(in uvec3 seed)
     float v = pcg3d.x;
     float u = pcg3d.y;
     float phi = v * 2.0 * PI;
-    float cosTheta = sqrt(1.0 - u);
+    float cosTheta = sqrt(u);
+    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+    // float theta = asin(sqrt(u));
+    // return vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
+
+    return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+}
+
+vec3 hemisphereSample_uniform(in uvec3 seed)
+{
+
+    vec3 pcg3d = pcg3d_random(seed);
+    float v = pcg3d.x;
+    float u = pcg3d.y;
+    float phi = v * 2.0 * PI;
+    float cosTheta = u;
     float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
     return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
 }

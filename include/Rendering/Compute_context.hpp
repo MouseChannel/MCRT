@@ -33,6 +33,6 @@ private:
     std::shared_ptr<Uniform_Stuff<test_Compute>> test_data;
     std::shared_ptr<CommandBuffer> m_command_buffer;
     std::shared_ptr<Compute_Pipeline> m_compute_pipeline;
-    Vertex testcheck{.color{1,1,1}};
+    std::shared_ptr<Image> m_out_image;
 };
 }

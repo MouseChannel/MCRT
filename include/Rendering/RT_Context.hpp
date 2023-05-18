@@ -26,10 +26,14 @@ class RT_Context : public Context_base {
 public:
     RT_Context(std::shared_ptr<Device> device);
     ~RT_Context();
-    // std::shared_ptr<RenderPass>& Get_render_pass() override
-    // {
-    //     return m_renderpass;
-    // }
+    auto& get_pushcontants_ray()
+    {
+        return pushContant_Ray;
+    }
+    auto& get_cur_frame_id()
+    {
+        return frame_id;
+    }
     std::shared_ptr<Pipeline_base> get_pipeline() override;
 
     std::shared_ptr<CommandBuffer> get_commandbuffer() override
@@ -70,6 +74,11 @@ private:
     std::shared_ptr<CommandBuffer> m_command_buffer;
     // std::vector<std::shared_ptr<RenderTarget>> render_targets;
     std::shared_ptr<Image> m_out_image;
+    // gbuffer
+    std::shared_ptr<Image> m_position_gbuffer;
+    std::shared_ptr<Image> m_normal_gbuffer;
+
+    // end gbuffer
     std::shared_ptr<Device> m_device;
     std::shared_ptr<RT_Pipeline> m_rt_pipeline;
     // shader bind table
@@ -86,7 +95,8 @@ private:
     std::shared_ptr<Buffer> m_SBT_buffer_rhit;
 
     int frame_id = 0;
-    Vertex testcheck{.color{2,2,2}};
+    PushContant pushContant_Ray;
+    Vertex testcheck { .color { 2, 2, 2 } };
     // std::shared_ptr<Buffer> m_V_P_UBO;
 };
 }

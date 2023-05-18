@@ -96,20 +96,22 @@ void RenderContext::Prepare_RenderPass()
 void RenderContext::prepare_descriptorset()
 {
     // todo descriptorset_layout
-    Context::Get_Singleton()->get_rt_context()->get_out_image();
+    for (int i = 0; i < 1; i++) {
 
-    Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(
-        Context::Get_Singleton()->get_rt_context()->get_out_image(),
-        0,
-        vk::DescriptorType ::eCombinedImageSampler,
-        vk::ShaderStageFlagBits::eFragment,
-        Descriptor_Manager::Graphic);
-    Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(
-        Context::Get_Singleton()->get_rt_context()->get_out_image(),
-        1,
-        vk::DescriptorType ::eStorageImage,
-        vk::ShaderStageFlagBits::eFragment,
-        Descriptor_Manager::Graphic);
+        Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(
+            Context::Get_Singleton()->get_compute_context()->get_out_image(),
+            0,
+            vk::DescriptorType ::eCombinedImageSampler,
+            vk::ShaderStageFlagBits::eFragment,
+            Descriptor_Manager::Graphic);
+    }
+
+    // Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(
+    //     Context::Get_Singleton()->get_rt_context()->get_out_image(),
+    //     1,
+    //     vk::DescriptorType ::eStorageImage,
+    //     vk::ShaderStageFlagBits::eFragment,
+    //     Descriptor_Manager::Graphic);
 
     Descriptor_Manager::Get_Singleton()
         ->CreateDescriptorPool(Descriptor_Manager::Graphic);
@@ -317,7 +319,8 @@ void RenderContext::record_command(std::shared_ptr<CommandBuffer> cmd)
     cmd_handle.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                   get_pipeline()->get_layout(),
                                   0,
-                                  Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Graphic)->get_handle(),
+                                  { //   Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute)->get_handle()[0],
+                                    Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Graphic)->get_handle() },
 
                                   {});
     cmd_handle.drawIndexed(6, 1, 0, 0, 0);

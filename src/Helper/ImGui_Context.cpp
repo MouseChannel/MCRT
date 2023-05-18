@@ -82,10 +82,18 @@ void ImGuiContext::Update(std::shared_ptr<CommandBuffer> cmd)
         ImGui::Text("im a sentence!");
         // if (ImGui::Button("Close Me"))
         //     show_another_window = false;
-
-        if (ImGui::Button("Button"))
-            c++;
-        ImGui::Text("counter = %d", c);
+        if (Context::Get_Singleton()->get_enable_filter()) {
+            if (ImGui::Button("Disable filter")) {
+                Context::Get_Singleton()->set_enable_filter(false);
+            }
+        } else {
+            if (ImGui::Button("Enable filter")) {
+                Context::Get_Singleton()->set_enable_filter(true);
+            }
+        }
+        // if (ImGui::Button("Button"))
+        //     c++;
+        ImGui::Text("counter = %d", Context::Get_Singleton()->get_enable_filter());
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", io.DeltaTime, 1.0f / io.DeltaTime);
         ImGui::End();
     }

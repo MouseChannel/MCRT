@@ -72,7 +72,14 @@ public:
     {
         return m_debugger;
     }
-
+    void set_enable_filter(bool enable)
+    {
+        enable_filter = enable;
+    }
+    auto get_enable_filter()
+    {
+        return enable_filter;
+    }
     std::shared_ptr<Image> get_out_image();
 
     auto get_rt_context()
@@ -126,6 +133,7 @@ private:
     std::shared_ptr<Sampler> m_sampler;
     std::vector<std::shared_ptr<Context_base>> contexts;
     std::shared_ptr<Camera> m_camera;
+    bool enable_filter;
 };
 
 } // namespace MCRT

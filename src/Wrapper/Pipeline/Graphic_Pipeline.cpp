@@ -11,8 +11,13 @@ Graphic_Pipeline::Graphic_Pipeline()
     //
     vk::PipelineLayoutCreateInfo layout_create_info {};
     // todo descriptor_set
-    layout_create_info.setSetLayouts(Descriptor_Manager::Get_Singleton()
-                                         ->Get_DescriptorSet_layout(Descriptor_Manager::Graphic));
+    std::vector<vk::DescriptorSetLayout> descriptor_layouts {
+        // Descriptor_Manager::Get_Singleton()
+        //     ->Get_DescriptorSet_layout(Descriptor_Manager::Compute),
+        Descriptor_Manager::Get_Singleton()
+            ->Get_DescriptorSet_layout(Descriptor_Manager::Graphic)
+    };
+    layout_create_info.setSetLayouts(descriptor_layouts);
     layout = Context::Get_Singleton()
                  ->get_device()
                  ->get_handle()

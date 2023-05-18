@@ -137,8 +137,15 @@ void RT_Context::prepare_descriptorset()
         ->Make_DescriptorSet(m_out_image,
                              Ray_Tracing_Binding::e_out_image,
                              vk::DescriptorType::eStorageImage,
-                             vk::ShaderStageFlagBits::eRaygenKHR,
+                             vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute,
                              Descriptor_Manager::Ray_Tracing);
+    // GBuffer
+    Descriptor_Manager::Get_Singleton()
+        ->Make_DescriptorSet(m_normal_gbuffer, Ray_Tracing_Binding::e_normal_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
+
+    Descriptor_Manager::Get_Singleton()
+        ->Make_DescriptorSet(m_position_gbuffer, Ray_Tracing_Binding::e_position_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
+    // end Gbuffer`
     Descriptor_Manager::Get_Singleton()
         ->Make_DescriptorSet(camera_data,
                              Global_Binding::e_camera,
@@ -225,13 +232,35 @@ void RT_Context::prepare()
                                 vk::Format::eR32G32B32A32Sfloat,
                                 vk::ImageType::e2D,
                                 vk::ImageTiling::eOptimal,
-                                vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled,
+                                vk::ImageUsageFlagBits::eStorage,
                                 vk::ImageAspectFlagBits::eColor,
                                 vk::SampleCountFlagBits::e1));
 
     m_out_image->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
-    // Context_base::prepare();
-    // fill_render_targets();
+
+    // gbuffer
+    m_position_gbuffer.reset(new Image(800,
+                                       749,
+                                       vk::Format::eR32G32B32A32Sfloat,
+                                       vk::ImageType::e2D,
+                                       vk::ImageTiling::eOptimal,
+                                       vk::ImageUsageFlagBits::eStorage,
+                                       vk::ImageAspectFlagBits::eColor,
+                                       vk::SampleCountFlagBits::e1));
+
+    m_position_gbuffer->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
+
+    m_normal_gbuffer.reset(new Image(800,
+                                     749,
+                                     vk::Format::eR32G32B32A32Sfloat,
+                                     vk::ImageType::e2D,
+                                     vk::ImageTiling::eOptimal,
+                                     vk::ImageUsageFlagBits::eStorage,
+                                     vk::ImageAspectFlagBits::eColor,
+                                     vk::SampleCountFlagBits::e1));
+
+    m_normal_gbuffer->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
+    // end gbuffer
     create_uniform_buffer();
     prepare_descriptorset();
     prepare_pipeline();
@@ -339,15 +368,18 @@ void RT_Context::record_command(std::shared_ptr<CommandBuffer> cmd)
                                          descriptor_sets,
                                          {});
 
-    cmd->get_handle().pushConstants<PushContant_Ray>(get_pipeline()
-                                                         ->get_layout(),
-                                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR,
-                                                     0,
-                                                     PushContant_Ray {
-                                                         .frame = frame_id,
-                                                         .clearColor { 1 },
-                                                         .lightPosition { 10.f, 15.f, 8.f, 0 },
-                                                         .lightIntensity = 100 });
+    pushContant_Ray = PushContant {
+        .frame = frame_id,
+        .clearColor { 1 },
+        .lightPosition { 10.f, 15.f, 8.f, 0 },
+        .lightIntensity = 100
+    };
+    cmd->get_handle()
+        .pushConstants<PushContant>(get_pipeline()
+                                        ->get_layout(),
+                                    vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR,
+                                    0,
+                                    pushContant_Ray);
 
     cmd->get_handle().traceRaysKHR(m_rgenRegion,
                                    m_missRegion,
@@ -357,7 +389,16 @@ void RT_Context::record_command(std::shared_ptr<CommandBuffer> cmd)
                                    749,
                                    1);
 
-    Context::Get_Singleton()->get_debugger()->set_name(cmd, "ray tracing command_buffer");
+    // vk::MemoryBarrier2 memory_barrier;
+    // memory_barrier.setSrcStageMask(vk::PipelineStageFlagBits2::eComputeShader)
+    //     .setSrcAccessMask(vk::AccessFlagBits2::eShaderWrite)
+    //     .setDstStageMask(vk::PipelineStageFlagBits2::eRayTracingShaderKHR)
+    //     .setDstAccessMask(vk::AccessFlagBits2::eShaderRead);
+    // cmd->get_handle().pipelineBarrier2(vk::DependencyInfo().setMemoryBarriers(memory_barrier));
+
+    Context::Get_Singleton()
+        ->get_debugger()
+        ->set_name(cmd, "ray tracing command_buffer");
 }
 std::shared_ptr<CommandBuffer> RT_Context::BeginFrame()
 {

@@ -129,9 +129,8 @@ void Camera::setPerpective(float angle, float ratio, float near, float far)
 
 void Camera::onMouseMove(double _xpos, double _ypos)
 {
+    return;
 
-    if (glfwGetMouseButton(Context::Get_Singleton()->get_window()->get_handle(), GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS)
-        return;
     // onMouseMove(m_xpos + 1.0, m_ypos);
     // std::cout << "on mouse 1" << std::endl;
 

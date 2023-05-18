@@ -18,6 +18,7 @@ layout(location = 0) rayPayloadInEXT hitPayload prd;
 
 layout(set = 0, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
 
+
 layout(set = 1, binding = e_obj_addresses, scalar) buffer _Address
 {
     Address address[];
@@ -65,6 +66,13 @@ void main()
                                                        attribs,
                                                        gl_WorldToObjectEXT);
 
+    {
+        if (prd.point_normal.x < 0) {
+            prd.point_normal = cur_world_normal;
+            prd.point_position = cur_world_pos;
+        }
+    }
+
     mat3 normal_coordinate = getNormalSpace(cur_world_normal);
     uvec3 seed = uvec3(gl_LaunchIDEXT.xy, uint(clockARB()));
     vec3 local_dir = hemisphereSample_cos(seed);
@@ -72,7 +80,7 @@ void main()
     // Lambertian reflection
     vec3 BRDF = material.material.color.xyz / PI;
     float cos_theta = dot(rayDirection, cur_world_normal);
-    float pdf = 1 / (2. * PI);
+    float pdf = 1. / PI;
     vec3 radiance = BRDF * cos_theta / pdf;
     prd.rayOrigin = cur_world_pos;
     prd.rayDirection = rayDirection;

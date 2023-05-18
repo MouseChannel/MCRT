@@ -28,28 +28,15 @@ public:
 
         "VK_KHR_ray_query",
         "VK_KHR_shader_non_semantic_info",
-        "VK_KHR_deferred_host_operations",
+
         "VK_KHR_acceleration_structure",
         "VK_KHR_ray_tracing_pipeline",
+        "VK_KHR_shader_clock",
         VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME,
         VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
         VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
         VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
-        VK_KHR_SHADER_CLOCK_EXTENSION_NAME,
-        // VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME
 
-        // "VK_EXT_buffer_device_address",
-        // "VK_KHR_buffer_device_address"
-        // VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME,
-
-        // VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-        // VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
-        // VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
-        // VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
-        // "VK_EXT_descriptor_indexing",
-        // "VK_KHR_buffer_device_address",
-        // "VK_KHR_deferred_host_operations",
-        // "VK_KHR_get_physical_device_properties"
     };
     [[nodiscard("missing physical device")]] auto Get_Physical_device()
     {

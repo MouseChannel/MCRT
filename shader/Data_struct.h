@@ -27,7 +27,9 @@ using uint = unsigned int;
 
 BEGIN_ENUM(Ray_Tracing_Binding)
 e_tlas = 0,
-    e_out_image = 1 END_ENUM();
+    e_out_image = 1,
+    e_position_gbuffer = 2,
+    e_normal_gbuffer = 3 END_ENUM();
 
 BEGIN_ENUM(Global_Binding)
 e_camera = 0,
@@ -43,6 +45,8 @@ struct hitPayload {
     vec3 rayDirection;
     vec3 weight;
     bool miss;
+    vec3 point_position;
+    vec3 point_normal;
 };
 struct Camera_data {
 
@@ -53,12 +57,16 @@ struct Camera_data {
     float fov_angel;
 };
 
-struct PushContant_Ray {
+struct PushContant {
     int frame;
     vec4 clearColor;
     vec4 lightPosition;
     float lightIntensity;
     int lightType;
+};
+struct PushContant_Compute {
+    int frame;
+    bool open_filter;
 };
 
 struct Address {

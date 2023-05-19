@@ -6,9 +6,15 @@
 #include "Wrapper/Pipeline/Pipeline_base.hpp"
 
 namespace MCRT {
+class ShaderModule;
 class Graphic_Pipeline : public Pipeline_base {
 public:
-    Graphic_Pipeline();
+    enum {
+        VERT,
+        FRAG,
+        shader_stage_count
+    };
+    Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shaders);
     ~Graphic_Pipeline();
     void Make_Layout(vk::DescriptorSetLayout descriptor_layout, uint32_t push_constants_size, vk::ShaderStageFlags push_constants_stage);
 
@@ -35,7 +41,7 @@ private:
     vk::PipelineInputAssemblyStateCreateInfo input_assembly;
 
     vk::PipelineViewportStateCreateInfo viewportInfo;
-    
+
     std::vector<vk::PipelineShaderStageCreateInfo> shader_stage;
     vk::PipelineRasterizationStateCreateInfo rasterization_info;
     vk::PipelineMultisampleStateCreateInfo multi_sample;

@@ -21,6 +21,7 @@
 #include "Wrapper/Pipeline/RT_pipeline.hpp"
 #include "Wrapper/Ray_Tracing/AS_Builder.hpp"
 #include "Wrapper/RenderPass.hpp"
+#include "Wrapper/Shader_module.hpp"
 #include "shader/Data_struct.h"
 
 namespace MCRT {
@@ -124,28 +125,9 @@ void RT_Context::create_shader_bind_table()
     m_SBT_buffer_rhit->Update(rhit_handles.data(), handleSize);
 }
 
-void RT_Context::prepare_descriptorset()
+void RT_Context::prepare_descriptorset(std::function<void()> prepare_func)
 {
-    Descriptor_Manager::Get_Singleton()
-        ->Make_DescriptorSet(AS_Builder::Get_Singleton()->get_tlas(),
-                             Ray_Tracing_Binding::e_tlas,
-                             vk::DescriptorType::eAccelerationStructureKHR,
-                             vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR,
-                             Descriptor_Manager::Ray_Tracing);
-
-    Descriptor_Manager::Get_Singleton()
-        ->Make_DescriptorSet(m_out_image,
-                             Ray_Tracing_Binding::e_out_image,
-                             vk::DescriptorType::eStorageImage,
-                             vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute,
-                             Descriptor_Manager::Ray_Tracing);
-    // GBuffer
-    Descriptor_Manager::Get_Singleton()
-        ->Make_DescriptorSet(m_normal_gbuffer, Ray_Tracing_Binding::e_normal_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
-
-    Descriptor_Manager::Get_Singleton()
-        ->Make_DescriptorSet(m_position_gbuffer, Ray_Tracing_Binding::e_position_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
-    // end Gbuffer`
+    prepare_func();
     Descriptor_Manager::Get_Singleton()
         ->Make_DescriptorSet(camera_data,
                              Global_Binding::e_camera,
@@ -163,9 +145,9 @@ void RT_Context::prepare_descriptorset()
 
     Descriptor_Manager::Get_Singleton()->CreateUpdateDescriptorSet(Descriptor_Manager::Global);
 }
-void RT_Context::prepare_pipeline()
+void RT_Context::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
 {
-    m_rt_pipeline.reset(new RT_Pipeline);
+    m_rt_pipeline.reset(new RT_Pipeline(shader_modules));
 }
 void RT_Context::create_uniform_buffer()
 {
@@ -223,7 +205,7 @@ void RT_Context::create_uniform_buffer()
                                                     vk::DescriptorType::eStorageBuffer);
 }
 
-void RT_Context::prepare()
+void RT_Context::prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
 {
 
     build_accelerate_structure();
@@ -262,14 +244,15 @@ void RT_Context::prepare()
     m_normal_gbuffer->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
     // end gbuffer
     create_uniform_buffer();
-    prepare_descriptorset();
-    prepare_pipeline();
-    create_shader_bind_table();
+
     m_command_buffer.reset(new CommandBuffer);
+}
+void RT_Context::post_prepare()
+{
+    create_shader_bind_table();
 }
 void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
 {
-    auto ubo_usage_stage { vk::PipelineStageFlagBits::eRayTracingShaderKHR | vk::PipelineStageFlagBits::eVertexShader };
 
     // Ensure that the modified UBO is not visible to previous frames.
 
@@ -285,28 +268,6 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
         .pipelineBarrier2(vk::DependencyInfo()
                               .setBufferMemoryBarriers(before_barrier));
 
-    glm::mat4 temp {
-        glm::vec4 { frame_id, 1, 1, 1 },
-        glm::vec4 { 1, 1, 1, 1 },
-        glm::vec4 { 1, 1, 1, 1 },
-        glm::vec4 { 1, 1, 1, 1 }
-    };
-
-    // std::cout << temp_id << std::endl;
-    frame_id++;
-    auto pos =
-        Context::Get_Singleton()
-            ->get_camera()
-            ->get_pos();
-    // std::cout << pos.x << ' ' << pos.y << ' ' << pos.z << std::endl;
-    auto front =
-        Context::Get_Singleton()
-            ->get_camera()
-            ->get_front();
-    // std::cout << "camera_data_size" << sizeof(Camera_data) << "\nfloat_size: " << sizeof(float) << "\n vec3_size : "
-    //           << sizeof(glm::vec3) << "\n vec4_size: " << sizeof(glm::vec4)
-    //           << "\n mat4_size: " << sizeof(glm::mat4) << std::endl;
-    // std::cout << "camera_front = " << sizeof(front) << ' ' << front.x << ' ' << front.y << ' ' << front.z << std::endl;
     cmd->get_handle()
         .updateBuffer<Camera_data>(
             camera_data->buffer->get_handle(),
@@ -349,37 +310,6 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
 void RT_Context::record_command(std::shared_ptr<CommandBuffer> cmd)
 {
     update_ubo(cmd);
-    cmd->get_handle()
-        .bindPipeline(vk::PipelineBindPoint ::eRayTracingKHR, get_pipeline()->get_handle());
-    std::vector<vk::DescriptorSet> descriptor_sets {
-        // descriptor_sets.push_back(
-        Descriptor_Manager::Get_Singleton()
-            ->get_DescriptorSet(Descriptor_Manager::Ray_Tracing)
-            ->get_handle()[0],
-
-        Descriptor_Manager::Get_Singleton()
-            ->get_DescriptorSet(Descriptor_Manager::Global)
-            ->get_handle()[0]
-    };
-
-    cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint ::eRayTracingKHR,
-                                         get_pipeline()->get_layout(),
-                                         0,
-                                         descriptor_sets,
-                                         {});
-
-    pushContant_Ray = PushContant {
-        .frame = frame_id,
-        .clearColor { 1 },
-        .lightPosition { 10.f, 15.f, 8.f, 0 },
-        .lightIntensity = 100
-    };
-    cmd->get_handle()
-        .pushConstants<PushContant>(get_pipeline()
-                                        ->get_layout(),
-                                    vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR,
-                                    0,
-                                    pushContant_Ray);
 
     cmd->get_handle().traceRaysKHR(m_rgenRegion,
                                    m_missRegion,
@@ -388,13 +318,6 @@ void RT_Context::record_command(std::shared_ptr<CommandBuffer> cmd)
                                    800,
                                    749,
                                    1);
-
-    // vk::MemoryBarrier2 memory_barrier;
-    // memory_barrier.setSrcStageMask(vk::PipelineStageFlagBits2::eComputeShader)
-    //     .setSrcAccessMask(vk::AccessFlagBits2::eShaderWrite)
-    //     .setDstStageMask(vk::PipelineStageFlagBits2::eRayTracingShaderKHR)
-    //     .setDstAccessMask(vk::AccessFlagBits2::eShaderRead);
-    // cmd->get_handle().pipelineBarrier2(vk::DependencyInfo().setMemoryBarriers(memory_barrier));
 
     Context::Get_Singleton()
         ->get_debugger()

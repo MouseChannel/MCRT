@@ -36,7 +36,8 @@ public:
         VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
         VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
         VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
-
+        "VK_EXT_debug_marker",
+        // "VK_NV_device_diagnostic_checkpoints"
     };
     [[nodiscard("missing physical device")]] auto Get_Physical_device()
     {

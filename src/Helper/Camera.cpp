@@ -37,7 +37,7 @@ void Camera::update()
 {
     m_vMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
 
-    Context::Get_Singleton()->get_rt_context()->reset();
+    Context::Get_Singleton()->reset();
 }
 
 void Camera::move_update()

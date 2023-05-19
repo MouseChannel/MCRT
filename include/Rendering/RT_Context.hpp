@@ -26,14 +26,14 @@ class RT_Context : public Context_base {
 public:
     RT_Context(std::shared_ptr<Device> device);
     ~RT_Context();
-    auto& get_pushcontants_ray()
-    {
-        return pushContant_Ray;
-    }
-    auto& get_cur_frame_id()
-    {
-        return frame_id;
-    }
+    // auto& get_pushcontants_ray()
+    // {
+    //     return pushContant_Ray;
+    // }
+    // auto& get_cur_frame_id()
+    // {
+    //     return frame_id;
+    // }
     std::shared_ptr<Pipeline_base> get_pipeline() override;
 
     std::shared_ptr<CommandBuffer> get_commandbuffer() override
@@ -43,9 +43,18 @@ public:
         return m_command_buffer;
     }
     std::shared_ptr<Image> get_out_image();
-    void prepare() override;
-    void prepare_descriptorset() override;
-    void prepare_pipeline() override;
+    auto get_normal_buffer()
+    {
+        return m_normal_gbuffer;
+    }
+    auto get_position_buffer()
+    {
+        return m_position_gbuffer;
+    }
+    void prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;
+    void post_prepare() override;
+    void prepare_descriptorset(std::function<void()> prepare_func) override;
+    void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;
     std::shared_ptr<CommandBuffer> BeginFrame() override;
     void Submit() override;
     void EndFrame() override;
@@ -55,10 +64,10 @@ public:
     // }
     void record_command(std::shared_ptr<CommandBuffer>) override;
     void build_accelerate_structure();
-    void reset()
-    {
-        frame_id = 0;
-    }
+    // void reset()
+    // {
+    //     frame_id = 0;
+    // }
 
 private:
     void create_shader_bind_table();
@@ -94,8 +103,8 @@ private:
 
     std::shared_ptr<Buffer> m_SBT_buffer_rhit;
 
-    int frame_id = 0;
-    PushContant pushContant_Ray;
+    // int frame_id = 0;
+    // PushContant pushContant_Ray;
     Vertex testcheck { .color { 2, 2, 2 } };
     // std::shared_ptr<Buffer> m_V_P_UBO;
 };

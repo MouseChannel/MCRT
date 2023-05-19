@@ -2,13 +2,17 @@
 #include "Wrapper/Pipeline/Pipeline_base.hpp"
 namespace MCRT {
 class ShaderModule;
-struct test_pushcontant {
-    int r = 1;
-    int rr = 3;
-};
+ 
 class RT_Pipeline : public Pipeline_base {
 public:
-    RT_Pipeline();
+    enum {
+        eRaygen,
+        eMiss,
+        // eMiss2,s
+        eClosestHit,
+        eShaderGroupCount
+    };
+    RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shaders);
     ~RT_Pipeline();
     vk::PipelineLayout get_layout() override
     {

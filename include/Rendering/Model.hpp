@@ -35,7 +35,7 @@ public:
     }
     [[nodiscard]] auto get_vertex_count()
     {
-        return m_vertexs.size();
+        return m_index.size();
     }
     static std::vector<ObjInstance> obj_instances;
     static std::vector<std::shared_ptr<Model>> models;
@@ -59,6 +59,9 @@ private:
     std::vector<Vertex> m_vertexs;
     std::vector<uint32_t> m_index;
     std::shared_ptr<Buffer> vertexs_buffer;
+    // std::shared_ptr<Buffer> position_buffer;
+    // std::shared_ptr<Buffer> uv_buffer;
+
     std::shared_ptr<Buffer> indices_buffer;
     std::shared_ptr<Buffer> material_buffer;
     int obj_instance_index;

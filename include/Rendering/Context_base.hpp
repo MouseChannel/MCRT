@@ -1,10 +1,12 @@
 #pragma once
+#include <functional>
 #include <memory>
 namespace MCRT {
 class CommandBuffer;
 class RenderTarget;
 class Image;
 class RenderPass;
+class ShaderModule;
 class Pipeline_base;
 class Framebuffer;
 class Context_base {
@@ -13,17 +15,19 @@ public:
     virtual std::shared_ptr<Pipeline_base> get_pipeline() = 0;
     virtual std::shared_ptr<CommandBuffer> get_commandbuffer() = 0;
     // virtual std::shared_ptr<Framebuffer>& get_framebuffer() = 0;
-    virtual void prepare();
+    virtual void prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modules) = 0;
+    virtual void post_prepare() = 0;
     virtual std::shared_ptr<CommandBuffer> BeginFrame() = 0;
     virtual void Submit() = 0;
     virtual void EndFrame() = 0;
-    std::shared_ptr<CommandBuffer> Begin_Record_Command_Buffer();
+    // std::shared_ptr<CommandBuffer> Begin_Record_Command_Buffer();
     virtual void record_command(std::shared_ptr<CommandBuffer>) = 0;
 
-protected:
-    virtual void prepare_descriptorset() = 0;
-    virtual void prepare_pipeline() = 0;
+    virtual void prepare_descriptorset(std::function<void()> prepare_func) = 0;
 
+    virtual void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules) = 0;
+
+protected:
     void Prepare_RenderPass();
 };
 }

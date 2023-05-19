@@ -5,7 +5,7 @@
 #include "shader/Data_struct.h"
 
 namespace MCRT {
-Compute_Pipeline::Compute_Pipeline()
+Compute_Pipeline::Compute_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shaders)
 {
 
     auto descriptor_layout = Descriptor_Manager::Get_Singleton()->Get_DescriptorSet_layout(Descriptor_Manager::Ray_Tracing);
@@ -24,11 +24,9 @@ Compute_Pipeline::Compute_Pipeline()
                                            .setPushConstantRanges(vk::PushConstantRange()
                                                                       .setSize(sizeof(PushContant_Compute))
                                                                       .setStageFlags(vk::ShaderStageFlagBits::eCompute)));
-    std::shared_ptr<ShaderModule> compute_shader {
-        new ShaderModule("D:/MoChengRT/shader/test.comp.spv")
-    };
+ 
     auto shader_stage = vk::PipelineShaderStageCreateInfo()
-                            .setModule(compute_shader->get_handle())
+                            .setModule(shaders[0]->get_handle())
                             .setStage(vk::ShaderStageFlagBits ::eCompute)
                             .setPName("main");
     auto create_info = vk::ComputePipelineCreateInfo()

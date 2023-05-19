@@ -16,6 +16,7 @@ class CommandBuffer;
 class Graphic_Pipeline;
 class Buffer;
 class RenderContext : public Context_base {
+
 public:
     RenderContext(std::shared_ptr<Device> device);
     ~RenderContext();
@@ -46,7 +47,7 @@ public:
         return all_rendertargets[0];
     }
     std::shared_ptr<Pipeline_base> get_pipeline() override;
-    std::shared_ptr<RenderPass>& Get_render_pass()  
+    std::shared_ptr<RenderPass>& Get_render_pass()
     {
         return m_renderpass;
     }
@@ -54,13 +55,14 @@ public:
     {
         return command_buffer;
     }
-    std::shared_ptr<Framebuffer>& get_framebuffer()  ;
+    std::shared_ptr<Framebuffer>& get_framebuffer();
     void Prepare_RenderPass();
-    void prepare() override;
+    void prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;
+    void post_prepare() override;
     void fill_render_targets();
     void Prepare_Framebuffer();
-    void prepare_descriptorset() override;
-    void prepare_pipeline() override;
+    void prepare_descriptorset(std::function<void()> prepare_func) override;
+    void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;
     std::shared_ptr<CommandBuffer> BeginFrame() override;
     void Submit() override;
     void EndFrame() override;

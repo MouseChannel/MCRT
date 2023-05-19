@@ -1,6 +1,7 @@
 #include "Rendering/Render_Context.hpp"
 #include "Helper/DescriptorManager.hpp"
 #include "Rendering/Compute_context.hpp"
+#include "Rendering/Model.hpp"
 #include "Rendering/RT_Context.hpp"
 #include "Rendering/Render_Frame.hpp"
 #include "Rendering/Render_Target/Color_Render_Target.hpp"
@@ -93,42 +94,20 @@ void RenderContext::Prepare_RenderPass()
     }
     render_pass->Build();
 }
-void RenderContext::prepare_descriptorset()
+void RenderContext::prepare_descriptorset(std::function<void()> prepare)
 {
-    // todo descriptorset_layout
-    for (int i = 0; i < 1; i++) {
-
-        Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(
-            Context::Get_Singleton()->get_compute_context()->get_out_image(),
-            0,
-            vk::DescriptorType ::eCombinedImageSampler,
-            vk::ShaderStageFlagBits::eFragment,
-            Descriptor_Manager::Graphic);
-    }
-
-    // Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(
-    //     Context::Get_Singleton()->get_rt_context()->get_out_image(),
-    //     1,
-    //     vk::DescriptorType ::eStorageImage,
-    //     vk::ShaderStageFlagBits::eFragment,
-    //     Descriptor_Manager::Graphic);
+    prepare();
 
     Descriptor_Manager::Get_Singleton()
         ->CreateDescriptorPool(Descriptor_Manager::Graphic);
     Descriptor_Manager::Get_Singleton()
         ->CreateUpdateDescriptorSet(Descriptor_Manager::Graphic);
 }
-void RenderContext::prepare_pipeline()
+void RenderContext::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
 {
-    m_graphic_pipeline.reset(new Graphic_Pipeline);
 
-    vert_shader.reset(new ShaderModule("D:/MoChengRT/shader/post.vert.spv"));
-    frag_shader.reset(new ShaderModule("D:/MoChengRT/shader/post.frag.spv"));
+    m_graphic_pipeline.reset(new Graphic_Pipeline(shader_modules));
 
-    m_graphic_pipeline->Add_Shader_Modules(vert_shader->get_handle(), vk::ShaderStageFlagBits::eVertex);
-    m_graphic_pipeline->Add_Shader_Modules(frag_shader->get_handle(), vk::ShaderStageFlagBits::eFragment);
-
-    // m_graphic_pipeline->Make_Layout();
     vk::VertexInputBindingDescription vert_position_binding;
     vert_position_binding
         .setBinding(0)
@@ -170,84 +149,17 @@ void RenderContext::prepare_pipeline()
 
     m_graphic_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
 }
-void RenderContext::prepare()
+void RenderContext::prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
 {
     fill_render_targets();
     Prepare_RenderPass();
     Prepare_Framebuffer();
-    prepare_descriptorset();
-    prepare_pipeline();
+
     // command_buffer = Context::Get_Singleton()->get_compute_context()->get_commandbuffer();
     command_buffer.reset(new CommandBuffer);
-
-    std::vector<uint32_t> indices {
-        0,
-        1,
-        2,
-        0,
-        1,
-        3
-
-    };
-    std::vector<float> positions {
-        1.0f,
-        -1.0f,
-        0,
-
-        -1.0f,
-        1.0f,
-        0,
-
-        -1.0f,
-        -1.0f,
-        0,
-
-        1.0f,
-        1.0f,
-        0
-
-    };
-    std::vector<float> uvs {
-        1.0f,
-        1.0f,
-
-        0.0f,
-        0.0f,
-
-        0.0f,
-        1.0f,
-
-        1.0f,
-        0.0f
-    };
-    index_buffer = Buffer::CreateDeviceBuffer(indices.data(), indices.size() * sizeof(indices[0]), vk::BufferUsageFlagBits::eIndexBuffer);
-    vertex_buffer = Buffer::CreateDeviceBuffer(positions.data(), positions.size() * sizeof(positions[0]), vk::BufferUsageFlagBits::eVertexBuffer);
-    uv_buffer = Buffer::CreateDeviceBuffer(uvs.data(), uvs.size() * sizeof(uvs[0]), vk::BufferUsageFlagBits::eVertexBuffer);
-    // m_graphic_pipeline.reset(new Graphic_Pipeline);
-    // // m_graphic_pipeline.
-    // auto count { enable_swapchain ? 3 : 1 };
-
-    // for (int i = 0; i < render_frame_count; i++) {
-
-    //     // todo need add multisampler stuff
-    //     // std::shared_ptr<Image> swapchain_image { new Image(
-    //     //     m_swapchain->Get_Swapchain_Images()[i],
-    //     //     vk::ImageLayout::eColorAttachmentOptimal,
-    //     //     m_swapchain->Get_Format(),
-    //     //     vk::ImageAspectFlagBits::eColor) };
-
-    //     std::vector<std::shared_ptr<RenderTarget>>
-    //         render_targets;
-
-    //     // render_targets.emplace_back(Final_RenderTarget::Create(swapchain_image));
-    //     render_targets.emplace_back(Color_RenderTarget::Create());
-
-    //     // render_targets.emplace_back(MultiSampler_RenderTarget::Create());
-    //     // render_targets.emplace_back(Depth_RenderTarget::Create());
-    //     if (!m_renderpass)
-    //         Prepare_RenderPass(render_targets);
-    //     render_frames.emplace_back(new RenderFrame(m_renderpass, render_targets));
-    // }
+}
+void RenderContext::post_prepare()
+{
 }
 std::shared_ptr<Framebuffer>& RenderContext::get_framebuffer()
 {
@@ -308,29 +220,31 @@ std::shared_ptr<CommandBuffer> RenderContext::Begin_Record_Command_Buffer()
 void RenderContext::record_command(std::shared_ptr<CommandBuffer> cmd)
 {
     auto cmd_handle = cmd->get_handle();
-    cmd_handle.bindIndexBuffer(index_buffer->get_handle(), 0, vk::IndexType ::eUint32);
-    cmd_handle.bindVertexBuffers(0, {
-                                        vertex_buffer->get_handle(),
-                                        uv_buffer->get_handle(),
-                                    },
-                                 { 0, 0 });
+    // cmd_handle.bindIndexBuffer(index_buffer->get_handle(), 0, vk::IndexType ::eUint32);
+    // cmd_handle.bindVertexBuffers(0, {
+    //                                     vertex_buffer->get_handle(),
+    //                                     uv_buffer->get_handle(),
+    //                                 },
+    //                              { 0, 0 });
 
-    cmd_handle.bindPipeline(vk::PipelineBindPoint ::eGraphics, get_pipeline()->get_handle());
-    cmd_handle.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                  get_pipeline()->get_layout(),
-                                  0,
-                                  { //   Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute)->get_handle()[0],
-                                    Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Graphic)->get_handle() },
+    // cmd_handle.bindPipeline(vk::PipelineBindPoint ::eGraphics, get_pipeline()->get_handle());
+    // cmd_handle.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+    //                               get_pipeline()->get_layout(),
+    //                               0,
+    //                               { //   Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute)->get_handle()[0],
+    //                                 Descriptor_Manager::Get_Singleton()
+    //                                     ->get_DescriptorSet(Descriptor_Manager::Graphic)
+    //                                     ->get_handle() },
 
-                                  {});
-    cmd_handle.drawIndexed(6, 1, 0, 0, 0);
+    //                               {});
+    // cmd_handle.drawIndexed(Model::models[0]->get_vertex_count(), 1, 0, 0, 0);
 
-    vk::MemoryBarrier2 memory_barrier;
+    // vk::MemoryBarrier2 memory_barrier;
 
-    memory_barrier.setSrcStageMask(vk::PipelineStageFlagBits2::eComputeShader)
-        .setSrcAccessMask(vk::AccessFlagBits2::eShaderStorageWrite)
-        .setDstStageMask(vk::PipelineStageFlagBits2::eFragmentShader)
-        .setDstAccessMask(vk::AccessFlagBits2::eShaderRead);
+    // memory_barrier.setSrcStageMask(vk::PipelineStageFlagBits2::eComputeShader)
+    //     .setSrcAccessMask(vk::AccessFlagBits2::eShaderStorageWrite)
+    //     .setDstStageMask(vk::PipelineStageFlagBits2::eFragmentShader)
+    //     .setDstAccessMask(vk::AccessFlagBits2::eShaderRead);
     // cmd_handle.pipelineBarrier2(vk::DependencyInfo().setMemoryBarriers(memory_barrier));
     Context::Get_Singleton()->get_debugger()->set_name(cmd, "render command_buffer");
 }

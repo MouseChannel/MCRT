@@ -7,19 +7,13 @@
 
 namespace MCRT {
 
-RT_Pipeline::RT_Pipeline()
+RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
 {
-    enum {
-        eRaygen,
-        eMiss,
-        // eMiss2,s
-        eClosestHit,
-        eShaderGroupCount
-    };
-    shader_modules.resize(eShaderGroupCount);
-    shader_modules[eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rgen.spv"));
-    shader_modules[eMiss].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rmiss.spv"));
-    shader_modules[eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rchit.spv"));
+
+    // shader_modules.resize(eShaderGroupCount);
+    // shader_modules[eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rgen.spv"));
+    // shader_modules[eMiss].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rmiss.spv"));
+    // shader_modules[eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rchit.spv"));
 
     std::vector<vk::PipelineShaderStageCreateInfo>
         stages(eShaderGroupCount);

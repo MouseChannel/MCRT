@@ -44,6 +44,7 @@ file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src *.cpp)
 # set(IMGUIDIR ${PROJECT_SOURCE_DIR}/lib/imgui)
 add_library(src ${SRC})
 
-# add_executable(MCRT main.cpp)
+ 
 target_link_libraries(src imgui)
+ 
 add_subdirectory(example)

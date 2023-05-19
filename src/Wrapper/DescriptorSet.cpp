@@ -11,8 +11,8 @@ namespace MCRT {
 DescriptorSet::DescriptorSet(std::shared_ptr<DescriptorPool> descriptorPool, vk::DescriptorSetLayout setLayouts)
 {
     vk::DescriptorSetAllocateInfo allocate_info;
-    auto swapchain_size = Get_Context_Singleton()->get_swapchain()->Get_Swapchain_Image_size();
-    std::vector<vk::DescriptorSetLayout> descriptor_layouts(swapchain_size, setLayouts);
+    // auto swapchain_size = Get_Context_Singleton()->get_swapchain()->Get_Swapchain_Image_size();
+    std::vector<vk::DescriptorSetLayout> descriptor_layouts(10, setLayouts);
     allocate_info.setDescriptorPool(descriptorPool->get_handle())
         .setSetLayouts(descriptor_layouts)
         // TODO swapchain_size

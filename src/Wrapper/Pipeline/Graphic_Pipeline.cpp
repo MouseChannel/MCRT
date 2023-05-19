@@ -3,10 +3,11 @@
 #include "Rendering/RT_Context.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/RenderPass.hpp"
+#include "Wrapper/Shader_module.hpp"
 #include "Wrapper/SwapChain.hpp"
 #include <vector>
 namespace MCRT {
-Graphic_Pipeline::Graphic_Pipeline()
+Graphic_Pipeline::Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
 {
     //
     vk::PipelineLayoutCreateInfo layout_create_info {};
@@ -23,16 +24,15 @@ Graphic_Pipeline::Graphic_Pipeline()
                  ->get_handle()
                  .createPipelineLayout(layout_create_info);
 
-    // vk::GraphicsPipelineCreateInfo create_info;
-    // vk::PipelineRasterizationStateCreateInfo rasterization_state;
-    // rasterization_state.setCullMode(vk::CullModeFlagBits::eBack);
-
-    // create_info.setLayout(layout)
-    //     .setPRasterizationState(&rasterization_state)
-    //     .setRenderPass(Context::Get_Singleton()
-    //                        ->get_context(Context::Graphic)
-    //                        ->Get_render_pass()
-    //                        ->get_handle());
+    shader_stage.resize(shader_stage_count);
+    shader_stage[VERT]
+        .setPName("main")
+        .setStage(vk::ShaderStageFlagBits ::eVertex)
+        .setModule(shader_modules[VERT]->get_handle());
+    shader_stage[FRAG]
+        .setPName("main")
+        .setStage(vk::ShaderStageFlagBits ::eFragment)
+        .setModule(shader_modules[FRAG]->get_handle());
 }
 Graphic_Pipeline::~Graphic_Pipeline()
 {

@@ -6,9 +6,9 @@ namespace MCRT {
 
 DescriptorPool::DescriptorPool(std::vector<std::tuple<vk::DescriptorType, uint32_t>> type_size)
 {
-    auto swapchain_size = Get_Context_Singleton()
-                              ->get_swapchain()
-                              ->Get_Swapchain_Image_size();
+    // auto swapchain_size = Get_Context_Singleton()
+    //                           ->get_swapchain()
+    //                           ->Get_Swapchain_Image_size();
     std::vector<vk::DescriptorPoolSize> pool_size(type_size.size());
     for (int i = 0; i < type_size.size(); i++) {
         auto type = std::get<0>(type_size[i]);
@@ -20,7 +20,7 @@ DescriptorPool::DescriptorPool(std::vector<std::tuple<vk::DescriptorType, uint32
 
     vk::DescriptorPoolCreateInfo create_info;
     create_info.setPoolSizes(pool_size)
-        .setMaxSets(swapchain_size);
+        .setMaxSets(10);
     m_handle = Get_Context_Singleton()
                    ->get_device()
                    ->get_handle()

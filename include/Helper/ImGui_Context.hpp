@@ -1,12 +1,12 @@
+#pragma once
 #include "lib/imgui/imgui.h"
-#include "lib/imgui/imgui_impl_vulkan.h"
 #include "lib/imgui/imgui_impl_glfw.h"
+#include "lib/imgui/imgui_impl_vulkan.h"
 #include <memory>
 #include <vulkan/vulkan.hpp>
 
-
 namespace MCRT {
- 
+
 class CommandBuffer;
 class Window;
 class ImGuiContext {

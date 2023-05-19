@@ -19,13 +19,13 @@ message(STATUS "run glslangValidator to compile shaders ...")
 message("-----all ray tracing shader------ ")
 
 foreach(var ${ALL_RT_SHADER})
-    message(${var})
+    # message(${var})
     get_filename_component(file_name ${var} NAME)
 
     string(CONCAT name ${file_name} .spv)
 
     # message(${name})
-    execute_process(COMMAND ${GLSLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/${name})
+    # execute_process(COMMAND ${GLSLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/${name})
 
     # execute_process(COMMAND ${GLSLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/${name})
 endforeach()
@@ -44,7 +44,6 @@ file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src *.cpp)
 # set(IMGUIDIR ${PROJECT_SOURCE_DIR}/lib/imgui)
 add_library(src ${SRC})
 
- 
 target_link_libraries(src imgui)
- 
+
 add_subdirectory(example)

@@ -27,12 +27,6 @@ std::shared_ptr<Image> Compute_Context::get_out_image()
 void Compute_Context::prepare_descriptorset(std::function<void()> prepare_func)
 {
     prepare_func();
-    Descriptor_Manager::Get_Singleton()
-        ->Make_DescriptorSet(m_out_image,
-                             0,
-                             vk::DescriptorType::eStorageImage,
-                             vk::ShaderStageFlagBits::eCompute,
-                             Descriptor_Manager::Compute);
 
     Descriptor_Manager::Get_Singleton()->CreateDescriptorPool(Descriptor_Manager::Compute);
     Descriptor_Manager::Get_Singleton()->CreateUpdateDescriptorSet(Descriptor_Manager::Compute);

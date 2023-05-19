@@ -64,6 +64,7 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
                  ->get_device()
                  ->get_handle()
                  .createPipelineLayout(layout_create_info);
+    Context::Get_Singleton()->get_debugger()->set_handle_name(layout, "my_lyout");
     // fix ray tracing data in pipeline
     vk::RayTracingPipelineCreateInfoKHR pipeline_create_info;
     pipeline_create_info.setStages(stages)

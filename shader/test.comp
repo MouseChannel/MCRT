@@ -58,7 +58,7 @@ float get_J(int i,
 void main()
 {
 
-    if (!contants.open_filter) {
+    if (!bool(contants.open_filter)) {
 
         vec3 cur_color1 = imageLoad(rt_out_image, ivec2(gl_GlobalInvocationID.xy)).xyz;
         // debugPrintfEXT("message  ray frame %d\n", contants.frame);

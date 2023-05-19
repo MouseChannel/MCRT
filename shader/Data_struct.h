@@ -36,18 +36,6 @@ e_camera = 0,
     e_obj_addresses = 1,
     eTextures = 2 END_ENUM();
 
-struct hitPayload {
-    vec3 hitValue;
-
-    vec3 rayOrigin;
-    uint seed;
-    uint depth;
-    vec3 rayDirection;
-    vec3 weight;
-    bool miss;
-    vec3 point_position;
-    vec3 point_normal;
-};
 struct Camera_data {
 
     mat4 viewInverse; // Camera inverse view matrix
@@ -58,15 +46,16 @@ struct Camera_data {
 };
 
 struct PushContant {
-    int frame;
-    vec4 clearColor;
+
+    // vec4 clearColor;
     vec4 lightPosition;
     float lightIntensity;
-    int lightType;
+    int frame;
+    // int lightType;
 };
 struct PushContant_Compute {
     int frame;
-    bool open_filter;
+    int open_filter;
 };
 
 struct Address {

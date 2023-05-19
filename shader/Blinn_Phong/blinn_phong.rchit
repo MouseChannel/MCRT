@@ -16,10 +16,17 @@
 hitAttributeEXT vec2 attribs;
 
 layout(location = 0) rayPayloadInEXT hitPayload prd;
-// layout(push_constant) uniform _PushContant
-// {
-//     PushContant pcRay;
-// };
+// layout(location = 1) rayPayloadEXT bool isShadowed;
+layout(push_constant) uniform PushContant_
+{
+    PushContant pcRay;
+}
+pc;
+layout(set = 1, binding = e_camera) uniform _camera_data
+{
+
+    Camera_data camera_data;
+};
 layout(set = 0, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
 
 layout(set = 1, binding = e_obj_addresses, scalar) buffer _Address
@@ -68,40 +75,18 @@ void main()
                                                        c.nrm,
                                                        attribs,
                                                        gl_WorldToObjectEXT);
+    vec3 color = pow(material.material.color.xyz, vec3(2.2));
+    vec3 ambient = 0.05f * color;
+    vec3 lightDir = normalize(pc.pcRay.lightPosition.xyz);
 
-    {
-        if (prd.point_normal.x < 0) {
-            prd.point_normal = cur_world_normal;
-            prd.point_position = cur_world_pos;
-        }
-    }
-
-    mat3 normal_coordinate = getNormalSpace(cur_world_normal);
-    uvec3 seed = uvec3(gl_LaunchIDEXT.xy, uint(clockARB()));
-    vec3 local_dir = hemisphereSample_cos(seed);
-    vec3 rayDirection = normal_coordinate * local_dir;
-    // Lambertian reflection
-    vec3 BRDF = material.material.color.xyz / PI;
-    float cos_theta = dot(rayDirection, cur_world_normal);
-    float pdf = 1. / PI;
-    vec3 radiance = BRDF * cos_theta / pdf;
-    prd.rayOrigin = cur_world_pos;
-    prd.rayDirection = rayDirection;
-
-    if (material.material.emit.x > 1e-6) {
-
-        prd.hitValue = material.material.emit.xyz * prd.weight;
-
-        prd.depth = 100;
-    }
-
-    prd.weight *= BRDF * cos_theta / pdf;
-    /*
-    simple path traing
-    shade(p)
-        if ray hit the light
-            return light_emit * BRDF * cosine / pdf
-        else if ray hit an object at q
-            return shade(q) * BRDF * cosine / pdf
-    */
+    float diff = max(dot(lightDir, cur_world_normal), 0.);
+    vec3 light_atten_coff = vec3(pc.pcRay.lightIntensity) / pow(length(pc.pcRay.lightPosition.xyz - cur_world_pos), 2.);
+    vec3 diffuse = diff * light_atten_coff * color;
+    vec3 viewDir = normalize(camera_data.camera_pos.xyz - cur_world_pos);
+    vec3 halfDir = normalize((lightDir + viewDir));
+    float spec = pow(max(dot(halfDir, cur_world_normal), 0.), 32.);
+    vec3 specular = 3 * light_atten_coff * spec;
+    // debugPrintfEXT("message \n", );
+    vec3 radiance = (ambient + diffuse + specular);
+    prd.hitValue = pow(radiance, vec3(1. / 2.2));
 }

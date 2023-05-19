@@ -1,5 +1,5 @@
 #pragma once
-#include "example/blinn_phong/App.cpp"
+#include "example/ray_tracing_blinn_phong/App.cpp"
 #include <iostream>
 
 int main(int, char**)

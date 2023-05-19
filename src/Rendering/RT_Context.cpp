@@ -183,7 +183,7 @@ void RT_Context::create_uniform_buffer()
     };
 
     camera_data = UniformManager::make_uniform({ _camera_data },
-                                               vk::ShaderStageFlagBits::eRaygenKHR,
+                                               vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR,
                                                vk::DescriptorType ::eUniformBuffer);
 
     m_objs_address.resize(Model::models.size());
@@ -214,7 +214,7 @@ void RT_Context::prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modul
                                 vk::Format::eR32G32B32A32Sfloat,
                                 vk::ImageType::e2D,
                                 vk::ImageTiling::eOptimal,
-                                vk::ImageUsageFlagBits::eStorage,
+                                vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled,
                                 vk::ImageAspectFlagBits::eColor,
                                 vk::SampleCountFlagBits::e1));
 

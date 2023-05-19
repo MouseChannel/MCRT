@@ -1,5 +1,5 @@
 
-#include "example/path_tracing/Path_tracing_Context.hpp"
+#include "example/ray_tracing_blinn_phong/blinn_phong_Context.hpp"
 #include "Helper/Camera.hpp"
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Model_Loader/Obj_Loader.hpp"
@@ -15,14 +15,14 @@
 #include "shader/Data_struct.h"
 
 namespace MCRT {
-std::unique_ptr<Context> Context::_instance { new MCRT::Path_tracing_context };
-Path_tracing_context::Path_tracing_context()
+std::unique_ptr<Context> Context::_instance { new MCRT::blinn_phong_context };
+blinn_phong_context::blinn_phong_context()
 {
 }
-Path_tracing_context::~Path_tracing_context()
+blinn_phong_context::~blinn_phong_context()
 {
 }
-void Path_tracing_context::prepare()
+void blinn_phong_context::prepare()
 {
     std::vector<uint32_t> indices {
         0,
@@ -68,20 +68,20 @@ void Path_tracing_context::prepare()
     vertex_buffer = Buffer::CreateDeviceBuffer(positions.data(), positions.size() * sizeof(positions[0]), vk::BufferUsageFlagBits::eVertexBuffer);
     uv_buffer = Buffer::CreateDeviceBuffer(uvs.data(), uvs.size() * sizeof(uvs[0]), vk::BufferUsageFlagBits::eVertexBuffer);
 }
-void Path_tracing_context::init(std::shared_ptr<Window> window)
+void blinn_phong_context::init(std::shared_ptr<Window> window)
 {
     Context::init(window);
     prepare();
-    Obj_loader::load_model("D:/MoChengRT/assets/mocheng.obj");
+    Obj_loader::load_model("D:/MoChengRT/assets/blinn_phong.obj");
 
-    contexts.resize(3);
+    contexts.resize(2);
     // raytracing
     {
         contexts[Context_index::Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
         std::vector<std::shared_ptr<ShaderModule>> rt_shader_modules(RT_Pipeline::eShaderGroupCount);
-        rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rgen.spv"));
-        rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rmiss.spv"));
-        rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rchit.spv"));
+        rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/Blinn_Phong/blinn_phong.rgen.spv"));
+        rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("D:/MoChengRT/shader/Blinn_Phong/blinn_phong.rmiss.spv"));
+        rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/Blinn_Phong/blinn_phong.rchit.spv"));
 
         contexts[Ray_tracing]->prepare(rt_shader_modules);
         contexts[Ray_tracing]->prepare_descriptorset([&]() {
@@ -100,37 +100,37 @@ void Path_tracing_context::init(std::shared_ptr<Window> window)
                                      vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute,
                                      Descriptor_Manager::Ray_Tracing);
             // GBuffer
-            Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(rt_context->get_normal_buffer(), Ray_Tracing_Binding::e_normal_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
+            // Descriptor_Manager::Get_Singleton()
+            //     ->Make_DescriptorSet(rt_context->get_normal_buffer(), Ray_Tracing_Binding::e_normal_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
 
-            Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(rt_context->get_position_buffer(), Ray_Tracing_Binding::e_position_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
+            // Descriptor_Manager::Get_Singleton()
+            //     ->Make_DescriptorSet(rt_context->get_position_buffer(), Ray_Tracing_Binding::e_position_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
             // end Gbuffer`
         });
         contexts[Ray_tracing]->prepare_pipeline(rt_shader_modules);
         contexts[Ray_tracing]->post_prepare();
     }
-    {
-        // Compute_Context
-        contexts[Context_index::Compute] = std::shared_ptr<Compute_Context> { new Compute_Context };
+    // {
+    //     // Compute_Context
+    //     contexts[Context_index::Compute] = std::shared_ptr<Compute_Context> { new Compute_Context };
 
-        std::shared_ptr<ShaderModule> compute_shader {
-            new ShaderModule("D:/MoChengRT/shader/test.comp.spv")
-        };
-        contexts[Compute]->prepare({ compute_shader });
-        contexts[Compute]->prepare_descriptorset([&]() {
-            Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(Context::Get_Singleton()
-                                         ->get_compute_context()
-                                         ->get_out_image(),
-                                     0,
-                                     vk::DescriptorType::eStorageImage,
-                                     vk::ShaderStageFlagBits::eCompute,
-                                     Descriptor_Manager::Compute);
-        });
-        contexts[Compute]->prepare_pipeline({ compute_shader });
-        contexts[Compute]->post_prepare();
-    }
+    //     std::shared_ptr<ShaderModule> compute_shader {
+    //         new ShaderModule("D:/MoChengRT/shader/test.comp.spv")
+    //     };
+    //     contexts[Compute]->prepare({ compute_shader });
+    //     contexts[Compute]->prepare_descriptorset([&]() {
+    //         Descriptor_Manager::Get_Singleton()
+    //             ->Make_DescriptorSet(Context::Get_Singleton()
+    //                                      ->get_compute_context()
+    //                                      ->get_out_image(),
+    //                                  0,
+    //                                  vk::DescriptorType::eStorageImage,
+    //                                  vk::ShaderStageFlagBits::eCompute,
+    //                                  Descriptor_Manager::Compute);
+    //     });
+    //     contexts[Compute]->prepare_pipeline({ compute_shader });
+    //     contexts[Compute]->post_prepare();
+    // }
     { // graphic
         contexts[Context_index::Graphic] = std::shared_ptr<RenderContext> { new RenderContext(m_device) };
 
@@ -141,7 +141,7 @@ void Path_tracing_context::init(std::shared_ptr<Window> window)
         contexts[Graphic]->prepare_descriptorset([&]() { Descriptor_Manager::Get_Singleton()
                                                              ->Make_DescriptorSet(
                                                                  Context::Get_Singleton()
-                                                                     ->get_compute_context()
+                                                                     ->get_rt_context()
                                                                      ->get_out_image(),
                                                                  0,
                                                                  vk::DescriptorType ::eCombinedImageSampler,
@@ -151,17 +151,17 @@ void Path_tracing_context::init(std::shared_ptr<Window> window)
         contexts[Graphic]->post_prepare();
     }
 }
-std::shared_ptr<CommandBuffer> Path_tracing_context::Begin_Frame()
+std::shared_ptr<CommandBuffer> blinn_phong_context::Begin_Frame()
 {
     m_camera->move_update();
     auto cmd = BeginRTFrame();
     EndRTFrame();
-    BeginComputeFrame();
-    EndComputeFrame();
+    // BeginComputeFrame();
+    // EndComputeFrame();
 
     return BeginGraphicFrame();
 }
-void Path_tracing_context::EndFrame()
+void blinn_phong_context::EndFrame()
 {
     auto ee = get_device()->Get_Graphic_queue().getCheckpointData2NV();
     for (auto& i : ee) {
@@ -172,7 +172,7 @@ void Path_tracing_context::EndFrame()
     EndGraphicFrame();
 }
 
-std::shared_ptr<CommandBuffer> Path_tracing_context::BeginRTFrame()
+std::shared_ptr<CommandBuffer> blinn_phong_context::BeginRTFrame()
 {
     // get_device()->get_handle().waitIdle();
     auto& rt_context = contexts[Ray_tracing];
@@ -201,8 +201,8 @@ std::shared_ptr<CommandBuffer> Path_tracing_context::BeginRTFrame()
         pushContant_Ray = PushContant {
             .frame = frame_id,
             // .clearColor { 1 },
-            .lightPosition { 10.f, 15.f, 8.f, 0 },
-            .lightIntensity = 100
+            .lightPosition { 0.f, 0.f, 2.f, 0 },
+            .lightIntensity = 10
         };
         frame_id++;
         cmd->get_handle()
@@ -216,12 +216,12 @@ std::shared_ptr<CommandBuffer> Path_tracing_context::BeginRTFrame()
     return cmd;
 }
 
-void Path_tracing_context::EndRTFrame()
+void blinn_phong_context::EndRTFrame()
 {
     auto& rt_context = contexts[Ray_tracing];
     rt_context->Submit();
 }
-std::shared_ptr<CommandBuffer> Path_tracing_context::BeginGraphicFrame()
+std::shared_ptr<CommandBuffer> blinn_phong_context::BeginGraphicFrame()
 {
     // get_device()->get_handle().waitIdle();
     auto& render_context = contexts[Graphic];
@@ -251,13 +251,13 @@ std::shared_ptr<CommandBuffer> Path_tracing_context::BeginGraphicFrame()
     return cmd;
 }
 
-void Path_tracing_context::EndGraphicFrame()
+void blinn_phong_context::EndGraphicFrame()
 {
     auto& m_render_context = contexts[Graphic];
     m_render_context->Submit();
     m_render_context->EndFrame();
 }
-std::shared_ptr<CommandBuffer> Path_tracing_context::BeginComputeFrame()
+std::shared_ptr<CommandBuffer> blinn_phong_context::BeginComputeFrame()
 {
 
     // compute_context->record_command(cmd);
@@ -322,7 +322,7 @@ std::shared_ptr<CommandBuffer> Path_tracing_context::BeginComputeFrame()
     }
     return cmd;
 }
-void Path_tracing_context::EndComputeFrame()
+void blinn_phong_context::EndComputeFrame()
 {
     auto& compute_context = contexts[2];
     compute_context->Submit();

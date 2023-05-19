@@ -1,5 +1,5 @@
 
-#include "example/blinn_phong/blinn_phone_Context.hpp"
+#include "example/blinn_phong_graphic/blinn_phone_Context.hpp"
 #include "Helper/Camera.hpp"
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Model_Loader/Obj_Loader.hpp"

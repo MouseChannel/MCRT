@@ -20,6 +20,18 @@ public:
         vkSetDebugUtilsObjectNameEXT(Context::Get_Singleton()->get_device()->get_handle(),
                                      (VkDebugUtilsObjectNameInfoEXT*)&info);
     }
+    template <typename T>
+    void set_handle_name(T obj, const std::string name)
+    {
+        vk::DebugUtilsObjectNameInfoEXT info;
+        auto native = static_cast<typename T::NativeType>(obj);
+        auto type = obj.objectType;
+        info.setObjectHandle((uint64_t)native)
+            .setPObjectName(name.c_str())
+            .setObjectType(type);
+        vkSetDebugUtilsObjectNameEXT(Context::Get_Singleton()->get_device()->get_handle(),
+                                     (VkDebugUtilsObjectNameInfoEXT*)&info);
+    }
 
 private:
     void set_object_name(uint64_t object, std::string name, vk::ObjectType type);

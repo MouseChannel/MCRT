@@ -1,3 +1,3 @@
 add_subdirectory(path_tracing)
 
-add_subdirectory(blinn_phong)
+add_subdirectory(ray_tracing_blinn_phong)

@@ -65,8 +65,8 @@ void RT_Context::create_shader_bind_table()
                                                  vk::PhysicalDeviceRayTracingPipelinePropertiesKHR>();
     auto& rt_pipeline_properties = device_properties.get<vk::PhysicalDeviceRayTracingPipelinePropertiesKHR>();
     // set up sbt data
-    uint32_t missCount { 1 };
-    uint32_t hitCount { 1 };
+    auto missCount { miss_shader_count };
+    auto hitCount { hit_shader_count };
     auto handleCount = 1 + missCount + hitCount;
     uint32_t handleSize = rt_pipeline_properties.shaderGroupHandleSize;
 
@@ -106,6 +106,7 @@ void RT_Context::create_shader_bind_table()
     m_SBT_buffer_rmiss = Buffer::create_buffer(nullptr, m_missRegion.size, sbt_buffer_usge);
     m_SBT_buffer_rhit = Buffer::create_buffer(nullptr, m_hitRegion.size, sbt_buffer_usge);
     // assign all kinds of handle data
+
     std::vector<uint8_t> rgen_handles;
     rgen_handles.assign(handles.begin(), handles.begin() + 1 * handleSize);
     std::vector<uint8_t> rmiss_handles;
@@ -120,9 +121,9 @@ void RT_Context::create_shader_bind_table()
     m_hitRegion.setDeviceAddress(m_SBT_buffer_rhit->get_address());
 
     // TODO {missCount or hitcount} >0
-    m_SBT_buffer_rgen->Update(rgen_handles.data(), handleSize);
-    m_SBT_buffer_rmiss->Update(rmiss_handles.data(), handleSize);
-    m_SBT_buffer_rhit->Update(rhit_handles.data(), handleSize);
+    m_SBT_buffer_rgen->Update(rgen_handles.data(), rgen_handles.size());
+    m_SBT_buffer_rmiss->Update(rmiss_handles.data(), rmiss_handles.size());
+    m_SBT_buffer_rhit->Update(rhit_handles.data(), rhit_handles.size());
 }
 
 void RT_Context::prepare_descriptorset(std::function<void()> prepare_func)

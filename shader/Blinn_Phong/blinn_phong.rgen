@@ -15,6 +15,7 @@ layout(push_constant) uniform _PushContant
     PushContant pcRay;
 };
 layout(location = 0) rayPayloadEXT hitPayload prd;
+layout(location = 1) rayPayloadEXT bool isShadowed;
 layout(set = 0, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
 layout(set = 0, binding = e_out_image, rgba32f) uniform image2D image;
 // gbuffer
@@ -36,6 +37,7 @@ void main()
     float tMax = 10000.0;
 
     prd.hitValue = vec3(0);
+  
 
     traceRayEXT(topLevelAS, // acceleration structure
                 rayFlags, // rayFlags

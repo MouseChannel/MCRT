@@ -16,7 +16,7 @@
 hitAttributeEXT vec2 attribs;
 
 layout(location = 0) rayPayloadInEXT hitPayload prd;
-// layout(location = 1) rayPayloadEXT bool isShadowed;
+layout(location = 1) rayPayloadEXT bool isShadowed;
 layout(push_constant) uniform PushContant_
 {
     PushContant pcRay;
@@ -77,16 +77,60 @@ void main()
                                                        gl_WorldToObjectEXT);
     vec3 color = pow(material.material.color.xyz, vec3(2.2));
     vec3 ambient = 0.05f * color;
-    vec3 lightDir = normalize(pc.pcRay.lightPosition.xyz);
+    vec3 lightDir = vec3(0);
+    vec3 light_atten_coff = vec3(0);
+    if (false) {
+        // directional light
+
+        lightDir = normalize(pc.pcRay.lightPosition.xyz);
+        light_atten_coff = vec3(pc.pcRay.lightIntensity);
+    } else {
+        // point light
+        lightDir = normalize(pc.pcRay.lightPosition.xyz - cur_world_pos);
+        light_atten_coff = vec3(pc.pcRay.lightIntensity) / pow(length(pc.pcRay.lightPosition.xyz - cur_world_pos), 2.);
+    }
 
     float diff = max(dot(lightDir, cur_world_normal), 0.);
-    vec3 light_atten_coff = vec3(pc.pcRay.lightIntensity) / pow(length(pc.pcRay.lightPosition.xyz - cur_world_pos), 2.);
+   
     vec3 diffuse = diff * light_atten_coff * color;
     vec3 viewDir = normalize(camera_data.camera_pos.xyz - cur_world_pos);
     vec3 halfDir = normalize((lightDir + viewDir));
     float spec = pow(max(dot(halfDir, cur_world_normal), 0.), 32.);
     vec3 specular = 3 * light_atten_coff * spec;
-    // debugPrintfEXT("message \n", );
-    vec3 radiance = (ambient + diffuse + specular);
+
+    vec3 radiance = vec3(0);
+
+    
+    if (dot(cur_world_normal, lightDir) > 0) {
+        float tMin = 0.001;
+        float tMax = length(pc.pcRay.lightPosition.xyz - cur_world_pos);
+        vec3 origin = cur_world_pos;
+        vec3 rayDir = lightDir;
+        uint flags = gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT;
+        isShadowed = true;
+        traceRayEXT(topLevelAS, // acceleration structure
+                    flags, // rayFlags
+                    0xFF, // cullMask
+                    0, // sbtRecordOffset
+                    0, // sbtRecordStride
+                    1, // missIndex
+                    origin, // ray origin
+                    tMin, // ray min range
+                    rayDir, // ray direction
+                    tMax, // ray max range
+                    1 // payload (location = 1)
+        );
+
+        if (isShadowed) {
+            // debugPrintfEXT("message  in shadow\n");
+            radiance = 0.3 * (ambient + diffuse);
+        } else {
+            // Specular
+            // debugPrintfEXT("message  not in shadow\n");
+
+            radiance = (ambient + diffuse + specular);
+        }
+    }
     prd.hitValue = pow(radiance, vec3(1. / 2.2));
+    prd.hitValue = radiance;
 }

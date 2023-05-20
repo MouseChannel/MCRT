@@ -2,13 +2,13 @@
 #include "Wrapper/Pipeline/Pipeline_base.hpp"
 namespace MCRT {
 class ShaderModule;
- 
+
 class RT_Pipeline : public Pipeline_base {
 public:
     enum {
         eRaygen,
         eMiss,
-        // eMiss2,s
+        eMiss2,
         eClosestHit,
         eShaderGroupCount
     };
@@ -21,7 +21,7 @@ public:
 
 private:
     std::vector<std::shared_ptr<ShaderModule>> shader_modules;
-    std::vector<vk::RayTracingShaderGroupCreateInfoKHR> groups;
+    std::vector<vk::RayTracingShaderGroupCreateInfoKHR>  groups;
     vk::PipelineLayout layout;
 };
 }

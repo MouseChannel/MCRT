@@ -16,6 +16,7 @@
 
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance { new MCRT::blinn_phong_context };
+float blinn_phong_context::light_pos_x = 0, blinn_phong_context::light_pos_y = 0, blinn_phong_context::light_pos_z = 0;
 blinn_phong_context::blinn_phong_context()
 {
 }
@@ -72,17 +73,21 @@ void blinn_phong_context::init(std::shared_ptr<Window> window)
 {
     Context::init(window);
     prepare();
-    Obj_loader::load_model("D:/MoChengRT/assets/blinn_phong.obj");
+    Obj_loader::load_model("D:/MoChengRT/assets/girl.obj");
 
     contexts.resize(2);
     // raytracing
     {
+
         contexts[Context_index::Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
         std::vector<std::shared_ptr<ShaderModule>> rt_shader_modules(RT_Pipeline::eShaderGroupCount);
         rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/Blinn_Phong/blinn_phong.rgen.spv"));
         rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("D:/MoChengRT/shader/Blinn_Phong/blinn_phong.rmiss.spv"));
+        rt_shader_modules[RT_Pipeline::eMiss2].reset(new ShaderModule("D:/MoChengRT/shader/Blinn_Phong/blinn_phong_shadow.rmiss.spv"));
         rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/Blinn_Phong/blinn_phong.rchit.spv"));
-
+        Context::Get_Singleton()->get_rt_context()->set_hit_shader_count(1);
+        Context::Get_Singleton()->get_rt_context()->set_miss_shader_count(2);
+        Context::Get_Singleton()->get_rt_context()->set_constants_size(sizeof(PushContant));
         contexts[Ray_tracing]->prepare(rt_shader_modules);
         contexts[Ray_tracing]->prepare_descriptorset([&]() {
             auto rt_context = Context::Get_Singleton()->get_rt_context();
@@ -108,6 +113,7 @@ void blinn_phong_context::init(std::shared_ptr<Window> window)
             // end Gbuffer`
         });
         contexts[Ray_tracing]->prepare_pipeline(rt_shader_modules);
+
         contexts[Ray_tracing]->post_prepare();
     }
     // {
@@ -148,6 +154,7 @@ void blinn_phong_context::init(std::shared_ptr<Window> window)
                                                                  vk::ShaderStageFlagBits::eFragment,
                                                                  Descriptor_Manager::Graphic); });
         contexts[Graphic]->prepare_pipeline(graphic_shader_modules);
+
         contexts[Graphic]->post_prepare();
     }
 }
@@ -201,7 +208,7 @@ std::shared_ptr<CommandBuffer> blinn_phong_context::BeginRTFrame()
         pushContant_Ray = PushContant {
             .frame = frame_id,
             // .clearColor { 1 },
-            .lightPosition { 0.f, 0.f, 2.f, 0 },
+            .lightPosition { light_pos_x, light_pos_y, light_pos_z, 0 },
             .lightIntensity = 10
         };
         frame_id++;

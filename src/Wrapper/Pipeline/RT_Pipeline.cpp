@@ -1,5 +1,6 @@
 #include "Wrapper/Pipeline/RT_pipeline.hpp"
 #include "Helper/DescriptorManager.hpp"
+#include "Rendering/RT_Context.hpp"
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Shader_module.hpp"
@@ -10,25 +11,33 @@ namespace MCRT {
 RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
 {
 
-    // shader_modules.resize(eShaderGroupCount);
-    // shader_modules[eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rgen.spv"));
-    // shader_modules[eMiss].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rmiss.spv"));
-    // shader_modules[eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rchit.spv"));
+    auto rgen_shader_count { 1 };
+    auto rmiss_shader_count { Context::Get_Singleton()->get_rt_context()->get_miss_shader_count() };
+    auto rhit_shader_count { Context::Get_Singleton()->get_rt_context()->get_hit_shader_count() };
 
+    auto rgen_index = 0;
+    auto rmiss_index = rgen_shader_count;
+    auto rhit_index = rgen_shader_count + rmiss_shader_count;
     std::vector<vk::PipelineShaderStageCreateInfo>
-        stages(eShaderGroupCount);
-    stages[eRaygen]
+        stages(rgen_shader_count + rmiss_shader_count + rhit_shader_count);
+    stages[rgen_index]
         .setPName("main")
         .setStage(vk::ShaderStageFlagBits ::eRaygenKHR)
         .setModule(shader_modules[eRaygen]->get_handle());
-    stages[eMiss]
-        .setPName("main")
-        .setStage(vk::ShaderStageFlagBits ::eMissKHR)
-        .setModule(shader_modules[eMiss]->get_handle());
-    stages[eClosestHit]
-        .setPName("main")
-        .setStage(vk::ShaderStageFlagBits ::eClosestHitKHR)
-        .setModule(shader_modules[eClosestHit]->get_handle());
+
+    for (int i = 0; i < rmiss_shader_count; i++) {
+        stages[rmiss_index + i]
+            .setPName("main")
+            .setStage(vk::ShaderStageFlagBits ::eMissKHR)
+            .setModule(shader_modules[eMiss + i]->get_handle());
+    }
+
+    for (int i = 0; i < rhit_shader_count; i++) {
+        stages[rhit_index + i]
+            .setPName("main")
+            .setStage(vk::ShaderStageFlagBits ::eClosestHitKHR)
+            .setModule(shader_modules[eClosestHit + i]->get_handle());
+    }
 
     vk::RayTracingShaderGroupCreateInfoKHR create_info;
     create_info
@@ -36,19 +45,22 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
         .setAnyHitShader(VK_SHADER_UNUSED_KHR)
         .setClosestHitShader(VK_SHADER_UNUSED_KHR)
         .setIntersectionShader(VK_SHADER_UNUSED_KHR)
-        .setGeneralShader(eRaygen);
+        .setGeneralShader(rgen_index);
     groups.push_back(create_info);
-    create_info.setGeneralShader(eMiss);
-    groups.push_back(create_info);
+    for (int i = 0; i < rmiss_shader_count; i++) {
+        create_info.setGeneralShader(rmiss_index + i);
+        groups.push_back(create_info);
+    }
+
     create_info.setType(vk::RayTracingShaderGroupTypeKHR ::eTrianglesHitGroup)
-        .setClosestHitShader(eClosestHit)
+        .setClosestHitShader(rhit_index)
         .setGeneralShader(VK_SHADER_UNUSED_KHR);
     groups.push_back(create_info);
     // pipeline layout
     vk::PushConstantRange push_contant;
     push_contant.setStageFlags(vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR)
         .setOffset(0)
-        .setSize(sizeof(PushContant));
+        .setSize(Context::Get_Singleton()->get_rt_context()->get_constants_size());
     vk::PipelineLayoutCreateInfo layout_create_info;
 
     std::vector<vk::DescriptorSetLayout> descriptor_layouts {

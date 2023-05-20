@@ -64,10 +64,31 @@ public:
     // }
     void record_command(std::shared_ptr<CommandBuffer>) override;
     void build_accelerate_structure();
-    // void reset()
-    // {
-    //     frame_id = 0;
-    // }
+    void set_hit_shader_count(int count)
+    {
+        hit_shader_count = count;
+    }
+    auto get_hit_shader_count()
+    {
+        return hit_shader_count;
+    }
+    void set_miss_shader_count(int count)
+    {
+        miss_shader_count = count;
+    }
+    auto get_miss_shader_count()
+    {
+        return miss_shader_count;
+    }
+    void set_constants_size(int size)
+    {
+        push_constants_size = size;
+    }
+    auto get_constants_size()
+    {
+        return push_constants_size;
+    }
+    
 
 private:
     void create_shader_bind_table();
@@ -102,10 +123,9 @@ private:
     std::shared_ptr<Buffer> m_SBT_buffer_rmiss;
 
     std::shared_ptr<Buffer> m_SBT_buffer_rhit;
+    int push_constants_size;
 
-    // int frame_id = 0;
-    // PushContant pushContant_Ray;
-    Vertex testcheck { .color { 2, 2, 2 } };
-    // std::shared_ptr<Buffer> m_V_P_UBO;
+    int miss_shader_count { 0 };
+    int hit_shader_count { 0 };
 };
 }

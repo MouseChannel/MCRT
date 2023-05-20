@@ -39,6 +39,7 @@ public:
         }
         throw std::runtime_error("it is not Ray_Tracing context");
     }
+    static float light_pos_x, light_pos_y, light_pos_z;
 
 private:
     std::shared_ptr<CommandBuffer> BeginGraphicFrame();

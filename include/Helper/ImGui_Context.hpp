@@ -14,7 +14,7 @@ public:
     ImGuiContext();
     ~ImGuiContext();
     void Init(std::shared_ptr<Window> window);
-    void Update(std::shared_ptr<CommandBuffer> cmd);
+    void Update(std::shared_ptr<CommandBuffer> cmd, std::function<void()> func);
 
 private:
     vk::DescriptorPool descriptor_pool;

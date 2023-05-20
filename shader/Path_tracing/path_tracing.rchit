@@ -69,6 +69,7 @@ void main()
                                                        attribs,
                                                        gl_WorldToObjectEXT);
 
+    // fill gbuffer
     {
         if (prd.point_normal.x < 0) {
             prd.point_normal = cur_world_normal;

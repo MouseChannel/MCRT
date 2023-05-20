@@ -123,6 +123,7 @@ protected:
     std::shared_ptr<Camera> m_camera;
     bool enable_filter;
     int frame_id = 0;
+    
 };
 
 } // namespace MCRT

@@ -71,30 +71,17 @@ void ImGuiContext::Init(std::shared_ptr<Window> window)
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 }
-void ImGuiContext::Update(std::shared_ptr<CommandBuffer> cmd)
+void ImGuiContext::Update(std::shared_ptr<CommandBuffer> cmd, std::function<void()> func)
 {
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     int c = 1;
     ImGui::NewFrame();
     {
+      
         ImGui::Begin("its imgui window"); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-        ImGui::Text("im a sentence!");
-        // if (ImGui::Button("Close Me"))
-        //     show_another_window = false;
-        if (Context::Get_Singleton()->get_enable_filter()) {
-            if (ImGui::Button("Disable filter")) {
-                Context::Get_Singleton()->set_enable_filter(false);
-            }
-        } else {
-            if (ImGui::Button("Enable filter")) {
-                Context::Get_Singleton()->set_enable_filter(true);
-            }
-        }
-        // if (ImGui::Button("Button"))
-        //     c++;
-        ImGui::Text("counter = %d", Context::Get_Singleton()->get_enable_filter());
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", io.DeltaTime, 1.0f / io.DeltaTime);
+        func();
+       
         ImGui::End();
     }
     ImGui::Render();

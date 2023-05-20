@@ -72,16 +72,20 @@ void Path_tracing_context::init(std::shared_ptr<Window> window)
 {
     Context::init(window);
     prepare();
-    Obj_loader::load_model("D:/MoChengRT/assets/mocheng.obj");
+    Obj_loader::load_model("D:/MoChengRT/assets/girl.obj");
 
     contexts.resize(3);
     // raytracing
     {
+      
         contexts[Context_index::Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
         std::vector<std::shared_ptr<ShaderModule>> rt_shader_modules(RT_Pipeline::eShaderGroupCount);
         rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rgen.spv"));
         rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rmiss.spv"));
         rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rchit.spv"));
+        Context::Get_Singleton()->get_rt_context()->set_hit_shader_count(1);
+        Context::Get_Singleton()->get_rt_context()->set_miss_shader_count(1);
+        Context::Get_Singleton()->get_rt_context()->set_constants_size(sizeof(PushContant));
 
         contexts[Ray_tracing]->prepare(rt_shader_modules);
         contexts[Ray_tracing]->prepare_descriptorset([&]() {
@@ -108,6 +112,7 @@ void Path_tracing_context::init(std::shared_ptr<Window> window)
             // end Gbuffer`
         });
         contexts[Ray_tracing]->prepare_pipeline(rt_shader_modules);
+
         contexts[Ray_tracing]->post_prepare();
     }
     {

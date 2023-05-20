@@ -16,4 +16,4 @@ specially:
 
 ```
 
-![demo](assets/demo_pathtracing.gif "demo")
+![cook_torrance](../../assets/cook_torrance_path_tracing.png "👍👍👍👍")

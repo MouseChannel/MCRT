@@ -9,4 +9,4 @@
 
 ```
 
-![demo](assets/demo_pathtracing.gif "demo")
+![path_tracing](../../assets/path_tracing.gif "👍👍")

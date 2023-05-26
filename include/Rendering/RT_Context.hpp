@@ -43,13 +43,17 @@ public:
         return m_command_buffer;
     }
     std::shared_ptr<Image> get_out_image();
-    auto get_normal_buffer()
+    // auto get_normal_buffer()
+    // {
+    //     return m_normal_gbuffer;
+    // }
+    // auto get_position_buffer()
+    // {
+    //     return m_position_gbuffer;
+    // }
+    auto get_gbuffer()
     {
-        return m_normal_gbuffer;
-    }
-    auto get_position_buffer()
-    {
-        return m_position_gbuffer;
+        return m_gbuffer;
     }
     void prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;
     void post_prepare() override;
@@ -88,7 +92,6 @@ public:
     {
         return push_constants_size;
     }
-    
 
 private:
     void create_shader_bind_table();
@@ -105,8 +108,9 @@ private:
     // std::vector<std::shared_ptr<RenderTarget>> render_targets;
     std::shared_ptr<Image> m_out_image;
     // gbuffer
-    std::shared_ptr<Image> m_position_gbuffer;
-    std::shared_ptr<Image> m_normal_gbuffer;
+    // std::shared_ptr<Image> m_position_gbuffer;
+    // std::shared_ptr<Image> m_normal_gbuffer;
+    std::vector<std::shared_ptr<Image>> m_gbuffer;
 
     // end gbuffer
     std::shared_ptr<Device> m_device;

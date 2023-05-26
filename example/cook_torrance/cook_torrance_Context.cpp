@@ -94,23 +94,29 @@ void cook_torrance_context::init(std::shared_ptr<Window> window)
             auto rt_context = Context::Get_Singleton()->get_rt_context();
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(AS_Builder::Get_Singleton()->get_tlas(),
+                                     Descriptor_Manager::Ray_Tracing,
                                      Ray_Tracing_Binding::e_tlas,
                                      vk::DescriptorType::eAccelerationStructureKHR,
-                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR,
-                                     Descriptor_Manager::Ray_Tracing);
+                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR);
 
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(rt_context->get_out_image(),
+                                     Descriptor_Manager::Ray_Tracing,
                                      Ray_Tracing_Binding::e_out_image,
                                      vk::DescriptorType::eStorageImage,
-                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute,
-                                     Descriptor_Manager::Ray_Tracing);
+                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute);
             // GBuffer
             Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(rt_context->get_normal_buffer(), Ray_Tracing_Binding::e_normal_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
+                ->Make_DescriptorSet(rt_context->get_gbuffer(),
+                                     Descriptor_Manager::Ray_Tracing,
+                                     Ray_Tracing_Binding::e_gbuffer,
+                                     vk::DescriptorType::eStorageImage,
+                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute);
+            // Descriptor_Manager::Get_Singleton()
+            //     ->Make_DescriptorSet(rt_context->get_normal_buffer(), Ray_Tracing_Binding::e_normal_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
 
-            Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(rt_context->get_position_buffer(), Ray_Tracing_Binding::e_position_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
+            // Descriptor_Manager::Get_Singleton()
+            //     ->Make_DescriptorSet(rt_context->get_position_buffer(), Ray_Tracing_Binding::e_position_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
             // end Gbuffer`
         });
         contexts[Ray_tracing]->prepare_pipeline(rt_shader_modules);
@@ -122,18 +128,17 @@ void cook_torrance_context::init(std::shared_ptr<Window> window)
         contexts[Context_index::Compute] = std::shared_ptr<Compute_Context> { new Compute_Context };
 
         std::shared_ptr<ShaderModule> compute_shader {
-            new ShaderModule("D:/MoChengRT/shader/test.comp.spv")
+            new ShaderModule("D:/MoChengRT/shader/filter.comp.spv")
         };
         contexts[Compute]->prepare({ compute_shader });
         contexts[Compute]->prepare_descriptorset([&]() {
-            Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(Context::Get_Singleton()
-                                         ->get_compute_context()
-                                         ->get_out_image(),
-                                     0,
-                                     vk::DescriptorType::eStorageImage,
-                                     vk::ShaderStageFlagBits::eCompute,
-                                     Descriptor_Manager::Compute);
+            Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(Context::Get_Singleton()
+                                                                        ->get_compute_context()
+                                                                        ->get_out_image(),
+                                                                    Descriptor_Manager::Compute,
+                                                                    0,
+                                                                    vk::DescriptorType::eStorageImage,
+                                                                    vk::ShaderStageFlagBits::eCompute);
         });
         contexts[Compute]->prepare_pipeline({ compute_shader });
         contexts[Compute]->post_prepare();
@@ -145,15 +150,14 @@ void cook_torrance_context::init(std::shared_ptr<Window> window)
         graphic_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/shader/post.vert.spv"));
         graphic_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/shader/post.frag.spv"));
         contexts[Graphic]->prepare(graphic_shader_modules);
-        contexts[Graphic]->prepare_descriptorset([&]() { Descriptor_Manager::Get_Singleton()
-                                                             ->Make_DescriptorSet(
-                                                                 Context::Get_Singleton()
-                                                                     ->get_compute_context()
-                                                                     ->get_out_image(),
-                                                                 0,
-                                                                 vk::DescriptorType ::eCombinedImageSampler,
-                                                                 vk::ShaderStageFlagBits::eFragment,
-                                                                 Descriptor_Manager::Graphic); });
+        contexts[Graphic]->prepare_descriptorset([&]() { Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(
+                                                             Context::Get_Singleton()
+                                                                 ->get_compute_context()
+                                                                 ->get_out_image(),
+                                                             Descriptor_Manager::Graphic,
+                                                             0,
+                                                             vk::DescriptorType ::eCombinedImageSampler,
+                                                             vk::ShaderStageFlagBits::eFragment); });
         contexts[Graphic]->prepare_pipeline(graphic_shader_modules);
         contexts[Graphic]->post_prepare();
     }

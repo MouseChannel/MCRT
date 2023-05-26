@@ -31,7 +31,7 @@ public:
     void add_blas_obj(std::shared_ptr<Model> obj);
 
     void build_tlas();
-    [[nodiscard("missing tlas")]] auto& get_tlas()
+    [[nodiscard("missing tlas")]] auto get_tlas()
     {
         return top_as;
     }

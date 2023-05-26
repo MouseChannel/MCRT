@@ -1,4 +1,4 @@
-#include "example/path_tracing/App.hpp"
+#include "example/ray_tracing_blinn_phong/App.hpp"
 #include "Helper/ImGui_Context.hpp"
 #include "Helper/Uniform_Manager.hpp"
 #include "Rendering/Context.hpp"

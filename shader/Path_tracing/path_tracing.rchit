@@ -43,7 +43,8 @@ layout(buffer_reference, scalar) readonly buffer _Material
 
 void main()
 {
-
+    // prd.depth++;
+    // return;
     Address address = addresses.address[gl_InstanceCustomIndexEXT];
     _Vertices vertices = _Vertices(address.vertexAddress);
     _Indices indices = _Indices(address.indexAddress);
@@ -84,11 +85,12 @@ void main()
     // Lambertian reflection
     vec3 BRDF = material.material.color.xyz / PI;
     float cos_theta = dot(rayDirection, cur_world_normal);
-    float pdf = 1. / PI;
-    vec3 radiance = BRDF * cos_theta / pdf;
+    float cos_in = dot(normalize(-gl_WorldRayDirectionEXT), cur_world_normal);
+    float pdf = 1 / PI;
+    vec3 radiance = BRDF * cos_theta * cos_theta / pdf;
     prd.rayOrigin = cur_world_pos;
     prd.rayDirection = rayDirection;
-
+    prd.depth++;
     if (material.material.emit.x > 1e-6) {
 
         prd.hitValue = material.material.emit.xyz * prd.weight;
@@ -96,7 +98,7 @@ void main()
         prd.depth = 100;
     }
 
-    prd.weight *= BRDF * cos_theta / pdf;
+    prd.weight *= radiance;
     /*
     simple path traing
     shade(p)

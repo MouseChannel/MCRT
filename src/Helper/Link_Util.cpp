@@ -159,3 +159,17 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetCheckpointNV(
         throw std::runtime_error("fail set point");
     }
 }
+VKAPI_ATTR VkResult VKAPI_CALL vkGetDeviceFaultInfoEXT(
+    VkDevice device,
+    VkDeviceFaultCountsEXT* pFaultCounts,
+    VkDeviceFaultInfoEXT* pFaultInfo)
+{
+    auto func = (PFN_vkGetDeviceFaultInfoEXT)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkGetDeviceFaultInfoEXT");
+
+    if (func != nullptr) {
+        std::cout << "in" << std::endl;
+        func(device, pFaultCounts, pFaultInfo);
+    } else {
+        throw std::runtime_error("fail set point");
+    }
+}

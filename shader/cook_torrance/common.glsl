@@ -43,16 +43,17 @@ vec3 microfacetBRDF(in vec3 L, in vec3 V, in vec3 N, in vec3 baseColor, in float
     // in case of metals, baseColor contains F0
     f0 = mix(f0, baseColor, metallicness);
 
+ 
+
     // specular microfacet (cook-torrance) BRDF
     vec3 F = fresnelSchlick(VoH, f0);
     float D = D_GGX(NoH, roughness);
     float G = G_Smith(NoV, NoL, roughness);
     vec3 spec = (D * G * F) / max(4.0 * NoV * NoL, 0.001);
 
-    // diffuse
+   // diffuse
     vec3 notSpec = vec3(1.0) - F; // if not specular, use as diffuse
     notSpec *= 1.0 - metallicness; // no diffuse for metals
     vec3 diff = notSpec * baseColor / PI;
-
     return diff + spec;
 }

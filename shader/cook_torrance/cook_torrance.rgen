@@ -19,8 +19,8 @@ layout(location = 0) rayPayloadEXT hitPayload prd;
 layout(set = 0, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
 layout(set = 0, binding = e_out_image, rgba32f) uniform image2D image;
 // gbuffer
-layout(set = 0, binding = e_position_gbuffer, rgba32f) uniform image2D posiiotn;
-layout(set = 0, binding = e_normal_gbuffer, rgba32f) uniform image2D normal;
+layout(set = 0, binding = e_gbuffer, rgba32f) uniform image2D gbuffer[];
+// layout(set = 0, binding = e_normal_gbuffer, rgba32f) uniform image2D normal;
 // gbuffer end
 layout(set = 1, binding = e_camera) uniform _camera_data
 {
@@ -60,9 +60,9 @@ void main()
         prd.depth++;
     }
 
-    imageStore(posiiotn, ivec2(gl_LaunchIDEXT.xy), vec4(prd.point_position, 0));
+    imageStore(gbuffer[position], ivec2(gl_LaunchIDEXT.xy), vec4(prd.point_position, 0));
 
-    imageStore(normal, ivec2(gl_LaunchIDEXT.xy), vec4(prd.point_normal, 0));
+    imageStore(gbuffer[normal], ivec2(gl_LaunchIDEXT.xy), vec4(prd.point_normal, 0));
 
     imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(prd.hitValue, 1.f));
     return;

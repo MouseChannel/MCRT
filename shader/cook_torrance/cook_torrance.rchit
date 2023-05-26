@@ -86,8 +86,8 @@ void main()
     vec3 rayDirection = normal_coordinate * local_dir;
     // Lambertian reflection
     vec3 BRDF = material.material.color.xyz / PI;
-    vec3 temp = BRDF;
-    if (gl_InstanceCustomIndexEXT == 1) {
+
+    if (gl_InstanceCustomIndexEXT == 8) {
         // cook torrance BRDF
         float metallicness = pcRay.metallicness;
         float fresnelReflect = 1.;
@@ -100,7 +100,7 @@ void main()
         // debugPrintfEXT("message %f %f %f |%f %f %f | \n", temp.x, temp.y, temp.z, BRDF.x, BRDF.y, BRDF.z);
     }
     float cos_theta = dot(rayDirection, cur_world_normal);
-    float pdf = 1. / PI;
+    float pdf = cos_theta / PI;
     vec3 radiance = BRDF * cos_theta / pdf;
     prd.rayOrigin = cur_world_pos;
     prd.rayDirection = rayDirection;

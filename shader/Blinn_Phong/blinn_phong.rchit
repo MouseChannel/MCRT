@@ -91,7 +91,7 @@ void main()
     }
 
     float diff = max(dot(lightDir, cur_world_normal), 0.);
-   
+
     vec3 diffuse = diff * light_atten_coff * color;
     vec3 viewDir = normalize(camera_data.camera_pos.xyz - cur_world_pos);
     vec3 halfDir = normalize((lightDir + viewDir));
@@ -100,7 +100,6 @@ void main()
 
     vec3 radiance = vec3(0);
 
-    
     if (dot(cur_world_normal, lightDir) > 0) {
         float tMin = 0.001;
         float tMax = length(pc.pcRay.lightPosition.xyz - cur_world_pos);
@@ -131,6 +130,6 @@ void main()
             radiance = (ambient + diffuse + specular);
         }
     }
-    prd.hitValue = pow(radiance, vec3(1. / 2.2));
+    // prd.hitValue = pow(radiance, vec3(1. / 2.2));
     prd.hitValue = radiance;
 }

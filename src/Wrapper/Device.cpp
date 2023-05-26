@@ -74,8 +74,7 @@ Device::Device()
     normal_feature.setShaderInt64(true)
         .setShaderFloat64(true)
         .setShaderStorageImageMultisample(true);
-
-    auto& _create_info = _features.get();
+     auto& _create_info = _features.get();
     _create_info.setQueueCreateInfos(queue_create_info)
         .setPEnabledExtensionNames(deviceRequiredExtensions)
         .setPEnabledFeatures(&normal_feature);

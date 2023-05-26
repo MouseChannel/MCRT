@@ -101,7 +101,7 @@ void RenderContext::prepare_descriptorset(std::function<void()> prepare)
     Descriptor_Manager::Get_Singleton()
         ->CreateDescriptorPool(Descriptor_Manager::Graphic);
     Descriptor_Manager::Get_Singleton()
-        ->CreateUpdateDescriptorSet(Descriptor_Manager::Graphic);
+        ->update_descriptor_set(Descriptor_Manager::Graphic);
 }
 void RenderContext::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
 {

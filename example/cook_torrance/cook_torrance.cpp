@@ -1,4 +1,4 @@
-#pragma once
+
 #include "example/cook_torrance/App.cpp"
 #include <iostream>
 

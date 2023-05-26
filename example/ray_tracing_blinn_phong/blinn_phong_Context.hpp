@@ -8,7 +8,7 @@ class blinn_phong_context : public Context {
 public:
     enum Context_index { Graphic,
                          Ray_tracing,
-    };
+                         Compute };
     blinn_phong_context();
     ~blinn_phong_context();
     void init(std::shared_ptr<Window>) override;

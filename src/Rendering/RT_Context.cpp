@@ -142,9 +142,9 @@ void RT_Context::prepare_descriptorset(std::function<void()> prepare_func)
     Descriptor_Manager::Get_Singleton()->CreateDescriptorPool(Descriptor_Manager::Ray_Tracing);
 
     Descriptor_Manager::Get_Singleton()->CreateDescriptorPool(Descriptor_Manager::Global);
-    Descriptor_Manager::Get_Singleton()->CreateUpdateDescriptorSet(Descriptor_Manager::Ray_Tracing);
+    Descriptor_Manager::Get_Singleton()->update_descriptor_set(Descriptor_Manager::Ray_Tracing);
 
-    Descriptor_Manager::Get_Singleton()->CreateUpdateDescriptorSet(Descriptor_Manager::Global);
+    Descriptor_Manager::Get_Singleton()->update_descriptor_set(Descriptor_Manager::Global);
 }
 void RT_Context::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
 {
@@ -222,27 +222,28 @@ void RT_Context::prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modul
     m_out_image->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
 
     // gbuffer
-    m_position_gbuffer.reset(new Image(800,
-                                       749,
-                                       vk::Format::eR32G32B32A32Sfloat,
-                                       vk::ImageType::e2D,
-                                       vk::ImageTiling::eOptimal,
-                                       vk::ImageUsageFlagBits::eStorage,
-                                       vk::ImageAspectFlagBits::eColor,
-                                       vk::SampleCountFlagBits::e1));
+    m_gbuffer.resize(Gbuffer_Index::gbuffer_count);
+    m_gbuffer[Gbuffer_Index::position].reset(new Image(800,
+                                                       749,
+                                                       vk::Format::eR32G32B32A32Sfloat,
+                                                       vk::ImageType::e2D,
+                                                       vk::ImageTiling::eOptimal,
+                                                       vk::ImageUsageFlagBits::eStorage,
+                                                       vk::ImageAspectFlagBits::eColor,
+                                                       vk::SampleCountFlagBits::e1));
 
-    m_position_gbuffer->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
+    m_gbuffer[Gbuffer_Index::position]->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
 
-    m_normal_gbuffer.reset(new Image(800,
-                                     749,
-                                     vk::Format::eR32G32B32A32Sfloat,
-                                     vk::ImageType::e2D,
-                                     vk::ImageTiling::eOptimal,
-                                     vk::ImageUsageFlagBits::eStorage,
-                                     vk::ImageAspectFlagBits::eColor,
-                                     vk::SampleCountFlagBits::e1));
+    m_gbuffer[Gbuffer_Index::normal].reset(new Image(800,
+                                                     749,
+                                                     vk::Format::eR32G32B32A32Sfloat,
+                                                     vk::ImageType::e2D,
+                                                     vk::ImageTiling::eOptimal,
+                                                     vk::ImageUsageFlagBits::eStorage,
+                                                     vk::ImageAspectFlagBits::eColor,
+                                                     vk::SampleCountFlagBits::e1));
 
-    m_normal_gbuffer->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
+    m_gbuffer[Gbuffer_Index::normal]->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
     // end gbuffer
     create_uniform_buffer();
 

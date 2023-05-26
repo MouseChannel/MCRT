@@ -61,12 +61,12 @@ vec3 hemisphereSample_cos(in uvec3 seed)
     float v = pcg3d.x;
     float u = pcg3d.y;
     float phi = v * 2.0 * PI;
-    float cosTheta = sqrt(u);
+    float cosTheta = sqrt(1. - u);
     float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
     // float theta = asin(sqrt(u));
     // return vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
 
-    return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+    return vec3(cos(phi) * sqrt(u), sin(phi) * sqrt(u), cosTheta);
 }
 
 vec3 hemisphereSample_uniform(in uvec3 seed)

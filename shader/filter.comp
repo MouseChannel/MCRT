@@ -1,0 +1,156 @@
+#version 460
+#extension GL_EXT_debug_printf : enable
+
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+#include "Data_struct.h"
+// layout(local_size_x = 8) in;
+layout(push_constant) uniform _PushContant_Compute
+{
+    PushContant_Compute contants;
+};
+layout(set = 0, binding = e_out_image, rgba32f) uniform image2D rt_out_image;
+layout(set = 1, binding = 0, rgba32f) uniform image2D image;
+
+// gbuffer
+layout(set = 0, binding = e_gbuffer, rgba32f) uniform image2D gbuffer[];
+
+// gbuffer end
+
+float get_D_normal(float normal_i, float normal_j)
+{
+    return acos(dot(normal_i, normal_j));
+}
+float get_D_plane(float normal_i, float position_i, float position_j)
+{
+    float _distance = position_j - position_i;
+    return normal_i * (_distance) / length(_distance);
+}
+float get_J(int i,
+            int j,
+            vec3 normal_i,
+            vec3 normal_j,
+            vec3 position_i,
+            vec3 position_j,
+            vec3 color_i,
+            vec3 color_j)
+
+{
+#define sqr(p) pow(p, 2)
+    const float SIGMA_p = 32.0f;
+    const float SIGMA_color = 0.6f;
+    const float SIGMA_n = 0.1f;
+    const float SIGMA_plane = 0.1f;
+
+    float D_position = length(float(i - j));
+    float D_color = length(color_i - color_j);
+    float D_normal = acos(dot(normal_i, normal_j));
+    float D_plane = 0;
+    // if (length(position_j - position_i) == 0) {
+    //     debugPrintfEXT("has ooo\n");
+    // }
+    if (D_position > 0)
+        D_plane = dot(normal_i, (position_j - position_i) / length((position_j - position_i)));
+
+    return exp(sqr(D_position) / (-2 * sqr(SIGMA_p)) + sqr(D_color) / (-2 * sqr(SIGMA_color)) + sqr(D_normal) / (-2 * sqr(SIGMA_n)) + sqr(D_plane) / (-2 * sqr(SIGMA_plane)));
+}
+void main()
+{
+
+    if (!bool(contants.open_filter)) {
+
+        vec3 cur_color1 = imageLoad(rt_out_image, ivec2(gl_GlobalInvocationID.xy)).xyz;
+        // debugPrintfEXT("message  ray frame %d\n", contants.frame);
+        if (contants.frame > 0) {
+            vec3 result_color = imageLoad(image, ivec2(gl_GlobalInvocationID.xy)).xyz;
+            result_color = mix(result_color, cur_color1, float(1. / float(contants.frame + 1)));
+            // debugPrintfEXT("message  %f %f %f |%f %f %f \n", cur_color1.x, cur_color1.y, cur_color1.z, result_color.x, result_color.y, result_color.z);
+            imageStore(image, ivec2(gl_GlobalInvocationID.xy), vec4(result_color, 1.f));
+        } else {
+            // First frame, replace the value in the buffer
+            imageStore(image, ivec2(gl_GlobalInvocationID.xy), vec4(cur_color1, 1.f));
+        }
+        // debugPrintfEXT("not filter  \n");
+
+        return;
+    }
+    // debugPrintfEXT("do filter  \n");
+
+    const int kernelRadius = 8;
+    int x_start = max(0, int(gl_GlobalInvocationID.x) - kernelRadius);
+    int y_start = max(0, int(gl_GlobalInvocationID.y) - kernelRadius);
+    int x_end = min(799, int(gl_GlobalInvocationID.x) + kernelRadius);
+    int y_end = min(749, int(gl_GlobalInvocationID.y) + kernelRadius);
+    float total_weight = 0.;
+    // debugPrintfEXT("top  %f %f %f   \n", total_weight);
+
+    vec3 total_color = vec3(0);
+
+    vec3 cur_normal = imageLoad(gbuffer[normal], ivec2(gl_GlobalInvocationID.xy)).xyz;
+    vec3 cur_color = imageLoad(rt_out_image, ivec2(gl_GlobalInvocationID.xy)).xyz;
+    vec3 cur_position = imageLoad(gbuffer[position], ivec2(gl_GlobalInvocationID.xy)).xyz;
+
+    for (int a = x_start; a < x_end; a++) {
+        for (int b = y_start; b < y_end; b++) {
+            if (a == gl_GlobalInvocationID.x && b == gl_GlobalInvocationID.y) {
+                total_weight += 1.;
+                total_color += cur_color;
+                continue;
+            }
+            vec3 normal_j = imageLoad(gbuffer[normal], ivec2(a, b)).xyz;
+            vec3 color_j = imageLoad(rt_out_image, ivec2(a, b)).xyz;
+            vec3 position_j = imageLoad(gbuffer[position], ivec2(a, b)).xyz;
+
+            float J = get_J(x_start, y_start, cur_normal, normal_j, cur_position, position_j, cur_color, color_j);
+
+            // debugPrintfEXT("compare  %d %d | %f \n", a, b, J);
+            total_weight += J;
+            total_color += color_j * J;
+        }
+    }
+    // debugPrintfEXT("compare %f  %f  \n", total_weight, total_color);
+    vec3 after_filter_color = vec3(0);
+    if (total_weight > 0.) {
+        // debugPrintfEXT("compare  %f   \n", total_weight);
+
+        if (gl_GlobalInvocationID.x == 1 && gl_GlobalInvocationID.y == 1) {
+            // debugPrintfEXT("compare  %f %f %f | %f %f %f \n", cur_color.y, cur_color.z, (total_color / total_weight).x, (total_color / total_weight).y, (total_color / total_weight).z);
+        }
+        after_filter_color = total_color / total_weight;
+        imageStore(rt_out_image, ivec2(gl_GlobalInvocationID.xy), vec4(total_color / total_weight, 1));
+    }
+
+    // Temporal Accumulation
+    {
+        vec3 average = vec3(0);
+        vec3 sigma = vec3(0);
+
+        for (int a = x_start; a < x_end; a++) {
+            for (int b = y_start; b < y_end; b++) {
+                // vec3 normal_j = imageLoad(normal, ivec2(a, b)).xyz;
+
+                vec3 color_j = imageLoad(rt_out_image, ivec2(a, b)).xyz;
+                average += after_filter_color;
+                sigma += vec3(sqr(after_filter_color.x - color_j.x),
+                              sqr(after_filter_color.y - color_j.y),
+                              sqr(after_filter_color.z - color_j.z));
+            }
+        }
+        int count = (x_end - x_start + 1) * (y_end - y_start + 1);
+        average /= count;
+        sigma = vec3(sqrt(max(0, (sigma / count).x)),
+                     sqrt(max(0, (sigma / count).y)),
+                     sqrt(max(0, (sigma / count).z)));
+    }
+
+    if (contants.frame > 0) {
+        vec3 result_color = imageLoad(image, ivec2(gl_GlobalInvocationID.xy)).xyz;
+        result_color = mix(result_color, after_filter_color, float(1. / float(max(9, contants.frame + 1))));
+        // debugPrintfEXT("message  %f %f %f |%f %f %f \n", after_filter_color.x, after_filter_color.y, after_filter_color.z, result_color.x, result_color.y, result_color.z);
+        imageStore(image, ivec2(gl_GlobalInvocationID.xy), vec4(result_color, 1.f));
+    } else {
+        // First frame, replace the value in the buffer
+        imageStore(image, ivec2(gl_GlobalInvocationID.xy), vec4(after_filter_color, 1.f));
+    }
+}

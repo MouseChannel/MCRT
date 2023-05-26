@@ -8,7 +8,7 @@ class Path_tracing_context : public Context {
 public:
     enum Context_index { Graphic,
                          Ray_tracing,
-                         Compute };
+                          Compute };
     Path_tracing_context();
     ~Path_tracing_context();
     void init(std::shared_ptr<Window>) override;

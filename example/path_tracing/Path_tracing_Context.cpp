@@ -15,7 +15,9 @@
 #include "shader/Data_struct.h"
 
 namespace MCRT {
-std::unique_ptr<Context> Context::_instance { new MCRT::Path_tracing_context };
+std::unique_ptr<Context> Context::_instance {
+    new MCRT::Path_tracing_context
+};
 Path_tracing_context::Path_tracing_context()
 {
 }
@@ -77,7 +79,7 @@ void Path_tracing_context::init(std::shared_ptr<Window> window)
     contexts.resize(3);
     // raytracing
     {
-      
+
         contexts[Context_index::Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
         std::vector<std::shared_ptr<ShaderModule>> rt_shader_modules(RT_Pipeline::eShaderGroupCount);
         rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rgen.spv"));
@@ -92,23 +94,30 @@ void Path_tracing_context::init(std::shared_ptr<Window> window)
             auto rt_context = Context::Get_Singleton()->get_rt_context();
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(AS_Builder::Get_Singleton()->get_tlas(),
+                                     Descriptor_Manager::Ray_Tracing,
                                      Ray_Tracing_Binding::e_tlas,
                                      vk::DescriptorType::eAccelerationStructureKHR,
-                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR,
-                                     Descriptor_Manager::Ray_Tracing);
+                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR);
 
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(rt_context->get_out_image(),
+                                     Descriptor_Manager::Ray_Tracing,
                                      Ray_Tracing_Binding::e_out_image,
                                      vk::DescriptorType::eStorageImage,
-                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute,
-                                     Descriptor_Manager::Ray_Tracing);
+                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute);
             // GBuffer
-            Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(rt_context->get_normal_buffer(), Ray_Tracing_Binding::e_normal_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
 
             Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(rt_context->get_position_buffer(), Ray_Tracing_Binding::e_position_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
+                ->Make_DescriptorSet(rt_context->get_gbuffer(),
+                                     Descriptor_Manager::Ray_Tracing,
+                                     Ray_Tracing_Binding::e_gbuffer,
+                                     vk::DescriptorType ::eStorageImage,
+                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute);
+            // Descriptor_Manager::Get_Singleton()
+            //     ->Make_DescriptorSet(rt_context->get_normal_buffer(), Ray_Tracing_Binding::e_normal_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
+
+            // Descriptor_Manager::Get_Singleton()
+            //     ->Make_DescriptorSet(rt_context->get_position_buffer(), Ray_Tracing_Binding::e_position_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
             // end Gbuffer`
         });
         contexts[Ray_tracing]->prepare_pipeline(rt_shader_modules);
@@ -120,7 +129,7 @@ void Path_tracing_context::init(std::shared_ptr<Window> window)
         contexts[Context_index::Compute] = std::shared_ptr<Compute_Context> { new Compute_Context };
 
         std::shared_ptr<ShaderModule> compute_shader {
-            new ShaderModule("D:/MoChengRT/shader/test.comp.spv")
+            new ShaderModule("D:/MoChengRT/shader/filter.comp.spv")
         };
         contexts[Compute]->prepare({ compute_shader });
         contexts[Compute]->prepare_descriptorset([&]() {
@@ -128,10 +137,10 @@ void Path_tracing_context::init(std::shared_ptr<Window> window)
                 ->Make_DescriptorSet(Context::Get_Singleton()
                                          ->get_compute_context()
                                          ->get_out_image(),
+                                     Descriptor_Manager::Compute,
                                      0,
                                      vk::DescriptorType::eStorageImage,
-                                     vk::ShaderStageFlagBits::eCompute,
-                                     Descriptor_Manager::Compute);
+                                     vk::ShaderStageFlagBits::eCompute);
         });
         contexts[Compute]->prepare_pipeline({ compute_shader });
         contexts[Compute]->post_prepare();
@@ -148,10 +157,10 @@ void Path_tracing_context::init(std::shared_ptr<Window> window)
                                                                  Context::Get_Singleton()
                                                                      ->get_compute_context()
                                                                      ->get_out_image(),
+                                                                 Descriptor_Manager::Graphic,
                                                                  0,
                                                                  vk::DescriptorType ::eCombinedImageSampler,
-                                                                 vk::ShaderStageFlagBits::eFragment,
-                                                                 Descriptor_Manager::Graphic); });
+                                                                 vk::ShaderStageFlagBits::eFragment); });
         contexts[Graphic]->prepare_pipeline(graphic_shader_modules);
         contexts[Graphic]->post_prepare();
     }
@@ -266,7 +275,7 @@ std::shared_ptr<CommandBuffer> Path_tracing_context::BeginComputeFrame()
 {
 
     // compute_context->record_command(cmd);
-    auto& compute_context = contexts[2];
+    auto& compute_context = contexts[Compute];
     std::shared_ptr<CommandBuffer> cmd = compute_context->BeginFrame();
     {
         cmd->get_handle()
@@ -318,8 +327,7 @@ std::shared_ptr<CommandBuffer> Path_tracing_context::BeginComputeFrame()
             .pushConstants<PushContant_Compute>(compute_context->get_pipeline()->get_layout(), vk::ShaderStageFlagBits::eCompute, 0, push_contants);
 
         Context::Get_Singleton()->get_debugger()->set_name(cmd, "compute command_buffer");
-        // auto ee = get_out_image();
-        // cmd->get_handle().setCheckpointNV(testcheck);
+
         cmd->get_handle()
             .pipelineBarrier2(vk::DependencyInfo().setMemoryBarriers(barriers));
 

@@ -16,7 +16,7 @@
 
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance { new MCRT::blinn_phong_context };
-float blinn_phong_context::light_pos_x = 0, blinn_phong_context::light_pos_y = 0, blinn_phong_context::light_pos_z = 0;
+float blinn_phong_context::light_pos_x = 0, blinn_phong_context::light_pos_y = 0, blinn_phong_context::light_pos_z = 5;
 blinn_phong_context::blinn_phong_context()
 {
 }
@@ -79,7 +79,7 @@ void blinn_phong_context::init(std::shared_ptr<Window> window)
     // raytracing
     {
 
-        contexts[Context_index::Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
+        contexts[Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
         std::vector<std::shared_ptr<ShaderModule>> rt_shader_modules(RT_Pipeline::eShaderGroupCount);
         rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/Blinn_Phong/blinn_phong.rgen.spv"));
         rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("D:/MoChengRT/shader/Blinn_Phong/blinn_phong.rmiss.spv"));
@@ -92,53 +92,26 @@ void blinn_phong_context::init(std::shared_ptr<Window> window)
         contexts[Ray_tracing]->prepare_descriptorset([&]() {
             auto rt_context = Context::Get_Singleton()->get_rt_context();
             Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(AS_Builder::Get_Singleton()->get_tlas(),
+                ->Make_DescriptorSet(std::vector { AS_Builder::Get_Singleton()->get_tlas() },
+                                     Descriptor_Manager::Ray_Tracing,
                                      Ray_Tracing_Binding::e_tlas,
                                      vk::DescriptorType::eAccelerationStructureKHR,
-                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR,
-                                     Descriptor_Manager::Ray_Tracing);
+                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR);
 
             Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(rt_context->get_out_image(),
+                ->Make_DescriptorSet(std::vector { rt_context->get_out_image() },
+                                     Descriptor_Manager::Ray_Tracing,
                                      Ray_Tracing_Binding::e_out_image,
                                      vk::DescriptorType::eStorageImage,
-                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute,
-                                     Descriptor_Manager::Ray_Tracing);
-            // GBuffer
-            // Descriptor_Manager::Get_Singleton()
-            //     ->Make_DescriptorSet(rt_context->get_normal_buffer(), Ray_Tracing_Binding::e_normal_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
-
-            // Descriptor_Manager::Get_Singleton()
-            //     ->Make_DescriptorSet(rt_context->get_position_buffer(), Ray_Tracing_Binding::e_position_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
-            // end Gbuffer`
+                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute);
         });
         contexts[Ray_tracing]->prepare_pipeline(rt_shader_modules);
 
         contexts[Ray_tracing]->post_prepare();
     }
-    // {
-    //     // Compute_Context
-    //     contexts[Context_index::Compute] = std::shared_ptr<Compute_Context> { new Compute_Context };
 
-    //     std::shared_ptr<ShaderModule> compute_shader {
-    //         new ShaderModule("D:/MoChengRT/shader/test.comp.spv")
-    //     };
-    //     contexts[Compute]->prepare({ compute_shader });
-    //     contexts[Compute]->prepare_descriptorset([&]() {
-    //         Descriptor_Manager::Get_Singleton()
-    //             ->Make_DescriptorSet(Context::Get_Singleton()
-    //                                      ->get_compute_context()
-    //                                      ->get_out_image(),
-    //                                  0,
-    //                                  vk::DescriptorType::eStorageImage,
-    //                                  vk::ShaderStageFlagBits::eCompute,
-    //                                  Descriptor_Manager::Compute);
-    //     });
-    //     contexts[Compute]->prepare_pipeline({ compute_shader });
-    //     contexts[Compute]->post_prepare();
-    // }
     { // graphic
-        contexts[Context_index::Graphic] = std::shared_ptr<RenderContext> { new RenderContext(m_device) };
+        contexts[Graphic] = std::shared_ptr<RenderContext> { new RenderContext(m_device) };
 
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
         graphic_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/shader/post.vert.spv"));
@@ -146,13 +119,13 @@ void blinn_phong_context::init(std::shared_ptr<Window> window)
         contexts[Graphic]->prepare(graphic_shader_modules);
         contexts[Graphic]->prepare_descriptorset([&]() { Descriptor_Manager::Get_Singleton()
                                                              ->Make_DescriptorSet(
-                                                                 Context::Get_Singleton()
-                                                                     ->get_rt_context()
-                                                                     ->get_out_image(),
+                                                                 std::vector { Context::Get_Singleton()
+                                                                                   ->get_rt_context()
+                                                                                   ->get_out_image() },
+                                                                 Descriptor_Manager::Graphic,
                                                                  0,
                                                                  vk::DescriptorType ::eCombinedImageSampler,
-                                                                 vk::ShaderStageFlagBits::eFragment,
-                                                                 Descriptor_Manager::Graphic); });
+                                                                 vk::ShaderStageFlagBits::eFragment); });
         contexts[Graphic]->prepare_pipeline(graphic_shader_modules);
 
         contexts[Graphic]->post_prepare();
@@ -170,12 +143,7 @@ std::shared_ptr<CommandBuffer> blinn_phong_context::Begin_Frame()
 }
 void blinn_phong_context::EndFrame()
 {
-    auto ee = get_device()->Get_Graphic_queue().getCheckpointData2NV();
-    for (auto& i : ee) {
-        auto dd = vk::to_string(i.stage);
-        auto rr = *(Vertex*)i.pCheckpointMarker;
-        int eeee = 0;
-    }
+
     EndGraphicFrame();
 }
 
@@ -218,6 +186,12 @@ std::shared_ptr<CommandBuffer> blinn_phong_context::BeginRTFrame()
                                         vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR,
                                         0,
                                         pushContant_Ray);
+        cmd->get_handle().pipelineBarrier2(vk::DependencyInfo()
+                                               .setMemoryBarriers(vk::MemoryBarrier2()
+                                                                      .setSrcStageMask(vk::PipelineStageFlagBits2::eRayTracingShaderKHR)
+                                                                      .setSrcAccessMask(vk::AccessFlagBits2::eShaderStorageWrite)
+                                                                      .setDstStageMask(vk::PipelineStageFlagBits2::eFragmentShader)
+                                                                      .setDstAccessMask(vk::AccessFlagBits2::eShaderStorageRead)));
         rt_context->record_command(cmd);
     }
     return cmd;

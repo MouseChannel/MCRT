@@ -29,7 +29,7 @@ void Compute_Context::prepare_descriptorset(std::function<void()> prepare_func)
     prepare_func();
 
     Descriptor_Manager::Get_Singleton()->CreateDescriptorPool(Descriptor_Manager::Compute);
-    Descriptor_Manager::Get_Singleton()->CreateUpdateDescriptorSet(Descriptor_Manager::Compute);
+    Descriptor_Manager::Get_Singleton()->update_descriptor_set(Descriptor_Manager::Compute);
 }
 void Compute_Context::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
 {

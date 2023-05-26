@@ -44,8 +44,9 @@ public:
     static float roughness;
     static float metallicness;
 
-        private : std::shared_ptr<CommandBuffer>
-                  BeginGraphicFrame();
+private:
+    std::shared_ptr<CommandBuffer>
+    BeginGraphicFrame();
     std::shared_ptr<CommandBuffer> BeginComputeFrame();
     std::shared_ptr<CommandBuffer> BeginRTFrame();
 

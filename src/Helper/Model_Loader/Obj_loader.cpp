@@ -45,9 +45,9 @@ void Obj_loader::load_model(std::string_view obj_path)
             .reflect = false
 
         };
-        if (shape.name == "behind_behind") {
-            cur_material.reflect = true;
-        }
+        // if (shape.name == "mocheng.003_mocheng.003" || shape.name == "mocheng_mocheng") {
+        //     cur_material.reflect = true;
+        // }
 
         Model::models.emplace_back(new Model(shape.name, vertexs, indexs, cur_material));
     }

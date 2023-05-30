@@ -2,12 +2,23 @@
 
 ### setup
 
-
-`cmake  -GNinja `
-
-`ninja`
+```
+cmake  -GNinja 
+ninja
+```
 
 current now can only be compiled by **clang**
+
+
+## What achieved?
+
+- raster, using `Graphic Pipeline`
+- **path tracing**, using   `Ray Tracing Pipeline `
+- **AO**, using `Ray Query`extension
+- Denoisy, using `Compute Pipeline`
+- Some classical Material
+  - blinn phong
+  - cook torrance BRDF and together with some disney principle BRDF
 
 ## example
 

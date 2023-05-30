@@ -29,6 +29,13 @@ vec3 get_interpolation(vec3 triangle_a, vec3 triangle_b, vec3 triangle_c, vec2 a
         triangle_b * barycentrics.y +
         triangle_c * barycentrics.z;
 }
+vec2 get_interpolation(vec2 triangle_a, vec2 triangle_b, vec2 triangle_c, vec2 attribs)
+{
+    vec3 barycentrics = get_barycentrics(attribs);
+    return triangle_a * barycentrics.x +
+        triangle_b * barycentrics.y +
+        triangle_c * barycentrics.z;
+}
 vec3 get_cur_world_position(vec3 a_pos, vec3 b_pos, vec3 c_pos, vec2 attribs, mat4x3 object_to_world)
 {
 
@@ -40,6 +47,11 @@ vec3 get_cur_world_normal(vec3 a_normal, vec3 b_normal, vec3 c_normal, vec2 attr
 {
     vec3 cur_nrm = get_interpolation(a_normal, b_normal, c_normal, attribs);
     return normalize(vec3(cur_nrm * world_to_object));
+}
+
+vec2 get_cur_uv(vec2 a_uv, vec2 b_uv, vec2 c_uv, vec2 attribs)
+{
+    return get_interpolation(a_uv, b_uv, c_uv, attribs);
 }
 mat3 getNormalSpace(in vec3 normal)
 {

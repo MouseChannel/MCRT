@@ -41,6 +41,8 @@ public:
                             vk::DescriptorType type,
                             vk::ShaderStageFlags shader_stage)
     {
+        if (data.empty())
+            return;
         vk::DescriptorSetLayoutBinding binding;
         binding.setBinding(binding_index)
             .setDescriptorCount(data.size())
@@ -58,6 +60,8 @@ public:
                             vk::DescriptorType type,
                             vk::ShaderStageFlags shader_stage)
     {
+        if (data == nullptr)
+            return;
         Make_DescriptorSet(std::vector { data }, which_set, binding_index, type, shader_stage);
     }
 

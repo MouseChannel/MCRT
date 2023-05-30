@@ -36,7 +36,7 @@ message("---------------------------------")
 
 # execute_process(COMMAND ${GLSLANGV} -V ${CMAKE_SOURCE_DIR}/Shader/frag.frag -o ${CMAKE_SOURCE_DIR}/Shader/frag.spv)
 message(STATUS "compile shader OK")
-include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/Tool)
 
 # include(cmake/FindSrc.cmake)
 file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src *.cpp)

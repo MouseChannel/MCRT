@@ -10,7 +10,7 @@ class Window;
 class Surface;
 class SwapChain;
 class CommandPool;
-class Model;
+class Mesh;
 class CommandBuffer;
 class RenderContext;
 class Sampler;
@@ -96,7 +96,7 @@ public:
         return m_camera;
     }
     [[nodiscard("missing renderpass")]] std::shared_ptr<RenderPass> get_renderpass();
-    virtual void init(std::shared_ptr<Window>);
+    // virtual void init(std::shared_ptr<Window>);
     virtual std::shared_ptr<CommandBuffer> Begin_Frame() = 0;
     virtual void EndFrame() = 0;
     auto get_cur_frame_id()
@@ -108,10 +108,9 @@ public:
         frame_id = 0;
     }
 
+    virtual void prepare(std::shared_ptr<Window> window);
 protected:
-    virtual void prepare() = 0;
-    std::shared_ptr<Device>
-        m_device;
+    std::shared_ptr<Device> m_device;
     std::shared_ptr<Instance> m_instance;
     std::shared_ptr<Window> m_window;
     std::shared_ptr<Surface> m_surface;
@@ -123,7 +122,6 @@ protected:
     std::shared_ptr<Camera> m_camera;
     bool enable_filter;
     int frame_id = 0;
-    
 };
 
 } // namespace MCRT

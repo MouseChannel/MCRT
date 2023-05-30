@@ -24,7 +24,6 @@ namespace MCRT {
 
 RenderContext::RenderContext(std::shared_ptr<Device> device)
     : m_device(device)
-
 {
 
     if (enable_swapchain) {
@@ -35,8 +34,7 @@ RenderContext::RenderContext(std::shared_ptr<Device> device)
         Context::Get_Singleton()->set_swapchain(m_swapchain);
         render_frame_count = m_swapchain->Get_Swapchain_Image_size();
     }
-    for (int i = 0; i < render_frame_count;
-         i++) {
+    for (int i = 0; i < render_frame_count; i++) {
         fences.emplace_back(new Fence);
     }
 
@@ -108,36 +106,39 @@ void RenderContext::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> 
 
     m_graphic_pipeline.reset(new Graphic_Pipeline(shader_modules));
 
-    vk::VertexInputBindingDescription vert_position_binding;
-    vert_position_binding
-        .setBinding(0)
-        .setInputRate(vk::VertexInputRate ::eVertex)
-        .setStride(sizeof(float) * 3);
-    vk::VertexInputAttributeDescription vertex_position_attr;
-    vertex_position_attr.setBinding(0)
-        .setFormat(vk::Format ::eR32G32B32Sfloat)
-        .setLocation(0)
-        .setOffset(0);
+    // vk::VertexInputBindingDescription vert_position_binding;
+    // vert_position_binding
+    //     .setBinding(0)
+    //     .setInputRate(vk::VertexInputRate ::eVertex)
+    //     .setStride(sizeof(float) * 3);
+    // vk::VertexInputAttributeDescription vertex_position_attr;
+    // vertex_position_attr.setBinding(0)
+    //     .setFormat(vk::Format ::eR32G32B32Sfloat)
+    //     .setLocation(0)
+    //     .setOffset(0);
 
-    vk::VertexInputBindingDescription vert_uv_binding;
-    vert_uv_binding
-        .setBinding(1)
-        .setInputRate(vk::VertexInputRate ::eVertex)
-        .setStride(sizeof(float) * 2);
+    // vk::VertexInputBindingDescription vert_uv_binding;
+    // vert_uv_binding
+    //     .setBinding(1)
+    //     .setInputRate(vk::VertexInputRate ::eVertex)
+    //     .setStride(sizeof(float) * 2);
 
-    vk::VertexInputAttributeDescription vertex_uv_attr;
-    vertex_uv_attr.setBinding(1)
-        .setFormat(vk::Format ::eR32G32Sfloat)
-        .setLocation(1)
-        .setOffset(0);
-    std::vector<vk::VertexInputBindingDescription> binds {
-        vert_position_binding,
-        vert_uv_binding
-    };
-    std::vector<vk::VertexInputAttributeDescription> attrs {
-        vertex_position_attr,
-        vertex_uv_attr
-    };
+    // vk::VertexInputAttributeDescription vertex_uv_attr;
+    // vertex_uv_attr.setBinding(1)
+    //     .setFormat(vk::Format ::eR32G32Sfloat)
+    //     .setLocation(1)
+    //     .setOffset(0);
+    // std::vector<vk::VertexInputBindingDescription> binds {
+    //     vert_position_binding,
+    //     vert_uv_binding
+    // };
+    // std::vector<vk::VertexInputAttributeDescription> attrs {
+    //     vertex_position_attr,
+    //     vertex_uv_attr
+    // };
+    auto binds = Vertex::make_bind();
+    auto attrs = Vertex::make_attr();
+
     m_graphic_pipeline->Make_VertexInput(binds, attrs);
     m_graphic_pipeline->Make_VertexAssembly();
     m_graphic_pipeline->Make_viewPort();

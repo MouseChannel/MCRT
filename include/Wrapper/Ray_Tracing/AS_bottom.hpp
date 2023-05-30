@@ -2,7 +2,7 @@
 #include "Wrapper/Component.hpp"
 #include "Wrapper/Ray_Tracing/AS_base.hpp"
 namespace MCRT {
-class Model;
+class Mesh;
 class Buffer;
 struct Obj_geom_data {
     vk::AccelerationStructureGeometryKHR as_geom;
@@ -18,7 +18,7 @@ struct BuildAccelerationStructure {
 
 class AccelerationStructure_Bottom : public AccelerationStructure {
 public:
-    AccelerationStructure_Bottom(std::shared_ptr<Model> obj);
+    AccelerationStructure_Bottom(std::shared_ptr<Mesh> obj);
     ~AccelerationStructure_Bottom();
     vk::DeviceAddress get_address();
     auto get_obj_index()
@@ -41,7 +41,7 @@ public:
 
 private:
     // fill geom_ready_data
-    void object_to_vkGeometryKHR(std::shared_ptr<Model> obj);
+    void object_to_vkGeometryKHR(std::shared_ptr<Mesh> obj);
 
     void fill_build_info() override;
     int obj_index;

@@ -13,7 +13,8 @@ Window::Window(int width, int height)
 
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+    glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     // glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
 

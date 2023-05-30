@@ -2,18 +2,18 @@
 #include "Helper/ImGui_Context.hpp"
 #include "Helper/Uniform_Manager.hpp"
 #include "Rendering/Context.hpp"
-#include "example/path_tracing/Path_tracing_Context.cpp"
 #include "Rendering/GLFW_Window.hpp"
+#include "example/path_tracing/Path_tracing_Context.hpp"
+
 
 namespace MCRT {
 void App::init()
 {
     window.reset(new Window(800, 800));
-    Path_tracing_context::Get_Singleton()->init(window);
+    Path_tracing_context::Get_Singleton()->prepare(window);
     imgui.reset(new ImGuiContext);
 
     imgui->Init(window);
-  
 }
 void App::run()
 {
@@ -37,7 +37,6 @@ void App::run()
             //     c++;
             ImGui::Text("counter = %d", Context::Get_Singleton()->get_enable_filter()); });
         context->EndFrame();
-         
     }
 }
 } // namespace MCRT

@@ -1,5 +1,5 @@
 
-#include "example/cook_torrance/App.cpp"
+#include "example/cook_torrance/App.hpp"
 #include <iostream>
 
 int main(int, char**)

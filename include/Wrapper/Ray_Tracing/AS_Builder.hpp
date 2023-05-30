@@ -5,7 +5,7 @@
 #include <vulkan/vulkan.hpp>
 
 namespace MCRT {
-class Model;
+class Mesh;
 class Device;
 class Buffer;
 class AccelerationStructure_Bottom;
@@ -28,7 +28,7 @@ public:
     void build_blas();
     vk::DeviceAddress get_blas_device_address(uint32_t blas_index);
 
-    void add_blas_obj(std::shared_ptr<Model> obj);
+    void add_blas_obj(std::shared_ptr<Mesh> obj);
 
     void build_tlas();
     [[nodiscard("missing tlas")]] auto get_tlas()

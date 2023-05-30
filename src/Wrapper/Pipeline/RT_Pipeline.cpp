@@ -5,6 +5,7 @@
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "shader/Data_struct.h"
+#include "shader/Set_binding.h"
 
 namespace MCRT {
 
@@ -63,13 +64,17 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
         .setSize(Context::Get_Singleton()->get_rt_context()->get_constants_size());
     vk::PipelineLayoutCreateInfo layout_create_info;
 
-    std::vector<vk::DescriptorSetLayout> descriptor_layouts {
-        Descriptor_Manager::Get_Singleton()
-            ->Get_DescriptorSet_layout(Descriptor_Manager::Ray_Tracing),
-        Descriptor_Manager::Get_Singleton()
-            ->Get_DescriptorSet_layout(Descriptor_Manager::Global),
+    std::vector<vk::DescriptorSetLayout> descriptor_layouts(Ray_Tracing_Set::ray_tracing_count);
+    descriptor_layouts[Ray_Tracing_Set::e_ray_tracing] = Descriptor_Manager::Get_Singleton()
+                                                             ->Get_DescriptorSet_layout(Descriptor_Manager::Ray_Tracing);
+    descriptor_layouts[Ray_Tracing_Set::e_ray_global] = Descriptor_Manager::Get_Singleton()
+                                                            ->Get_DescriptorSet_layout(Descriptor_Manager::Global);
+    descriptor_sets.resize(Ray_Tracing_Set::ray_tracing_count);
 
-    };
+    descriptor_sets[Ray_Tracing_Set::e_ray_tracing] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Ray_Tracing)->get_handle()[0];
+
+    descriptor_sets[Ray_Tracing_Set::e_ray_global] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Global)->get_handle()[0];
+
     layout_create_info.setSetLayouts(descriptor_layouts)
         .setPushConstantRanges(push_contant);
     layout = Context::Get_Singleton()

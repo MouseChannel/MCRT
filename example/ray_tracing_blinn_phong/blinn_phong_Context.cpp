@@ -1,8 +1,9 @@
 
 #include "example/ray_tracing_blinn_phong/blinn_phong_Context.hpp"
-#include "Helper/Camera.hpp"
+// #include "Helper/Camera.hpp"
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Model_Loader/Obj_Loader.hpp"
+#include "Helper/Model_Loader/gltf_loader.hpp"
 #include "Rendering/Compute_context.hpp"
 #include "Rendering/RT_Context.hpp"
 #include "Rendering/Render_Context.hpp"
@@ -23,57 +24,11 @@ blinn_phong_context::blinn_phong_context()
 blinn_phong_context::~blinn_phong_context()
 {
 }
-void blinn_phong_context::prepare()
+void blinn_phong_context::prepare(std::shared_ptr<Window> window)
 {
-    std::vector<uint32_t> indices {
-        0,
-        1,
-        2,
-        0,
-        1,
-        3
-
-    };
-    std::vector<float> positions {
-        1.0f,
-        -1.0f,
-        0,
-
-        -1.0f,
-        1.0f,
-        0,
-
-        -1.0f,
-        -1.0f,
-        0,
-
-        1.0f,
-        1.0f,
-        0
-
-    };
-    std::vector<float> uvs {
-        1.0f,
-        1.0f,
-
-        0.0f,
-        0.0f,
-
-        0.0f,
-        1.0f,
-
-        1.0f,
-        0.0f
-    };
-    index_buffer = Buffer::CreateDeviceBuffer(indices.data(), indices.size() * sizeof(indices[0]), vk::BufferUsageFlagBits::eIndexBuffer);
-    vertex_buffer = Buffer::CreateDeviceBuffer(positions.data(), positions.size() * sizeof(positions[0]), vk::BufferUsageFlagBits::eVertexBuffer);
-    uv_buffer = Buffer::CreateDeviceBuffer(uvs.data(), uvs.size() * sizeof(uvs[0]), vk::BufferUsageFlagBits::eVertexBuffer);
-}
-void blinn_phong_context::init(std::shared_ptr<Window> window)
-{
-    Context::init(window);
-    prepare();
+    ray_tracing_context::prepare(window);
     Obj_loader::load_model("D:/MoChengRT/assets/girl.obj");
+    // GLTF_Loader::load_model("D:/MoChengRT/assets/girl.gltf");
 
     contexts.resize(2);
     // raytracing
@@ -133,18 +88,15 @@ void blinn_phong_context::init(std::shared_ptr<Window> window)
 }
 std::shared_ptr<CommandBuffer> blinn_phong_context::Begin_Frame()
 {
-    m_camera->move_update();
-    auto cmd = BeginRTFrame();
+    BeginRTFrame();
     EndRTFrame();
-    // BeginComputeFrame();
-    // EndComputeFrame();
 
-    return BeginGraphicFrame();
+    return ray_tracing_context::Begin_Frame();
 }
 void blinn_phong_context::EndFrame()
 {
 
-    EndGraphicFrame();
+    ray_tracing_context::EndFrame();
 }
 
 std::shared_ptr<CommandBuffer> blinn_phong_context::BeginRTFrame()
@@ -202,110 +154,12 @@ void blinn_phong_context::EndRTFrame()
     auto& rt_context = contexts[Ray_tracing];
     rt_context->Submit();
 }
-std::shared_ptr<CommandBuffer> blinn_phong_context::BeginGraphicFrame()
-{
-    // get_device()->get_handle().waitIdle();
-    auto& render_context = contexts[Graphic];
-    std::shared_ptr<CommandBuffer> cmd = render_context->BeginFrame();
-    {
-        cmd->get_handle().bindPipeline(vk::PipelineBindPoint ::eGraphics, render_context->get_pipeline()->get_handle());
-        cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                             render_context->get_pipeline()->get_layout(),
-                                             0,
-                                             { //   Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute)->get_handle()[0],
-                                               Descriptor_Manager::Get_Singleton()
-                                                   ->get_DescriptorSet(Descriptor_Manager::Graphic)
-                                                   ->get_handle() },
 
-                                             {});
-        cmd->get_handle().bindIndexBuffer(index_buffer->get_handle(), 0, vk::IndexType ::eUint32);
-        cmd->get_handle().bindVertexBuffers(0, {
-                                                   vertex_buffer->get_handle(),
-                                                   uv_buffer->get_handle(),
-                                               },
-                                            { 0, 0 });
-        cmd->get_handle()
-            .drawIndexed(6, 1, 0, 0, 0);
-        render_context->record_command(cmd);
-    }
-
-    return cmd;
-}
-
-void blinn_phong_context::EndGraphicFrame()
-{
-    auto& m_render_context = contexts[Graphic];
-    m_render_context->Submit();
-    m_render_context->EndFrame();
-}
 std::shared_ptr<CommandBuffer> blinn_phong_context::BeginComputeFrame()
 {
-
-    // compute_context->record_command(cmd);
-    auto& compute_context = contexts[2];
-    std::shared_ptr<CommandBuffer> cmd = compute_context->BeginFrame();
-    {
-        cmd->get_handle()
-            .bindDescriptorSets(vk::PipelineBindPoint ::eCompute,
-                                compute_context->get_pipeline()->get_layout(),
-                                0,
-                                { Descriptor_Manager::Get_Singleton()
-                                      ->get_DescriptorSet(Descriptor_Manager::Ray_Tracing)
-                                      ->get_handle()[0],
-                                  Descriptor_Manager::Get_Singleton()
-                                      ->get_DescriptorSet(Descriptor_Manager::Compute)
-                                      ->get_handle()[0] },
-                                {});
-        cmd->get_handle()
-            .bindPipeline(vk::PipelineBindPoint::eCompute,
-                          compute_context->get_pipeline()->get_handle());
-
-        vk::MemoryBarrier2 memory_barrier, memory_barrier2, memory_barrier3, memory_barrier4;
-        memory_barrier.setSrcStageMask(vk::PipelineStageFlagBits2::eRayTracingShaderKHR)
-            .setSrcAccessMask(vk::AccessFlagBits2::eShaderStorageWrite)
-            .setDstStageMask(vk::PipelineStageFlagBits2::eComputeShader)
-            .setDstAccessMask(vk::AccessFlagBits2::eShaderStorageRead);
-        // memory_barrier2.setSrcStageMask(vk::PipelineStageFlagBits2::eComputeShader)
-        //     .setSrcAccessMask(vk::AccessFlagBits2::eShaderRead)
-        //     .setDstStageMask(vk::PipelineStageFlagBits2::eComputeShader)
-        //     .setDstAccessMask(vk::AccessFlagBits2::eShaderWrite);
-        memory_barrier3.setSrcStageMask(vk::PipelineStageFlagBits2::eComputeShader)
-            .setSrcAccessMask(vk::AccessFlagBits2::eShaderStorageWrite)
-            .setDstStageMask(vk::PipelineStageFlagBits2::eComputeShader)
-            .setDstAccessMask(vk::AccessFlagBits2::eShaderStorageRead);
-        memory_barrier4.setSrcStageMask(vk::PipelineStageFlagBits2::eComputeShader)
-            .setSrcAccessMask(vk::AccessFlagBits2::eShaderStorageWrite)
-            .setDstStageMask(vk::PipelineStageFlagBits2::eFragmentShader)
-            .setDstAccessMask(vk::AccessFlagBits2::eShaderStorageRead | vk::AccessFlagBits2::eShaderSampledRead);
-        std::vector<vk::MemoryBarrier2> barriers {
-            memory_barrier,
-            // memory_barrier2,
-            memory_barrier3,
-            memory_barrier4
-        };
-        cmd->get_handle()
-            .dispatch(800, 749, 1);
-        auto pushConstantsss = Context::Get_Singleton()->get_enable_filter();
-        auto push_contants = PushContant_Compute {
-            .frame = Context::Get_Singleton()->get_cur_frame_id(),
-            .open_filter = Context::Get_Singleton()->get_enable_filter()
-        };
-        cmd->get_handle()
-            .pushConstants<PushContant_Compute>(compute_context->get_pipeline()->get_layout(), vk::ShaderStageFlagBits::eCompute, 0, push_contants);
-
-        Context::Get_Singleton()->get_debugger()->set_name(cmd, "compute command_buffer");
-        // auto ee = get_out_image();
-        // cmd->get_handle().setCheckpointNV(testcheck);
-        cmd->get_handle()
-            .pipelineBarrier2(vk::DependencyInfo().setMemoryBarriers(barriers));
-
-        compute_context->record_command(cmd);
-    }
-    return cmd;
+    throw std::runtime_error("no compute frame");
 }
 void blinn_phong_context::EndComputeFrame()
 {
-    auto& compute_context = contexts[2];
-    compute_context->Submit();
 }
 }

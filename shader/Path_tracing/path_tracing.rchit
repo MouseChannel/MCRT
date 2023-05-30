@@ -4,11 +4,13 @@
 #extension GL_EXT_debug_printf : enable
 #extension GL_EXT_scalar_block_layout : enable
 #extension GL_ARB_shader_clock : enable
+#extension GL_EXT_nonuniform_qualifier : enable
 
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 #extension GL_EXT_buffer_reference2 : require
 
 #include "../Data_struct.h"
+#include "../Set_binding.h"
 #include "../common.glsl"
 #include "../sampling.glsl"
 #include "hit_payload.glsl"
@@ -20,14 +22,15 @@ layout(location = 0) rayPayloadInEXT hitPayload prd;
 // {
 //     PushContant pcRay;
 // };
-layout(set = 0, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
+layout(set = e_ray_tracing, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
+layout(set = e_ray_global, binding = eTextures) uniform sampler2D textures[];
 
-layout(set = 1, binding = e_obj_addresses, scalar) buffer _Address
+layout(set = e_ray_global, binding = e_obj_addresses, scalar) buffer _Address
 {
     Address address[];
 }
 addresses;
-
+// layout(set = )
 layout(buffer_reference, scalar) readonly buffer _Vertices
 {
     Vertex vertices[];
@@ -69,12 +72,22 @@ void main()
                                                        c.nrm,
                                                        attribs,
                                                        gl_WorldToObjectEXT);
+    const vec2 cur_uv = get_cur_uv(a.texCoord,
+                                   b.texCoord,
+                                   c.texCoord,
+                                   attribs);
+    // prd.hitValue = material.material.color.xyz;
+    // prd.depth = 100;
+    // return;
 
     // fill gbuffer
     {
         if (prd.point_normal.x < 0) {
             prd.point_normal = cur_world_normal;
             prd.point_position = cur_world_pos;
+            // prd.hitValue = cur_world_pos;
+            // prd.depth = 100;
+            // return;
         }
     }
 
@@ -82,12 +95,20 @@ void main()
     uvec3 seed = uvec3(gl_LaunchIDEXT.xy, uint(clockARB()));
     vec3 local_dir = hemisphereSample_cos(seed);
     vec3 rayDirection = normal_coordinate * local_dir;
-    // Lambertian reflection
-    vec3 BRDF = material.material.color.xyz / PI;
+    vec3 BRDF;
+    // debugPrintfEXT("message \n");
+    if (material.material.texture_index > -1) {
+
+        BRDF = texture(textures[nonuniformEXT(material.material.texture_index)], cur_uv).xyz;
+        // debugPrintfEXT("message \n");
+    } else {
+        // Lambertian reflection
+        BRDF = material.material.color.xyz / PI;
+    }
     float cos_theta = dot(rayDirection, cur_world_normal);
-    float cos_in = dot(normalize(-gl_WorldRayDirectionEXT), cur_world_normal);
-    float pdf = 1 / PI;
-    vec3 radiance = BRDF * cos_theta * cos_theta / pdf;
+
+    float pdf = cos_theta / PI;
+    vec3 radiance = BRDF * cos_theta / pdf;
     prd.rayOrigin = cur_world_pos;
     prd.rayDirection = rayDirection;
     prd.depth++;

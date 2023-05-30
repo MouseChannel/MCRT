@@ -23,56 +23,9 @@ mirror_context::mirror_context()
 mirror_context::~mirror_context()
 {
 }
-void mirror_context::prepare()
+void mirror_context::prepare(std::shared_ptr<Window> window)
 {
-    std::vector<uint32_t> indices {
-        0,
-        1,
-        2,
-        0,
-        1,
-        3
-
-    };
-    std::vector<float> positions {
-        1.0f,
-        -1.0f,
-        0,
-
-        -1.0f,
-        1.0f,
-        0,
-
-        -1.0f,
-        -1.0f,
-        0,
-
-        1.0f,
-        1.0f,
-        0
-
-    };
-    std::vector<float> uvs {
-        1.0f,
-        1.0f,
-
-        0.0f,
-        0.0f,
-
-        0.0f,
-        1.0f,
-
-        1.0f,
-        0.0f
-    };
-    index_buffer = Buffer::CreateDeviceBuffer(indices.data(), indices.size() * sizeof(indices[0]), vk::BufferUsageFlagBits::eIndexBuffer);
-    vertex_buffer = Buffer::CreateDeviceBuffer(positions.data(), positions.size() * sizeof(positions[0]), vk::BufferUsageFlagBits::eVertexBuffer);
-    uv_buffer = Buffer::CreateDeviceBuffer(uvs.data(), uvs.size() * sizeof(uvs[0]), vk::BufferUsageFlagBits::eVertexBuffer);
-}
-void mirror_context::init(std::shared_ptr<Window> window)
-{
-    Context::init(window);
-    prepare();
+    ray_tracing_context::prepare(window);
     Obj_loader::load_model("D:/MoChengRT/assets/girl.obj");
 
     contexts.resize(2);
@@ -166,17 +119,12 @@ std::shared_ptr<CommandBuffer> mirror_context::Begin_Frame()
     // BeginComputeFrame();
     // EndComputeFrame();
 
-    return BeginGraphicFrame();
+    return ray_tracing_context::Begin_Frame();
 }
 void mirror_context::EndFrame()
 {
-    auto ee = get_device()->Get_Graphic_queue().getCheckpointData2NV();
-    for (auto& i : ee) {
-        auto dd = vk::to_string(i.stage);
-        auto rr = *(Vertex*)i.pCheckpointMarker;
-        int eeee = 0;
-    }
-    EndGraphicFrame();
+
+    ray_tracing_context::EndFrame();
 }
 
 std::shared_ptr<CommandBuffer> mirror_context::BeginRTFrame()
@@ -234,42 +182,7 @@ void mirror_context::EndRTFrame()
     auto& rt_context = contexts[Ray_tracing];
     rt_context->Submit();
 }
-std::shared_ptr<CommandBuffer> mirror_context::BeginGraphicFrame()
-{
-    // get_device()->get_handle().waitIdle();
-    auto& render_context = contexts[Graphic];
-    std::shared_ptr<CommandBuffer> cmd = render_context->BeginFrame();
-    {
-        cmd->get_handle().bindPipeline(vk::PipelineBindPoint ::eGraphics, render_context->get_pipeline()->get_handle());
-        cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                             render_context->get_pipeline()->get_layout(),
-                                             0,
-                                             { //   Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute)->get_handle()[0],
-                                               Descriptor_Manager::Get_Singleton()
-                                                   ->get_DescriptorSet(Descriptor_Manager::Graphic)
-                                                   ->get_handle() },
 
-                                             {});
-        cmd->get_handle().bindIndexBuffer(index_buffer->get_handle(), 0, vk::IndexType ::eUint32);
-        cmd->get_handle().bindVertexBuffers(0, {
-                                                   vertex_buffer->get_handle(),
-                                                   uv_buffer->get_handle(),
-                                               },
-                                            { 0, 0 });
-        cmd->get_handle()
-            .drawIndexed(6, 1, 0, 0, 0);
-        render_context->record_command(cmd);
-    }
-
-    return cmd;
-}
-
-void mirror_context::EndGraphicFrame()
-{
-    auto& m_render_context = contexts[Graphic];
-    m_render_context->Submit();
-    m_render_context->EndFrame();
-}
 std::shared_ptr<CommandBuffer> mirror_context::BeginComputeFrame()
 {
 

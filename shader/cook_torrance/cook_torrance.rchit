@@ -12,6 +12,7 @@
 #include "../common.glsl"
 
 #include "../sampling.glsl"
+#include "../Set_binding.h"
 #include "common.glsl"
 #include "push_constants/push_constants.h"
 
@@ -24,7 +25,8 @@ layout(push_constant) uniform _PushContant
 {
     PushContant_cook_torrance pcRay;
 };
-layout(set = 0, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
+layout(set = e_ray_tracing, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
+layout(set = e_ray_global, binding = eTextures) uniform sampler2D textures[];
 
 layout(set = 1, binding = e_obj_addresses, scalar) buffer _Address
 {

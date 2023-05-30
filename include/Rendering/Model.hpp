@@ -18,9 +18,26 @@ struct ObjInstance {
     vk::TransformMatrixKHR matrix;
 };
 class Buffer;
-class Model {
+class Texture;
+class Mesh {
 public:
-    Model(std::string name, std::vector<Vertex> vertexs, std::vector<uint32_t> indexs, Material material);
+    Mesh(std::string name,
+         std::vector<Vertex> vertexs,
+         std::vector<uint32_t> indexs,
+         Material material,
+         std::array<std::array<float, 4>, 3> transform = std::array<std::array<float, 4>, 3> {
+             { 1,
+               0,
+               0,
+               0,
+               0,
+               1,
+               0,
+               0,
+               0,
+               0,
+               1,
+               0 } });
     [[nodiscard]] auto get_vertex_buffer()
     {
         return vertexs_buffer;
@@ -38,7 +55,8 @@ public:
         return m_index.size();
     }
     static std::vector<ObjInstance> obj_instances;
-    static std::vector<std::shared_ptr<Model>> models;
+    static std::vector<std::shared_ptr<Mesh>> meshs;
+
     static void update_accelerate_structure_data();
     void set_index(int index)
     {

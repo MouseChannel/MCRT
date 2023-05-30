@@ -150,7 +150,9 @@ void Image::FillImageData(size_t size, void* data)
     };
 
     image_buffer->Update(data, size);
-    auto graphic_queue = Get_Context_Singleton()->get_device()->Get_Graphic_queue();
+    auto graphic_queue = Get_Context_Singleton()
+                             ->get_device()
+                             ->Get_Graphic_queue();
     CommandManager::ExecuteCmd(graphic_queue, [&](auto cmd_buffer) {
         vk::BufferImageCopy region;
         vk::ImageSubresourceLayers subsource;
@@ -164,7 +166,10 @@ void Image::FillImageData(size_t size, void* data)
             .setImageExtent({ width, height, 1 })
             .setBufferRowLength(0)
             .setImageSubresource(subsource);
-        cmd_buffer.copyBufferToImage(image_buffer->get_handle(), m_handle, vk::ImageLayout::eTransferDstOptimal, region);
+        cmd_buffer.copyBufferToImage(image_buffer->get_handle(),
+                                     m_handle,
+                                     vk::ImageLayout::eTransferDstOptimal,
+                                     region);
     });
 }
 Image::~Image()

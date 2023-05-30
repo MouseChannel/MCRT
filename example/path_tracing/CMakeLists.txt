@@ -1,6 +1,11 @@
-# file(GLOB_RECURSE example ${CMAKE_CURRENT_SOURCE_DIR} App.cpp Path_tracing_Context.cpp)
-# add_library(example1 ${example})
+# add_executable(path_tracing pathtracing.cpp)
 
-add_executable(path_tracing pathtracing.cpp)
+# target_link_libraries(path_tracing PRIVATE examplelib)
 
-target_link_libraries(path_tracing PRIVATE src)
+file(GLOB_RECURSE PATH_TRACING ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
+
+add_library(path_tracing ${PATH_TRACING})
+target_link_libraries(path_tracing examplelib)
+add_executable(pathtracing pathtracing.cpp)
+
+target_link_libraries(pathtracing PRIVATE path_tracing)

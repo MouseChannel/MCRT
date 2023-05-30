@@ -32,6 +32,7 @@ void AccelerationStructure::build(std::shared_ptr<Buffer> scratch_buffer)
                                    ->Get_Graphic_queue(),
                                [&](vk::CommandBuffer cmd_buffer) {
                                    // build  here
+                                   cmd_buffer.setCheckpointNV(123);
                                    cmd_buffer.buildAccelerationStructuresKHR(build_info, &range_info);
 
                                    vk::MemoryBarrier2 barrier;
@@ -40,17 +41,7 @@ void AccelerationStructure::build(std::shared_ptr<Buffer> scratch_buffer)
                                        .setDstStageMask(vk::PipelineStageFlagBits2::eAccelerationStructureBuildKHR)
                                        .setDstAccessMask(vk::AccessFlagBits2::eAccelerationStructureReadKHR);
 
-                                   cmd_buffer.pipelineBarrier2(vk::DependencyInfo {}.setMemoryBarriers(barrier));
-                                   //    vk::MemoryBarrier barrier1;
-                                   //    barrier1
-                                   //        .setSrcAccessMask(vk::AccessFlagBits::eAccelerationStructureWriteKHR)
-                                   //        .setDstAccessMask(vk::AccessFlagBits::eAccelerationStructureReadKHR);
-                                   //    cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eAccelerationStructureBuildKHR,
-                                   //                               vk::PipelineStageFlagBits::eAccelerationStructureBuildKHR,
-                                   //                               {},
-                                   //                               barrier1,
-                                   //                               {},
-                                   //                               {});
+                                   //    cmd_buffer.pipelineBarrier2(vk::DependencyInfo {}.setMemoryBarriers(barrier));
                                });
 }
 }

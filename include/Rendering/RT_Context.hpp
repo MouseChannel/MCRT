@@ -17,7 +17,7 @@ class Device;
 class Buffer;
 class RenderPass;
 class Framebuffer;
-class Model;
+class Mesh;
 class RT_Pipeline;
 class Image;
 // struct V_P_Matrix;

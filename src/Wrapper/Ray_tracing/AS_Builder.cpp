@@ -16,11 +16,11 @@ AS_Builder::AS_Builder()
 {
 }
 
-void AS_Builder::add_blas_obj(std::shared_ptr<Model> obj)
+void AS_Builder::add_blas_obj(std::shared_ptr<Mesh> obj)
 {
 
     m_accelerate_structures.emplace_back(new AccelerationStructure_Bottom(obj));
-    Model::obj_instances.emplace_back(ObjInstance { .obj_index = (int)Model::obj_instances.size() });
+    Mesh::obj_instances.emplace_back(ObjInstance { .obj_index = (int)Mesh::obj_instances.size() });
 }
 
 void AS_Builder::build_blas()

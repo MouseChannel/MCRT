@@ -5,6 +5,7 @@
 #include "Wrapper/RenderPass.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/SwapChain.hpp"
+#include "shader/Set_binding.h"
 #include <vector>
 namespace MCRT {
 Graphic_Pipeline::Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
@@ -12,12 +13,12 @@ Graphic_Pipeline::Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> sh
     //
     vk::PipelineLayoutCreateInfo layout_create_info {};
     // todo descriptor_set
-    std::vector<vk::DescriptorSetLayout> descriptor_layouts {
-        // Descriptor_Manager::Get_Singleton()
-        //     ->Get_DescriptorSet_layout(Descriptor_Manager::Compute),
+    std::vector<vk::DescriptorSetLayout> descriptor_layouts(Graphic_Set::graphic_count);
+
+    descriptor_layouts[Graphic_Set::e_graphic] =
         Descriptor_Manager::Get_Singleton()
-            ->Get_DescriptorSet_layout(Descriptor_Manager::Graphic)
-    };
+            ->Get_DescriptorSet_layout(Descriptor_Manager::Graphic);
+
     layout_create_info.setSetLayouts(descriptor_layouts);
     layout = Context::Get_Singleton()
                  ->get_device()

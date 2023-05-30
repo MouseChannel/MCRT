@@ -1,5 +1,5 @@
 #pragma once
-#include "example/path_tracing/App.cpp"
+#include "example/path_tracing/App.hpp"
 #include <iostream>
 
 int main(int, char**)

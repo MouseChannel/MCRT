@@ -16,10 +16,7 @@ Buffer::Buffer(size_t size,
 {
     CreateBuffer(size, usage);
     memory_info = QueryMemoryInfo(property);
-    // vk::MemoryPropertyFlagBits::
-    // VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT ;
-    // vk::MemoryAllocateFlagBits::eDeviceAddress;
-    // vk::MemoryAllocateFlags
+ 
     AllocateMemory();
     BindMemory2Buffer();
 }

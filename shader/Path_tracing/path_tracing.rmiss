@@ -10,7 +10,7 @@
 layout(location = 0) rayPayloadInEXT hitPayload prd;
 void main()
 {
-    prd.hitValue = vec3(0.001);
+    prd.hitValue = vec3(0.01);
 
     prd.depth = 100;
 }

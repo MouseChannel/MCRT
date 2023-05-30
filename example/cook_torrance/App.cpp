@@ -10,7 +10,7 @@ namespace MCRT {
 void App::init()
 {
     window.reset(new Window(800, 800));
-    cook_torrance_context::Get_Singleton()->init(window);
+    cook_torrance_context::Get_Singleton()->prepare(window);
     imgui.reset(new ImGuiContext);
 
     imgui->Init(window);

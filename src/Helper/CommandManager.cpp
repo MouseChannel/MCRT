@@ -21,7 +21,8 @@ void CommandManager::submit_Cmd(vk::Queue queue,
     vk::SubmitInfo submitInfo;
     submitInfo.setCommandBuffers(cmd->get_handle());
     queue.submit(submitInfo);
-    queue.waitIdle();
+      queue.waitIdle();
+
 }
 
 }

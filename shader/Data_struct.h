@@ -3,7 +3,7 @@
 #define DATA_STRUCT
 #ifdef __cplusplus
 #include "glm/glm.hpp"
-
+#include "vulkan/vulkan.hpp"
 using mat4 = glm::mat4;
 using vec4 = glm::vec4;
 
@@ -39,9 +39,13 @@ e_camera = 0,
 BEGIN_ENUM(Gbuffer_Index)
 position = 0,
     normal = 1,
-    gbuffer_count = 2
-    END_ENUM();
+    gbuffer_count = 2 END_ENUM();
 
+BEGIN_ENUM(Vertex_Binding)
+e_pos = 0,
+    e_nrm = 1,
+    e_color = 2,
+    e_texCoord = 3 END_ENUM();
 struct Camera_data {
 
     mat4 viewInverse; // Camera inverse view matrix
@@ -49,6 +53,11 @@ struct Camera_data {
     vec4 camera_pos;
     vec4 camera_front;
     float fov_angel;
+};
+struct Camera_matrix {
+
+    mat4 view;
+    mat4 project;
 };
 
 struct PushContant {
@@ -78,11 +87,48 @@ struct Vertex // See ObjLoader, copy of VertexObj, could be compressed for devic
     vec3 nrm;
     vec3 color;
     vec2 texCoord;
+#ifdef __cplusplus
+
+    static vk::VertexInputBindingDescription make_bind()
+    {
+        return vk::VertexInputBindingDescription()
+            .setBinding(0)
+            .setInputRate(vk::VertexInputRate ::eVertex)
+            .setStride(sizeof(Vertex));
+    }
+    static std::vector<vk::VertexInputAttributeDescription> make_attr()
+    {
+        std::vector<vk::VertexInputAttributeDescription> res_attr(4);
+        res_attr[e_pos] = vk::VertexInputAttributeDescription()
+                              .setBinding(0)
+                              .setLocation(e_pos)
+                              .setFormat(vk::Format ::eR32G32B32Sfloat)
+                              .setOffset(offsetof(Vertex, pos));
+        res_attr[e_nrm] = vk::VertexInputAttributeDescription()
+                              .setBinding(0)
+                              .setLocation(e_nrm)
+                              .setFormat(vk::Format ::eR32G32B32Sfloat)
+                              .setOffset(offsetof(Vertex, nrm));
+        res_attr[e_color] = vk::VertexInputAttributeDescription()
+                                .setBinding(0)
+                                .setLocation(e_color)
+                                .setFormat(vk::Format ::eR32G32B32Sfloat)
+                                .setOffset(offsetof(Vertex, color));
+        res_attr[e_texCoord] = vk::VertexInputAttributeDescription()
+                                   .setBinding(0)
+                                   .setLocation(e_texCoord)
+                                   .setFormat(vk::Format ::eR32G32Sfloat)
+                                   .setOffset(offsetof(Vertex, texCoord));
+        return res_attr;
+    }
+
+#endif
 };
 struct Material {
 
     vec4 color;
     vec4 emit;
     bool reflect;
+    int texture_index;
 };
 #endif

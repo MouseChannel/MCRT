@@ -1,18 +1,22 @@
 #include "Rendering/Model.hpp"
+#include "Wrapper/Texture.hpp"
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "Tool/tiny_obj_loader.hpp"
 #include "Wrapper/Buffer.hpp"
 namespace MCRT {
-std::vector<ObjInstance> Model::obj_instances;
-std::vector<std::shared_ptr<Model>> Model::models;
-Model::Model(std::string name,
-             std::vector<Vertex> vertexs,
-             std::vector<uint32_t> indexs,
-             Material material)
+std::vector<ObjInstance> Mesh::obj_instances;
+std::vector<std::shared_ptr<Mesh>> Mesh::meshs;
+
+Mesh::Mesh(std::string name,
+           std::vector<Vertex> vertexs,
+           std::vector<uint32_t> indexs,
+           Material material,
+           std::array<std::array<float, 4>, 3> transform)
     : m_name(name)
     , m_vertexs(std::move(vertexs))
     , m_index(std::move(indexs))
     , m_material(material)
+    , tramsform(transform)
 {
     assert(m_vertexs.size() > 0);
     auto ray_tracing_flag =
@@ -30,16 +34,18 @@ Model::Model(std::string name,
     material_buffer = Buffer::CreateDeviceBuffer(&m_material, sizeof(m_material), ray_tracing_flag);
 }
 
-void Model::update_accelerate_structure_data()
+void Mesh::update_accelerate_structure_data()
 {
-    for (int i = 0; i < models.size(); i++) {
-        models[i]->set_index(i);
+    for (int i = 0; i < meshs.size(); i++) {
+        meshs[i]->set_index(i);
     }
+    glm::mat4x3 dd;
     obj_instances.clear();
-    for (auto i { 0 }; i < models.size(); i++) {
+    for (auto i { 0 }; i < meshs.size(); i++) {
         obj_instances.emplace_back(ObjInstance {
             .obj_index = i,
-            .matrix { vk::TransformMatrixKHR {}.setMatrix(models[i]->tramsform) } });
+
+            .matrix { vk::TransformMatrixKHR {}.setMatrix(meshs[i]->tramsform) } });
     }
 }
 

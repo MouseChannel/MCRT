@@ -21,10 +21,6 @@ Device::Device()
         // std::cout << i.extensionName << std::endl;
     }
 
-    auto r = physical_device.getFeatures();
-    auto rr = physical_device.getFeatures2();
-    auto ree = rr.pNext;
-
     assert(physical_device);
     QueryQueueFamilyIndices();
 
@@ -57,7 +53,10 @@ Device::Device()
     //     .setSynchronization2(true);
 
     _features.get<vk::PhysicalDeviceVulkan12Features>()
-        .setBufferDeviceAddress(true);
+        .setBufferDeviceAddress(true)
+        .setDescriptorIndexing(true)
+        .setRuntimeDescriptorArray(true)
+        .setShaderSampledImageArrayNonUniformIndexing(true);
     _features.get<vk::PhysicalDeviceVulkan13Features>()
         .setMaintenance4(true)
         .setSynchronization2(true);
@@ -74,7 +73,7 @@ Device::Device()
     normal_feature.setShaderInt64(true)
         .setShaderFloat64(true)
         .setShaderStorageImageMultisample(true);
-     auto& _create_info = _features.get();
+    auto& _create_info = _features.get();
     _create_info.setQueueCreateInfos(queue_create_info)
         .setPEnabledExtensionNames(deviceRequiredExtensions)
         .setPEnabledFeatures(&normal_feature);

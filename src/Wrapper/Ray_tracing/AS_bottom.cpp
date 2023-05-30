@@ -6,7 +6,7 @@
 #include "Wrapper/Device.hpp"
 
 namespace MCRT {
-AccelerationStructure_Bottom::AccelerationStructure_Bottom(std::shared_ptr<Model> obj)
+AccelerationStructure_Bottom::AccelerationStructure_Bottom(std::shared_ptr<Mesh> obj)
     : AccelerationStructure(vk::AccelerationStructureTypeKHR::eBottomLevel)
     , obj_index(obj->get_instance_index())
     , model_matrix(obj->get_transform())
@@ -27,7 +27,7 @@ vk::DeviceAddress AccelerationStructure_Bottom::get_address()
         ->get_handle()
         .getAccelerationStructureAddressKHR(address_info);
 }
-void AccelerationStructure_Bottom::object_to_vkGeometryKHR(std::shared_ptr<Model> obj)
+void AccelerationStructure_Bottom::object_to_vkGeometryKHR(std::shared_ptr<Mesh> obj)
 {
     // add tlas_instance
     // Model::obj_instances.push_back(ObjInstance { .obj_index = (int)blas_ready_data.size() });

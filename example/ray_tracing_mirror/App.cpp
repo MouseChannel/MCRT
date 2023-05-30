@@ -3,13 +3,13 @@
 #include "Helper/Uniform_Manager.hpp"
 #include "Rendering/Context.hpp"
 #include "Rendering/GLFW_Window.hpp"
-#include "example/ray_tracing_mirror/mirror_context.cpp"
+#include "example/ray_tracing_mirror/mirror_context.hpp"
 
 namespace MCRT {
 void App::init()
 {
     window.reset(new Window(800, 800));
-    mirror_context::Get_Singleton()->init(window);
+    mirror_context::Get_Singleton()->prepare(window);
     imgui.reset(new ImGuiContext);
 
     imgui->Init(window);

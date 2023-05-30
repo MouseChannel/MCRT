@@ -8,6 +8,7 @@
 #include "../Data_struct.h"
 #include "../common.glsl"
 #include "../sampling.glsl"
+#include "../Set_binding.h"
 #include "hit_payload.glsl"
 #include "push_constants/push_constants.h"
 
@@ -16,10 +17,10 @@ layout(push_constant) uniform _PushContant
     PushContant_cook_torrance pcRay;
 };
 layout(location = 0) rayPayloadEXT hitPayload prd;
-layout(set = 0, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
-layout(set = 0, binding = e_out_image, rgba32f) uniform image2D image;
+layout(set = e_ray_tracing, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
+layout(set = e_ray_tracing, binding = e_out_image, rgba32f) uniform image2D image;
 // gbuffer
-layout(set = 0, binding = e_gbuffer, rgba32f) uniform image2D gbuffer[];
+layout(set = e_ray_tracing, binding = e_gbuffer, rgba32f) uniform image2D gbuffer[];
 // layout(set = 0, binding = e_normal_gbuffer, rgba32f) uniform image2D normal;
 // gbuffer end
 layout(set = 1, binding = e_camera) uniform _camera_data

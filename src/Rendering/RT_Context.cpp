@@ -43,8 +43,8 @@ std::shared_ptr<Image> RT_Context::get_out_image()
 void RT_Context::build_accelerate_structure()
 {
 
-    Model::update_accelerate_structure_data();
-    for (auto obj : Model::models) {
+    Mesh::update_accelerate_structure_data();
+    for (auto obj : Mesh::meshs) {
         AS_Builder::Get_Singleton()->add_blas_obj(obj);
     }
 
@@ -120,7 +120,7 @@ void RT_Context::create_shader_bind_table()
     m_missRegion.setDeviceAddress(m_SBT_buffer_rmiss->get_address());
     m_hitRegion.setDeviceAddress(m_SBT_buffer_rhit->get_address());
 
-    // TODO {missCount or hitcount} >0
+
     m_SBT_buffer_rgen->Update(rgen_handles.data(), rgen_handles.size());
     m_SBT_buffer_rmiss->Update(rmiss_handles.data(), rmiss_handles.size());
     m_SBT_buffer_rhit->Update(rhit_handles.data(), rhit_handles.size());
@@ -187,8 +187,8 @@ void RT_Context::create_uniform_buffer()
                                                vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR,
                                                vk::DescriptorType ::eUniformBuffer);
 
-    m_objs_address.resize(Model::models.size());
-    for (auto& obj : Model::models) {
+    m_objs_address.resize(Mesh::meshs.size());
+    for (auto& obj : Mesh::meshs) {
 
         m_objs_address[obj->get_instance_index()] = Address {
 

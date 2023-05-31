@@ -15,10 +15,8 @@ e_graphic = 0,
     graphic_count = 1 END_ENUM();
 
 BEGIN_ENUM(Graphic_Binding)
-e_camera_matrix = 0
+e_camera_matrix = 0,
+    e_textures = 1
     // e_graphic_global = 1,
     END_ENUM();
 
-struct PC_Raster {
-    mat4 model_matrix;
-};

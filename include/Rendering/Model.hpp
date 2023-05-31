@@ -71,9 +71,10 @@ public:
         return tramsform;
     }
 
+    Material m_material;
+
 private:
     std::string m_name;
-    Material m_material;
     std::vector<Vertex> m_vertexs;
     std::vector<uint32_t> m_index;
     std::shared_ptr<Buffer> vertexs_buffer;

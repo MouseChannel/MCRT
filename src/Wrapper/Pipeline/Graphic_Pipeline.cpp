@@ -1,12 +1,13 @@
 #include "Wrapper/Pipeline/Graphic_Pipeline.hpp"
 #include "Helper/DescriptorManager.hpp"
-#include "Rendering/RT_Context.hpp"
+#include "Rendering/Render_Context.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/RenderPass.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/SwapChain.hpp"
 #include "shader/Set_binding.h"
 #include <vector>
+
 namespace MCRT {
 Graphic_Pipeline::Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
 {
@@ -16,10 +17,15 @@ Graphic_Pipeline::Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> sh
     std::vector<vk::DescriptorSetLayout> descriptor_layouts(Graphic_Set::graphic_count);
 
     descriptor_layouts[Graphic_Set::e_graphic] =
-        Descriptor_Manager::Get_Singleton()
-            ->Get_DescriptorSet_layout(Descriptor_Manager::Graphic);
-
-    layout_create_info.setSetLayouts(descriptor_layouts);
+        Descriptor_Manager::Get_Singleton()->Get_DescriptorSet_layout(Descriptor_Manager::Graphic);
+    vk::PushConstantRange push_contant;
+    push_contant.setStageFlags(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment)
+        .setOffset(0)
+        .setSize(Context::Get_Singleton()
+                     ->get_graphic_context()
+                     ->get_constants_size());
+    layout_create_info.setSetLayouts(descriptor_layouts)
+        .setPushConstantRanges(push_contant);
     layout = Context::Get_Singleton()
                  ->get_device()
                  ->get_handle()

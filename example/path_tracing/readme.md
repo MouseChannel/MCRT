@@ -6,7 +6,8 @@
         else if ray hit an object at q
             return shade(q) * BRDF * cosine / pdf
   
-
 ```
+
+![path_tracing](../../assets/cube.png "👍👍")
 
 ![path_tracing](../../assets/path_tracing.gif "👍👍")

@@ -26,8 +26,17 @@ public:
     virtual void prepare_descriptorset(std::function<void()> prepare_func) = 0;
 
     virtual void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules) = 0;
+    void set_constants_size(int size)
+    {
+        push_constants_size = size;
+    }
+    auto get_constants_size()
+    {
+        return push_constants_size;
+    }
 
 protected:
     void Prepare_RenderPass();
+    int push_constants_size;
 };
 }

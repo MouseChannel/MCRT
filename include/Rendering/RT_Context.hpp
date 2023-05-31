@@ -84,14 +84,14 @@ public:
     {
         return miss_shader_count;
     }
-    void set_constants_size(int size)
-    {
-        push_constants_size = size;
-    }
-    auto get_constants_size()
-    {
-        return push_constants_size;
-    }
+    // void set_constants_size(int size)
+    // {
+    //     push_constants_size = size;
+    // }
+    // auto get_constants_size()
+    // {
+    //     return push_constants_size;
+    // }
 
 private:
     void create_shader_bind_table();
@@ -127,7 +127,7 @@ private:
     std::shared_ptr<Buffer> m_SBT_buffer_rmiss;
 
     std::shared_ptr<Buffer> m_SBT_buffer_rhit;
-    int push_constants_size;
+    // int push_constants_size;
 
     int miss_shader_count { 0 };
     int hit_shader_count { 0 };

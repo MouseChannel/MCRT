@@ -45,6 +45,7 @@ BEGIN_ENUM(Vertex_Binding)
 e_pos = 0,
     e_nrm = 1,
     e_color = 2,
+    // e_texture_index = 3,
     e_texCoord = 3 END_ENUM();
 struct Camera_data {
 
@@ -86,6 +87,7 @@ struct Vertex // See ObjLoader, copy of VertexObj, could be compressed for devic
     vec3 pos;
     vec3 nrm;
     vec3 color;
+    // int texture_index;
     vec2 texCoord;
 #ifdef __cplusplus
 
@@ -114,6 +116,11 @@ struct Vertex // See ObjLoader, copy of VertexObj, could be compressed for devic
                                 .setLocation(e_color)
                                 .setFormat(vk::Format ::eR32G32B32Sfloat)
                                 .setOffset(offsetof(Vertex, color));
+        // res_attr[e_texture_index] = vk::VertexInputAttributeDescription()
+        //                                 .setBinding(0)
+        //                                 .setLocation(e_texture_index)
+        //                                 .setFormat(vk::Format ::eR32Sint)
+        //                                 .setOffset(offsetof(Vertex, texture_index));
         res_attr[e_texCoord] = vk::VertexInputAttributeDescription()
                                    .setBinding(0)
                                    .setLocation(e_texCoord)

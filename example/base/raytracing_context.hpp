@@ -40,7 +40,7 @@ public:
         throw std::runtime_error("it is not Ray_Tracing context");
     }
 
-    void prepare(std::shared_ptr<Window> window) override;
+   virtual void prepare(std::shared_ptr<Window> window) override;
 
 private:
     std::shared_ptr<CommandBuffer> BeginGraphicFrame();
@@ -52,7 +52,7 @@ private:
     virtual void EndRTFrame() = 0;
     PushContant pushContant_Ray;
     std::shared_ptr<Buffer> m_vertex_buffer;
-    std::shared_ptr<Buffer> index_buffer, position_buffer, uv_buffer;
+    std::shared_ptr<Buffer> index_buffer;
 };
 
 }

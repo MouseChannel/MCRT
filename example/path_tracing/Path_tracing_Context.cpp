@@ -30,7 +30,7 @@ Path_tracing_context::~Path_tracing_context()
 void Path_tracing_context::prepare(std::shared_ptr<Window> window)
 {
     ray_tracing_context::prepare(window);
-    GLTF_Loader::load_model("D:/MoChengRT/assets/girl.glb");
+    GLTF_Loader::load_model("D:/MoChengRT/assets/cube.glb");
     auto mm = Mesh::meshs;
     auto tt = Texture::textures;
     // return;
@@ -79,7 +79,6 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
                                      Ray_Tracing_Binding::e_gbuffer,
                                      vk::DescriptorType ::eStorageImage,
                                      vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute);
-         
         });
         contexts[Ray_tracing]->prepare_pipeline(rt_shader_modules);
 
@@ -128,7 +127,7 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
 }
 std::shared_ptr<CommandBuffer> Path_tracing_context::Begin_Frame()
 {
-   
+
     BeginRTFrame();
     EndRTFrame();
     BeginComputeFrame();
@@ -149,7 +148,6 @@ std::shared_ptr<CommandBuffer> Path_tracing_context::BeginRTFrame()
 
         cmd->get_handle()
             .bindPipeline(vk::PipelineBindPoint ::eRayTracingKHR, rt_context->get_pipeline()->get_handle());
-     
 
         cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint ::eRayTracingKHR,
                                              rt_context->get_pipeline()->get_layout(),

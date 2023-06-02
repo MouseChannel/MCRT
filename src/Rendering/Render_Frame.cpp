@@ -6,8 +6,8 @@
 
 namespace MCRT {
 
-RenderFrame::RenderFrame(  std::shared_ptr<RenderPass> renderpass, std::vector<std::shared_ptr<RenderTarget>>& render_targets)
-     
+RenderFrame::RenderFrame(std::shared_ptr<RenderPass> renderpass, std::vector<std::shared_ptr<RenderTarget>>& render_targets)
+
 {
     m_render_targets = render_targets;
     std::vector<std::shared_ptr<Image>> images;

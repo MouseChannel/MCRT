@@ -35,12 +35,17 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     raster_context::prepare(window);
 
     // Obj_loader::load_model("D:/MoChengRT/assets/girl.obj");
-    GLTF_Loader::load_model("D:/MoChengRT/assets/girl.glb");
+    GLTF_Loader::load_model("D:/MoChengRT/assets/scene.glb");
+    auto dd = Texture::textures;
+    auto ss = Mesh::meshs;
+
     contexts.resize(1);
 
     { // graphic
         contexts[Context_index::Graphic] = std::shared_ptr<RenderContext> { new RenderContext(m_device) };
-        Context::Get_Singleton()->get_graphic_context()->set_constants_size(sizeof(PC_Raster));
+        Context::Get_Singleton()
+            ->get_graphic_context()
+            ->set_constants_size(sizeof(PC_Raster));
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
         graphic_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/shader/raster/raster.vert.spv"));
         graphic_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/shader/raster/raster.frag.spv"));
@@ -51,15 +56,15 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                     camera_matrix,
                     e_camera_matrix,
                     Descriptor_Manager::Graphic);
+
+            Descriptor_Manager::Get_Singleton()
+                ->Make_DescriptorSet(
+                    Texture::get_image_handles(),
+                    Descriptor_Manager::Graphic,
+                    e_textures,
+                    vk::DescriptorType ::eCombinedImageSampler,
+                    vk::ShaderStageFlagBits::eFragment);
         });
-        auto rr = Texture::get_image_handles();
-        Descriptor_Manager::Get_Singleton()
-            ->Make_DescriptorSet(
-                 Texture::get_image_handles()  ,
-                Descriptor_Manager::Graphic,
-                e_textures,
-                vk::DescriptorType ::eCombinedImageSampler,
-                vk::ShaderStageFlagBits::eFragment);
         contexts[Graphic]->prepare_pipeline(graphic_shader_modules);
 
         contexts[Graphic]->post_prepare();
@@ -83,7 +88,8 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
     {
 
         cmd->get_handle()
-            .bindPipeline(vk::PipelineBindPoint ::eGraphics, render_context->get_pipeline()->get_handle());
+            .bindPipeline(vk::PipelineBindPoint ::eGraphics,
+                          render_context->get_pipeline()->get_handle());
 
         cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                              render_context->get_pipeline()->get_layout(),
@@ -103,16 +109,19 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                                                    },
                                                 { 0 });
             pc = PC_Raster {
-                .model_matrix { glm::mat4(1) },
+                .model_matrix { glm::rotate(mesh->get_model_matrix(), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f))
+
+                },
                 .texture_index = mesh->m_material.texture_index
             };
+            angle++;
 
             cmd->get_handle()
                 .pushConstants<PC_Raster>(
                     render_context
                         ->get_pipeline()
                         ->get_layout(),
-                    vk::ShaderStageFlagBits::eVertex,
+                    vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
                     0,
                     pc);
             cmd->get_handle()

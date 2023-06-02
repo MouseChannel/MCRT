@@ -70,6 +70,17 @@ public:
     {
         return tramsform;
     }
+    auto get_model_matrix()
+    {
+        auto model_matrix = glm::mat4(1);
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 4; j++) {
+
+                model_matrix[i][j] = tramsform[i][j];
+            }
+        }
+        return model_matrix;
+    }
 
     Material m_material;
 
@@ -84,20 +95,22 @@ private:
     std::shared_ptr<Buffer> indices_buffer;
     std::shared_ptr<Buffer> material_buffer;
     int obj_instance_index;
-    std::array<std::array<float, 4>, 3> tramsform {
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0
-    };
+
+    std::array<std::array<float, 4>, 3>
+        tramsform {
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+        };
 };
 
 } // namespace MCRT

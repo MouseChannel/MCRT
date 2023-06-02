@@ -8,7 +8,8 @@
 #include "../Data_struct.h"
 #include "../common.glsl"
 #include "../sampling.glsl"
-#include "../Set_binding.h"
+// #include "../Set_binding.h"
+#include "Binding.h"
 #include "hit_payload.glsl"
 #include "push_constants/push_constants.h"
 

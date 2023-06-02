@@ -8,6 +8,7 @@
 #include "../Data_struct.h"
 #include "../common.glsl"
 #include "../sampling.glsl"
+#include "Binding.h"
 #include "hit_payload.glsl"
 
 layout(push_constant) uniform _PushContant
@@ -55,7 +56,6 @@ void main()
                     tMax, // ray max range
                     0 // payload (location = 0)
         );
-       
     }
 
     imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(prd.hitValue, 0));

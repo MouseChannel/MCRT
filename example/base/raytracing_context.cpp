@@ -32,8 +32,8 @@ void ray_tracing_context::prepare(std::shared_ptr<Window> window)
         1,
         2,
         0,
-        1,
-        3
+        3,
+        1
 
     };
 

@@ -70,6 +70,7 @@ void RenderContext::fill_render_targets()
                       vk::ImageAspectFlagBits::eColor)
         };
         all_rendertargets[i].emplace_back(Color_RenderTarget::Create(swapchain_image));
+        all_rendertargets[i].emplace_back(Depth_RenderTarget::Create());
     }
 }
 void RenderContext::Prepare_Framebuffer()
@@ -106,36 +107,7 @@ void RenderContext::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> 
 
     m_graphic_pipeline.reset(new Graphic_Pipeline(shader_modules));
 
-    // vk::VertexInputBindingDescription vert_position_binding;
-    // vert_position_binding
-    //     .setBinding(0)
-    //     .setInputRate(vk::VertexInputRate ::eVertex)
-    //     .setStride(sizeof(float) * 3);
-    // vk::VertexInputAttributeDescription vertex_position_attr;
-    // vertex_position_attr.setBinding(0)
-    //     .setFormat(vk::Format ::eR32G32B32Sfloat)
-    //     .setLocation(0)
-    //     .setOffset(0);
-
-    // vk::VertexInputBindingDescription vert_uv_binding;
-    // vert_uv_binding
-    //     .setBinding(1)
-    //     .setInputRate(vk::VertexInputRate ::eVertex)
-    //     .setStride(sizeof(float) * 2);
-
-    // vk::VertexInputAttributeDescription vertex_uv_attr;
-    // vertex_uv_attr.setBinding(1)
-    //     .setFormat(vk::Format ::eR32G32Sfloat)
-    //     .setLocation(1)
-    //     .setOffset(0);
-    // std::vector<vk::VertexInputBindingDescription> binds {
-    //     vert_position_binding,
-    //     vert_uv_binding
-    // };
-    // std::vector<vk::VertexInputAttributeDescription> attrs {
-    //     vertex_position_attr,
-    //     vertex_uv_attr
-    // };
+  
     auto binds = Vertex::make_bind();
     auto attrs = Vertex::make_attr();
 
@@ -221,32 +193,7 @@ std::shared_ptr<CommandBuffer> RenderContext::Begin_Record_Command_Buffer()
 void RenderContext::record_command(std::shared_ptr<CommandBuffer> cmd)
 {
     auto cmd_handle = cmd->get_handle();
-    // cmd_handle.bindIndexBuffer(index_buffer->get_handle(), 0, vk::IndexType ::eUint32);
-    // cmd_handle.bindVertexBuffers(0, {
-    //                                     vertex_buffer->get_handle(),
-    //                                     uv_buffer->get_handle(),
-    //                                 },
-    //                              { 0, 0 });
 
-    // cmd_handle.bindPipeline(vk::PipelineBindPoint ::eGraphics, get_pipeline()->get_handle());
-    // cmd_handle.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-    //                               get_pipeline()->get_layout(),
-    //                               0,
-    //                               { //   Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute)->get_handle()[0],
-    //                                 Descriptor_Manager::Get_Singleton()
-    //                                     ->get_DescriptorSet(Descriptor_Manager::Graphic)
-    //                                     ->get_handle() },
-
-    //                               {});
-    // cmd_handle.drawIndexed(Model::models[0]->get_vertex_count(), 1, 0, 0, 0);
-
-    // vk::MemoryBarrier2 memory_barrier;
-
-    // memory_barrier.setSrcStageMask(vk::PipelineStageFlagBits2::eComputeShader)
-    //     .setSrcAccessMask(vk::AccessFlagBits2::eShaderStorageWrite)
-    //     .setDstStageMask(vk::PipelineStageFlagBits2::eFragmentShader)
-    //     .setDstAccessMask(vk::AccessFlagBits2::eShaderRead);
-    // cmd_handle.pipelineBarrier2(vk::DependencyInfo().setMemoryBarriers(memory_barrier));
     Context::Get_Singleton()->get_debugger()->set_name(cmd, "render command_buffer");
 }
 

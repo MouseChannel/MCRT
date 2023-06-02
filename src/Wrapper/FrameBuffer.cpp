@@ -11,12 +11,12 @@ Framebuffer::Framebuffer(std::shared_ptr<RenderPass> renderpass, std::vector<std
     auto h = Get_Context_Singleton()->get_swapchain()->Get_Extent2D().height;
     auto w = Get_Context_Singleton()->get_swapchain()->Get_Extent2D().width;
 
-    vk::FramebufferCreateInfo create_info;
     std::vector<vk::ImageView> image_views;
     for (auto& i : images) {
 
         image_views.push_back(i->Get_Image_View());
     }
+    vk::FramebufferCreateInfo create_info;
     create_info.setRenderPass(renderpass->get_handle())
         .setAttachments(image_views)
         .setHeight(749)

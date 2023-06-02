@@ -10,7 +10,8 @@
 #extension GL_EXT_buffer_reference2 : require
 
 #include "../Data_struct.h"
-#include "../Set_binding.h"
+// #include "../Set_binding.h"
+#include "Binding.h"
 #include "../common.glsl"
 #include "../sampling.glsl"
 #include "hit_payload.glsl"
@@ -96,13 +97,13 @@ void main()
     vec3 local_dir = hemisphereSample_cos(seed);
     vec3 rayDirection = normal_coordinate * local_dir;
     vec3 BRDF;
-    // debugPrintfEXT("message \n");
+    // Lambertian reflection
     if (material.material.texture_index > -1) {
 
-        BRDF = texture(textures[nonuniformEXT(material.material.texture_index)], cur_uv).xyz;
+        BRDF = texture(textures[nonuniformEXT(material.material.texture_index)], cur_uv).xyz / PI;
         // debugPrintfEXT("message \n");
     } else {
-        // Lambertian reflection
+
         BRDF = material.material.color.xyz / PI;
     }
     float cos_theta = dot(rayDirection, cur_world_normal);

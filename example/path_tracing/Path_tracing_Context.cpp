@@ -15,7 +15,7 @@
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/Texture.hpp"
 #include "iostream"
-#include "shader/Data_struct.h"
+#include "shader/Path_tracing/Binding.h"
 
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance {
@@ -30,7 +30,7 @@ Path_tracing_context::~Path_tracing_context()
 void Path_tracing_context::prepare(std::shared_ptr<Window> window)
 {
     ray_tracing_context::prepare(window);
-    GLTF_Loader::load_model("D:/MoChengRT/assets/cube.glb");
+    GLTF_Loader::load_model("D:/MoChengRT/assets/girl.glb");
     auto mm = Mesh::meshs;
     auto tt = Texture::textures;
     // return;
@@ -87,10 +87,11 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
     {
         // Compute_Context
         contexts[Context_index::Compute] = std::shared_ptr<Compute_Context> { new Compute_Context };
-
-        std::shared_ptr<ShaderModule> compute_shader {
-            new ShaderModule("D:/MoChengRT/shader/filter.comp.spv")
-        };
+        // contexts[Compute]->set_constants_size(sizeof(PushContant));
+        std::shared_ptr<ShaderModule>
+            compute_shader {
+                new ShaderModule("D:/MoChengRT/shader/filter.comp.spv")
+            };
         contexts[Compute]->prepare({ compute_shader });
         contexts[Compute]->prepare_descriptorset([&]() {
             Descriptor_Manager::Get_Singleton()
@@ -107,7 +108,7 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
     }
     { // graphic
         contexts[Context_index::Graphic] = std::shared_ptr<RenderContext> { new RenderContext(m_device) };
-
+        contexts[Graphic]->set_constants_size(sizeof(PushContant));
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
         graphic_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/shader/post.vert.spv"));
         graphic_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/shader/post.frag.spv"));

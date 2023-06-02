@@ -48,6 +48,7 @@ Graphic_Pipeline::~Graphic_Pipeline()
 }
 void Graphic_Pipeline::Build_Pipeline(std::shared_ptr<RenderPass> render_pass)
 {
+
     vk::GraphicsPipelineCreateInfo create_info;
     create_info.setLayout(layout)
         .setRenderPass(render_pass->get_handle())
@@ -65,6 +66,29 @@ void Graphic_Pipeline::Build_Pipeline(std::shared_ptr<RenderPass> render_pass)
         .setPDepthStencilState(&depth_test)
         .setPColorBlendState(&blend);
     auto res = Get_Context_Singleton()->get_device()->get_handle().createGraphicsPipeline(nullptr, create_info);
+    // vk::GraphicsPipelineCreateInfo create_info;
+    // create_info.setLayout(layout)
+    //     .setRenderPass(render_pass->get_handle())
+    //     // vertex input
+    //     .setPVertexInputState(&input_state)
+    //     // vertex assembly
+    //     .setPInputAssemblyState(&input_assembly)
+    //     // viewport and scissor
+    //     .setPViewportState(&viewportInfo)
+    //     // shader
+    //     .setStages(shader_stage)
+    //     // rasterization
+    //     .setPRasterizationState(&rasterization_info)
+    //     .setPMultisampleState(&multi_sample)
+    //     // .setPDepthStencilState(const vk::PipelineDepthStencilStateCreateInfo *pDepthStencilState_)
+    //     .setPDepthStencilState(&depth_test)
+    //     .setPColorBlendState(&blend);
+    // auto res = Get_Context_Singleton()
+    //                ->get_device()
+    //                ->get_handle()
+    //                .createGraphicsPipeline(nullptr, create_info);
+    if (res.result != vk::Result::eSuccess)
+        throw std::runtime_error("fail to create graphic pipeline ");
     m_handle = res.value;
 }
 void Graphic_Pipeline::Make_Layout(vk::DescriptorSetLayout descriptor_layout,
@@ -81,14 +105,15 @@ void Graphic_Pipeline::Make_Layout(vk::DescriptorSetLayout descriptor_layout,
                  .createPipelineLayout(createInfo);
     // layout = pipeline_layout;
 }
-void Graphic_Pipeline::Make_VertexInput(vk::ArrayProxyNoTemporaries<const vk::VertexInputBindingDescription> const& bind,
-                                        vk::ArrayProxyNoTemporaries<const vk::VertexInputAttributeDescription> const& attr)
+void Graphic_Pipeline::Make_VertexInput(vk::ArrayProxyNoTemporaries<const vk::VertexInputBindingDescription> const bind,
+                                        vk::ArrayProxyNoTemporaries<const vk::VertexInputAttributeDescription> const attr)
 {
     input_state.setVertexAttributeDescriptions(attr).setVertexBindingDescriptions(bind);
 }
 void Graphic_Pipeline::Make_VertexAssembly()
 {
-    input_assembly.setTopology(vk::PrimitiveTopology::eTriangleList).setPrimitiveRestartEnable(false);
+    input_assembly.setTopology(vk::PrimitiveTopology::eTriangleList)
+        .setPrimitiveRestartEnable(false);
 }
 
 void Graphic_Pipeline::Make_viewPort()
@@ -98,8 +123,8 @@ void Graphic_Pipeline::Make_viewPort()
                         ->Get_Extent2D();
     viewport.setX(0)
         .setY(0)
-        .setHeight(extent2D.height)
-        .setWidth(extent2D.width)
+        .setHeight(749)
+        .setWidth(800)
         .setMinDepth(0)
         .setMaxDepth(1);
 
@@ -120,7 +145,7 @@ void Graphic_Pipeline::Add_Shader_Modules(vk::ShaderModule module, vk::ShaderSta
 }
 void Graphic_Pipeline::Make_Resterization()
 {
-    rasterization_info.setCullMode(vk::CullModeFlagBits::eNone)
+    rasterization_info.setCullMode(vk::CullModeFlagBits::eBack)
         .setFrontFace(vk::FrontFace::eClockwise)
         .setLineWidth(1)
         .setPolygonMode(vk::PolygonMode::eFill)
@@ -140,8 +165,11 @@ void Graphic_Pipeline::Make_DepthTest()
 void Graphic_Pipeline::Make_attach()
 {
     vk::PipelineColorBlendAttachmentState attach;
-    attach.setBlendEnable(true).setColorWriteMask(
-                                   vk::ColorComponentFlagBits::eA | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eR)
+    attach.setBlendEnable(true)
+        .setColorWriteMask(
+            vk::ColorComponentFlagBits::eA |
+            vk::ColorComponentFlagBits::eB |
+            vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eR)
         .setSrcColorBlendFactor(vk::BlendFactor::eOne)
         .setDstAlphaBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha)
         .setColorBlendOp(vk::BlendOp::eAdd)

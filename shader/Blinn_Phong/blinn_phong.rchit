@@ -11,12 +11,14 @@
 #include "../Data_struct.h"
 #include "../common.glsl"
 #include "../sampling.glsl"
+#include "Binding.h"
 #include "hit_payload.glsl"
 
 hitAttributeEXT vec2 attribs;
 
 layout(location = 0) rayPayloadInEXT hitPayload prd;
 layout(location = 1) rayPayloadEXT bool isShadowed;
+// layout(set = e_ray_global, binding = eTextures) uniform sampler2D textures[];
 layout(push_constant) uniform PushContant_
 {
     PushContant pcRay;

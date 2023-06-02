@@ -2,6 +2,7 @@
 #ifndef DATA_STRUCT
 #define DATA_STRUCT
 #ifdef __cplusplus
+#pragma once
 #include "glm/glm.hpp"
 #include "vulkan/vulkan.hpp"
 using mat4 = glm::mat4;
@@ -25,11 +26,11 @@ using uint = unsigned int;
 #define END_ENUM()
 #endif
 
-BEGIN_ENUM(Ray_Tracing_Binding)
-e_tlas = 0,
-    e_out_image = 1,
-    e_gbuffer = 2,
-    e_normal_gbuffer = 3 END_ENUM();
+// BEGIN_ENUM(Ray_Tracing_Binding)
+// e_tlas = 0,
+//     e_out_image = 1,
+//     e_gbuffer = 2,
+//     e_normal_gbuffer = 3 END_ENUM();
 
 BEGIN_ENUM(Global_Binding)
 e_camera = 0,
@@ -67,7 +68,7 @@ struct PushContant {
     vec4 lightPosition;
     float lightIntensity;
     int frame;
-    // int lightType;
+    
 };
 struct PushContant_Compute {
     int frame;

@@ -15,12 +15,16 @@
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/Texture.hpp"
 #include "iostream"
-#include "shader/Data_struct.h"
+// #include "shader/Data_struct.h"
+#include "shader/AO/Binding.h"
 
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance {
     new MCRT::raytracing_AO_context
 };
+bool raytracing_AO_context::enable_ao;
+int raytracing_AO_context::sample_count = 5;
+float raytracing_AO_context::ao_field = 1.;
 raytracing_AO_context::raytracing_AO_context()
 {
 }
@@ -29,24 +33,37 @@ raytracing_AO_context::~raytracing_AO_context()
 }
 void raytracing_AO_context::prepare(std::shared_ptr<Window> window)
 {
+
     ray_tracing_context::prepare(window);
-    GLTF_Loader::load_model("D:/MoChengRT/assets/cube.glb");
+    m_camera->m_position = glm::vec3 { 0, 8, 8 };
+    GLTF_Loader::load_model("D:/MoChengRT/assets/scene.glb");
     auto mm = Mesh::meshs;
     auto tt = Texture::textures;
     // return;
+    ao_image.reset(new Image(800,
+                             749,
+                             vk::Format::eR32G32B32A32Sfloat,
+                             vk::ImageType::e2D,
+                             vk::ImageTiling::eOptimal,
+                             vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled,
+                             vk::ImageAspectFlagBits::eColor,
+                             vk::SampleCountFlagBits::e1));
 
-    contexts.resize(3);
+    ao_image->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
+    contexts.resize(2);
     // raytracing
     {
 
         contexts[Context_index::Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
         std::vector<std::shared_ptr<ShaderModule>> rt_shader_modules(RT_Pipeline::eShaderGroupCount);
-        rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rgen.spv"));
-        rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rmiss.spv"));
-        rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rchit.spv"));
+        rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/AO/ray_tracing_AO.rgen.spv"));
+        rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("D:/MoChengRT/shader/AO/ray_tracing_AO.rmiss.spv"));
+
+        rt_shader_modules[RT_Pipeline::eMiss2].reset(new ShaderModule("D:/MoChengRT/shader/AO/ray_tracing_AO2.rmiss.spv"));
+        rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/AO/ray_tracing_AO.rchit.spv"));
         Context::Get_Singleton()->get_rt_context()->set_hit_shader_count(1);
-        Context::Get_Singleton()->get_rt_context()->set_miss_shader_count(1);
-        Context::Get_Singleton()->get_rt_context()-> set_constants_size(sizeof(PushContant));
+        Context::Get_Singleton()->get_rt_context()->set_miss_shader_count(2);
+        Context::Get_Singleton()->get_rt_context()->set_constants_size(sizeof(AOPushContant));
 
         contexts[Ray_tracing]->prepare(rt_shader_modules);
         contexts[Ray_tracing]->prepare_descriptorset([&]() {
@@ -64,6 +81,12 @@ void raytracing_AO_context::prepare(std::shared_ptr<Window> window)
                                      Ray_Tracing_Binding::e_out_image,
                                      vk::DescriptorType::eStorageImage,
                                      vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute);
+            Descriptor_Manager::Get_Singleton()
+                ->Make_DescriptorSet(ao_image,
+                                     Descriptor_Manager::Ray_Tracing,
+                                     Ray_Tracing_Binding::e_ao_image,
+                                     vk::DescriptorType::eStorageImage,
+                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute);
 
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(Texture::get_image_handles(),
@@ -71,43 +94,35 @@ void raytracing_AO_context::prepare(std::shared_ptr<Window> window)
                                      Global_Binding::eTextures,
                                      vk::DescriptorType::eCombinedImageSampler,
                                      vk::ShaderStageFlagBits::eClosestHitKHR);
-            // GBuffer
-
-            Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(rt_context->get_gbuffer(),
-                                     Descriptor_Manager::Ray_Tracing,
-                                     Ray_Tracing_Binding::e_gbuffer,
-                                     vk::DescriptorType ::eStorageImage,
-                                     vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute);
         });
         contexts[Ray_tracing]->prepare_pipeline(rt_shader_modules);
 
         contexts[Ray_tracing]->post_prepare();
     }
-    {
-        // Compute_Context
-        contexts[Context_index::Compute] = std::shared_ptr<Compute_Context> { new Compute_Context };
+    // {
+    //     // Compute_Context
+    //     contexts[Context_index::Compute] = std::shared_ptr<Compute_Context> { new Compute_Context };
 
-        std::shared_ptr<ShaderModule> compute_shader {
-            new ShaderModule("D:/MoChengRT/shader/filter.comp.spv")
-        };
-        contexts[Compute]->prepare({ compute_shader });
-        contexts[Compute]->prepare_descriptorset([&]() {
-            Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(Context::Get_Singleton()
-                                         ->get_compute_context()
-                                         ->get_out_image(),
-                                     Descriptor_Manager::Compute,
-                                     0,
-                                     vk::DescriptorType::eStorageImage,
-                                     vk::ShaderStageFlagBits::eCompute);
-        });
-        contexts[Compute]->prepare_pipeline({ compute_shader });
-        contexts[Compute]->post_prepare();
-    }
+    //     std::shared_ptr<ShaderModule> compute_shader {
+    //         new ShaderModule("D:/MoChengRT/shader/filter.comp.spv")
+    //     };
+    //     contexts[Compute]->prepare({ compute_shader });
+    //     contexts[Compute]->prepare_descriptorset([&]() {
+    //         Descriptor_Manager::Get_Singleton()
+    //             ->Make_DescriptorSet(Context::Get_Singleton()
+    //                                      ->get_compute_context()
+    //                                      ->get_out_image(),
+    //                                  Descriptor_Manager::Compute,
+    //                                  0,
+    //                                  vk::DescriptorType::eStorageImage,
+    //                                  vk::ShaderStageFlagBits::eCompute);
+    //     });
+    //     contexts[Compute]->prepare_pipeline({ compute_shader });
+    //     contexts[Compute]->post_prepare();
+    // }
     { // graphic
         contexts[Context_index::Graphic] = std::shared_ptr<RenderContext> { new RenderContext(m_device) };
-
+        contexts[Context_index::Graphic]->set_constants_size(sizeof(PushContant));
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
         graphic_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/shader/post.vert.spv"));
         graphic_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/shader/post.frag.spv"));
@@ -115,7 +130,7 @@ void raytracing_AO_context::prepare(std::shared_ptr<Window> window)
         contexts[Graphic]->prepare_descriptorset([&]() { Descriptor_Manager::Get_Singleton()
                                                              ->Make_DescriptorSet(
                                                                  Context::Get_Singleton()
-                                                                     ->get_compute_context()
+                                                                     ->get_rt_context()
                                                                      ->get_out_image(),
                                                                  Descriptor_Manager::Graphic,
                                                                  0,
@@ -130,8 +145,8 @@ std::shared_ptr<CommandBuffer> raytracing_AO_context::Begin_Frame()
 
     BeginRTFrame();
     EndRTFrame();
-    BeginComputeFrame();
-    EndComputeFrame();
+    // BeginComputeFrame();
+    // EndComputeFrame();
 
     return ray_tracing_context::Begin_Frame();
 }
@@ -155,19 +170,20 @@ std::shared_ptr<CommandBuffer> raytracing_AO_context::BeginRTFrame()
                                              rt_context->get_pipeline()->get_descriptor_sets(),
                                              {});
 
-        pushContant_Ray = PushContant {
+        pushContant_Ray = AOPushContant {
             .frame = frame_id,
-            // .clearColor { 1 },
-            .lightPosition { 10.f, 15.f, 8.f, 0 },
-            .lightIntensity = 100
+            .enable_ao = enable_ao,
+            .sample_count = sample_count,
+            .ao_field = ao_field,
+
         };
         frame_id++;
         cmd->get_handle()
-            .pushConstants<PushContant>(rt_context->get_pipeline()
-                                            ->get_layout(),
-                                        vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR,
-                                        0,
-                                        pushContant_Ray);
+            .pushConstants<AOPushContant>(rt_context->get_pipeline()
+                                              ->get_layout(),
+                                          vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR,
+                                          0,
+                                          pushContant_Ray);
         rt_context->record_command(cmd);
     }
     return cmd;

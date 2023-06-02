@@ -7,7 +7,8 @@
 #extension GL_ARB_shader_clock : enable
 // #extension GL_GOOGLE_cpp_style_line_direcitve :  require
 #include "../Data_struct.h"
-#include "../Set_binding.h"
+// #include "../Set_binding.h"
+#include "Binding.h"
 #include "../common.glsl"
 #include "../sampling.glsl"
 #include "hit_payload.glsl"
@@ -25,7 +26,7 @@ layout(set = e_ray_tracing, binding = e_gbuffer, rgba32f) uniform image2D gbuffe
 // layout(set = 0, binding = e_position_gbuffer, rgba32f) uniform image2D posiiotn;
 // layout(set = 0, binding = e_normal_gbuffer, rgba32f) uniform image2D normal;
 // gbuffer end
-layout(set = 1, binding = e_camera) uniform _camera_data
+layout(set = e_ray_global, binding = e_camera) uniform _camera_data
 {
     Camera_data camera_data;
 };

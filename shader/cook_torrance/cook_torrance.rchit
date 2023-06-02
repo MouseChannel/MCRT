@@ -12,7 +12,8 @@
 #include "../common.glsl"
 
 #include "../sampling.glsl"
-#include "../Set_binding.h"
+// #include "../Set_binding.h"
+#include "Binding.h"
 #include "common.glsl"
 #include "push_constants/push_constants.h"
 

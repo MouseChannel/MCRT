@@ -15,8 +15,7 @@
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/Texture.hpp"
 #include "iostream"
-#include "shader/Data_struct.h"
-
+#include "shader/cook_torrance/Binding.h"
 
 namespace MCRT {
 float cook_torrance_context::roughness = 0;
@@ -32,7 +31,7 @@ void cook_torrance_context::prepare(std::shared_ptr<Window> window)
 {
     ray_tracing_context::prepare(window);
     GLTF_Loader::load_model("D:/MoChengRT/assets/girl.glb");
-   
+
     contexts.resize(3);
     // raytracing
     {
@@ -76,12 +75,16 @@ void cook_torrance_context::prepare(std::shared_ptr<Window> window)
                                      Ray_Tracing_Binding::e_gbuffer,
                                      vk::DescriptorType::eStorageImage,
                                      vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute);
+            //
             // Descriptor_Manager::Get_Singleton()
-            //     ->Make_DescriptorSet(rt_context->get_normal_buffer(), Ray_Tracing_Binding::e_normal_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
-
+            //     ->Make_DescriptorSet(camera_data,
+            //                          Global_Binding::e_camera,
+            //                          Descriptor_Manager::Global);
+            // // obj_data_address->
             // Descriptor_Manager::Get_Singleton()
-            //     ->Make_DescriptorSet(rt_context->get_position_buffer(), Ray_Tracing_Binding::e_position_gbuffer, vk::DescriptorType ::eStorageImage, vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute, Descriptor_Manager::Ray_Tracing);
-            // end Gbuffer`
+            //     ->Make_DescriptorSet(obj_data_address,
+            //                          Global_Binding::e_obj_addresses,
+            //                          Descriptor_Manager::Global);
         });
         contexts[Ray_tracing]->prepare_pipeline(rt_shader_modules);
 
@@ -128,7 +131,7 @@ void cook_torrance_context::prepare(std::shared_ptr<Window> window)
 }
 std::shared_ptr<CommandBuffer> cook_torrance_context::Begin_Frame()
 {
- BeginRTFrame();
+    BeginRTFrame();
     EndRTFrame();
     BeginComputeFrame();
     EndComputeFrame();

@@ -9,6 +9,7 @@ public:
         eRaygen,
         eMiss,
         eMiss2,
+        eMiss3,
         eClosestHit,
         eShaderGroupCount
     };
@@ -21,7 +22,7 @@ public:
 
 private:
     std::vector<std::shared_ptr<ShaderModule>> shader_modules;
-    std::vector<vk::RayTracingShaderGroupCreateInfoKHR>  groups;
+    std::vector<vk::RayTracingShaderGroupCreateInfoKHR> groups;
     vk::PipelineLayout layout;
 };
 }

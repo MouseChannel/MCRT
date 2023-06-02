@@ -79,14 +79,19 @@ std::vector<std::shared_ptr<Image>> Texture::get_image_handles()
     std::shared_ptr<Image> white_image {
         new Image(1,
                   1,
-                  vk::Format::eR32G32B32A32Sfloat,
+                  vk::Format::eR8G8B8A8Srgb,
                   vk::ImageType::e2D,
                   vk::ImageTiling::eOptimal,
-                  vk::ImageUsageFlagBits::eStorage,
+                  vk::ImageUsageFlagBits::eSampled,
                   vk::ImageAspectFlagBits::eColor,
                   vk::SampleCountFlagBits::e1)
     };
-
+    white_image->SetImageLayout(
+        vk::ImageLayout::eShaderReadOnlyOptimal,
+        vk::AccessFlagBits::eNone,
+        vk::AccessFlagBits::eShaderRead,
+        vk::PipelineStageFlagBits::eTopOfPipe,
+        vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
     image_handles.push_back(white_image);
     return image_handles;
 }

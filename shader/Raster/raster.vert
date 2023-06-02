@@ -30,9 +30,10 @@ void main()
     mat4 view_matrix = camera_matrix.view;
     mat4 project_matrix = camera_matrix.project;
 
-    gl_Position = project_matrix * view_matrix * vec4(in_pos, 1.);
+    gl_Position = project_matrix * view_matrix * model_matrix * vec4(in_pos, 1.);
     out_nrm = in_nrm;
     out_texCoord = in_texCoord;
+    // debugPrintfEXT("message \n", );
     // if (pc_raster.texture_index != -1)
     //     debugPrintfEXT("message from frag %f %f | %d \n", out_texCoord.x, out_texCoord.y, pc_raster.texture_index);
     // out_texture_index = in_texture_index;

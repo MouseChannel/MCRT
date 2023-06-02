@@ -18,8 +18,8 @@ public:
     ~Graphic_Pipeline();
     void Make_Layout(vk::DescriptorSetLayout descriptor_layout, uint32_t push_constants_size, vk::ShaderStageFlags push_constants_stage);
 
-    void Make_VertexInput(vk::ArrayProxyNoTemporaries<const vk::VertexInputBindingDescription> const& bind,
-                          vk::ArrayProxyNoTemporaries<const vk::VertexInputAttributeDescription> const& attr);
+    void Make_VertexInput(vk::ArrayProxyNoTemporaries<const vk::VertexInputBindingDescription> const bind,
+                          vk::ArrayProxyNoTemporaries<const vk::VertexInputAttributeDescription> const attr);
     void Make_VertexAssembly();
     void Make_viewPort();
     void Add_Shader_Modules(vk::ShaderModule shader_module, vk::ShaderStageFlagBits stage);

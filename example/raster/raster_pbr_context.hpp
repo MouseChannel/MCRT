@@ -1,8 +1,9 @@
 #pragma once
 #include "example/base/raster_context.hpp"
 // #include "shader/Data_struct.h"
-#include <iostream>
 #include "shader/Raster/Constants.h"
+#include <iostream>
+
 namespace MCRT {
 class Buffer;
 class raster_context_pbr : public raster_context {
@@ -46,13 +47,13 @@ public:
 private:
     std::shared_ptr<CommandBuffer> BeginGraphicFrame() override;
     std::shared_ptr<CommandBuffer> BeginComputeFrame();
-  
 
     void EndComputeFrame();
     void EndGraphicFrame() override;
 
     // PushContant pushContant_Ray;
     PC_Raster pc;
+    float angle;
     // std::shared_ptr<Buffer> index_buffer, vertex_buffer, uv_buffer;
 };
 

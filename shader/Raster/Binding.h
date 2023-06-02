@@ -19,4 +19,3 @@ e_camera_matrix = 0,
     e_textures = 1
     // e_graphic_global = 1,
     END_ENUM();
-

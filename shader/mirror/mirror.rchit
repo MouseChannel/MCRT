@@ -12,6 +12,7 @@
 #include "../Data_struct.h"
 #include "../common.glsl"
 #include "../sampling.glsl"
+#include "Binding.h"
 #include "hit_payload.glsl"
 
 hitAttributeEXT vec2 attribs;

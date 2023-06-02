@@ -12,7 +12,7 @@
 #include "Wrapper/Ray_Tracing/AS_Builder.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "iostream"
-#include "shader/Data_struct.h"
+#include "shader/Blinn_Phong/Binding.h"
 
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance { new MCRT::mirror_context };

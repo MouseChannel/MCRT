@@ -16,7 +16,7 @@ Buffer::Buffer(size_t size,
 {
     CreateBuffer(size, usage);
     memory_info = QueryMemoryInfo(property);
- 
+
     AllocateMemory();
     BindMemory2Buffer();
 }
@@ -115,6 +115,27 @@ void Buffer::Update(void* data, size_t size)
     }
     Unmap();
 }
+void Buffer::Update(std::vector<void*> data, std::vector<size_t> size)
+{
+
+    assert(data.size() == size.size());
+    size_t total_size = 0;
+    for (auto i : size)
+        total_size += i;
+    Map(0, total_size);
+    size_t cur_s = 0;
+    for (auto i = 0; i < data.size(); i++) {
+        auto d = data[i];
+        auto s = size[i];
+
+        std::memcpy((uint8_t*)mapped_data + cur_s, d, s);
+        cur_s += s;
+    }
+    if (permanent) {
+        return;
+    }
+    Unmap();
+}
 std::shared_ptr<Buffer> Buffer::CreateDeviceBuffer(void* data,
                                                    size_t size,
                                                    vk::BufferUsageFlags usage)
@@ -132,8 +153,11 @@ std::shared_ptr<Buffer> Buffer::CreateDeviceBuffer(void* data,
                                  vk::BufferUsageFlagBits::eTransferSrc,
                                  vk::MemoryPropertyFlagBits::eHostVisible |
                                      vk::MemoryPropertyFlagBits::eHostCoherent));
-    if (data)
-        host_buffer->Update(data, size);
+    if (data) {
+        std::vector<void*> d { data };
+        std::vector<size_t> s { size };
+        host_buffer->Update(d, s);
+    }
 
     device_buffer.reset(new Buffer(size,
                                    vk::BufferUsageFlagBits::eTransferDst | usage,

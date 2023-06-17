@@ -10,6 +10,7 @@ public:
     Buffer(size_t size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags property, bool permanent = false);
     ~Buffer();
     void Update(void* data, size_t size);
+    void Update(std::vector<void*> data, std::vector<size_t> size);
     [[nodiscard("Missing Size")]] auto GetSize()
     {
         return m_size;

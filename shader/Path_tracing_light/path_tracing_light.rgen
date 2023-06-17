@@ -1,0 +1,90 @@
+#version 460
+#extension GL_EXT_ray_tracing : require
+#extension GL_EXT_debug_printf : enable
+#extension GL_GOOGLE_include_directive : enable
+
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_ARB_shader_clock : enable
+// #extension GL_GOOGLE_cpp_style_line_direcitve :  require
+#include "../Data_struct.h"
+// #include "../Set_binding.h"
+#include "../common.glsl"
+#include "../sampling.glsl"
+#include "Binding.h"
+#include "Push_constants.h"
+#include "hit_payload.glsl"
+
+layout(push_constant) uniform _PushContant
+{
+    PushContant_light pcRay;
+};
+layout(location = 0) rayPayloadEXT hitPayload prd;
+layout(location = 1) rayPayloadEXT hitPayload_light prd_light;
+layout(set = e_ray_tracing, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
+layout(set = e_ray_tracing, binding = e_out_image, rgba32f) uniform image2D image;
+// gbuffer
+layout(set = e_ray_tracing, binding = e_gbuffer, rgba32f) uniform image2D gbuffer[];
+// gbuffer end
+layout(set = e_ray_global, binding = e_camera) uniform _camera_data
+{
+    Camera_data camera_data;
+};
+void main()
+{
+
+    vec3 ray_origin = camera_data.camera_pos.xyz;
+    vec3 ray_dir = get_camera_dir(gl_LaunchIDEXT.xy, gl_LaunchSizeEXT.xy, camera_data);
+    uint rayFlags = gl_RayFlagsOpaqueEXT;
+    float tMin = 0.001;
+    float tMax = 10000.0;
+
+    prd.hitValue = vec3(0);
+    prd.dir = vec3(0);
+    prd.seed = 1;
+    prd.rayOrigin = ray_origin;
+    prd.indir = vec3(0);
+    prd.depth = 0;
+    prd.rayDirection = ray_dir;
+
+    prd.point_position = vec3(-1);
+    prd.point_normal = vec3(-1);
+
+    vec3 weight = vec3(1);
+    prd.weight = vec3(1);
+    // while (prd.depth++ < 10) {
+
+    traceRayEXT(topLevelAS, // acceleration structure
+                rayFlags, // rayFlags
+                0xFF, // cullMask
+                0, // sbtRecordOffset
+                0, // sbtRecordStride
+                0, // missIndex
+                prd.rayOrigin, // ray origin
+                tMin, // ray min range
+                prd.rayDirection, // ray direction
+                tMax, // ray max range
+                0 // payload (location = 0)
+    );
+
+    //     weight *= prd.weight;
+    // }
+    // prd.hitValue *= weight;
+
+    // imageStore(gbuffer[position], ivec2(gl_LaunchIDEXT.xy), vec4(prd.point_position, 0));
+
+    // imageStore(gbuffer[normal], ivec2(gl_LaunchIDEXT.xy), vec4(prd.point_normal, 0));
+    if (pcRay.enable_filter == 0) {
+        imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(prd.hitValue, 1.f));
+        // // // debugPrintfEXT("message \n");
+        // return;
+    } else if (pcRay.frame > 0) {
+        float a = 1.0f / float(pcRay.frame + 1);
+        vec3 old_color = imageLoad(image, ivec2(gl_LaunchIDEXT.xy)).xyz;
+        vec3 new_color = mix(old_color, prd.hitValue, a);
+        // debugPrintfEXT("message %f %f %f| %f %f %f \n", old_color.x, old_color.y, old_color.z, new_color.x, new_color.y, new_color.z);
+        imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(new_color, 1.f));
+    } else {
+        // First frame, replace the value in the buffer
+        imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(prd.hitValue, 1.f));
+    }
+}

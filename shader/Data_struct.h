@@ -68,7 +68,6 @@ struct PushContant {
     vec4 lightPosition;
     float lightIntensity;
     int frame;
-    
 };
 struct PushContant_Compute {
     int frame;
@@ -77,7 +76,7 @@ struct PushContant_Compute {
 
 struct Address {
     // int txtOffset; // Texture index offset in the array of textures
-    uint64_t test_address;
+    uint64_t triangle_count;
     uint64_t vertexAddress; // Address of the Vertex buffer
     uint64_t indexAddress; // Address of the index buffer
     uint64_t materialAddress; // Address of the material buffer

@@ -54,10 +54,10 @@ void RT_Context::build_accelerate_structure()
 
 void RT_Context::create_shader_bind_table()
 {
-    vk::PhysicalDeviceProperties2 a_;
-    vk::PhysicalDeviceRayTracingPipelinePropertiesKHR b_;
-    vk::StructureChain<vk::PhysicalDeviceProperties2, vk::PhysicalDeviceRayTracingPipelinePropertiesKHR>
-        chain { a_, b_ };
+    // vk::PhysicalDeviceProperties2 a_;
+    // vk::PhysicalDeviceRayTracingPipelinePropertiesKHR b_;
+    // vk::StructureChain<vk::PhysicalDeviceProperties2, vk::PhysicalDeviceRayTracingPipelinePropertiesKHR>
+    //     chain { a_, b_ };
     auto device_properties = Context::Get_Singleton()
                                  ->get_device()
                                  ->Get_Physical_device()
@@ -119,7 +119,6 @@ void RT_Context::create_shader_bind_table()
     m_rgenRegion.setDeviceAddress(m_SBT_buffer_rgen->get_address());
     m_missRegion.setDeviceAddress(m_SBT_buffer_rmiss->get_address());
     m_hitRegion.setDeviceAddress(m_SBT_buffer_rhit->get_address());
-
 
     m_SBT_buffer_rgen->Update(rgen_handles.data(), rgen_handles.size());
     m_SBT_buffer_rmiss->Update(rmiss_handles.data(), rmiss_handles.size());
@@ -190,7 +189,9 @@ void RT_Context::create_uniform_buffer()
     m_objs_address.resize(Mesh::meshs.size());
     for (auto& obj : Mesh::meshs) {
 
-        m_objs_address[obj->get_instance_index()] = Address {
+        m_objs_address[obj->get_instance_index()] = Address
+        {
+            .triangle_count = obj->get_vertex_count() / 3,
 
             .vertexAddress = obj->get_vertex_buffer()
                                  ->get_address(),
@@ -285,7 +286,7 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
                     Context::Get_Singleton()
                         ->get_camera()
                         ->get_pos(),
-                    0 },
+                    1 },
                 .camera_front {
                     Context::Get_Singleton()
                         ->get_camera()

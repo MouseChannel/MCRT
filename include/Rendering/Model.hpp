@@ -6,13 +6,19 @@
 #include <vulkan/vulkan.hpp>
 
 namespace MCRT {
-// struct VertexObj {
-//     glm::vec3 pos;
-//     glm::vec3 normal;
-//     glm::vec2 texCoord;
+struct Triangle {
 
-//     //   void dd() { pos.x = 1.1f; }
-// };
+    float area;
+    std::array<glm::vec3, 3> pos;
+    Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c)
+    {
+        pos = { a, b, c };
+        auto e1 = a - b;
+        auto e2 = c - a;
+        area = glm::length(glm::cross(e1, e2)) * 0.5f;
+    }
+};
+
 struct ObjInstance {
     int obj_index;
     vk::TransformMatrixKHR matrix;
@@ -22,8 +28,9 @@ class Texture;
 class Mesh {
 public:
     Mesh(std::string name,
-         std::vector<Vertex> vertexs,
-         std::vector<uint32_t> indexs,
+         std::vector<Vertex>& vertexs,
+         std::vector<uint32_t>& indexs,
+         std::vector<Triangle>& triangles,
          Material material,
          std::array<std::array<float, 4>, 3> transform = std::array<std::array<float, 4>, 3> {
              { 1,
@@ -70,6 +77,14 @@ public:
     {
         return tramsform;
     }
+    auto get_pos()
+    {
+        return glm::vec3 {
+            tramsform[0][3],
+            tramsform[1][3],
+            tramsform[2][3]
+        };
+    }
     auto get_model_matrix()
     {
         auto model_matrix = glm::mat4(1);
@@ -111,6 +126,7 @@ private:
             1,
             0
         };
+    std::vector<Triangle> triangles;
 };
 
 } // namespace MCRT

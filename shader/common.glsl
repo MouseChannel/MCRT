@@ -11,13 +11,17 @@ float get_radian(float angel)
 vec3 get_camera_dir(vec2 launchID, vec2 launchSize, Camera_data camera_data)
 {
     vec3 ray_origin = camera_data.camera_pos.xyz;
+    // ray_origin = (camera_data.viewInverse * vec4(0, 0, 0, 1)).xyz;
     vec2 pixelCenter = vec2(launchID.xy) + vec2(0.5);
     vec2 inUV = pixelCenter / vec2(launchSize.xy);
     vec2 d = inUV * 2.0 - 1.0;
-    vec3 ray_dir = camera_data.camera_front.xyz * (1. / tan(get_radian(camera_data.fov_angel / 2.))) + vec3(d, 0);
+    float aspectRatio = float(launchSize.x) / float(launchSize.y);
+    d.x = d.x * aspectRatio;
+    vec3 ray_dir = vec3(0, 0, -1) * (1. / tan(get_radian(camera_data.fov_angel / 2.))) + vec3(d, 0);
     ray_dir = (camera_data.viewInverse * vec4(normalize(ray_dir.xyz), 0)).xyz;
     return ray_dir;
 }
+
 vec3 get_barycentrics(vec2 attribs)
 {
     return vec3(1.0 - attribs.x - attribs.y, attribs.x, attribs.y);
@@ -53,6 +57,14 @@ vec2 get_cur_uv(vec2 a_uv, vec2 b_uv, vec2 c_uv, vec2 attribs)
 {
     return get_interpolation(a_uv, b_uv, c_uv, attribs);
 }
+float get_area(vec3 a_pos, vec3 b_pos, vec3 c_pos)
+{
+
+    vec3 e1 = b_pos - a_pos;
+    vec3 e2 = c_pos - a_pos;
+    return length(cross(e1, e2)) * 0.5f;
+    // return object_to_world * vec4(cur_object_pos, 1.0);
+}
 mat3 getNormalSpace(in vec3 normal)
 {
     vec3 someVec = vec3(1.0, 0.0, 0.0);
@@ -63,4 +75,10 @@ mat3 getNormalSpace(in vec3 normal)
     }
     vec3 bitangent = cross(normal, tangent);
     return mat3(tangent, bitangent, normal);
+}
+vec2 directionToSphericalEnvmap(vec3 dir)
+{
+    float s = fract(1.0 / (2.0 * PI) * atan(dir.y, -dir.x));
+    float t = 1.0 / (PI)*acos(-dir.z);
+    return vec2(s, t);
 }

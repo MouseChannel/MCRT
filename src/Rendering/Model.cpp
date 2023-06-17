@@ -8,15 +8,19 @@ std::vector<ObjInstance> Mesh::obj_instances;
 std::vector<std::shared_ptr<Mesh>> Mesh::meshs;
 
 Mesh::Mesh(std::string name,
-           std::vector<Vertex> vertexs,
-           std::vector<uint32_t> indexs,
+           std::vector<Vertex> &vertexs,
+           std::vector<uint32_t> &indexs,
+           std::vector<Triangle> &triangles,
            Material material,
            std::array<std::array<float, 4>, 3> transform)
     : m_name(name)
     , m_vertexs(std::move(vertexs))
     , m_index(std::move(indexs))
+    , triangles(std::move(triangles))
+
     , m_material(material)
     , tramsform(transform)
+
 {
     assert(m_vertexs.size() > 0);
     auto ray_tracing_flag =

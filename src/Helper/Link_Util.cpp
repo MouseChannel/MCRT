@@ -1,7 +1,10 @@
+
+#include "Helper/Link_Util.hpp"
 #include "Rendering/Context.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Instance.hpp"
 #include <vulkan/vulkan.hpp>
+
 VKAPI_ATTR VkResult VKAPI_CALL vkSetDebugUtilsObjectNameEXT(
     VkDevice device, const VkDebugUtilsObjectNameInfoEXT* pNameInfo)
 {
@@ -94,16 +97,16 @@ VKAPI_ATTR void VKAPI_CALL vkCmdTraceRaysKHR(
                                                            "vkCmdTraceRaysKHR");
     return func(commandBuffer, pRaygenShaderBindingTable, pMissShaderBindingTable, pHitShaderBindingTable, pCallableShaderBindingTable, width, height, depth);
 }
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallBack(
-    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-    VkDebugUtilsMessageTypeFlagsEXT messageType,
-    VkDebugUtilsMessengerCallbackDataEXT const* pCallbackData,
-    void*)
-{
-    std::cout << pCallbackData->pMessage << std::endl;
+// static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallBack(
+//     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+//     VkDebugUtilsMessageTypeFlagsEXT messageType,
+//     VkDebugUtilsMessengerCallbackDataEXT const* pCallbackData,
+//     void*)
+// {
+//     std::cout << pCallbackData->pMessage << std::endl;
 
-    return VK_FALSE;
-}
+//     return VK_FALSE;
+// }
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
     VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pMessenger)
 {
@@ -165,7 +168,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetDeviceFaultInfoEXT(
     VkDeviceFaultInfoEXT* pFaultInfo)
 {
     auto func = (PFN_vkGetDeviceFaultInfoEXT)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkGetDeviceFaultInfoEXT");
-
+    func = pfn_vkGetDeviceFaultInfoEXT;
     if (func != nullptr) {
         std::cout << "in" << std::endl;
         func(device, pFaultCounts, pFaultInfo);

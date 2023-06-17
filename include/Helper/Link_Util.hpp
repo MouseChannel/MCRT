@@ -1,6 +1,7 @@
+#pragma once
 #include <iostream>
 #include <vulkan/vulkan.hpp>
-
+#include "Wrapper/Device.hpp"
 // #include ""
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallBack(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -12,8 +13,5 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallBack(
 
     return VK_FALSE;
 }
-namespace MCRT {
 
-}
-// PFN_vkGetAccelerationStructureBuildSizesKHR pfnGetAccelerationStructureBuildSizesKHR;
-// pfnGetAccelerationStructureBuildSizesKHR = reinterpret_cast<PFN_vkGetAccelerationStructureBuildSizesKHR>(vkGetDeviceProcAddr(device, "vkGetAccelerationStructureBuildSizesKHR"));
+static PFN_vkGetDeviceFaultInfoEXT pfn_vkGetDeviceFaultInfoEXT = 0;

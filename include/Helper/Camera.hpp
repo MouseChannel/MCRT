@@ -16,7 +16,10 @@ namespace MCRT {
 enum class CAMERA_MOVE { MOVE_LEFT,
                          MOVE_RIGHT,
                          MOVE_FRONT,
-                         MOVE_BACK };
+                         MOVE_BACK,
+                         MOVE_TOP,
+                         MOVE_DOWN,
+};
 
 class Camera {
 public:
@@ -72,9 +75,9 @@ private:
     // int cur_
 
     float m_pitch { 0 };
-    float m_fov_angel { 60 };
+    float m_fov_angel { 90 };
     float m_yaw { -90 };
-    float m_sensitivity { 0.1 };
+    float m_sensitivity { 0.3 };
     float m_xpos { 0 };
     float m_ypos { 0 };
     bool m_firstMove;

@@ -16,6 +16,10 @@ auto Instance::get_required_extension()
 
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+
+    extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+    // extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+
     //   extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
     //
     // extensions.push_back(VK_EXT_DEBUG);
@@ -49,7 +53,7 @@ Instance::Instance()
     //   disables);
     std::cout << "instance extension" << std::endl;
     for (auto i : vk::enumerateInstanceExtensionProperties()) {
-        // std::cout << i.extensionName << std::endl;
+        std::cout << i.extensionName << std::endl;
     }
 
     auto glfw_extension = get_required_extension();

@@ -1,6 +1,7 @@
 #include "Helper/Model_Loader/gltf_loader.hpp"
 #include "Rendering/Model.hpp"
 #include "Wrapper/Texture.hpp"
+#include <iostream>
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -31,29 +32,31 @@ static std::string GetFilePathExtension(const std::string& FileName)
         return FileName.substr(FileName.find_last_of(".") + 1);
     return "";
 }
-glm::mat4 translation_to_matrix(std ::vector<double> translation)
+glm::mat4 translation_to_matrix(std::vector<double>& translation)
 {
-    auto x = translation[0];
-    auto y = translation[1];
-    auto z = translation[2];
+    double x = translation[0];
+    double y = translation[1];
+    double z = translation[2];
 
     glm::mat4 mat(1);
-    mat[0][3] = x;
-    mat[1][3] = y;
-    mat[2][3] = z;
+    // mat[0][3] = x;
+    // mat[1][3] = y;
+    // mat[2][3] = z;
+    mat = glm::translate(mat, glm::vec3 { x, y, z });
 
     return mat;
 }
-glm::mat4 scale_to_matrix(std ::vector<double> scale)
+glm::mat4 scale_to_matrix(std ::vector<double>& scale)
 {
-    auto x = scale[0];
-    auto y = scale[1];
-    auto z = scale[2];
+    double x = scale[0];
+    double y = scale[1];
+    double z = scale[2];
 
     glm::mat4 mat(1);
-    mat[0][0] = x;
-    mat[1][1] = y;
-    mat[2][2] = z;
+    // mat[0][0] = x;
+    // mat[1][1] = y;
+    // mat[2][2] = z;
+    mat = glm::scale(mat, { x, y, z });
 
     return mat;
 }
@@ -77,22 +80,40 @@ glm::mat4 quaternion_to_matrix(std ::vector<double> quaternion)
     float yz = z2 * y;
     float zz = z2 * z;
     glm::mat4 mat;
+    // mat[0][0] = 1 - (yy + zz);
+    // mat[0][1] = xy - wz;
+    // mat[0][2] = xz + wy;
+    // mat[0][3] = 0.0f;
+    // mat[1][0] = xy + wz;
+    // mat[1][1] = 1 - (xx + zz);
+    // mat[1][2] = yz - wx;
+    // mat[1][3] = 0.0f;
+    // mat[2][0] = xz - wy;
+    // mat[2][1] = yz + wx;
+    // mat[2][2] = 1 - (xx + yy);
+    // mat[2][3] = 0.0f;
+    // mat[3][0] = 0.0f;
+    // mat[3][1] = 0.0f;
+    // mat[3][2] = 0.0f;
+    // mat[3][3] = 1.0f;
+    //
     mat[0][0] = 1 - (yy + zz);
-    mat[0][1] = xy - wz;
-    mat[0][2] = xz + wy;
-    mat[0][3] = 0.0f;
-    mat[1][0] = xy + wz;
-    mat[1][1] = 1 - (xx + zz);
-    mat[1][2] = yz - wx;
-    mat[1][3] = 0.0f;
-    mat[2][0] = xz - wy;
-    mat[2][1] = yz + wx;
-    mat[2][2] = 1 - (xx + yy);
-    mat[2][3] = 0.0f;
+    mat[1][0] = xy - wz;
+    mat[2][0] = xz + wy;
     mat[3][0] = 0.0f;
+    mat[0][1] = xy + wz;
+    mat[1][1] = 1 - (xx + zz);
+    mat[2][1] = yz - wx;
     mat[3][1] = 0.0f;
+    mat[0][2] = xz - wy;
+    mat[1][2] = yz + wx;
+    mat[2][2] = 1 - (xx + yy);
     mat[3][2] = 0.0f;
+    mat[0][3] = 0.0f;
+    mat[1][3] = 0.0f;
+    mat[2][3] = 0.0f;
     mat[3][3] = 1.0f;
+    // mat = glm::transpose(mat);
     return mat;
 }
 
@@ -158,16 +179,19 @@ void GLTF_Loader::load_model(std::string_view path)
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> texcoord;
+    std::vector<Triangle> triangles;
     std::vector<unsigned short> indexs;
-
+    int node_number = 0;
+    std::cout << "loading Model" << std::endl;
     for (auto& node_index : model.scenes[model.defaultScene].nodes) {
-
         auto node = model.nodes[node_index];
+        std::cout << ++node_number << "/" << model.nodes.size() << "    loading: " << node.name << std::endl;
         if (node.mesh < 0)
             continue;
         auto cur_name = node.name;
         auto mesh = model.meshes[node.mesh];
         auto primitive = mesh.primitives[0];
+        assert(mesh.primitives.size() == 1);
         if (primitive.mode != 4) {
             throw std::runtime_error("not triangle");
         }
@@ -217,13 +241,20 @@ void GLTF_Loader::load_model(std::string_view path)
         }
         vertexs.clear();
         indices.clear();
-        for (auto index : indexs) {
-
-            vertexs.emplace_back(Vertex {
-                .pos = positions[index],
-                .nrm = normals[index],
-                .texCoord = texcoord[index] });
-            indices.push_back(indices.size());
+        triangles.clear();
+        std::array<glm::vec3, 3> triangle_pos;
+        for (int i = 0; i < indexs.size(); i += 3) {
+            // auto index = indexs[i];
+            // for (auto index : indexs)
+            for (int j = 0; j < 3; j++) {
+                vertexs.emplace_back(Vertex {
+                    .pos = positions[indexs[i + j]],
+                    .nrm = normals[indexs[i + j]],
+                    .texCoord = texcoord[indexs[i + j]] });
+                indices.push_back(indices.size());
+                triangle_pos[j] = positions[indexs[i + j]];
+            }
+            triangles.emplace_back(Triangle(triangle_pos[0], triangle_pos[1], triangle_pos[2]));
         }
         glm::mat4 translation_matrix(1);
         if (!node.translation.empty()) {
@@ -237,29 +268,46 @@ void GLTF_Loader::load_model(std::string_view path)
         if (!node.rotation.empty()) {
             rotate_matrix = quaternion_to_matrix(node.rotation);
         }
-        // // transform
-        // auto translation = node.translation.empty()
-        //     ? std::vector { 0., 0., 0. }
-        //     : node.translation;
-        // auto scale = node.scale.empty()
-        //     ? std::vector { 1., 1., 1. }
-        //     : node.scale;
-        auto local_matrix = translation_matrix * scale_matrix * rotate_matrix;
+
+        glm::mat4 local_matrix = translation_matrix * rotate_matrix * scale_matrix;
         static std::array<std::array<float, 4>, 3> transform;
         transform[0] = {
             local_matrix[0][0],
-            local_matrix[0][1],
-            local_matrix[0][2],
-            local_matrix[0][3]
+            local_matrix[1][0],
+            local_matrix[2][0],
+            local_matrix[3][0]
         };
-        transform[1] = { local_matrix[1][0],
-                         local_matrix[1][1],
-                         local_matrix[1][2],
-                         local_matrix[1][3] };
-        transform[2] = { local_matrix[2][0],
-                         local_matrix[2][1],
-                         local_matrix[2][2],
-                         local_matrix[2][3] };
+        transform[1] = {
+            local_matrix[0][1],
+            local_matrix[1][1],
+            local_matrix[2][1],
+            local_matrix[3][1]
+        };
+        transform[2] = {
+            local_matrix[0][2],
+            local_matrix[1][2],
+            local_matrix[2][2],
+            local_matrix[3][2]
+        };
+        // transform[0] = {
+        //     local_matrix[0][0],
+        //     local_matrix[0][1],
+        //     local_matrix[0][2],
+        //     local_matrix[0][3]
+        // };
+        // transform[1] = {
+        //     local_matrix[1][0],
+        //     local_matrix[1][1],
+        //     local_matrix[1][2],
+        //     local_matrix[1][3]
+        // };
+        // transform[2] = {
+        //     local_matrix[2][0],
+        //     local_matrix[2][1],
+        //     local_matrix[2][2],
+        //     local_matrix[2][3]
+        // };
+
         // material
         if (primitive.material < 0)
             continue;
@@ -278,6 +326,12 @@ void GLTF_Loader::load_model(std::string_view path)
                 1 },
             .texture_index = handle_texture(model, material.pbrMetallicRoughness.baseColorTexture)
         };
+        std::vector<double> aa {
+            1.,
+            4.,
+        };
+
+        // std::cout << material.emissiveFactor[0] << std::endl;
         if (auto value = material.extensions.find("KHR_materials_emissive_strength"); value != material.extensions.end()) {
             auto emissiveStrength = value->second.Get("emissiveStrength").GetNumberAsDouble();
             cur_material.emit *= emissiveStrength;
@@ -286,6 +340,7 @@ void GLTF_Loader::load_model(std::string_view path)
         Mesh::meshs.emplace_back(new Mesh(cur_name,
                                           vertexs,
                                           indices,
+                                          triangles,
                                           cur_material,
                                           transform));
     }

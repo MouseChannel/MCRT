@@ -52,17 +52,18 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
         create_info.setGeneralShader(rmiss_index + i);
         groups.push_back(create_info);
     }
-
-    create_info.setType(vk::RayTracingShaderGroupTypeKHR ::eTrianglesHitGroup)
-        .setClosestHitShader(rhit_index)
-        .setGeneralShader(VK_SHADER_UNUSED_KHR);
-    groups.push_back(create_info);
+    for (int i = 0; i < rhit_shader_count; i++) {
+        create_info.setType(vk::RayTracingShaderGroupTypeKHR ::eTrianglesHitGroup)
+            .setClosestHitShader(rhit_index + i)
+            .setGeneralShader(VK_SHADER_UNUSED_KHR);
+        groups.push_back(create_info);
+    }
     // pipeline layout
     vk::PushConstantRange push_contant;
-    push_contant.setStageFlags(vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR)
+    push_contant
+        .setStageFlags(vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR)
         .setOffset(0)
         .setSize(Context::Get_Singleton()->get_rt_context()->get_constants_size());
-    vk::PipelineLayoutCreateInfo layout_create_info;
 
     std::vector<vk::DescriptorSetLayout> descriptor_layouts(Ray_Tracing_Set::ray_tracing_count);
     descriptor_layouts[Ray_Tracing_Set::e_ray_tracing] = Descriptor_Manager::Get_Singleton()
@@ -74,7 +75,7 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
     descriptor_sets[Ray_Tracing_Set::e_ray_tracing] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Ray_Tracing)->get_handle()[0];
 
     descriptor_sets[Ray_Tracing_Set::e_ray_global] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Global)->get_handle()[0];
-
+    vk::PipelineLayoutCreateInfo layout_create_info;
     layout_create_info.setSetLayouts(descriptor_layouts)
         .setPushConstantRanges(push_contant);
     layout = Context::Get_Singleton()
@@ -82,12 +83,22 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
                  ->get_handle()
                  .createPipelineLayout(layout_create_info);
     Context::Get_Singleton()->get_debugger()->set_handle_name(layout, "my_lyout");
-    // fix ray tracing data in pipeline
+
     vk::RayTracingPipelineCreateInfoKHR pipeline_create_info;
+
     pipeline_create_info.setStages(stages)
         .setGroups(groups)
         .setLayout(layout)
-        .setMaxPipelineRayRecursionDepth(2);
+        .setMaxPipelineRayRecursionDepth(
+            Context::Get_Singleton()
+                ->get_device()
+                ->Get_Physical_device()
+                .getProperties2<vk::PhysicalDeviceProperties2KHR,
+                                vk::PhysicalDeviceRayTracingPipelinePropertiesKHR>()
+                .get<vk::PhysicalDeviceRayTracingPipelinePropertiesKHR>()
+                .maxRayRecursionDepth);
+    std::cout << pipeline_create_info.maxPipelineRayRecursionDepth << std::endl;
+
     auto res = Context::Get_Singleton()
                    ->get_device()
                    ->get_handle()

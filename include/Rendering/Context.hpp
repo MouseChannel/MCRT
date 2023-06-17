@@ -109,6 +109,7 @@ public:
     }
 
     virtual void prepare(std::shared_ptr<Window> window);
+
 protected:
     std::shared_ptr<Device> m_device;
     std::shared_ptr<Instance> m_instance;
@@ -120,7 +121,7 @@ protected:
     std::shared_ptr<Sampler> m_sampler;
     std::vector<std::shared_ptr<Context_base>> contexts;
     std::shared_ptr<Camera> m_camera;
-    bool enable_filter;
+    bool enable_filter = false;
     int frame_id = 0;
 };
 

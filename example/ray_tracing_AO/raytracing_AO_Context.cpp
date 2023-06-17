@@ -35,8 +35,9 @@ void raytracing_AO_context::prepare(std::shared_ptr<Window> window)
 {
 
     ray_tracing_context::prepare(window);
-    m_camera->m_position = glm::vec3 { 0, 8, 8 };
-    GLTF_Loader::load_model("D:/MoChengRT/assets/scene.glb");
+    m_camera->m_position = glm::vec3 { 0, 2, 8 };
+    // Obj_loader::load_model("D:/MoChengRT/assets/no.obj");
+    GLTF_Loader::load_model("D:/MoChengRT/assets/noddl.glb");
     auto mm = Mesh::meshs;
     auto tt = Texture::textures;
     // return;

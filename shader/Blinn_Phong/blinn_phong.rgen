@@ -9,8 +9,8 @@
 #include "../common.glsl"
 #include "../sampling.glsl"
 #include "Binding.h"
+#include "Push_Constants.h"
 #include "hit_payload.glsl"
-
 
 layout(push_constant) uniform _PushContant
 {
@@ -34,6 +34,7 @@ void main()
 
     vec3 ray_origin = camera_data.camera_pos.xyz;
     vec3 ray_dir = get_camera_dir(gl_LaunchIDEXT.xy, gl_LaunchSizeEXT.xy, camera_data);
+
     uint rayFlags = gl_RayFlagsOpaqueEXT;
     float tMin = 0.001;
     float tMax = 10000.0;

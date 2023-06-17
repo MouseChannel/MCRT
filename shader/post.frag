@@ -17,7 +17,7 @@ void main()
 
     // vec4 color = imageLoad(image, ivec2(100));
     // if (inUV.x < 1e5 && inUV.y < 1e5)
-    //     debugPrintfEXT("message from frag %f %f %f %f\n", color.x, color.y, color.z, color.w);
+    // debugPrintfEXT("message from frag\n");
 
     outColor = pow(texture(Sampler, in_texCoord).rgba, vec4(1. / 2.2));
 }

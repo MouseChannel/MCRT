@@ -19,7 +19,7 @@ void Camera::init()
         camera->onMouseMove(xpos, ypos);
     });
 
-    setPerpective(60, 1, 0.1f, 100000);
+    setPerpective(m_fov_angel, 1, 0.1f, 100000);
 
     m_vMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
 }
@@ -49,6 +49,12 @@ void Camera::move_update()
     if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_S) == GLFW_PRESS) {
         move(CAMERA_MOVE::MOVE_BACK);
     }
+    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_R) == GLFW_PRESS) {
+        move(CAMERA_MOVE::MOVE_TOP);
+    }
+    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_F) == GLFW_PRESS) {
+        move(CAMERA_MOVE::MOVE_DOWN);
+    }
 
     if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_A) == GLFW_PRESS) {
         move(CAMERA_MOVE::MOVE_LEFT);
@@ -57,12 +63,20 @@ void Camera::move_update()
     if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_D) == GLFW_PRESS) {
         move(CAMERA_MOVE::MOVE_RIGHT);
     }
-    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_Q) == GLFW_PRESS) {
+    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_LEFT) == GLFW_PRESS) {
         yaw(-1);
         update();
     }
-    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_E) == GLFW_PRESS) {
+    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_RIGHT) == GLFW_PRESS) {
         yaw(1);
+        update();
+    }
+    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_DOWN) == GLFW_PRESS) {
+        pitch(1);
+        update();
+    }
+    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_UP) == GLFW_PRESS) {
+        pitch(-1);
         update();
     }
 }
@@ -73,8 +87,15 @@ void Camera::move(CAMERA_MOVE _mode)
     case CAMERA_MOVE::MOVE_LEFT:
         m_position -= glm::normalize(glm::cross(m_front, m_up)) * m_speed * m_sensitivity;
         break;
+
     case CAMERA_MOVE::MOVE_RIGHT:
         m_position += glm::normalize(glm::cross(m_front, m_up)) * m_speed * m_sensitivity;
+        break;
+    case CAMERA_MOVE::MOVE_TOP:
+        m_position += m_speed * m_up * m_sensitivity;
+        break;
+    case CAMERA_MOVE::MOVE_DOWN:
+        m_position -= m_speed * m_up * m_sensitivity;
         break;
     case CAMERA_MOVE::MOVE_FRONT:
         m_position += m_speed * m_front * m_sensitivity;
@@ -85,6 +106,7 @@ void Camera::move(CAMERA_MOVE _mode)
     default:
         break;
     }
+    // std::cout << m_position.x << '|' << m_position.y << "|" << m_position.z << std::endl;
 
     update();
 }
@@ -116,6 +138,7 @@ void Camera::yaw(float _xOffset)
     m_front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
 
     m_front = glm::normalize(m_front);
+    // std::cout << m_front.x << " |" << m_front.y << "| " << m_front.z << std::endl;
 }
 void Camera::setSentitivity(float _s)
 {

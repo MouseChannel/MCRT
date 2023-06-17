@@ -32,10 +32,11 @@ public:
         "VK_KHR_acceleration_structure",
         "VK_KHR_ray_tracing_pipeline",
         "VK_KHR_shader_clock",
-        VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME,
+        // VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME,
         VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
         VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
         VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
+        // VK_EXT_DEVICE_FAULT_EXTENSION_NAME
     };
     [[nodiscard("missing physical device")]] auto Get_Physical_device()
     {
@@ -66,6 +67,7 @@ public:
     //   QueueFamilyIndices queue_family_indices;
 private:
     void QueryQueueFamilyIndices();
+    void get_feature();
 
     vk::PhysicalDevice physical_device;
     vk::Queue graphic_queue;

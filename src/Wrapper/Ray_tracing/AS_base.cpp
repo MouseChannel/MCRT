@@ -32,7 +32,7 @@ void AccelerationStructure::build(std::shared_ptr<Buffer> scratch_buffer)
                                    ->Get_Graphic_queue(),
                                [&](vk::CommandBuffer cmd_buffer) {
                                    // build  here
-                                   cmd_buffer.setCheckpointNV(123);
+                                   //    cmd_buffer.setCheckpointNV(123);
                                    cmd_buffer.buildAccelerationStructuresKHR(build_info, &range_info);
 
                                    vk::MemoryBarrier2 barrier;

@@ -5,7 +5,8 @@
 namespace MCRT {
 int handle_texture(std::string texture_path)
 {
-
+    return -1;
+    
     if (texture_path.empty())
         return -1;
 
@@ -61,8 +62,8 @@ void Obj_loader::load_model(std::string_view obj_path)
         // if (shape.name == "mocheng.003_mocheng.003" || shape.name == "mocheng_mocheng") {
         //     cur_material.reflect = true;
         // }
-        // Texture a("D:/BaiduNetdiskDownload/可爱卡通女孩儿模型/可爱卡通女孩儿模型/scene/mat4_c.jpg");
-        Mesh::meshs.emplace_back(new Mesh(shape.name, vertexs, indexs, cur_material));
+        // Texture a("D:/BaiduNetdiskDownload/�?爱卡通女孩儿模型/�?爱卡通女孩儿模型/scene/mat4_c.jpg");
+        // Mesh::meshs.emplace_back(new Mesh(shape.name, vertexs, indexs, cur_material));
     }
 }
 }

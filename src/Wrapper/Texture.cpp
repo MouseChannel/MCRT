@@ -9,7 +9,7 @@ std::vector<std::shared_ptr<Texture>> Texture::textures;
 Texture::Texture(std::string_view path)
 {
     int width, height, channel;
-    stbi_uc* pixels = stbi_load(path.data(), &width, &height, &channel, STBI_rgb_alpha);
+    void* pixels = stbi_load(path.data(), &width, &height, &channel, STBI_rgb_alpha);
     size_t size = width * height * 4;
     if (!pixels) {
         throw std::runtime_error("image load failed");

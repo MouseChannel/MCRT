@@ -1,6 +1,6 @@
 
 #include "example/ray_tracing_blinn_phong/blinn_phong_Context.hpp"
-// #include "Helper/Camera.hpp"
+#include "Helper/Camera.hpp"
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Model_Loader/Obj_Loader.hpp"
 #include "Helper/Model_Loader/gltf_loader.hpp"
@@ -14,7 +14,7 @@
 #include "Wrapper/Shader_module.hpp"
 #include "iostream"
 #include "shader/Blinn_Phong/Binding.h"
-
+#include "shader/Blinn_Phong/Push_Constants.h"
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance { new MCRT::blinn_phong_context };
 float blinn_phong_context::light_pos_x = 0, blinn_phong_context::light_pos_y = 0, blinn_phong_context::light_pos_z = 5;
@@ -27,8 +27,9 @@ blinn_phong_context::~blinn_phong_context()
 void blinn_phong_context::prepare(std::shared_ptr<Window> window)
 {
     ray_tracing_context::prepare(window);
-    // Obj_loader::load_model("D:/MoChengRT/assets/girl.obj");
-    GLTF_Loader::load_model("D:/MoChengRT/assets/scene.glb");
+    // m_camera->m_position.z = 20.f;
+    // Obj_loader::load_model("D:/MoChengRT/assets/no.obj");
+    GLTF_Loader::load_model("D:/MoChengRT/assets/cube.glb");
 
     contexts.resize(2);
     // raytracing
@@ -67,7 +68,7 @@ void blinn_phong_context::prepare(std::shared_ptr<Window> window)
 
     { // graphic
         contexts[Graphic] = std::shared_ptr<RenderContext> { new RenderContext(m_device) };
-
+        contexts[Graphic]->set_constants_size(sizeof(PushContant));
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
         graphic_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/shader/post.vert.spv"));
         graphic_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/shader/post.frag.spv"));
@@ -85,6 +86,7 @@ void blinn_phong_context::prepare(std::shared_ptr<Window> window)
 
         contexts[Graphic]->post_prepare();
     }
+    
 }
 std::shared_ptr<CommandBuffer> blinn_phong_context::Begin_Frame()
 {
@@ -126,6 +128,8 @@ std::shared_ptr<CommandBuffer> blinn_phong_context::BeginRTFrame()
                                              {});
 
         pushContant_Ray = PushContant {
+            // .view_inverse = glm::inverse(m_camera->Get_v_matrix()),
+            // .project_inverse = glm::inverse(m_camera->Get_p_matrix()),
             .frame = frame_id,
             // .clearColor { 1 },
             .lightPosition { light_pos_x, light_pos_y, light_pos_z, 0 },

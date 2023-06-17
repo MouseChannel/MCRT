@@ -30,7 +30,7 @@ Path_tracing_context::~Path_tracing_context()
 void Path_tracing_context::prepare(std::shared_ptr<Window> window)
 {
     ray_tracing_context::prepare(window);
-    GLTF_Loader::load_model("D:/MoChengRT/assets/girl.glb");
+    GLTF_Loader::load_model("D:/MoChengRT/assets/girl.gltf");
     auto mm = Mesh::meshs;
     auto tt = Texture::textures;
     // return;

@@ -6,6 +6,7 @@
 
 namespace MCRT {
 class Buffer;
+class Skybox;
 class raster_context_pbr : public raster_context {
 public:
     enum Context_index { Graphic,
@@ -54,6 +55,7 @@ private:
     // PushContant pushContant_Ray;
     PC_Raster pc;
     float angle;
+    std::shared_ptr<Skybox> sky_box;
     // std::shared_ptr<Buffer> index_buffer, vertex_buffer, uv_buffer;
 };
 

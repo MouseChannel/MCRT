@@ -107,7 +107,6 @@ void RenderContext::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> 
 
     m_graphic_pipeline.reset(new Graphic_Pipeline(shader_modules));
 
-  
     auto binds = Vertex::make_bind();
     auto attrs = Vertex::make_attr();
 
@@ -215,7 +214,29 @@ void RenderContext::Submit()
         .setWaitSemaphores(Get_cur_render_semaphore()->get_handle())
         .setWaitDstStageMask(wait_mask)
         .setSignalSemaphores(Get_cur_present_semaphore()->get_handle());
-    graphic_queue.submit(submit_info, Get_cur_fence()->get_handle());
+    try {
+
+        VkSubmitInfo sub {};
+        sub.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        sub.commandBufferCount = 1;
+        sub.pCommandBuffers = (VkCommandBuffer*)&command_buffer->get_handle();
+        sub.pWaitSemaphores = (VkSemaphore*)&Get_cur_render_semaphore()->get_handle();
+        sub.waitSemaphoreCount = 1;
+        sub.pWaitDstStageMask = (VkPipelineStageFlags*)&wait_mask;
+        sub.signalSemaphoreCount = 1;
+        sub.pSignalSemaphores = (VkSemaphore*)&Get_cur_present_semaphore()->get_handle();
+
+        auto res = vkQueueSubmit(graphic_queue, 1, &sub, Get_cur_fence()->get_handle());
+
+        // auto res = graphic_queue.submit(1, &submit_info, Get_cur_fence()->get_handle(), m_device->get_handle());
+        if (res == VK_ERROR_DEVICE_LOST) {
+            auto r = m_device->get_handle().getFaultInfoEXT();
+            int tt = 0;
+        }
+    } catch (std::exception e) {
+        auto r = m_device->get_handle().getFaultInfoEXT();
+        int rr = 9;
+    }
 }
 void RenderContext::EndFrame()
 {

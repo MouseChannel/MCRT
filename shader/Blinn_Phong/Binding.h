@@ -26,12 +26,4 @@ e_tlas = 0,
     e_out_image = 1,
     e_gbuffer = 2,
     e_normal_gbuffer = 3 END_ENUM();
-
-// BEGIN_ENUM(Global_Binding)
-// e_camera = 0,
-//     e_obj_addresses = 1,
-//     eTextures = 2 END_ENUM();
-// BEGIN_ENUM(Gbuffer_Index)
-// position = 0,
-//     normal = 1,
-//     gbuffer_count = 2 END_ENUM();
+ 

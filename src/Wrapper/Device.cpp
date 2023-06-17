@@ -1,4 +1,7 @@
 #include "Wrapper/Device.hpp"
+#include "Helper/Link_Util.hpp"
+
+// #include "src/Helper/Link_Util.cpp"
 #include "Rendering/Context.hpp"
 #include "Rendering/GLFW_Window.hpp"
 #include "Wrapper/Instance.hpp"
@@ -6,7 +9,6 @@
 #include <cassert>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
-
 namespace MCRT {
 Device::Device()
 {
@@ -18,7 +20,7 @@ Device::Device()
 
     std::cout << "device extension: " << std::endl;
     for (auto& i : physical_device.enumerateDeviceExtensionProperties()) {
-        // std::cout << i.extensionName << std::endl;
+        std::cout << i.extensionName << std::endl;
     }
 
     assert(physical_device);
@@ -35,75 +37,48 @@ Device::Device()
         .setQueueCount(1)
         .setQueueFamilyIndex(queue_family_indices.graphic_queue.value());
 
-    // vk::PhysicalDeviceSynchronization2Features synchronizations_feature;
-    // synchronizations_feature.setSynchronization2(true);
-    // vk::PhysicalDeviceVulkan11Features rrrrr;
-    // rrrrr.set
+    get_feature();
 
-    vk::StructureChain<vk::DeviceCreateInfo,
-                       vk::PhysicalDeviceVulkan13Features,
-                       vk::PhysicalDeviceVulkan12Features,
-                       vk::PhysicalDeviceVulkan11Features,
-                       vk::PhysicalDeviceRayTracingPipelineFeaturesKHR,
-                       vk::PhysicalDeviceAccelerationStructureFeaturesKHR,
-                       vk::PhysicalDeviceRayQueryFeaturesKHR,
-                       vk::PhysicalDeviceShaderClockFeaturesKHR>
-        _features;
-    // _features.get<vk::PhysicalDeviceSynchronization2Features>()
-    //     .setSynchronization2(true);
+    auto feature = physical_device.getFeatures2<vk::PhysicalDeviceFeatures2,
+                                                vk::PhysicalDeviceVulkan13Features,
+                                                vk::PhysicalDeviceVulkan12Features,
+                                                vk::PhysicalDeviceVulkan11Features,
+                                                vk::PhysicalDeviceRayTracingPipelineFeaturesKHR,
+                                                vk::PhysicalDeviceAccelerationStructureFeaturesKHR,
+                                                vk::PhysicalDeviceRayQueryFeaturesKHR,
+                                                vk::PhysicalDeviceShaderClockFeaturesKHR,
+                                                vk::PhysicalDeviceFaultFeaturesEXT>();
+    VkDeviceFaultInfoEXT a;
 
-    _features.get<vk::PhysicalDeviceVulkan12Features>()
-        .setBufferDeviceAddress(true)
-        .setDescriptorIndexing(true)
-        .setRuntimeDescriptorArray(true)
-        .setShaderSampledImageArrayNonUniformIndexing(true);
-    _features.get<vk::PhysicalDeviceVulkan13Features>()
-        .setMaintenance4(true)
-        .setSynchronization2(true);
-    _features.get<vk::PhysicalDeviceRayTracingPipelineFeaturesKHR>()
-        .setRayTracingPipeline(true);
-    _features.get<vk::PhysicalDeviceAccelerationStructureFeaturesKHR>()
-        .setAccelerationStructure(true);
-    _features.get<vk::PhysicalDeviceRayQueryFeaturesKHR>()
-        .setRayQuery(true);
-    _features.get<vk::PhysicalDeviceShaderClockFeaturesKHR>()
-        .setShaderDeviceClock(true)
-        .setShaderSubgroupClock(true);
-    vk::PhysicalDeviceFeatures normal_feature;
-    normal_feature.setShaderInt64(true)
-        .setShaderFloat64(true)
-        .setShaderStorageImageMultisample(true);
-    auto& _create_info = _features.get();
-    _create_info.setQueueCreateInfos(queue_create_info)
+   
+
+    feature.get<vk::PhysicalDeviceFaultFeaturesEXT>().setDeviceFault(true);
+    vk::DeviceCreateInfo new_create_info;
+    new_create_info.setPNext(&feature.get())
+        .setQueueCreateInfos(queue_create_info)
         .setPEnabledExtensionNames(deviceRequiredExtensions)
-        .setPEnabledFeatures(&normal_feature);
+        // .setPEnabledFeatures(&normal_feature)
+        ;
 
-    // vk::PhysicalDeviceVulkan12Features buffer_address_feature;
-    // buffer_address_feature.setBufferDeviceAddress(true);
-    // vk::PhysicalDeviceRayTracingPipelineFeaturesKHR rt_feature;
-    // rt_feature.setRayTracingPipeline(true).setPNext(&buffer_address_feature);
-    // vk::PhysicalDeviceAccelerationStructureFeaturesKHR as_feature;
-    // as_feature.setAccelerationStructure(true).setPNext(&rt_feature);
-    // vk::PhysicalDeviceRayQueryFeaturesKHR ray_query_feature;
-    // ray_query_feature.setRayQuery(true).setPNext(&as_feature);
-
-    // vk::StructureChain<vk::DeviceCreateInfo, vk>
-    // vk::DeviceCreateInfo create_info;
-    // create_info
-    //     .setQueueCreateInfos(queue_create_info)
-    //     .setPEnabledExtensionNames(deviceRequiredExtensions)
-    //     .setPEnabledFeatures(&normal_feature)
-
-    //     .setPNext(&ray_query_feature);
-
-    m_handle = physical_device.createDevice(_create_info);
+    m_handle = physical_device.createDevice(new_create_info);
 
     graphic_queue = m_handle.getQueue(queue_family_indices.graphic_queue.value(), 0);
     present_queue = m_handle.getQueue(queue_family_indices.present_queue.value(), 0);
-    // auto res = physical_device.getQueueFamilyProperties2();
-    // int re = 0;
+    pfn_vkGetDeviceFaultInfoEXT = (PFN_vkGetDeviceFaultInfoEXT)vkGetDeviceProcAddr(m_handle, "vkGetDeviceFaultInfoEXT");
+    int e = 0;
 }
 
+void Device::get_feature()
+{
+    vk::StructureChain<vk::PhysicalDeviceFeatures2,
+                       vk::PhysicalDeviceVulkan13Features,
+                       vk::PhysicalDeviceVulkan12Features,
+                       vk::PhysicalDeviceVulkan11Features>
+        features;
+
+    auto feature = physical_device.getFeatures2<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceVulkan12Features, vk::PhysicalDeviceVulkan11Features>();
+    int t = 0;
+}
 Device::~Device()
 {
     // Context::Get_Singleton()->Get_Instance()->Get_handle()
@@ -122,7 +97,8 @@ void Device::QueryQueueFamilyIndices()
         if (property.queueFlags | vk::QueueFlagBits::eGraphics) {
             queue_family_indices.graphic_queue = i;
         }
-        if (physical_device.getSurfaceSupportKHR(i, surface->get_handle())) {
+        if (physical_device.getSurfaceSupportKHR(i,
+                                                 surface->get_handle())) {
             queue_family_indices.present_queue = i;
         }
         if (queue_family_indices.Complete()) {

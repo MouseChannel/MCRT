@@ -1,5 +1,6 @@
 #include "Wrapper/Image.hpp"
 #include "Helper/CommandManager.hpp"
+#include "Helper/Debugger.hpp"
 #include "Rendering/Context.hpp"
 #include "Wrapper/Buffer.hpp"
 #include "Wrapper/CommandBuffer.hpp"
@@ -57,17 +58,40 @@ Image::Image(vk::Image other_image,
     Create_ImageView(format);
 }
 
-void Image::Create_ImageView(vk::Format format)
+Image::Image(vk::Image other_image,
+             vk::Format format,
+             size_t width,
+             size_t height)
+    : image_layout(vk::ImageLayout::eUndefined)
+    , m_aspect(vk::ImageAspectFlagBits::eColor)
+    , width(width)
+    , height(height)
+    , need_delete(true)
+{
+
+    m_handle = other_image;
+    AllocateMemory();
+    Get_Context_Singleton()
+        ->get_device()
+        ->get_handle()
+        .bindImageMemory(
+            m_handle,
+            memory,
+            0);
+    Create_ImageView(format, 6);
+}
+
+void Image::Create_ImageView(vk::Format format, size_t layer_count)
 {
     vk::ImageSubresourceRange range;
     range.setBaseMipLevel(0)
         .setLevelCount(1)
         .setBaseArrayLayer(0)
-        .setLayerCount(1)
+        .setLayerCount(layer_count)
         .setAspectMask(m_aspect);
     vk::ImageViewCreateInfo view_create_info;
     view_create_info.setImage(m_handle)
-        .setViewType(vk::ImageViewType::e2D)
+        .setViewType(layer_count == 1 ? vk::ImageViewType::e2D : vk::ImageViewType::eCube)
         .setFormat(format)
         .setSubresourceRange(range);
     image_view = Get_Context_Singleton()
@@ -75,6 +99,9 @@ void Image::Create_ImageView(vk::Format format)
                      ->get_handle()
                      .createImageView(
                          view_create_info);
+    if (layer_count == 6) {
+        Context::Get_Singleton()->get_debugger()->set_handle_name(image_view, "skybox_image_view");
+    }
 }
 
 void Image::AllocateMemory()
@@ -111,14 +138,15 @@ void Image::SetImageLayout(vk::ImageLayout dst_layout,
                            vk::AccessFlags src_access_mask,
                            vk::AccessFlags dst_access_mask,
                            vk::PipelineStageFlags src_stage_mask,
-                           vk::PipelineStageFlags dst_stage_mask)
+                           vk::PipelineStageFlags dst_stage_mask,
+                           int layer)
 {
     auto graphic_queue = Get_Context_Singleton()
                              ->get_device()
                              ->Get_Graphic_queue();
     CommandManager::ExecuteCmd(graphic_queue, [&](auto cmd) {
         vk::ImageSubresourceRange range;
-        range.setLayerCount(1)
+        range.setLayerCount(layer)
             .setBaseArrayLayer(0)
             .setLevelCount(1)
             .setBaseMipLevel(0)
@@ -170,6 +198,44 @@ void Image::FillImageData(size_t size, void* data)
                                      m_handle,
                                      vk::ImageLayout::eTransferDstOptimal,
                                      region);
+    });
+}
+void Image::FillImageData(std::vector<size_t> size, std::vector<void*> data)
+{
+    size_t total_size = 0;
+    for (auto i : size) {
+        total_size += i;
+    }
+    std::unique_ptr<Buffer> image_buffer {
+        new Buffer(total_size, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible)
+    };
+
+    image_buffer->Update(data, size);
+    auto graphic_queue = Get_Context_Singleton()
+                             ->get_device()
+                             ->Get_Graphic_queue();
+    CommandManager::ExecuteCmd(graphic_queue, [&](auto cmd_buffer) {
+        std::vector<vk::BufferImageCopy> copys(data.size());
+        size_t offset = 0;
+        for (int i = 0; i < copys.size(); i++) {
+
+            copys[i]
+                .setBufferImageHeight(0)
+                .setBufferOffset(offset)
+                // .setImageOffset(0)
+                .setImageExtent({ width, height, 1 })
+                .setBufferRowLength(0)
+                .setImageSubresource(vk::ImageSubresourceLayers()
+                                         .setAspectMask(vk::ImageAspectFlagBits::eColor)
+                                         .setBaseArrayLayer(i)
+                                         .setLayerCount(1)
+                                         .setMipLevel(0));
+            offset += size[i];
+        }
+        cmd_buffer.copyBufferToImage(image_buffer->get_handle(),
+                                     m_handle,
+                                     vk::ImageLayout::eTransferDstOptimal,
+                                     copys);
     });
 }
 Image::~Image()

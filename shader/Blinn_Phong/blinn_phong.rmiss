@@ -11,5 +11,5 @@ layout(location = 0) rayPayloadInEXT hitPayload prd;
 void main()
 {
     // debugPrintfEXT("message f?W?Srom back \n");
-    prd.hitValue = vec3(0.001);
+    prd.hitValue = vec3(0.1);
 }

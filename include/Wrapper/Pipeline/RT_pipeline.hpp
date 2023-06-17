@@ -11,6 +11,7 @@ public:
         eMiss2,
         eMiss3,
         eClosestHit,
+        eClosestHit2,
         eShaderGroupCount
     };
     RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shaders);

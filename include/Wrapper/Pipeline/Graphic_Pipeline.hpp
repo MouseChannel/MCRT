@@ -25,7 +25,7 @@ public:
     void Add_Shader_Modules(vk::ShaderModule shader_module, vk::ShaderStageFlagBits stage);
     void Make_Resterization();
     void Make_MultiSample();
-    void Make_DepthTest();
+    void Make_DepthTest(bool enable_test = true);
     void Make_Blend();
     void Make_attach();
 

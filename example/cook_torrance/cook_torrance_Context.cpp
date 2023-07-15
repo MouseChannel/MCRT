@@ -45,7 +45,7 @@ void cook_torrance_context::prepare(std::shared_ptr<Window> window)
         Context::Get_Singleton()->get_rt_context()->set_miss_shader_count(1);
         Context::Get_Singleton()->get_rt_context()->set_constants_size(sizeof(PushContant_cook_torrance));
 
-        contexts[Ray_tracing]->prepare(rt_shader_modules);
+        contexts[Ray_tracing]->prepare();
         contexts[Ray_tracing]->prepare_descriptorset([&]() {
             auto rt_context = Context::Get_Singleton()->get_rt_context();
             Descriptor_Manager::Get_Singleton()
@@ -97,7 +97,7 @@ void cook_torrance_context::prepare(std::shared_ptr<Window> window)
         std::shared_ptr<ShaderModule> compute_shader {
             new ShaderModule("D:/MoChengRT/shader/filter.comp.spv")
         };
-        contexts[Compute]->prepare({ compute_shader });
+        contexts[Compute]->prepare( );
         contexts[Compute]->prepare_descriptorset([&]() {
             Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(Context::Get_Singleton()
                                                                         ->get_compute_context()
@@ -116,7 +116,7 @@ void cook_torrance_context::prepare(std::shared_ptr<Window> window)
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
         graphic_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/shader/post.vert.spv"));
         graphic_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/shader/post.frag.spv"));
-        contexts[Graphic]->prepare(graphic_shader_modules);
+        contexts[Graphic]->prepare();
         contexts[Graphic]->prepare_descriptorset([&]() { Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(
                                                              Context::Get_Singleton()
                                                                  ->get_compute_context()

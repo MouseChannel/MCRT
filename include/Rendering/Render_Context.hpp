@@ -47,6 +47,8 @@ public:
         return all_rendertargets[0];
     }
     std::shared_ptr<Pipeline_base> get_pipeline() override;
+    std::shared_ptr<Pipeline_base> get_pipeline2();
+
     std::shared_ptr<RenderPass>& Get_render_pass()
     {
         return m_renderpass;
@@ -57,12 +59,13 @@ public:
     }
     std::shared_ptr<Framebuffer>& get_framebuffer();
     void Prepare_RenderPass();
-    void prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;
+    void prepare( ) override;
     void post_prepare() override;
     void fill_render_targets();
     void Prepare_Framebuffer();
     void prepare_descriptorset(std::function<void()> prepare_func) override;
     void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;
+    void prepare_pipeline2(std::vector<std::shared_ptr<ShaderModule>> shader_modules);
     std::shared_ptr<CommandBuffer> BeginFrame() override;
     void Submit() override;
     void EndFrame() override;
@@ -77,6 +80,7 @@ private:
     std::vector<std::unique_ptr<RenderFrame>> render_frames;
     std::shared_ptr<RenderPass> m_renderpass;
     std::shared_ptr<Graphic_Pipeline> m_graphic_pipeline;
+    std::shared_ptr<Graphic_Pipeline> m_skybox_pipeline;
     std::shared_ptr<ShaderModule> vert_shader, frag_shader;
     std::vector<std::shared_ptr<Fence>> fences;
     uint32_t current_frame { 0 };

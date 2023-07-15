@@ -13,11 +13,22 @@ Compute_Pipeline::Compute_Pipeline(std::vector<std::shared_ptr<ShaderModule>> sh
 
     // auto layout_create_info = vk::PipelineLayoutCreateInfo().setPSetLayouts(&descriptor_layout);
     std::vector<vk::DescriptorSetLayout> descriptor_layouts(Compute_Set::compute_count);
-    descriptor_layouts[Compute_Set::e_compute] = Descriptor_Manager::Get_Singleton()->Get_DescriptorSet_layout(Descriptor_Manager::Compute);
-    descriptor_layouts[Compute_Set::e_comp_raytracing] = Descriptor_Manager::Get_Singleton()->Get_DescriptorSet_layout(Descriptor_Manager::Ray_Tracing);
+    descriptor_layouts[Compute_Set::e_compute] = Descriptor_Manager::Get_Singleton()
+                                                     ->Get_DescriptorSet_layout(Descriptor_Manager::Compute);
+    // descriptor_layouts[Compute_Set::e_compute2] = Descriptor_Manager::Get_Singleton()
+    //                                                  ->Get_DescriptorSet_layout(Descriptor_Manager::Compute2);
+    descriptor_layouts[Compute_Set::e_comp_raytracing] = Descriptor_Manager::Get_Singleton()
+                                                             ->Get_DescriptorSet_layout(Descriptor_Manager::Ray_Tracing);
     descriptor_sets.resize(Compute_Set::compute_count);
-    descriptor_sets[Compute_Set::e_compute] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute)->get_handle()[0];
-    descriptor_sets[Compute_Set::e_comp_raytracing] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Ray_Tracing)->get_handle()[0];
+    descriptor_sets[Compute_Set::e_compute] = Descriptor_Manager::Get_Singleton()
+                                                  ->get_DescriptorSet(Descriptor_Manager::Compute)
+                                                  ->get_handle()[0];
+    // descriptor_sets[Compute_Set::e_compute2] = Descriptor_Manager::Get_Singleton()
+    //                                               ->get_DescriptorSet(Descriptor_Manager::Compute2)
+    //                                               ->get_handle()[0];
+    descriptor_sets[Compute_Set::e_comp_raytracing] = Descriptor_Manager::Get_Singleton()
+                                                          ->get_DescriptorSet(Descriptor_Manager::Ray_Tracing)
+                                                          ->get_handle()[0];
 
     layout = Context::Get_Singleton()
                  ->get_device()

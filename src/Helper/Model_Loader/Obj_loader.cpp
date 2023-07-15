@@ -6,7 +6,7 @@ namespace MCRT {
 int handle_texture(std::string texture_path)
 {
     return -1;
-    
+
     if (texture_path.empty())
         return -1;
 
@@ -23,9 +23,11 @@ void Obj_loader::load_model(std::string_view obj_path)
     Mesh::meshs.clear();
     std::vector<Vertex> vertexs;
     std::vector<uint32_t> indexs;
+    std::vector<Triangle> triangles;
     for (const auto& shape : shapes) {
         vertexs.clear();
         indexs.clear();
+        triangles.clear();
         for (const auto& index : shape.mesh.indices) {
             vertexs.emplace_back(Vertex {
                 .pos {
@@ -56,14 +58,14 @@ void Obj_loader::load_model(std::string_view obj_path)
                 cur.emission[2],
                 0 },
             .reflect = false,
-            .texture_index = handle_texture(cur.diffuse_texname)
+            .color_texture_index = handle_texture(cur.diffuse_texname)
 
         };
         // if (shape.name == "mocheng.003_mocheng.003" || shape.name == "mocheng_mocheng") {
         //     cur_material.reflect = true;
         // }
         // Texture a("D:/BaiduNetdiskDownload/�?爱卡通女孩儿模型/�?爱卡通女孩儿模型/scene/mat4_c.jpg");
-        // Mesh::meshs.emplace_back(new Mesh(shape.name, vertexs, indexs, cur_material));
+        Mesh::meshs.emplace_back(new Mesh(shape.name, vertexs, indexs, triangles, cur_material));
     }
 }
 }

@@ -55,7 +55,7 @@ public:
     {
         return m_gbuffer;
     }
-    void prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;
+    void prepare( ) override;
     void post_prepare() override;
     void prepare_descriptorset(std::function<void()> prepare_func) override;
     void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;

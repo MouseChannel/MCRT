@@ -14,7 +14,7 @@ layout(location = 1) rayPayloadInEXT hitPayload_light prd_light;
 void main()
 {
     // is_shadow = true;
-    prd.hitValue = vec3(0.00);
+    prd.hitValue = vec3(0.0);
 
     // prd.depth = 100;
 }

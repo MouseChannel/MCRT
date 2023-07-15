@@ -7,23 +7,23 @@ class Texture;
 class Image;
 class Skybox {
 public:
-    enum {
-        Top,
-        Bottom,
-        Left,
-        Right,
-        Forward,
-        BackWard
-    };
+    // enum {
+    //     Top,
+    //     Bottom,
+    //     Left,
+    //     Right,
+    //     Forward,
+    //     BackWard
+    // };
     std::array<std::string, 6> names {
-        "right", "left", "top", "bottom", "forward", "backward"
-
-        // "top", "forward", "left", "bottom",
-
-        // "right",
-
-        // "backward"
+        "right",
+        "left",
+        "top",
+        "bottom",
+        "forward",
+        "backward"
     };
+    Skybox(int height, int width);
     Skybox(std::string file_dir);
     ~Skybox();
 

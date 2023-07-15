@@ -156,10 +156,10 @@ void Graphic_Pipeline::Make_MultiSample()
     multi_sample.setSampleShadingEnable(false)
         .setRasterizationSamples(vk::SampleCountFlagBits::e1);
 }
-void Graphic_Pipeline::Make_DepthTest()
+void Graphic_Pipeline::Make_DepthTest(bool enable_test)
 {
-    depth_test.setDepthTestEnable(true)
-        .setDepthWriteEnable(true)
+    depth_test.setDepthTestEnable(enable_test)
+        .setDepthWriteEnable(enable_test)
         .setDepthCompareOp(vk::CompareOp ::eLessOrEqual);
 }
 void Graphic_Pipeline::Make_attach()

@@ -72,17 +72,24 @@ void Camera::move_update()
         update();
     }
     if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_DOWN) == GLFW_PRESS) {
-        pitch(1);
+        pitch(-1);
         update();
     }
     if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_UP) == GLFW_PRESS) {
-        pitch(-1);
+        pitch(1);
         update();
+    }
+    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        setSentitivity(1);
+    } else {
+        setSentitivity(0.5);
     }
 }
 void Camera::move(CAMERA_MOVE _mode)
 {
     // std::cout << (int)_mode << std::endl;
+    glm::vec3 m_right = glm::cross(m_front, m_up);
+    auto m_top = glm::cross(m_right, m_front);
     switch (_mode) {
     case CAMERA_MOVE::MOVE_LEFT:
         m_position -= glm::normalize(glm::cross(m_front, m_up)) * m_speed * m_sensitivity;
@@ -92,10 +99,10 @@ void Camera::move(CAMERA_MOVE _mode)
         m_position += glm::normalize(glm::cross(m_front, m_up)) * m_speed * m_sensitivity;
         break;
     case CAMERA_MOVE::MOVE_TOP:
-        m_position += m_speed * m_up * m_sensitivity;
+        m_position += m_speed * m_top * m_sensitivity;
         break;
     case CAMERA_MOVE::MOVE_DOWN:
-        m_position -= m_speed * m_up * m_sensitivity;
+        m_position -= m_speed * m_top * m_sensitivity;
         break;
     case CAMERA_MOVE::MOVE_FRONT:
         m_position += m_speed * m_front * m_sensitivity;

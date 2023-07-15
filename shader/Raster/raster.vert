@@ -5,6 +5,7 @@
 
 #include "../Data_struct.h"
 #include "Binding.h"
+// #inclu
 #include "Constants.h"
 layout(location = e_pos) in vec3 in_pos;
 layout(location = e_nrm) in vec3 in_nrm;
@@ -23,18 +24,22 @@ layout(set = e_graphic, binding = e_camera_matrix) uniform _Camera_matrix
 {
     Camera_matrix camera_matrix;
 };
+layout(location = e_out_uv) out vec3 out_uv;
+layout(location = e_out_pos) out vec3 out_pos;
 
 void main()
 {
     mat4 model_matrix = pc_raster.model_matrix;
-    mat4 view_matrix = camera_matrix.view;
+    mat4 view_matrix = pc_raster.view_matrix;
     mat4 project_matrix = camera_matrix.project;
 
     gl_Position = project_matrix * view_matrix * model_matrix * vec4(in_pos, 1.);
+    vec3 carmera_dir = pc_raster.camera_pos - in_pos;
+    vec3 new_uv = vec3(model_matrix * vec4(reflect(carmera_dir, in_nrm), 1));
     out_nrm = in_nrm;
+    out_uv = new_uv;
+
+    // out_uv = vec3(model_matrix * vec4(in_pos, 1.));
+    out_pos = gl_Position.xyz;
     out_texCoord = in_texCoord;
-    // debugPrintfEXT("message \n", );
-    // if (pc_raster.texture_index != -1)
-    //     debugPrintfEXT("message from frag %f %f | %d \n", out_texCoord.x, out_texCoord.y, pc_raster.texture_index);
-    // out_texture_index = in_texture_index;
 }

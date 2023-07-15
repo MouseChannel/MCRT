@@ -113,31 +113,7 @@ void DescriptorSet::update(std::vector<std::shared_ptr<AccelerationStructure_Top
         .setPNext(&dst_as_info);
     Get_Context_Singleton()->get_device()->get_handle().updateDescriptorSets(writer, {});
 }
-// void DescriptorSet::create_descriptor_pool()
-// {
-//     std::map<vk::DescriptorType, uint32_t> type_map;
 
-//     for (auto& i : images) {
-
-//         auto type = i.binding.descriptorType;
-//         type_map[type]++;
-//     }
-//     for (auto& i : buffers) {
-
-//         auto type = i.binding.descriptorType;
-//         type_map[type]++;
-//     }
-//     for (auto& i : as) {
-
-//         auto type = i.binding.descriptorType;
-//         type_map[type]++;
-//     }
-//     std::vector<std::tuple<vk::DescriptorType, uint32_t>> type_arr;
-//     for (auto& i : type_map) {
-//         type_arr.emplace_back(std::tuple<vk::DescriptorType, uint32_t> { i.first, 10 });
-//     }
-//     pool.reset(new DescriptorPool(type_arr));
-// }
 void DescriptorSet::create(std::shared_ptr<DescriptorPool> pool)
 {
 

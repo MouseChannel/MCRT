@@ -10,6 +10,7 @@ class Skybox;
 class raster_context_pbr : public raster_context {
 public:
     enum Context_index { Graphic,
+                         Sky_box,
                          Ray_tracing,
     };
     raster_context_pbr();
@@ -48,13 +49,15 @@ public:
 private:
     std::shared_ptr<CommandBuffer> BeginGraphicFrame() override;
     std::shared_ptr<CommandBuffer> BeginComputeFrame();
-
+    std::shared_ptr<CommandBuffer> BeginSkyboxFrame();
+    void EndSkyboxFrame();
     void EndComputeFrame();
     void EndGraphicFrame() override;
 
     // PushContant pushContant_Ray;
     PC_Raster pc;
     float angle;
+    std::shared_ptr<Mesh> skybox_mesh;
     std::shared_ptr<Skybox> sky_box;
     // std::shared_ptr<Buffer> index_buffer, vertex_buffer, uv_buffer;
 };

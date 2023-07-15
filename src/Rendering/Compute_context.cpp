@@ -36,7 +36,7 @@ void Compute_Context::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>
 
     m_compute_pipeline.reset(new Compute_Pipeline(shader_modules));
 }
-void Compute_Context::prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
+void Compute_Context::prepare( )
 {
     m_out_image.reset(new Image(800,
                                 749,

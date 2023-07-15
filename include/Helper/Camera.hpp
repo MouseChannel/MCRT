@@ -64,7 +64,7 @@ public:
 
     void setPerpective(float angle, float ratio, float near, float far);
 
-    glm::vec3 m_position { 0, 0, 20 };
+    glm::vec3 m_position { 0, 0, 10 };
 
 private:
     float m_speed = 1.0f;

@@ -94,8 +94,8 @@ struct Vertex // See ObjLoader, copy of VertexObj, could be compressed for devic
     static vk::VertexInputBindingDescription make_bind()
     {
         return vk::VertexInputBindingDescription()
-            .setBinding(0)
             .setInputRate(vk::VertexInputRate ::eVertex)
+            .setBinding(0)
             .setStride(sizeof(Vertex));
     }
     static std::vector<vk::VertexInputAttributeDescription> make_attr()
@@ -136,6 +136,8 @@ struct Material {
     vec4 color;
     vec4 emit;
     bool reflect;
-    int texture_index;
+    int color_texture_index;
+    int normal_texture_index;
+    int metallicness_roughness_texture_index;
 };
 #endif

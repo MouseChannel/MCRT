@@ -19,3 +19,6 @@ e_camera_matrix = 0,
     e_textures = 1
     // e_graphic_global = 1,
     END_ENUM();
+
+const int e_out_pos = 4;
+const int e_out_uv = 5;

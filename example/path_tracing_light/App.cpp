@@ -31,7 +31,7 @@ void App::run()
             if (ImGui::Checkbox("enable_filter", &Path_tracing_light_context::enable_filter)) {
                 Context::Get_Singleton()->reset();
             }
-            if (ImGui::SliderFloat("light_desity", &Path_tracing_light_context::light_desity, 0.1f, 1.0f)) {
+            if (ImGui::SliderFloat("light_desity", &Path_tracing_light_context::light_desity, 0.1f, 10.0f)) {
                 Context::Get_Singleton()->reset();
             }
         });

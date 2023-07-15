@@ -56,6 +56,10 @@ std::shared_ptr<Pipeline_base> RenderContext::get_pipeline()
 {
     return m_graphic_pipeline;
 }
+std::shared_ptr<Pipeline_base> RenderContext::get_pipeline2()
+{
+    return m_skybox_pipeline;
+}
 void RenderContext::fill_render_targets()
 {
     auto count { enable_swapchain ? 3 : 1 };
@@ -121,7 +125,25 @@ void RenderContext::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> 
 
     m_graphic_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
 }
-void RenderContext::prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
+void RenderContext::prepare_pipeline2(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
+{
+    m_skybox_pipeline.reset(new Graphic_Pipeline(shader_modules));
+
+    auto binds = Vertex::make_bind();
+    auto attrs = Vertex::make_attr();
+
+    m_skybox_pipeline->Make_VertexInput(binds, attrs);
+    m_skybox_pipeline->Make_VertexAssembly();
+    m_skybox_pipeline->Make_viewPort();
+    m_skybox_pipeline->Make_MultiSample();
+    m_skybox_pipeline->Make_Resterization();
+    m_skybox_pipeline->Make_attach();
+    m_skybox_pipeline->Make_Blend();
+    m_skybox_pipeline->Make_DepthTest(false);
+
+    m_skybox_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
+}
+void RenderContext::prepare( )
 {
     fill_render_targets();
     Prepare_RenderPass();

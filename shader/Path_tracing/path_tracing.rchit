@@ -11,9 +11,9 @@
 
 #include "../Data_struct.h"
 // #include "../Set_binding.h"
-#include "Binding.h"
 #include "../common.glsl"
 #include "../sampling.glsl"
+#include "Binding.h"
 #include "hit_payload.glsl"
 
 hitAttributeEXT vec2 attribs;
@@ -98,9 +98,9 @@ void main()
     vec3 rayDirection = normal_coordinate * local_dir;
     vec3 BRDF;
     // Lambertian reflection
-    if (material.material.texture_index > -1) {
+    if (material.material.color_texture_index > -1) {
 
-        BRDF = texture(textures[nonuniformEXT(material.material.texture_index)], cur_uv).xyz / PI;
+        BRDF = texture(textures[nonuniformEXT(material.material.color_texture_index)], cur_uv).xyz / PI;
         // debugPrintfEXT("message \n");
     } else {
 
@@ -114,6 +114,8 @@ void main()
     prd.rayDirection = rayDirection;
     prd.depth++;
     if (material.material.emit.x > 1e-6) {
+
+        float d = pow(length(cur_world_pos - gl_WorldRayOriginEXT), 2.);
 
         prd.hitValue = material.material.emit.xyz * prd.weight;
 

@@ -28,8 +28,8 @@ void blinn_phong_context::prepare(std::shared_ptr<Window> window)
 {
     ray_tracing_context::prepare(window);
     // m_camera->m_position.z = 20.f;
-    // Obj_loader::load_model("D:/MoChengRT/assets/no.obj");
-    GLTF_Loader::load_model("D:/MoChengRT/assets/cube.glb");
+    // Obj_loader::load_model("D:/MoChengRT/assets/buddha.obj");
+    GLTF_Loader::load_model("D:/MoChengRT/assets/buddha.gltf");
 
     contexts.resize(2);
     // raytracing
@@ -44,7 +44,7 @@ void blinn_phong_context::prepare(std::shared_ptr<Window> window)
         Context::Get_Singleton()->get_rt_context()->set_hit_shader_count(1);
         Context::Get_Singleton()->get_rt_context()->set_miss_shader_count(2);
         Context::Get_Singleton()->get_rt_context()->set_constants_size(sizeof(PushContant));
-        contexts[Ray_tracing]->prepare(rt_shader_modules);
+        contexts[Ray_tracing]->prepare( );
         contexts[Ray_tracing]->prepare_descriptorset([&]() {
             auto rt_context = Context::Get_Singleton()->get_rt_context();
             Descriptor_Manager::Get_Singleton()
@@ -72,7 +72,7 @@ void blinn_phong_context::prepare(std::shared_ptr<Window> window)
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
         graphic_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/shader/post.vert.spv"));
         graphic_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/shader/post.frag.spv"));
-        contexts[Graphic]->prepare(graphic_shader_modules);
+        contexts[Graphic]->prepare( );
         contexts[Graphic]->prepare_descriptorset([&]() { Descriptor_Manager::Get_Singleton()
                                                              ->Make_DescriptorSet(
                                                                  std::vector { Context::Get_Singleton()
@@ -86,7 +86,6 @@ void blinn_phong_context::prepare(std::shared_ptr<Window> window)
 
         contexts[Graphic]->post_prepare();
     }
-    
 }
 std::shared_ptr<CommandBuffer> blinn_phong_context::Begin_Frame()
 {

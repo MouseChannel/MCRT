@@ -207,7 +207,7 @@ void RT_Context::create_uniform_buffer()
                                                     vk::DescriptorType::eStorageBuffer);
 }
 
-void RT_Context::prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
+void RT_Context::prepare( )
 {
 
     build_accelerate_structure();

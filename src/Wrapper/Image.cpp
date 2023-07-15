@@ -44,6 +44,50 @@ Image::Image(uint32_t width,
             0);
     Create_ImageView(format);
 }
+Image::Image(uint32_t width,
+             uint32_t height,
+             vk::Format format,
+             vk::ImageType type,
+             vk::ImageTiling tiling,
+             vk::ImageUsageFlags usage,
+             vk::ImageAspectFlags aspect,
+             vk::SampleCountFlagBits sample,
+             size_t layer_count,
+             size_t mipmap_level_count,
+             vk::ImageCreateFlags flag)
+    : width(width)
+    , height(height)
+    , m_aspect(aspect)
+    , layer_count(layer_count)
+    , mipmap_level_count(mipmap_level_count)
+
+    , need_delete(true)
+{
+    auto& device = Get_Context_Singleton()->get_device();
+    vk::ImageCreateInfo create_info;
+    vk::Extent3D extent { width, height, 1 };
+    create_info.setImageType(vk::ImageType::e2D)
+        .setArrayLayers(layer_count)
+        .setMipLevels(mipmap_level_count)
+        .setInitialLayout(vk::ImageLayout::eUndefined)
+        .setFormat(format)
+        .setUsage(usage)
+        .setExtent(extent)
+        .setTiling(tiling)
+        .setSamples(sample)
+        .setFlags(flag);
+
+    m_handle = device->get_handle().createImage(create_info);
+    AllocateMemory();
+    Get_Context_Singleton()
+        ->get_device()
+        ->get_handle()
+        .bindImageMemory(
+            m_handle,
+            memory,
+            0);
+    Create_ImageView(format);
+}
 
 Image::Image(vk::Image other_image,
              vk::ImageLayout image_layout,
@@ -55,6 +99,30 @@ Image::Image(vk::Image other_image,
 {
 
     m_handle = other_image;
+    Create_ImageView(format);
+}
+
+Image::Image(
+    vk::Format format,
+    vk::Image other_image,
+    size_t width,
+    size_t height)
+    : image_layout(vk::ImageLayout::eUndefined)
+    , m_aspect(vk::ImageAspectFlagBits::eColor)
+    , width(width)
+    , height(height)
+    , need_delete(true)
+{
+
+    m_handle = other_image;
+    AllocateMemory();
+    Get_Context_Singleton()
+        ->get_device()
+        ->get_handle()
+        .bindImageMemory(
+            m_handle,
+            memory,
+            0);
     Create_ImageView(format);
 }
 
@@ -78,14 +146,14 @@ Image::Image(vk::Image other_image,
             m_handle,
             memory,
             0);
-    Create_ImageView(format, 6);
+    Create_ImageView(format);
 }
 
-void Image::Create_ImageView(vk::Format format, size_t layer_count)
+void Image::Create_ImageView(vk::Format format)
 {
     vk::ImageSubresourceRange range;
     range.setBaseMipLevel(0)
-        .setLevelCount(1)
+        .setLevelCount(mipmap_level_count)
         .setBaseArrayLayer(0)
         .setLayerCount(layer_count)
         .setAspectMask(m_aspect);
@@ -138,17 +206,16 @@ void Image::SetImageLayout(vk::ImageLayout dst_layout,
                            vk::AccessFlags src_access_mask,
                            vk::AccessFlags dst_access_mask,
                            vk::PipelineStageFlags src_stage_mask,
-                           vk::PipelineStageFlags dst_stage_mask,
-                           int layer)
+                           vk::PipelineStageFlags dst_stage_mask)
 {
     auto graphic_queue = Get_Context_Singleton()
                              ->get_device()
                              ->Get_Graphic_queue();
     CommandManager::ExecuteCmd(graphic_queue, [&](auto cmd) {
         vk::ImageSubresourceRange range;
-        range.setLayerCount(layer)
+        range.setLayerCount(layer_count)
             .setBaseArrayLayer(0)
-            .setLevelCount(1)
+            .setLevelCount(mipmap_level_count)
             .setBaseMipLevel(0)
             .setAspectMask(m_aspect);
 
@@ -218,7 +285,6 @@ void Image::FillImageData(std::vector<size_t> size, std::vector<void*> data)
         std::vector<vk::BufferImageCopy> copys(data.size());
         size_t offset = 0;
         for (int i = 0; i < copys.size(); i++) {
-
             copys[i]
                 .setBufferImageHeight(0)
                 .setBufferOffset(offset)
@@ -237,6 +303,87 @@ void Image::FillImageData(std::vector<size_t> size, std::vector<void*> data)
                                      vk::ImageLayout::eTransferDstOptimal,
                                      copys);
     });
+}
+void Image::generate_mipmap( )
+{
+    int count = std::log2(std::min(width, height));
+
+    for (int i = 1; i < count; i++) {
+
+        CommandManager::ExecuteCmd(Context::Get_Singleton()->get_device()->Get_Graphic_queue(),
+                                   [&](vk::CommandBuffer cmd) {
+                                       cmd.pipelineBarrier2(
+                                           vk::DependencyInfo()
+                                               .setImageMemoryBarriers(
+                                                   vk::ImageMemoryBarrier2()
+                                                       .setImage(m_handle)
+                                                       .setOldLayout(vk::ImageLayout::eUndefined)
+                                                       .setNewLayout(vk::ImageLayout::eTransferDstOptimal)
+                                                       .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                                       .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                                       .setSrcStageMask(vk::PipelineStageFlagBits2::eTransfer)
+                                                       .setSrcAccessMask(vk::AccessFlagBits2::eNone)
+                                                       .setDstStageMask(vk::PipelineStageFlagBits2::eTransfer)
+                                                       .setDstAccessMask(vk::AccessFlagBits2::eTransferWrite)
+                                                       .setSubresourceRange(
+                                                           vk::ImageSubresourceRange()
+                                                               .setAspectMask(vk::ImageAspectFlagBits::eColor)
+                                                               .setLayerCount(layer_count)
+                                                               .setBaseArrayLayer(0)
+                                                               .setLevelCount(1)
+                                                               .setBaseMipLevel(i))));
+                                   });
+
+        CommandManager::ExecuteCmd(Context::Get_Singleton()->get_device()->Get_Graphic_queue(),
+                                   [&](vk::CommandBuffer cmd) {
+                                       cmd.blitImage2(vk::BlitImageInfo2()
+                                                          .setSrcImage(m_handle)
+                                                          .setSrcImageLayout(vk::ImageLayout ::eTransferSrcOptimal)
+                                                          .setDstImage(m_handle)
+                                                          .setDstImageLayout(vk::ImageLayout ::eTransferDstOptimal)
+                                                          .setRegions(
+                                                              vk::ImageBlit2()
+                                                                  .setSrcOffsets({ vk::Offset3D { 0, 0, 0 },
+                                                                                   vk::Offset3D { (int)width >> (i - 1), (int)height >> (i - 1), 1 } })
+                                                                  .setDstOffsets({ vk::Offset3D { 0, 0, 0 },
+                                                                                   vk::Offset3D { (int)width >> i, (int)height >> i, 1 } })
+                                                                  .setSrcSubresource(vk::ImageSubresourceLayers()
+                                                                                         .setAspectMask(vk::ImageAspectFlagBits::eColor)
+                                                                                         .setBaseArrayLayer(0)
+                                                                                         .setLayerCount(layer_count)
+                                                                                         .setMipLevel(i - 1))
+                                                                  .setDstSubresource(vk::ImageSubresourceLayers()
+                                                                                         .setAspectMask(vk::ImageAspectFlagBits::eColor)
+                                                                                         .setBaseArrayLayer(0)
+                                                                                         .setLayerCount(layer_count)
+                                                                                         .setMipLevel(i)))
+                                                          .setFilter(vk::Filter ::eLinear));
+                                   });
+        CommandManager::ExecuteCmd(Context::Get_Singleton()->get_device()->Get_Graphic_queue(),
+                                   [&](vk::CommandBuffer cmd) {
+                                       cmd.pipelineBarrier2(
+                                           vk::DependencyInfo()
+                                               .setImageMemoryBarriers(
+                                                   vk::ImageMemoryBarrier2()
+                                                       .setImage(m_handle)
+                                                       .setOldLayout(vk::ImageLayout::eTransferDstOptimal)
+                                                       .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
+                                                       .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                                       .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                                       .setSrcStageMask(vk::PipelineStageFlagBits2::eTransfer)
+                                                       .setSrcAccessMask(vk::AccessFlagBits2::eTransferWrite)
+                                                       .setDstStageMask(vk::PipelineStageFlagBits2::eTransfer)
+                                                       .setDstAccessMask(vk::AccessFlagBits2::eTransferRead)
+                                                       .setSubresourceRange(
+                                                           vk::ImageSubresourceRange()
+                                                               .setAspectMask(vk::ImageAspectFlagBits::eColor)
+                                                               .setLayerCount(layer_count)
+                                                               .setBaseArrayLayer(0)
+                                                               .setLevelCount(1)
+                                                               .setBaseMipLevel(i))));
+                                   });
+        int a = 0;
+    }
 }
 Image::~Image()
 {

@@ -2,8 +2,9 @@
 
 #include "Data_struct.h"
 #endif
+#ifndef PI
 #define PI 3.1415926
-
+#endif
 float get_radian(float angel)
 {
     return angel / 180. * PI;
@@ -16,9 +17,10 @@ vec3 get_camera_dir(vec2 launchID, vec2 launchSize, Camera_data camera_data)
     vec2 inUV = pixelCenter / vec2(launchSize.xy);
     vec2 d = inUV * 2.0 - 1.0;
     float aspectRatio = float(launchSize.x) / float(launchSize.y);
+    aspectRatio = 1.;
     d.x = d.x * aspectRatio;
     vec3 ray_dir = vec3(0, 0, -1) * (1. / tan(get_radian(camera_data.fov_angel / 2.))) + vec3(d, 0);
-    ray_dir = (camera_data.viewInverse * vec4(normalize(ray_dir.xyz), 0)).xyz;
+    ray_dir = (camera_data.viewInverse * vec4(ray_dir.xyz, 0)).xyz;
     return ray_dir;
 }
 
@@ -65,17 +67,7 @@ float get_area(vec3 a_pos, vec3 b_pos, vec3 c_pos)
     return length(cross(e1, e2)) * 0.5f;
     // return object_to_world * vec4(cur_object_pos, 1.0);
 }
-mat3 getNormalSpace(in vec3 normal)
-{
-    vec3 someVec = vec3(1.0, 0.0, 0.0);
-    float dd = dot(someVec, normal);
-    vec3 tangent = vec3(0.0, 1.0, 0.0);
-    if (1.0 - abs(dd) > 1e-6) {
-        tangent = normalize(cross(someVec, normal));
-    }
-    vec3 bitangent = cross(normal, tangent);
-    return mat3(tangent, bitangent, normal);
-}
+
 vec2 directionToSphericalEnvmap(vec3 dir)
 {
     float s = fract(1.0 / (2.0 * PI) * atan(dir.y, -dir.x));

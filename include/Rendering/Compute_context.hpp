@@ -12,7 +12,7 @@ class Compute_Pipeline;
 class Compute_Context : public Context_base {
 public:
     std::shared_ptr<Image> get_out_image();
-    void prepare(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;
+    void prepare( ) override;
     void post_prepare() override;
     std::shared_ptr<Pipeline_base> get_pipeline() override;
 

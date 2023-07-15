@@ -59,43 +59,45 @@ void main()
         return;
     }
     float total_area = 0;
+    uvec3 seed = uvec3(gl_LaunchIDEXT.xy, uint(clockARB()));
+    vec3 random = pcg3d_random(seed);
+    int i = int(random.z * float(address.triangle_count));
 
-    for (int i = 0; i < address.triangle_count; i++) {
-        ivec3 cur_indices = indices.indices[i];
+    ivec3 cur_indices = indices.indices[i];
 
-        Vertex a = vertices.vertices[cur_indices.x];
+    Vertex a = vertices.vertices[cur_indices.x];
 
-        Vertex b = vertices.vertices[cur_indices.y];
+    Vertex b = vertices.vertices[cur_indices.y];
 
-        Vertex c = vertices.vertices[cur_indices.z];
+    Vertex c = vertices.vertices[cur_indices.z];
 
-        const vec3 cur_world_pos = get_cur_world_position(a.pos,
-                                                          b.pos,
-                                                          c.pos,
-                                                          vec2(0.3, 0.3),
-                                                          gl_ObjectToWorldEXT);
+    const vec3 cur_world_pos = get_cur_world_position(a.pos,
+                                                      b.pos,
+                                                      c.pos,
+                                                      vec2(random),
+                                                      gl_ObjectToWorldEXT);
 
-        const vec3 cur_world_normal = get_cur_world_normal(a.nrm,
-                                                           b.nrm,
-                                                           c.nrm,
-                                                           vec2(0.3, 0.3),
-                                                           gl_WorldToObjectEXT);
-        const vec2 cur_uv = get_cur_uv(a.texCoord,
-                                       b.texCoord,
-                                       c.texCoord,
-                                       vec2(0.3, 0.3));
+    const vec3 cur_world_normal = get_cur_world_normal(a.nrm,
+                                                       b.nrm,
+                                                       c.nrm,
+                                                       vec2(random),
+                                                       gl_WorldToObjectEXT);
+    const vec2 cur_uv = get_cur_uv(a.texCoord,
+                                   b.texCoord,
+                                   c.texCoord,
+                                   vec2(random));
 
-        vec3 incoming_ray_dir = normalize(gl_WorldRayOriginEXT - cur_world_pos);
+    vec3 incoming_ray_dir = normalize(gl_WorldRayOriginEXT - cur_world_pos);
 
-        if (dot(incoming_ray_dir, cur_world_normal) < 0) {
-            continue;
-        }
-
-        float pdf = 1. / get_area(a.pos, b.pos, c.pos);
-        float cos_theta = dot(prd_light.world_normal, incoming_ray_dir);
-        float _cos_theta = dot(cur_world_normal, -incoming_ray_dir);
-        float sqr_distance = pow(length(cur_world_pos - gl_WorldRayDirectionEXT), 6);
-        prd_light.total_light_contribute += material.material.emit.xyz * (pcRay.light_desity) * cos_theta * _cos_theta / sqr_distance / pdf;
-        // debugPrintfEXT("message %f \n", prd_light.total_light_contribute);
+    if (dot(incoming_ray_dir, cur_world_normal) < 0) {
+        return;
     }
+
+    float pdf = 1. / get_area(a.pos, b.pos, c.pos);
+    float cos_theta = dot(prd_light.world_normal, incoming_ray_dir);
+    float _cos_theta = dot(cur_world_normal, -incoming_ray_dir);
+    float sqr_distance = pow(length(cur_world_pos - gl_WorldRayDirectionEXT), 2);
+    // sqr_distance = 1.;
+    prd_light.total_light_contribute += material.material.emit.xyz * (pcRay.light_desity) * cos_theta * _cos_theta / sqr_distance / pdf;
+    // debugPrintfEXT("message %f \n", prd_light.total_light_contribute);
 }

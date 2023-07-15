@@ -15,6 +15,7 @@ e_ray_tracing = 0,
 
 BEGIN_ENUM(Compute_Set)
 e_compute = 0,
+    // e_compute2 = 1,
     e_comp_raytracing = 1,
     compute_count = 2 END_ENUM();
 BEGIN_ENUM(Graphic_Set)

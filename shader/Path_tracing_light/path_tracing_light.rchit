@@ -51,7 +51,7 @@ layout(buffer_reference, scalar) readonly buffer _Material
 void main()
 {
     // debugPrintfEXT("message %d %d \n", pcRay.enable_dir, pcRay.enable_indir);
-    if (prd.depth > 4) {
+    if (prd.depth > 9) {
         // debugPrintfEXT("message12 \n");
         return;
     }
@@ -102,9 +102,9 @@ void main()
     vec3 dir = vec3(0);
     vec3 indir = vec3(0);
     vec3 color = vec3(0, 0, 0);
-    if (material.material.texture_index > -1) {
+    if (material.material.color_texture_index > -1) {
 
-        color = texture(textures[nonuniformEXT(material.material.texture_index)], cur_uv).xyz / PI;
+        color = texture(textures[nonuniformEXT(material.material.color_texture_index)], cur_uv).xyz / PI;
 
     } else {
 
@@ -116,7 +116,9 @@ void main()
         prd_light.world_normal = cur_world_normal;
         prd_light.total_light_contribute = vec3(0);
         float light_distance = length(pcRay.lightPosition.xyz - cur_world_pos);
-        vec3 light_dir = pcRay.lightPosition.xyz - cur_world_pos;
+        uvec3 seed = uvec3(gl_LaunchIDEXT.xy, uint(clockARB()));
+        vec3 random = pcg3d_random(seed);
+        vec3 light_dir = pcRay.lightPosition.xyz + random * 2 - cur_world_pos;
 
         traceRayEXT(topLevelAS, // acceleration structure
                     gl_RayFlagsNoneEXT, // rayFlags
@@ -168,6 +170,7 @@ void main()
         prd.indir = incoming * color * cos_theta / pdf;
     }
 
-    prd.hitValue = prd.dir + prd.indir;
+    prd.hitValue = (prd.dir + prd.indir);
+    // prd.hitValue = prd.hitValue / (prd.hitValue + 1);
     // prd.hitValue = dir + indir;
 }

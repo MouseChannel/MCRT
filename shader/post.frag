@@ -10,14 +10,14 @@ layout(location = e_nrm) in vec3 in_nrm;
 layout(location = e_texCoord) in vec2 in_texCoord;
 
 layout(binding = 0) uniform sampler2D Sampler;
+// layout(binding = 3) uniform sampler2D test;
 layout(location = 0) out vec4 outColor;
-// layout(set = 0, binding = 0, rgba32f) uniform image2D image;
+layout(binding = 4, rgba32f) uniform image2D LUT;
+layout(binding = 5, rgba8_snorm) uniform imageCube irr;
+ 
 void main()
 {
 
-    // vec4 color = imageLoad(image, ivec2(100));
-    // if (inUV.x < 1e5 && inUV.y < 1e5)
-    // debugPrintfEXT("message from frag\n");
-
+ 
     outColor = pow(texture(Sampler, in_texCoord).rgba, vec4(1. / 2.2));
 }

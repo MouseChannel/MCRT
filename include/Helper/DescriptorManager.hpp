@@ -22,6 +22,8 @@ public:
         Ray_Tracing,
         Global,
         Compute,
+        Compute2,
+        Sky_box,
         e_type_count
     };
     enum Type {
@@ -52,6 +54,7 @@ public:
         if (!descriptorsets[which_set])
             descriptorsets[which_set].reset(new DescriptorSet);
         descriptorsets[which_set]->Add(data, binding);
+        // Context::Get_Singleton()->get_debugger()->set_handle_name(descriptorsets[which_set]->get_handle()[0], "binding" + std::to_string(binding_index));
     }
     template <typename T>
     void Make_DescriptorSet(std::shared_ptr<T> data,

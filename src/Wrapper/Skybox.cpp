@@ -126,7 +126,7 @@ Skybox::Skybox(int height, int width)
     //                          height));
     cube_map.reset(new Image(width,
                              height,
-                             vk::Format::eR8G8B8A8Snorm,
+                             vk::Format::eR8G8B8A8Unorm,
                              vk::ImageType::e2D,
                              vk::ImageTiling::eOptimal,
                              vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eStorage,

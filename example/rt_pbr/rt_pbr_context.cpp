@@ -35,7 +35,7 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
     ray_tracing_context::prepare(window);
     m_skybox.reset(new Skybox("D:/MoChengRT/assets/Cubemap/farm"));
     skybox_mesh = GLTF_Loader::load_skybox("D:/MoChengRT/assets/cube.gltf");
-    GLTF_Loader::load_model("D:/MoChengRT/assets/buddha.gltf");
+    GLTF_Loader::load_model("D:/MoChengRT/assets/classic_model/sphere.gltf");
     LUT.reset(new Image(1024,
                         1024,
                         vk::Format::eR32G32B32A32Sfloat,
@@ -51,68 +51,9 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
                         vk::PipelineStageFlagBits::eBottomOfPipe);
     irradiance.reset(new Skybox(irradiance_size, irradiance_size));
 
-    // {
-    //     // test_texture.reset(new Texture("D:/MoChengRT/assets/Cubemap/farm/backward.png"));
-    //     // auto image = test_texture->get_image();
-    //     // image->generate_mipmap();
-    //     std::string path = "D:/MoChengRT/assets/Cubemap/farm/backward.png";
-    //     int width, height, channel;
-    //     void* pixels = stbi_load(path.data(), &width, &height, &channel, STBI_rgb_alpha);
-    //     size_t size = width * height * 4;
-    //     if (!pixels) {
-    //         throw std::runtime_error("image load failed");
-    //     }
-
-    //     vk::ImageCreateInfo image_create_info;
-
-    //     image_create_info.setImageType(vk::ImageType ::e2D)
-    //         .setFormat(vk::Format ::eR8G8B8A8Unorm)
-    //         .setSharingMode(vk::SharingMode ::eExclusive)
-    //         .setArrayLayers(1)
-    //         .setSamples(vk::SampleCountFlagBits::e1)
-    //         .setTiling(vk::ImageTiling ::eOptimal)
-    //         .setInitialLayout(vk::ImageLayout ::eUndefined)
-    //         .setExtent( vk::Extent3D()
-    //                        .setHeight(height)
-    //                        .setWidth(width)
-    //                        .setDepth(1))
-    //         .setMipLevels(11)
-
-    //         .setUsage(vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eStorage);
-    //     auto image_handle = Context::Get_Singleton()
-    //                             ->get_device()
-    //                             ->get_handle()
-    //                             .createImage(image_create_info);
-    //     test_image.reset(new Image(
-    //         image_create_info.format,
-    //         image_handle,
-    //         width,
-    //         height));
-
-    //     test_image->SetImageLayout(vk::ImageLayout::eTransferDstOptimal,
-    //                                vk::AccessFlagBits::eNone,
-    //                                vk::AccessFlagBits::eTransferWrite,
-    //                                vk::PipelineStageFlagBits::eTransfer,
-    //                                vk::PipelineStageFlagBits::eTransfer);
-    //     test_image->FillImageData(size, pixels);
-
-    //     test_image->SetImageLayout(vk::ImageLayout::eTransferSrcOptimal,
-    //                                vk::AccessFlagBits::eTransferWrite,
-    //                                vk::AccessFlagBits::eTransferRead,
-    //                                vk::PipelineStageFlagBits::eTransfer,
-    //                                vk::PipelineStageFlagBits::eTransfer);
-    //     test_image->generate_mipmap();
-    //     test_image->SetImageLayout(
-    //         vk::ImageLayout::eShaderReadOnlyOptimal,
-    //         vk::AccessFlagBits::eTransferWrite,
-    //         vk::AccessFlagBits::eShaderRead,
-    //         vk::PipelineStageFlagBits::eTransfer,
-    //         vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
-    // }
-
     contexts.resize(3);
-    // raytracing
-    {
+
+    { // raytracing
 
         contexts[Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
         std::vector<std::shared_ptr<ShaderModule>> rt_shader_modules(RT_Pipeline::eShaderGroupCount);
@@ -200,7 +141,7 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
 
         contexts[Graphic]->post_prepare();
     }
-    {
+    { // compute_precompute
         contexts[Compute].reset(new Compute_Context);
         contexts[Compute]->set_constants_size(sizeof(PushContant_IBL));
 
@@ -249,7 +190,7 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
                 cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
                                  compute_context->get_pipeline()->get_handle());
 
-                cmd.dispatch(irradiance_size, irradiance_size, irradiance_size);
+                cmd.dispatch(irradiance_size, irradiance_size, 6);
 
                 // auto push_contants = PushContant_IBL {
                 //     .doing_filter = 0

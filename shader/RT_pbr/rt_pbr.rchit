@@ -113,29 +113,10 @@ void main()
     vec3 irradiance = texture(irradiance_cubemap, N).rgb;
     vec3 diffuse = albedo * irradiance;
     vec3 ray_dir = reflect(gl_WorldRayDirectionEXT, cur_world_normal);
-    // int lod = int(roughness * 22.);
-    // debugPrintfEXT("message123 %d\n", lod);
-    // debugPrintfEXT("message \n");
+
     vec3 prefilteredColor = textureLod(skybox, ray_dir, roughness * 11).rgb;
     vec3 brdf = texture(LUT_image, vec2(max(dot(N, V), 0.0), roughness)).rgb;
     vec3 specular = prefilteredColor * (F0 * brdf.r + brdf.g);
     prd.hitValue = KD * diffuse + specular;
-    // prd.hitValue = prefilteredColor;
-    // // direct light
-    // prd.hitValue = microfacetBRDF(L, V, N, albedo, metallicness, roughness);
-    // if (prd.depth++ < 10) {
-    //     prd.ray_dir = ray_dir;
-    //     traceRayEXT(topLevelAS, // acceleration structure
-    //                 gl_RayFlagsOpaqueEXT, // rayFlags
-    //                 0xFF, // cullMask
-    //                 0, // sbtRecordOffset
-    //                 0, // sbtRecordStride
-    //                 0, // missIndex
-    //                 cur_world_pos, // ray origin
-    //                 1e-3, // ray min range
-    //                 prd.ray_dir, // ray direction
-    //                 1e5, // ray max range
-    //                 0 // payload (location = 0)
-    //     );
-    // }
+    // prd.hitValue = irradiance;
 }

@@ -28,8 +28,10 @@ void RenderPass::Build()
     create_info.setSubpasses(subpass);
 
     create_info.setDependencies(subpass_dependency);
-    m_handle = Get_Context_Singleton()->get_device()->get_handle().createRenderPass(
-        create_info);
+    m_handle = Get_Context_Singleton()
+                   ->get_device()
+                   ->get_handle()
+                   .createRenderPass(create_info);
 }
 RenderPass::~RenderPass()
 {

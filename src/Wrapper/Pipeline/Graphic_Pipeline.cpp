@@ -48,7 +48,7 @@ Graphic_Pipeline::~Graphic_Pipeline()
 }
 void Graphic_Pipeline::Build_Pipeline(std::shared_ptr<RenderPass> render_pass)
 {
-
+    std::vector<vk::DynamicState> dynamic_state = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
     vk::GraphicsPipelineCreateInfo create_info;
     create_info.setLayout(layout)
         .setRenderPass(render_pass->get_handle())
@@ -64,7 +64,9 @@ void Graphic_Pipeline::Build_Pipeline(std::shared_ptr<RenderPass> render_pass)
         .setPRasterizationState(&rasterization_info)
         .setPMultisampleState(&multi_sample)
         .setPDepthStencilState(&depth_test)
-        .setPColorBlendState(&blend);
+        .setPColorBlendState(&blend)
+        .setPDynamicState(&vk::PipelineDynamicStateCreateInfo().setDynamicStates(dynamic_state));
+
     auto res = Get_Context_Singleton()->get_device()->get_handle().createGraphicsPipeline(nullptr, create_info);
     // vk::GraphicsPipelineCreateInfo create_info;
     // create_info.setLayout(layout)
@@ -123,8 +125,8 @@ void Graphic_Pipeline::Make_viewPort()
                         ->Get_Extent2D();
     viewport.setX(0)
         .setY(0)
-        .setHeight(749)
-        .setWidth(800)
+        .setHeight(extent2D.height)
+        .setWidth(extent2D.width)
         .setMinDepth(0)
         .setMaxDepth(1);
 

@@ -14,8 +14,9 @@ RT_Color_RenderTarget::RT_Color_RenderTarget(std::shared_ptr<Image> image,
 std::unique_ptr<RT_Color_RenderTarget> RT_Color_RenderTarget::Create()
 {
 
-    std::shared_ptr<Image> color_image { new Image(800,
-                                                   749,
+    auto extent = Context::Get_Singleton()->get_extent2d();
+    std::shared_ptr<Image> color_image { new Image(extent.width,
+                                                   extent.height,
                                                    vk::Format::eR32G32B32A32Sfloat,
                                                    vk::ImageType::e2D,
                                                    vk::ImageTiling::eOptimal,

@@ -8,8 +8,8 @@ Framebuffer::Framebuffer(std::shared_ptr<RenderPass> renderpass, std::vector<std
 {
 
     //   render_pass = Get_Context_Singleton()->get_renderpass();
-    auto h = Get_Context_Singleton()->get_swapchain()->Get_Extent2D().height;
-    auto w = Get_Context_Singleton()->get_swapchain()->Get_Extent2D().width;
+    auto h = Get_Context_Singleton()->get_extent2d().height;
+    auto w = Get_Context_Singleton()->get_extent2d().width;
 
     std::vector<vk::ImageView> image_views;
     for (auto& i : images) {
@@ -19,8 +19,8 @@ Framebuffer::Framebuffer(std::shared_ptr<RenderPass> renderpass, std::vector<std
     vk::FramebufferCreateInfo create_info;
     create_info.setRenderPass(renderpass->get_handle())
         .setAttachments(image_views)
-        .setHeight(749)
-        .setWidth(800)
+        .setHeight(h)
+        .setWidth(w)
         .setLayers(1);
     m_handle = Get_Context_Singleton()
                    ->get_device()

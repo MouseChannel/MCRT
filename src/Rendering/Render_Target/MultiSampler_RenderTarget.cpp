@@ -17,8 +17,16 @@ std::unique_ptr<MultiSampler_RenderTarget> MultiSampler_RenderTarget::Create()
 
     auto sampler_count = Context::Get_Singleton()->get_device()->Get_sampler_count();
     auto swapchain_format = Context::Get_Singleton()->get_swapchain()->Get_Format();
+    auto extent = Context::Get_Singleton()->get_extent2d();
     std::shared_ptr<Image> image {
-        new Image(800, 749, swapchain_format, vk::ImageType::e2D, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, sampler_count)
+        new Image(extent.width,
+                  extent.height,
+                  swapchain_format,
+                  vk::ImageType::e2D,
+                  vk::ImageTiling::eOptimal,
+                  vk::ImageUsageFlagBits::eColorAttachment,
+                  vk::ImageAspectFlagBits::eColor,
+                  sampler_count)
     };
     image->SetImageLayout(vk::ImageLayout::eColorAttachmentOptimal,
                           vk::AccessFlagBits::eNone,

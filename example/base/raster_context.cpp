@@ -34,6 +34,8 @@ void raster_context::EndFrame()
 {
     EndGraphicFrame();
 }
+
+void raster_context::re_create_context(){}
 // std::shared_ptr<CommandBuffer> raster_context::BeginGraphicFrame()
 // {
 

@@ -4,6 +4,7 @@
 #include "shader/Data_struct.h"
 #include <string_view>
 #include <vulkan/vulkan.hpp>
+#include <memory>
 
 namespace MCRT {
 struct Triangle {

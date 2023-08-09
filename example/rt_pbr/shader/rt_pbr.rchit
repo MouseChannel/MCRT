@@ -1,5 +1,5 @@
-
 #version 460
+
 #extension GL_EXT_ray_tracing : require
 #extension GL_GOOGLE_include_directive : enable
 #extension GL_EXT_debug_printf : enable
@@ -10,15 +10,15 @@
 #extension GL_EXT_buffer_reference2 : require
 #extension GL_EXT_nonuniform_qualifier : enable
 
-#include "../Data_struct.h"
+#include "shader/Data_struct.h"
 
-#include "../PBR/common.h"
-#include "../common.glsl"
-#include "../math.h"
-#include "../sampling.glsl"
 #include "Binding.h"
 #include "Push_Constants.h"
 #include "hit_payload.glsl"
+#include "shader/PBR/common.h"
+#include "shader/common.glsl"
+#include "shader/math.h"
+#include "shader/sampling.glsl"
 
 hitAttributeEXT vec2 attribs;
 
@@ -104,7 +104,7 @@ void main()
     vec3 L = normalize(vec3(pcRay.lightPosition) - cur_world_pos);
     vec3 H = normalize(V + L);
 
-    vec3 F0 = vec3(0.04); // »ù´¡·´ÉäÂÊ(´¹Ö±ÈëÉä)
+    vec3 F0 = vec3(0.04); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½)
     F0 = mix(F0, albedo, metallicness);
     vec3 F = fresnelSchlick(max(dot(V, H), 0.0), F0);
     vec3 KS = F;

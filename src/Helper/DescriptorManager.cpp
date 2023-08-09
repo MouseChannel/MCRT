@@ -13,19 +13,21 @@ void Descriptor_Manager::CreateDescriptorPool(Which_Set which_set)
     std::map<vk::DescriptorType, uint32_t> type_map;
     auto& descriptor_set = descriptorsets[which_set];
 
-    for (auto& i : descriptor_set->get_buffer_data()) {
+    for (auto& [index, i] : descriptor_set->get_buffer_data()) {
 
         auto type = i.binding.descriptorType;
         type_map[type]++;
     }
 
-    for (auto& i : descriptor_set->get_image_data()) {
+   
+    for (auto& [index, i] : descriptor_set->_get_image_data()) {
 
         auto type = i.binding.descriptorType;
         type_map[type]++;
     }
 
-    for (auto& i : descriptor_set->get_as_data()) {
+   
+    for (auto& [index, i] : descriptor_set->get_as_data()) {
 
         auto type = i.binding.descriptorType;
         type_map[type]++;

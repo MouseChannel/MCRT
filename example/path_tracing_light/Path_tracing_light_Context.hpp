@@ -2,7 +2,7 @@
 #include "Rendering/Context.hpp"
 #include "example/base/raytracing_context.hpp"
 // #include "shader/Data_struct.h"
-#include "shader/Path_tracing_light/Push_constants.h"
+#include "example/path_tracing_light/shader/Push_constants.h"
 #include <iostream>
 
 namespace MCRT {

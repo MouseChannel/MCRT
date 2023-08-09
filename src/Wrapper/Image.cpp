@@ -5,6 +5,7 @@
 #include "Wrapper/Buffer.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Device.hpp"
+#include <cmath>
 namespace MCRT {
 Image::Image(uint32_t width,
              uint32_t height,
@@ -187,7 +188,7 @@ void Image::AllocateMemory()
                  ->get_handle()
                  .allocateMemory(allocate_info);
 }
-uint32_t Image::FindMemoryTypeIndex(std::uint32_t requirement_type,
+uint32_t Image::FindMemoryTypeIndex(uint32_t requirement_type,
                                     vk::MemoryPropertyFlags flag)
 {
     auto memory_properties = Get_Context_Singleton()

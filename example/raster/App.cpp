@@ -8,7 +8,7 @@
 namespace MCRT {
 void App::init()
 {
-    window.reset(new Window(800, 800));
+    window.reset(new Window(1200, 800));
     raster_context_pbr::Get_Singleton()->prepare(window);
     imgui.reset(new ImGuiContext);
 

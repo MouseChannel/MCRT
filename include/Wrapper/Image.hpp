@@ -63,16 +63,16 @@ public:
         return image_layout;
     }
 
-private:
     uint32_t width, height;
-    uint32_t layer_count = 1, mipmap_level_count = 1;
     vk::ImageView image_view;
+private:
+    uint32_t layer_count = 1, mipmap_level_count = 1;
     vk::DeviceMemory memory;
     vk::ImageLayout image_layout { vk::ImageLayout::eUndefined };
     vk::ImageAspectFlags m_aspect;
     bool need_delete;
     void AllocateMemory();
-    uint32_t FindMemoryTypeIndex(std::uint32_t requirement_type,
+    uint32_t FindMemoryTypeIndex(uint32_t requirement_type,
                                  vk::MemoryPropertyFlags flag);
 };
 } // namespace MoCheng3D

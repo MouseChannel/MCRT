@@ -16,7 +16,7 @@
 #include "Wrapper/Texture.hpp"
 #include "iostream"
 // #include "shader/Data_struct.h"
-#include "shader/AO/Binding.h"
+// #include "example/ray_tracing_AO/shader/
 
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance {

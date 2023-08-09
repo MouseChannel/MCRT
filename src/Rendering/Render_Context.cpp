@@ -1,12 +1,15 @@
 #include "Rendering/Render_Context.hpp"
+#include "Helper/CommandManager.hpp"
 #include "Helper/DescriptorManager.hpp"
 #include "Rendering/Compute_context.hpp"
+#include "Rendering/GLFW_Window.hpp"
 #include "Rendering/Model.hpp"
 #include "Rendering/RT_Context.hpp"
 #include "Rendering/Render_Frame.hpp"
 #include "Rendering/Render_Target/Color_Render_Target.hpp"
 #include "Rendering/Render_Target/Depth_Render_Target.hpp"
 #include "Rendering/Render_Target/Final_RenderTarget.hpp"
+#include "Rendering/Render_Target/MultiSampler_Render_Target.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Device.hpp"
@@ -17,8 +20,7 @@
 #include "Wrapper/Semaphore.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/SwapChain.hpp"
-
-#include "Rendering/Render_Target/MultiSampler_Render_Target.hpp"
+#include <Helper/Camera.hpp>
 
 namespace MCRT {
 
@@ -27,11 +29,11 @@ RenderContext::RenderContext(std::shared_ptr<Device> device)
 {
 
     if (enable_swapchain) {
+        // m_swapchain.reset(new SwapChain);
+        // Context::Get_Singleton()->set_swapchain(m_swapchain);
+        Context::Get_Singleton()->get_swapchain().reset(new SwapChain);
 
-        // m_swapchain = Context::Get_Singleton()->get_swapchain();
-
-        m_swapchain.reset(new SwapChain);
-        Context::Get_Singleton()->set_swapchain(m_swapchain);
+        m_swapchain = Context::Get_Singleton()->get_swapchain();
         render_frame_count = m_swapchain->Get_Swapchain_Image_size();
     }
     for (int i = 0; i < render_frame_count; i++) {
@@ -63,9 +65,9 @@ std::shared_ptr<Pipeline_base> RenderContext::get_pipeline2()
 void RenderContext::fill_render_targets()
 {
     auto count { enable_swapchain ? 3 : 1 };
+    all_rendertargets.clear();
     all_rendertargets.resize(count);
     for (auto i { 0 }; i < count; i++) {
-
         auto swapchain_image_handle = m_swapchain->Get_Swapchain_Images()[i];
         std::shared_ptr<Image> swapchain_image {
             new Image(swapchain_image_handle,
@@ -80,9 +82,9 @@ void RenderContext::fill_render_targets()
 void RenderContext::Prepare_Framebuffer()
 {
     auto count { enable_swapchain ? 3 : 1 };
+    render_frames.resize(count);
     for (auto i { 0 }; i < count; i++) {
-        render_frames.emplace_back(new RenderFrame(m_renderpass,
-                                                   all_rendertargets[i]));
+        render_frames[i].reset(new RenderFrame(m_renderpass, all_rendertargets[i]));
     }
 }
 void RenderContext::Prepare_RenderPass()
@@ -143,7 +145,7 @@ void RenderContext::prepare_pipeline2(std::vector<std::shared_ptr<ShaderModule>>
 
     m_skybox_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
 }
-void RenderContext::prepare( )
+void RenderContext::prepare()
 {
     fill_render_targets();
     Prepare_RenderPass();
@@ -184,14 +186,14 @@ std::shared_ptr<CommandBuffer> RenderContext::Begin_Record_Command_Buffer()
     // cmd->Reset();
     auto render_pass = Get_render_pass();
     vk::RenderPassBeginInfo render_pass_begin_info;
-    vk::Rect2D rect;
+    // vk::Rect2D rect;
 
-    // auto extent = Context::Get_Singleton()->get_swapchain()->Get_Extent2D();
-    vk::Extent2D extent;
-    extent.setHeight(749)
-        .setWidth(800);
-    rect.setOffset({ 0, 0 })
-        .setExtent(extent);
+    // auto extent1 = Context::Get_Singleton()->get_extent2d();
+    // vk::Extent2D extent;
+    // extent.setHeight(800)
+    //     .setWidth(800);
+    // rect.setOffset({ 0, 0 })
+    //     .setExtent(Context::Get_Singleton()->get_extent2d());
 
     std::vector<vk::ClearValue> clear_values;
 
@@ -200,12 +202,15 @@ std::shared_ptr<CommandBuffer> RenderContext::Begin_Record_Command_Buffer()
     }
 
     render_pass_begin_info.setRenderPass(render_pass->get_handle())
-        .setRenderArea(rect)
+        .setRenderArea(vk::Rect2D()
+                           .setOffset({ 0, 0 })
+                           .setExtent(Context::Get_Singleton()
+                                          ->get_extent2d()))
         .setFramebuffer(Get_RenderFrame(current_index)
                             ->Get_Framebuffer()
                             ->get_handle())
         .setClearValues(clear_values);
-
+    // std::cout << render_pass_begin_info.renderArea.extent.width << render_pass_begin_info.renderArea.extent.height << std::endl;
     cmd->Begin(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 
     cmd->BeginRenderPass(render_pass_begin_info, vk::SubpassContents::eInline);
@@ -213,7 +218,23 @@ std::shared_ptr<CommandBuffer> RenderContext::Begin_Record_Command_Buffer()
 }
 void RenderContext::record_command(std::shared_ptr<CommandBuffer> cmd)
 {
-    auto cmd_handle = cmd->get_handle();
+
+    auto extent2d = Context::Get_Singleton()->get_extent2d();
+    // std::cout<<123<<extent2d.width<<extent2d.height<<std::endl;
+    cmd->get_handle().setViewport(0,
+                                  vk::Viewport()
+                                      .setHeight(extent2d.height)
+                                      .setWidth(extent2d.width)
+                                      .setMinDepth(0)
+                                      .setMaxDepth(1)
+                                      .setX(0)
+                                      .setY(0));
+    cmd->get_handle().setScissor(0,
+                                 vk::Rect2D()
+                                     .setExtent(extent2d)
+                                     .setOffset(vk::Offset2D()
+                                                    .setX(0)
+                                                    .setY(0)));
 
     Context::Get_Singleton()->get_debugger()->set_name(cmd, "render command_buffer");
 }
@@ -248,7 +269,10 @@ void RenderContext::Submit()
         sub.signalSemaphoreCount = 1;
         sub.pSignalSemaphores = (VkSemaphore*)&Get_cur_present_semaphore()->get_handle();
 
-        auto res = vkQueueSubmit(graphic_queue, 1, &sub, Get_cur_fence()->get_handle());
+        auto res = vkQueueSubmit(graphic_queue,
+                                 1,
+                                 &sub,
+                                 Get_cur_fence()->get_handle());
 
         // auto res = graphic_queue.submit(1, &submit_info, Get_cur_fence()->get_handle(), m_device->get_handle());
         if (res == VK_ERROR_DEVICE_LOST) {
@@ -279,12 +303,41 @@ void RenderContext::EndFrame()
 
     auto present_queue = m_device->Get_present_queue();
 
-    auto present_result = present_queue.presentKHR(present_info);
+    auto present_result = present_queue.presentKHR(&present_info);
 
-    if (present_result != vk::Result::eSuccess) {
+    if (present_result == vk::Result::eErrorOutOfDateKHR || present_result == vk::Result::eSuboptimalKHR) {
         std::cout << "present fail" << std::endl;
+        re_create();
     }
     current_frame++;
     current_frame %= render_frame_count;
+}
+void RenderContext::re_create()
+{
+    int cur_width = 0, cur_height = 0;
+    glfwGetFramebufferSize(Context::Get_Singleton()->get_window()->get_handle(),
+                           &cur_width,
+                           &cur_height);
+    while (cur_width == 0 || cur_height == 0) {
+        glfwWaitEvents();
+        glfwGetFramebufferSize(Context::Get_Singleton()->get_window()->get_handle(),
+                               &cur_width,
+                               &cur_height);
+    }
+    std::cout << cur_width << cur_height << std::endl;
+    Context::Get_Singleton()->get_swapchain().reset(new SwapChain);
+    m_swapchain = Context::Get_Singleton()->get_swapchain();
+    Context::Get_Singleton()->set_extent2d(cur_width, cur_height);
+    fill_render_targets();
+    Prepare_Framebuffer();
+    Context::Get_Singleton()
+        ->get_camera()
+        ->setPerpective(90, (float)cur_width / (float)cur_height, 0.1f, 10000);
+    //---
+    Context::Get_Singleton()->re_create_context();
+   
+}
+void RenderContext::re_create_swapchain()
+{
 }
 } // namespace MoCheng3D

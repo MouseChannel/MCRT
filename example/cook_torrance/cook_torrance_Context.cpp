@@ -14,8 +14,9 @@
 #include "Wrapper/Ray_Tracing/AS_Builder.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/Texture.hpp"
+#include "example/cook_torrance/shader/Binding.h"
 #include "iostream"
-#include "shader/cook_torrance/Binding.h"
+
 
 namespace MCRT {
 float cook_torrance_context::roughness = 0;
@@ -97,7 +98,7 @@ void cook_torrance_context::prepare(std::shared_ptr<Window> window)
         std::shared_ptr<ShaderModule> compute_shader {
             new ShaderModule("D:/MoChengRT/shader/filter.comp.spv")
         };
-        contexts[Compute]->prepare( );
+        contexts[Compute]->prepare();
         contexts[Compute]->prepare_descriptorset([&]() {
             Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(Context::Get_Singleton()
                                                                         ->get_compute_context()

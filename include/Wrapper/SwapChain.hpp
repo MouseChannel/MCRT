@@ -26,7 +26,7 @@ public:
     struct SurfaceInfo {
         vk::SurfaceFormatKHR format;
         vk::Extent2D extent;
-        std::uint32_t count;
+        uint32_t count;
         vk::SurfaceTransformFlagBitsKHR transform;
     } surfaceInfo;
 
@@ -61,6 +61,7 @@ public:
     }
 
 private:
+    static vk::SwapchainKHR old_swapchian;
     vk::SurfaceFormatKHR Query_surface_Format();
 
     std::vector<std::shared_ptr<Image>> images;

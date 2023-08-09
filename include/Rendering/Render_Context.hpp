@@ -42,10 +42,14 @@ public:
     {
         return fences[current_frame];
     }
+    // [[nodiscard]] auto get_swapchain()
+    // {
+    // }
     std::vector<std::shared_ptr<RenderTarget>>& Get_render_targets()
     {
         return all_rendertargets[0];
     }
+    void re_create() override;
     std::shared_ptr<Pipeline_base> get_pipeline() override;
     std::shared_ptr<Pipeline_base> get_pipeline2();
 
@@ -59,10 +63,11 @@ public:
     }
     std::shared_ptr<Framebuffer>& get_framebuffer();
     void Prepare_RenderPass();
-    void prepare( ) override;
+    void prepare() override;
     void post_prepare() override;
     void fill_render_targets();
     void Prepare_Framebuffer();
+    void re_create_swapchain();
     void prepare_descriptorset(std::function<void()> prepare_func) override;
     void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;
     void prepare_pipeline2(std::vector<std::shared_ptr<ShaderModule>> shader_modules);

@@ -4,6 +4,7 @@
 #include "lib/imgui/imgui_impl_vulkan.h"
 #include <memory>
 #include <vulkan/vulkan.hpp>
+#include <functional>
 
 namespace MCRT {
 

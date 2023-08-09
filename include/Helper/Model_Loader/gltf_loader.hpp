@@ -1,6 +1,7 @@
 #pragma once
 #include "Tool/tiny_gltf.h"
 #include "glm/glm.hpp"
+#include <memory>
 namespace MCRT {
 class Mesh;
 class GLTF_Loader {

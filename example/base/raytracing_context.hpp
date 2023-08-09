@@ -40,7 +40,8 @@ public:
         throw std::runtime_error("it is not Ray_Tracing context");
     }
 
-   virtual void prepare(std::shared_ptr<Window> window) override;
+    virtual void prepare(std::shared_ptr<Window> window) override;
+    virtual void re_create_context() override;
 
 private:
     std::shared_ptr<CommandBuffer> BeginGraphicFrame();

@@ -1,5 +1,6 @@
 #include "Wrapper/SwapChain.hpp"
 #include "Rendering/Context.hpp"
+#include "Rendering/GLFW_Window.hpp"
 #include "Wrapper/Window_Surface.hpp"
 #include <array>
 #include <cstdint>
@@ -10,10 +11,10 @@
 #include <vulkan/vulkan_structs.hpp>
 
 namespace MCRT {
+vk::SwapchainKHR SwapChain::old_swapchian = VK_NULL_HANDLE;
 SwapChain::SwapChain()
 {
     Query_info();
-    vk::SwapchainCreateInfoKHR createInfo;
     auto surface = Get_Context_Singleton()->get_surface();
     auto graphic_queue_index = Get_Context_Singleton()->get_device()->queue_family_indices.graphic_queue.value();
 
@@ -25,8 +26,8 @@ SwapChain::SwapChain()
 
     std::vector<uint32_t> queue_family_index_v;
     queue_family_index_v.assign(queue_family_index.begin(), queue_family_index.end());
-    // vk::Extent2D extent;
-    // extent.setHeight(800).setWidth(800);
+    vk::SwapchainCreateInfoKHR createInfo;
+
     createInfo.setClipped(true)
         .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
         .setImageExtent(surfaceInfo.extent)
@@ -39,11 +40,18 @@ SwapChain::SwapChain()
         .setPreTransform(surfaceInfo.transform)
         .setSurface(surface->get_handle())
         .setQueueFamilyIndices(queue_family_index_v)
-        .setImageSharingMode(share_mode);
-    m_handle = Get_Context_Singleton()->get_device()->get_handle().createSwapchainKHR(createInfo);
+        .setImageSharingMode(share_mode)
+        .setOldSwapchain(old_swapchian);
+
+    m_handle = Get_Context_Singleton()
+                   ->get_device()
+                   ->get_handle()
+                   .createSwapchainKHR(createInfo);
+    old_swapchian = m_handle;
 }
 SwapChain::~SwapChain()
 {
+    std::cout << "destroySwapchainKHR" << std::endl;
     Get_Context_Singleton()
         ->get_device()
         ->get_handle()
@@ -54,10 +62,10 @@ void SwapChain::Query_info()
 {
     surfaceInfo.format = Query_surface_Format();
     auto surface = Get_Context_Singleton()->get_surface();
-    auto capability = Get_Context_Singleton()->get_device()->Get_Physical_device().getSurfaceCapabilitiesKHR(surface->get_handle());
-    //   capability.maxImageCount = 3;
-
-    //   capability.minImageCount = 1;
+    auto capability = Get_Context_Singleton()
+                          ->get_device()
+                          ->Get_Physical_device()
+                          .getSurfaceCapabilitiesKHR(surface->get_handle());
 
     surfaceInfo.count =
 
@@ -65,7 +73,13 @@ void SwapChain::Query_info()
     // todo
     // surfaceInfo.count = 3;
     surfaceInfo.transform = capability.currentTransform;
-    surfaceInfo.extent = Query_surface_Extent(capability, 800, 800);
+    int width = 0, height = 0;
+    glfwGetFramebufferSize(
+        Context::Get_Singleton()->get_window()->get_handle(),
+        &width,
+        &height);
+    surfaceInfo.extent = Query_surface_Extent(capability, width, height);
+    int e = 0;
 }
 vk::Extent2D SwapChain::Query_surface_Extent(const vk::SurfaceCapabilitiesKHR& capability, int windowWidth, int windowHeight)
 {

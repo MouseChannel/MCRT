@@ -12,7 +12,7 @@ class Compute_Pipeline;
 class Compute_Context : public Context_base {
 public:
     std::shared_ptr<Image> get_out_image();
-    void prepare( ) override;
+    void prepare() override;
     void post_prepare() override;
     std::shared_ptr<Pipeline_base> get_pipeline() override;
 
@@ -26,6 +26,7 @@ public:
     void prepare_descriptorset(std::function<void()> prepare_func) override;
 
     void set_barrier(std::shared_ptr<CommandBuffer> cmd);
+    void re_create() override;
 
     void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;
 

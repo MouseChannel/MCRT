@@ -35,20 +35,29 @@ DescriptorSet::~DescriptorSet()
 }
 void DescriptorSet::add(std::vector<std::shared_ptr<Image>> data, vk::DescriptorSetLayoutBinding binding_data)
 {
-    images.emplace_back(Data_Binding(data, binding_data));
+
+    _images[binding_data.binding] = Data_Binding(data, binding_data);
+
     layout_bindings.push_back(binding_data);
 }
 void DescriptorSet::add(std::vector<std::shared_ptr<Buffer>> data, vk::DescriptorSetLayoutBinding binding_data)
 {
-    buffers.emplace_back(Data_Binding(data, binding_data));
 
+    _buffers[binding_data.binding] = Data_Binding(data, binding_data);
+    // _buffers.emplace(std::pair {
+    //     binding_data.binding,
+    //     Data_Binding(data, binding_data) });
     layout_bindings.push_back(binding_data);
 }
 void DescriptorSet::add(std::vector<std::shared_ptr<AccelerationStructure_Top>> data, vk::DescriptorSetLayoutBinding binding_data)
 {
 
-    as.push_back(Data_Binding(data, binding_data));
+    // as.push_back(Data_Binding(data, binding_data));
 
+    _as[binding_data.binding] = Data_Binding(data, binding_data);
+    // _as.emplace(std::pair {
+    //     binding_data.binding,
+    //     Data_Binding(data, binding_data) });
     layout_bindings.push_back(binding_data);
 }
 void DescriptorSet::update(std::vector<std::shared_ptr<Buffer>> new_data,
@@ -80,6 +89,8 @@ void DescriptorSet::update(std::vector<std::shared_ptr<Image>> new_data,
                                      .setImageLayout(i->Get_image_layout())
                                      .setImageView(i->Get_Image_View())
                                      .setSampler(Context::Get_Singleton()->get_sampler()->get_handle()));
+        // std::cout << i->height << i->width << std::endl;
+        // std::cout << i->get_handle() << std::endl;
     }
     vk::WriteDescriptorSet writer;
 
@@ -88,7 +99,10 @@ void DescriptorSet::update(std::vector<std::shared_ptr<Image>> new_data,
         .setDstBinding(binding_data.binding)
         .setDstSet(get_handle()[0])
         .setDstArrayElement(0);
-    Get_Context_Singleton()->get_device()->get_handle().updateDescriptorSets(writer, {});
+    Get_Context_Singleton()
+        ->get_device()
+        ->get_handle()
+        .updateDescriptorSets(writer, {});
 }
 void DescriptorSet::update(std::vector<std::shared_ptr<AccelerationStructure_Top>> new_data,
                            vk::DescriptorSetLayoutBinding binding_data)
@@ -129,7 +143,6 @@ void DescriptorSet::create(std::shared_ptr<DescriptorPool> pool)
                    ->get_handle()
                    .allocateDescriptorSets(allocate_info);
 }
-
 
 vk::DescriptorSetLayout DescriptorSet::get_layout()
 {

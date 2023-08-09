@@ -84,9 +84,9 @@ std::shared_ptr<CommandBuffer> ray_tracing_context::BeginGraphicFrame()
                                              {});
         cmd->get_handle().bindIndexBuffer(index_buffer->get_handle(), 0, vk::IndexType ::eUint32);
         cmd->get_handle().bindVertexBuffers(0, { m_vertex_buffer->get_handle() }, { 0 });
+        render_context->record_command(cmd);
         cmd->get_handle()
             .drawIndexed(6, 1, 0, 0, 0);
-        render_context->record_command(cmd);
     }
 
     return cmd;
@@ -97,6 +97,9 @@ void ray_tracing_context::EndGraphicFrame()
     auto& m_render_context = contexts[Graphic];
     m_render_context->Submit();
     m_render_context->EndFrame();
+}
+void ray_tracing_context::re_create_context()
+{
 }
 
 }

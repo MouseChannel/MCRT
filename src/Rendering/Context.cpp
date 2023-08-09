@@ -40,21 +40,7 @@ void Context::prepare(std::shared_ptr<Window> window)
     m_camera->init();
   }
 
-// void Context::init(std::shared_ptr<Window> window)
-// {
-//     m_window = window;
-//     m_instance.reset(new Instance);
-//     m_surface.reset(new Surface);
-//     m_device.reset(new Device);
-//     m_command_pool.reset(new CommandPool);
-
-//     m_debugger.reset(new Debugger);
-//     m_sampler.reset(new Sampler);
-//     m_camera.reset(new Camera);
-//     m_camera->init();
-    
-   
-// }
+ 
 std::shared_ptr<RenderPass> Context::get_renderpass()
 {
     return get_graphic_context()->Get_render_pass();

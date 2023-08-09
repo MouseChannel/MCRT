@@ -4,14 +4,17 @@
 #include "Wrapper/Image.hpp"
 #include "Wrapper/Texture.hpp"
 #include "vulkan/vulkan.hpp"
+#include <cmath>
 
 namespace MCRT {
 Skybox::Skybox(std::string file_dir)
 {
-    // cube_maps.resize(6);
-    // for (int i = 0; i < 6; i++) {
-    //     cube_maps[i].reset(new Texture(file_dir + "/" + names[i] + ".png"));
-    // }
+    names[0] = "right";
+    names[1] = "left";
+    names[2] = "top";
+    names[3] = "bottom";
+    names[4] = "forward";
+    names[5] = "backward";
 
     std::vector<void*> datas(6);
     std::vector<size_t> sizes(6);

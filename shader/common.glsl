@@ -17,11 +17,22 @@ vec3 get_camera_dir(vec2 launchID, vec2 launchSize, Camera_data camera_data)
     vec2 inUV = pixelCenter / vec2(launchSize.xy);
     vec2 d = inUV * 2.0 - 1.0;
     float aspectRatio = float(launchSize.x) / float(launchSize.y);
-    aspectRatio = 1.;
+    // aspectRatio = 1.;
+    // debugPrintfEXT("message %f ", aspectRatio);
     d.x = d.x * aspectRatio;
+    // d = normalize(d);
     vec3 ray_dir = vec3(0, 0, -1) * (1. / tan(get_radian(camera_data.fov_angel / 2.))) + vec3(d, 0);
+    // if (d.x > 800) {
+    //     debugPrintfEXT("message 123");
+    // }
+    if (aspectRatio > 1.6) {
+        // debugPrintfEXT("message %f %f dx: %f dy: %f| %f %f %f\n", launchSize.x, launchSize.y, launchID.x, launchID.y, ray_dir.x, ray_dir.y, ray_dir.z);
+    }
+    // if (d.x > 800 && d.x > d.y) {
+    //     debugPrintfEXT("message %f %f %f \n", ray_dir.x, ray_dir.y, ray_dir.z);
+    // }
     ray_dir = (camera_data.viewInverse * vec4(ray_dir.xyz, 0)).xyz;
-    return ray_dir;
+    return normalize(ray_dir);
 }
 
 vec3 get_barycentrics(vec2 attribs)

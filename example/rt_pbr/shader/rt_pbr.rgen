@@ -6,13 +6,13 @@
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 #extension GL_ARB_shader_clock : enable
 // #extension GL_GOOGLE_cpp_style_line_direcitve :  require
-#include "../Data_struct.h"
-#include "../common.glsl"
-#include "../sampling.glsl"
 #include "Binding.h"
 #include "Push_Constants.h"
 #include "hit_payload.glsl"
-
+#include "shader/Data_struct.h"
+#include "shader/common.glsl"
+#include "shader/sampling.glsl"
+// #include "shader/sampling.glsl"
 layout(push_constant) uniform _PushContant
 {
     PushContant_rtpbr pcRay;
@@ -30,6 +30,7 @@ void main()
 {
 
     vec3 ray_origin = camera_data.camera_pos.xyz;
+
     vec3 ray_dir = get_camera_dir(gl_LaunchIDEXT.xy, gl_LaunchSizeEXT.xy, camera_data);
 
     uint rayFlags = gl_RayFlagsOpaqueEXT;
@@ -55,8 +56,13 @@ void main()
     );
 
     // debugPrintfEXT("message 2 \n");
+    // uvec3 seed = uvec3(pcRay.camera_pos.xyz * 10);
+    // pcg3d_random(seed);
+    // imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(pcg3d_random(seed), 1.));
     imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(prd.hitValue, 1.));
+
     return;
+
     if (pcRay.frame > 0) {
         float a = 1.0f / float(pcRay.frame + 1);
         vec3 old_color = imageLoad(image, ivec2(gl_LaunchIDEXT.xy)).xyz;

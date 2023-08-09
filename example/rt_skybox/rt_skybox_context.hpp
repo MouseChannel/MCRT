@@ -1,7 +1,7 @@
 #pragma once
 #include "Rendering/Context.hpp"
 #include "example/base/raytracing_context.hpp"
-#include "shader/Blinn_Phong/Push_Constants.h"
+#include "example/rt_skybox/shader/Push_Constants.h"
 #include <iostream>
 
 namespace MCRT {

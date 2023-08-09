@@ -1,9 +1,10 @@
 #pragma once
 #include "Rendering/Context.hpp"
 #include "example/base/raytracing_context.hpp"
+#include "example/rt_pbr/shader/Push_Constants.h"
 #include "shader/PBR/IBL/push_constants.h"
-#include "shader/RT_pbr/Push_Constants.h"
 #include <iostream>
+
 
 namespace MCRT {
 class Buffer;
@@ -23,6 +24,8 @@ public:
 
     static float light_pos_x, light_pos_y, light_pos_z, roughness, met;
     void prepare(std::shared_ptr<Window> window) override;
+    // vk::Extent2D last_extent2d;
+    void re_create_context() override;
 
 private:
     // void pre_compute();

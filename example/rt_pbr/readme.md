@@ -12,5 +12,3 @@ diffuse = irradiance * color
 
 specular = pow(dot(half_dir,view_dir),32	)
 ```
-
-![blinn_phong](../../assets/blinn_phong.png "😊😊😊")

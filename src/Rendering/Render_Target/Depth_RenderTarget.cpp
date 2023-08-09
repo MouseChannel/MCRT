@@ -2,6 +2,7 @@
 #include "Rendering/Render_Target/Depth_Render_Target.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Image.hpp"
+#include "Wrapper/SwapChain.hpp"
 
 namespace MCRT {
 Depth_RenderTarget::Depth_RenderTarget(std::shared_ptr<Image> image,
@@ -29,10 +30,10 @@ std::unique_ptr<Depth_RenderTarget> Depth_RenderTarget::Create()
         .setStencilStoreOp(vk::AttachmentStoreOp ::eDontCare)
         .setInitialLayout(vk::ImageLayout ::eUndefined)
         .setFinalLayout(vk::ImageLayout ::eDepthStencilAttachmentOptimal);
-
+    auto extent = Context::Get_Singleton()->get_extent2d();
     std::shared_ptr<Image> image { new Image(
-        800,
-        749,
+        extent.width,
+        extent.height,
         depth_format,
         vk::ImageType::e2D,
         vk::ImageTiling::eOptimal,

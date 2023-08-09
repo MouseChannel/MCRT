@@ -14,7 +14,7 @@ Window::Window(int width, int height)
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     // glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
     // glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
 
@@ -24,6 +24,11 @@ Window::Window(int width, int height)
     //   glfwMakeContextCurrent(window);
     // glfwSwapInterval(0);
     assert(m_window);
+    int w = 0, h = 0;
+    glfwGetFramebufferSize(m_window,
+                           &w,
+                           &h);
+    Context::Get_Singleton()->set_extent2d(w, h);
 }
 
 Window::~Window()

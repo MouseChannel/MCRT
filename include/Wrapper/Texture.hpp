@@ -1,5 +1,7 @@
 #pragma once
 #include <string_view>
+#include <memory>
+#include <vector>
 namespace MCRT {
 class Image;
 class Texture {

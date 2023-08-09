@@ -5,15 +5,16 @@
 #extension GL_EXT_debug_printf : enable
 #extension GL_GOOGLE_include_directive : enable
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
-#include "../Data_struct.h"
-// #include "common.h"
+#include "shader/Data_struct.h"
+#include "Binding.h"
+#include "hit_payload.glsl"
 
 layout(location = 0) rayPayloadInEXT hitPayload prd;
+layout(set = 0, binding = e_rt_skybox) uniform samplerCube samplerCubeMap;
+
 void main()
 {
-    // prd.hitValue = vec3(0.1, 0.1, 0.1);
-    prd.miss = true;
-    // debugPrintfEXT("message  from miss\n");
 
-    // prd.depth = 100;
+    prd.hitValue = texture(samplerCubeMap, normalize(prd.ray_dir)).rgb;
+    prd.depth = 999;
 }

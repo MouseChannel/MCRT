@@ -13,9 +13,10 @@
 #include "Wrapper/Ray_Tracing/AS_Builder.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/Skybox.hpp"
+#include "example/rt_skybox/shader/Binding.h"
+#include "example/rt_skybox/shader/Push_Constants.h"
 #include "iostream"
-#include "shader/RT_skybox/Binding.h"
-#include "shader/RT_skybox/Push_Constants.h"
+
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance { new MCRT::rt_skybox_context };
 float rt_skybox_context::light_pos_x = 0, rt_skybox_context::light_pos_y = 0, rt_skybox_context::light_pos_z = 5;

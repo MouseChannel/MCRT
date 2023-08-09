@@ -13,10 +13,11 @@ class Context_base {
 public:
     // [[nodiscard("missing Render_pass")]] virtual std::shared_ptr<RenderPass>& Get_render_pass() = 0;
     virtual std::shared_ptr<Pipeline_base> get_pipeline() = 0;
-    
+
     virtual std::shared_ptr<CommandBuffer> get_commandbuffer() = 0;
     // virtual std::shared_ptr<Framebuffer>& get_framebuffer() = 0;
-    virtual void prepare( ) = 0;
+    virtual void prepare() = 0;
+
     virtual void post_prepare() = 0;
     virtual std::shared_ptr<CommandBuffer> BeginFrame() = 0;
     virtual void Submit() = 0;
@@ -27,7 +28,18 @@ public:
     virtual void prepare_descriptorset(std::function<void()> prepare_func) = 0;
 
     virtual void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules) = 0;
-   
+    // virtual void set_re_create(std::function<void()> re_create)
+    // {
+    //     re_create_context = re_create;
+    // }
+    virtual void re_create() = 0;
+    // virtual void re_create_descriptorset() = 0;
+    // {
+    //     if (re_create_context == nullptr) {
+    //         throw std::runtime_error("did not set recreate func");
+    //     }
+    //     re_create_context();
+    // }
     void set_constants_size(int size)
     {
         push_constants_size = size;
@@ -38,6 +50,7 @@ public:
     }
 
 protected:
+    // std::function<void()> re_create_context = nullptr;
     void Prepare_RenderPass();
     int push_constants_size;
 };

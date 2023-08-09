@@ -15,8 +15,9 @@
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/Skybox.hpp"
 #include "Wrapper/Texture.hpp"
+#include "example/path_tracing_light/shader/Push_constants.h"
+#include "example/path_tracing_light/shader/Binding.h"
 #include "iostream"
-#include "shader/Path_tracing/Binding.h"
 
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance {

@@ -1,7 +1,7 @@
 #pragma once
 #include "Rendering/Context.hpp"
 #include "example/base/raytracing_context.hpp"
-#include "shader/AO/Binding.h"
+#include "example/ray_tracing_AO/shader/Binding.h"
 #include <iostream>
 
 namespace MCRT {

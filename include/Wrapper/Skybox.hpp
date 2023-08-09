@@ -1,28 +1,23 @@
 #pragma once
-#include <string>
-#include <string_view>
+#include <cstring>
+#include <memory>
+// #include <string>
+// #include <string_view>
+#include  <array>
+
+#include <tuple>
 
 namespace MCRT {
 class Texture;
 class Image;
 class Skybox {
 public:
-    // enum {
-    //     Top,
-    //     Bottom,
-    //     Left,
-    //     Right,
-    //     Forward,
-    //     BackWard
-    // };
-    std::array<std::string, 6> names {
-        "right",
-        "left",
-        "top",
-        "bottom",
-        "forward",
-        "backward"
-    };
+     
+    std::array<std::string, 6> names ;
+    Skybox(const Skybox&) = default;
+    Skybox(Skybox&&) = delete;
+    Skybox& operator=(const Skybox&) = default;
+    Skybox& operator=(Skybox&&) = delete;
     Skybox(int height, int width);
     Skybox(std::string file_dir);
     ~Skybox();

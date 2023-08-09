@@ -3,6 +3,8 @@
 #include <exception>
 #include <memory>
 #include <vector>
+#include <vulkan/vulkan.hpp>
+
 namespace MCRT {
 class Device;
 class Instance;
@@ -107,10 +109,21 @@ public:
     {
         frame_id = 0;
     }
+    auto get_extent2d()
+    {
+        return extent2d;
+    }
+    void set_extent2d(int width, int height)
+    {
+        extent2d.width = width;
+        extent2d.height = height;
+    }
 
     virtual void prepare(std::shared_ptr<Window> window);
+    virtual void re_create_context() = 0;
 
 protected:
+    vk::Extent2D extent2d;
     std::shared_ptr<Device> m_device;
     std::shared_ptr<Instance> m_instance;
     std::shared_ptr<Window> m_window;

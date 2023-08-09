@@ -4,6 +4,8 @@
 using mat4 = glm::mat4;
 using vec3 = glm::vec3;
 #endif // DEBUG
+#ifndef raster_push_constants
+#define raster_push_constants
 struct PC_Raster {
     mat4 model_matrix;
 
@@ -14,3 +16,4 @@ struct PC_Raster {
     int texture_index;
     vec3 light_pos;
 };
+#endif

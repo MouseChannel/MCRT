@@ -15,7 +15,7 @@
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/Texture.hpp"
 #include "iostream"
-#include "shader/Path_tracing/Binding.h"
+#include "example/path_tracing/shader/Binding.h"
 
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance {
@@ -42,9 +42,9 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
 
         contexts[Context_index::Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
         std::vector<std::shared_ptr<ShaderModule>> rt_shader_modules(RT_Pipeline::eShaderGroupCount);
-        rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rgen.spv"));
-        rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rmiss.spv"));
-        rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("D:/MoChengRT/shader/Path_tracing/path_tracing.rchit.spv"));
+        rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoChengRT/example/path_tracing/shader/path_tracing.rgen.spv"));
+        rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("D:/MoChengRT/example/path_tracing/shader/path_tracing.rmiss.spv"));
+        rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("D:/MoChengRT/example/path_tracing/shader/path_tracing.rchit.spv"));
         Context::Get_Singleton()->get_rt_context()->set_hit_shader_count(1);
         Context::Get_Singleton()->get_rt_context()->set_miss_shader_count(1);
         Context::Get_Singleton()->get_rt_context()->set_constants_size(sizeof(PushContant));

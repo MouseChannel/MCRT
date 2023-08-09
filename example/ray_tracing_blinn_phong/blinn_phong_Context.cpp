@@ -12,9 +12,10 @@
 #include "Wrapper/Pipeline/RT_pipeline.hpp"
 #include "Wrapper/Ray_Tracing/AS_Builder.hpp"
 #include "Wrapper/Shader_module.hpp"
+#include "example/ray_tracing_blinn_phong/shader/Binding.h"
 #include "iostream"
-#include "shader/Blinn_Phong/Binding.h"
-#include "shader/Blinn_Phong/Push_Constants.h"
+ 
+
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance { new MCRT::blinn_phong_context };
 float blinn_phong_context::light_pos_x = 0, blinn_phong_context::light_pos_y = 0, blinn_phong_context::light_pos_z = 5;

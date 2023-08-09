@@ -1,6 +1,7 @@
 
 #include "example/raster/raster_pbr_context.hpp"
 #include "Helper/Camera.hpp"
+#include "Helper/CommandManager.hpp"
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Model_Loader/Obj_Loader.hpp"
 #include "Helper/Model_Loader/gltf_loader.hpp"
@@ -20,7 +21,9 @@
 // #include "shader/Data_struct.h"
 // #include "shader/Raster/Constants.h"
 
-#include "shader/Raster/Binding.h"
+#include "example/raster/shader/Binding.h"
+
+#include "example/raster/shader/Constants.h"
 
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance { new MCRT::raster_context_pbr };
@@ -39,7 +42,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     skybox_mesh = GLTF_Loader::load_skybox("D:/MoChengRT/assets/cube.gltf");
 
     // Obj_loader::load_model("D:/MoChengRT/assets/girl.obj");
-    GLTF_Loader::load_model("D:/MoChengRT/assets/buddha.gltf");
+    GLTF_Loader::load_model("D:/MoChengRT/assets/classic_model/buddha.gltf");
     auto dd = Texture::textures;
     auto ss = Mesh::meshs;
 
@@ -55,11 +58,11 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
             throw std::runtime_error("not graphic context");
         }
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
-        graphic_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/shader/raster/raster.vert.spv"));
-        graphic_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/shader/raster/raster.frag.spv"));
+        graphic_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/example/raster/shader/raster.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/example/raster/shader/raster.frag.spv"));
         std::vector<std::shared_ptr<ShaderModule>> skybox_shader_modules(Graphic_Pipeline::shader_stage_count);
-        skybox_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/shader/raster/skybox.vert.spv"));
-        skybox_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/shader/raster/skybox.frag.spv"));
+        skybox_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/example/raster/shader/skybox.vert.spv"));
+        skybox_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/example/raster/shader/skybox.frag.spv"));
         graphic_context->prepare();
         graphic_context->prepare_descriptorset([&]() {
             Descriptor_Manager::Get_Singleton()
@@ -91,8 +94,16 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
 }
 std::shared_ptr<CommandBuffer> raster_context_pbr::Begin_Frame()
 {
-    // BeginSkyboxFrame();
-    // EndSkyboxFrame();
+    CommandManager::ExecuteCmd(Context::Get_Singleton()
+                                   ->get_device()
+                                   ->Get_Graphic_queue(),
+                               [&](vk::CommandBuffer& cmd) {
+                                   cmd.updateBuffer<Camera_matrix>(camera_matrix->buffer->get_handle(),
+                                                                   0,
+                                                                   Camera_matrix {
+                                                                       .view { m_camera->Get_v_matrix() },
+                                                                       .project { m_camera->Get_p_matrix() } });
+                               });
     return raster_context::Begin_Frame();
 }
 void raster_context_pbr::EndFrame()
@@ -119,6 +130,7 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
             cmd->get_handle()
                 .bindPipeline(vk::PipelineBindPoint::eGraphics,
                               render_context->get_pipeline2()->get_handle());
+            render_context->record_command(cmd);
             cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                                  render_context->get_pipeline()->get_layout(),
                                                  0,
@@ -126,6 +138,7 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                                                        ->get_DescriptorSet(Descriptor_Manager::Graphic)
                                                        ->get_handle() },
                                                  {});
+
             cmd->get_handle().bindIndexBuffer(skybox_mesh->get_indices_buffer()->get_handle(),
                                               0,
                                               vk::IndexType ::eUint32);
@@ -166,73 +179,60 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                              0,
                              0);
         }
-        cmd->get_handle()
-            .bindPipeline(vk::PipelineBindPoint ::eGraphics,
-                          render_context->get_pipeline()->get_handle());
-
-        cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                             render_context->get_pipeline()->get_layout(),
-                                             0,
-                                             { Descriptor_Manager::Get_Singleton()
-                                                   ->get_DescriptorSet(Descriptor_Manager::Graphic)
-                                                   ->get_handle() },
-                                             {});
-        // cmd->get_handle()
-        //     .updateBuffer<Camera_matrix>(
-        //         camera_matrix->buffer->get_handle(),
-        //         0,
-        //         Camera_matrix {
-        //             //    .camera_pos { pos },
-        //             .view {
-        //                 Context::Get_Singleton()
-        //                     ->get_camera()
-        //                     ->Get_v_matrix() },
-
-        //             .project {
-        //                 Context::Get_Singleton()
-        //                     ->get_camera()
-        //                     ->Get_p_matrix() } });
-
-        for (auto& mesh : Mesh::meshs) {
-
-            cmd->get_handle().bindIndexBuffer(mesh->get_indices_buffer()->get_handle(),
-                                              0,
-                                              vk::IndexType ::eUint32);
-            cmd->get_handle().bindVertexBuffers(0, {
-                                                       mesh->get_vertex_buffer()->get_handle(),
-                                                   },
-                                                { 0 });
-
-            pc = PC_Raster {
-                .model_matrix {
-                    glm::rotate(mesh->get_model_matrix(), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f)) },
-
-                .view_matrix { Context::Get_Singleton()
-                                   ->get_camera()
-                                   ->Get_v_matrix() },
-                .texture_index = mesh->m_material.color_texture_index,
-                .camera_pos = m_camera->get_pos(),
-                .light_pos = { light_pos_x, light_pos_y, light_pos_z }
-            };
-            // angle++;
-
+        {
             cmd->get_handle()
-                .pushConstants<PC_Raster>(
-                    render_context
-                        ->get_pipeline()
-                        ->get_layout(),
-                    vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
-                    0,
-                    pc);
-            cmd->get_handle()
-                .drawIndexed(mesh->get_vertex_count(),
-                             1,
-                             0,
-                             0,
-                             0);
+                .bindPipeline(vk::PipelineBindPoint ::eGraphics,
+                              render_context->get_pipeline()->get_handle());
+            render_context->record_command(cmd);
+
+            cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                                 render_context->get_pipeline()->get_layout(),
+                                                 0,
+                                                 { Descriptor_Manager::Get_Singleton()
+                                                       ->get_DescriptorSet(Descriptor_Manager::Graphic)
+                                                       ->get_handle() },
+                                                 {});
+
+            for (auto& mesh : Mesh::meshs) {
+
+                cmd->get_handle().bindIndexBuffer(mesh->get_indices_buffer()->get_handle(),
+                                                  0,
+                                                  vk::IndexType ::eUint32);
+                cmd->get_handle().bindVertexBuffers(0, {
+                                                           mesh->get_vertex_buffer()->get_handle(),
+                                                       },
+                                                    { 0 });
+
+                pc = PC_Raster {
+                    .model_matrix {
+                        glm::rotate(mesh->get_model_matrix(), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f)) },
+
+                    .view_matrix { Context::Get_Singleton()
+                                       ->get_camera()
+                                       ->Get_v_matrix() },
+                    .texture_index = mesh->m_material.color_texture_index,
+                    .camera_pos = m_camera->get_pos(),
+                    .light_pos = { light_pos_x, light_pos_y, light_pos_z }
+                };
+                // angle++;
+
+                cmd->get_handle()
+                    .pushConstants<PC_Raster>(
+                        render_context
+                            ->get_pipeline()
+                            ->get_layout(),
+                        vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+                        0,
+                        pc);
+                cmd->get_handle()
+                    .drawIndexed(mesh->get_vertex_count(),
+                                 1,
+                                 0,
+                                 0,
+                                 0);
+            }
         }
     }
-    render_context->record_command(cmd);
 
     return cmd;
 }

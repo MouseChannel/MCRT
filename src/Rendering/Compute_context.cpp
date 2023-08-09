@@ -36,10 +36,11 @@ void Compute_Context::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>
 
     m_compute_pipeline.reset(new Compute_Pipeline(shader_modules));
 }
-void Compute_Context::prepare( )
+void Compute_Context::prepare()
 {
-    m_out_image.reset(new Image(800,
-                                749,
+    auto extent2d = Context::Get_Singleton()->get_extent2d();
+    m_out_image.reset(new Image(extent2d.width,
+                                extent2d.height,
                                 vk::Format::eR32G32B32A32Sfloat,
                                 vk::ImageType::e2D,
                                 vk::ImageTiling::eOptimal,
@@ -83,5 +84,8 @@ void Compute_Context::Submit()
 void Compute_Context::EndFrame()
 {
     m_command_buffer->End();
+}
+void Compute_Context::re_create()
+{
 }
 }

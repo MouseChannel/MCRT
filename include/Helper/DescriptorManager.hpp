@@ -56,6 +56,13 @@ public:
         descriptorsets[which_set]->Add(data, binding);
         // Context::Get_Singleton()->get_debugger()->set_handle_name(descriptorsets[which_set]->get_handle()[0], "binding" + std::to_string(binding_index));
     }
+
+    template <typename T>
+    void replace_DescriptorSet()
+    {
+        
+    }
+
     template <typename T>
     void Make_DescriptorSet(std::shared_ptr<T> data,
                             Which_Set which_set,

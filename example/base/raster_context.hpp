@@ -15,6 +15,7 @@ public:
     virtual std::shared_ptr<CommandBuffer> Begin_Frame() override;
     virtual void EndFrame() override;
     virtual void prepare(std::shared_ptr<Window> window) override;
+    virtual void re_create_context() override;
 
 protected:
     virtual std::shared_ptr<CommandBuffer> BeginGraphicFrame() = 0;

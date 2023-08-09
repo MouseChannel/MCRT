@@ -22,6 +22,7 @@
 #include "Wrapper/Ray_Tracing/AS_Builder.hpp"
 #include "Wrapper/RenderPass.hpp"
 #include "Wrapper/Shader_module.hpp"
+#include "Wrapper/SwapChain.hpp"
 #include "shader/Data_struct.h"
 
 namespace MCRT {
@@ -189,8 +190,7 @@ void RT_Context::create_uniform_buffer()
     m_objs_address.resize(Mesh::meshs.size());
     for (auto& obj : Mesh::meshs) {
 
-        m_objs_address[obj->get_instance_index()] = Address
-        {
+        m_objs_address[obj->get_instance_index()] = Address {
             .triangle_count = obj->get_vertex_count() / 3,
 
             .vertexAddress = obj->get_vertex_buffer()
@@ -207,12 +207,21 @@ void RT_Context::create_uniform_buffer()
                                                     vk::DescriptorType::eStorageBuffer);
 }
 
-void RT_Context::prepare( )
+void RT_Context::prepare()
 {
 
     build_accelerate_structure();
-    m_out_image.reset(new Image(800,
-                                749,
+    create_offscreen_image();
+    create_uniform_buffer();
+
+    m_command_buffer.reset(new CommandBuffer);
+}
+void RT_Context::create_offscreen_image()
+{
+    extent2d = Context::Get_Singleton()->get_extent2d();
+    // std::cout << extent2d.width << extent2d.height << std::endl;
+    m_out_image.reset(new Image(extent2d.width,
+                                extent2d.height,
                                 vk::Format::eR32G32B32A32Sfloat,
                                 vk::ImageType::e2D,
                                 vk::ImageTiling::eOptimal,
@@ -220,12 +229,16 @@ void RT_Context::prepare( )
                                 vk::ImageAspectFlagBits::eColor,
                                 vk::SampleCountFlagBits::e1));
 
-    m_out_image->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
+    m_out_image->SetImageLayout(vk::ImageLayout::eGeneral,
+                                vk::AccessFlagBits::eNone,
+                                vk::AccessFlagBits::eNone,
+                                vk::PipelineStageFlagBits::eTopOfPipe,
+                                vk::PipelineStageFlagBits::eBottomOfPipe);
 
     // gbuffer
     m_gbuffer.resize(Gbuffer_Index::gbuffer_count);
-    m_gbuffer[Gbuffer_Index::position].reset(new Image(800,
-                                                       749,
+    m_gbuffer[Gbuffer_Index::position].reset(new Image(extent2d.width,
+                                                       extent2d.height,
                                                        vk::Format::eR32G32B32A32Sfloat,
                                                        vk::ImageType::e2D,
                                                        vk::ImageTiling::eOptimal,
@@ -235,8 +248,8 @@ void RT_Context::prepare( )
 
     m_gbuffer[Gbuffer_Index::position]->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
 
-    m_gbuffer[Gbuffer_Index::normal].reset(new Image(800,
-                                                     749,
+    m_gbuffer[Gbuffer_Index::normal].reset(new Image(extent2d.width,
+                                                     extent2d.height,
                                                      vk::Format::eR32G32B32A32Sfloat,
                                                      vk::ImageType::e2D,
                                                      vk::ImageTiling::eOptimal,
@@ -244,15 +257,21 @@ void RT_Context::prepare( )
                                                      vk::ImageAspectFlagBits::eColor,
                                                      vk::SampleCountFlagBits::e1));
 
-    m_gbuffer[Gbuffer_Index::normal]->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
+    m_gbuffer[Gbuffer_Index::normal]
+        ->SetImageLayout(vk::ImageLayout::eGeneral,
+                         vk::AccessFlagBits::eNone,
+                         vk::AccessFlagBits::eNone,
+                         vk::PipelineStageFlagBits::eTopOfPipe,
+                         vk::PipelineStageFlagBits::eBottomOfPipe);
     // end gbuffer
-    create_uniform_buffer();
-
-    m_command_buffer.reset(new CommandBuffer);
 }
 void RT_Context::post_prepare()
 {
     create_shader_bind_table();
+}
+void RT_Context::re_create()
+{
+    create_offscreen_image();
 }
 void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
 {
@@ -313,14 +332,15 @@ void RT_Context::update_ubo(std::shared_ptr<CommandBuffer> cmd)
 void RT_Context::record_command(std::shared_ptr<CommandBuffer> cmd)
 {
     update_ubo(cmd);
-
+    auto extent = Context::Get_Singleton()->get_extent2d();
     cmd->get_handle().traceRaysKHR(m_rgenRegion,
                                    m_missRegion,
                                    m_hitRegion,
                                    m_callRegion,
-                                   800,
-                                   749,
+                                   extent.width,
+                                   extent.height,
                                    1);
+    // std::cout<<extent.width<<extent.height<<std::endl;
 
     Context::Get_Singleton()
         ->get_debugger()
@@ -343,6 +363,7 @@ void RT_Context::Submit()
 }
 void RT_Context::EndFrame()
 {
-    m_command_buffer->End();
+    // m_command_buffer->End();
 }
+
 }

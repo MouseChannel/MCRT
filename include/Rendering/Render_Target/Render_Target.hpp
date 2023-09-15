@@ -5,7 +5,11 @@
 namespace MCRT {
 class RenderTarget {
 public:
-    RenderTarget(std::shared_ptr<Image>, vk::AttachmentDescription);
+    enum {
+        COLOR,
+        DEPTH
+    };
+    RenderTarget(std::shared_ptr<Image>,int type, vk::AttachmentDescription);
     ~RenderTarget();
     [[nodiscard("Missing format")]] auto& Get_Extent()
     {
@@ -26,6 +30,7 @@ public:
     {
         return clear_color;
     }
+    int type;
 
 protected:
     vk::Extent2D extent;
@@ -34,6 +39,7 @@ protected:
 
     vk::AttachmentDescription attachment_description;
     vk::AttachmentReference attach_reference;
+
     vk::ClearValue clear_color;
 };
 

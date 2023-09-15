@@ -16,13 +16,18 @@
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/Skybox.hpp"
 #include "Wrapper/Texture.hpp"
+#include "example/base/shader/ray_tracing/Data_struct.h"
 #include "example/rt_pbr/shader/Binding.h"
+#include "example/rt_pbr/shader/Push_Constants.h"
 #include "iostream"
 #include "shader/PBR/IBL/binding.h"
+// #include ""
 
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance { new MCRT::rt_pbr_context };
 float rt_pbr_context::light_pos_x = 0, rt_pbr_context::light_pos_y = 0, rt_pbr_context::light_pos_z = 5, rt_pbr_context::roughness = 0.1, rt_pbr_context ::met = 0.1;
+int rt_pbr_context::apply_normal = 0;
+bool rt_pbr_context::use_normal_map = false;
 int irradiance_size = 512;
 rt_pbr_context::rt_pbr_context()
 {
@@ -33,9 +38,12 @@ rt_pbr_context::~rt_pbr_context()
 void rt_pbr_context::prepare(std::shared_ptr<Window> window)
 {
     ray_tracing_context::prepare(window);
-    m_skybox.reset(new Skybox("D:/MoChengRT/assets/Cubemap/farm"));
-    skybox_mesh = GLTF_Loader::load_skybox("D:/MoChengRT/assets/cube.gltf");
-    GLTF_Loader::load_model("D:/MoChengRT/assets/classic_model/sphere.gltf");
+    m_skybox.reset(new Skybox("D:/MoCheng/MoChengRT/assets/Cubemap/farm"));
+    skybox_mesh = GLTF_Loader::load_skybox("D:/MoCheng/MoChengRT/assets/cube.gltf");
+    // GLTF_Loader::load_model("D:/MoCheng/MoChengRT/assets/pbr/cardbox.gltf");
+
+    GLTF_Loader::load_model("D:/MoCheng/MoChengRT/assets/pbr/cat/cat.glb");
+
     LUT.reset(new Image(1024,
                         1024,
                         vk::Format::eR32G32B32A32Sfloat,
@@ -57,10 +65,10 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
 
         contexts[Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
         std::vector<std::shared_ptr<ShaderModule>> rt_shader_modules(RT_Pipeline::eShaderGroupCount);
-        rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoChengRT/example/RT_pbr/shader/rt_pbr.rgen.spv"));
-        rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("D:/MoChengRT/example/RT_pbr/shader/rt_pbr.rmiss.spv"));
-        // rt_shader_modules[RT_Pipeline::eMiss2].reset(new ShaderModule("D:/MoChengRT/example/RT_pbr/shader/rt_pbr_shadow.rmiss.spv"));
-        rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("D:/MoChengRT/example/RT_pbr/shader/rt_pbr.rchit.spv"));
+        rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/RT_pbr/shader/rt_pbr.rgen.spv"));
+        rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/RT_pbr/shader/rt_pbr.rmiss.spv"));
+        // rt_shader_modules[RT_Pipeline::eMiss2].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/RT_pbr/shader/rt_pbr_shadow.rmiss.spv"));
+        rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/RT_pbr/shader/rt_pbr.rchit.spv"));
         Context::Get_Singleton()->get_rt_context()->set_hit_shader_count(1);
         Context::Get_Singleton()->get_rt_context()->set_miss_shader_count(1);
         Context::Get_Singleton()->get_rt_context()->set_constants_size(sizeof(PushContant_rtpbr));
@@ -70,56 +78,53 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(std::vector { AS_Builder::Get_Singleton()->get_tlas() },
                                      Descriptor_Manager::Ray_Tracing,
-                                     Ray_Tracing_Binding::e_tlas,
+                                     (int)Ray_Tracing_Binding::e_tlas,
                                      vk::DescriptorType::eAccelerationStructureKHR,
                                      vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR);
 
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(std::vector { rt_context->get_out_image() },
                                      Descriptor_Manager::Ray_Tracing,
-                                     Ray_Tracing_Binding::e_out_image,
+                                     (int)Ray_Tracing_Binding::e_out_image,
                                      vk::DescriptorType::eStorageImage,
                                      vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute);
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(Texture::get_image_handles(),
                                      Descriptor_Manager::Global,
-                                     Global_Binding::eTextures,
+                                     (int)Global_Binding::eTextures,
+
+                                     //  (int)Global_Binding::eTextures,
                                      vk::DescriptorType::eCombinedImageSampler,
                                      vk::ShaderStageFlagBits::eClosestHitKHR);
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(std::vector { m_skybox->get_handle() },
                                      Descriptor_Manager::Ray_Tracing,
-                                     Ray_Tracing_Binding::e_rt_skybox,
+                                     (int)Ray_Tracing_Binding::e_rt_skybox,
                                      vk::DescriptorType::eCombinedImageSampler,
                                      vk::ShaderStageFlagBits::eMissKHR | vk::ShaderStageFlagBits::eClosestHitKHR);
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(
                     std::vector { LUT },
                     Descriptor_Manager::Ray_Tracing,
-                    Ray_Tracing_Binding::e_rt_LUT_image,
+                    (int)Ray_Tracing_Binding::e_rt_LUT_image,
                     vk::DescriptorType ::eCombinedImageSampler,
                     vk::ShaderStageFlagBits::eClosestHitKHR);
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(
                     std::vector { irradiance->get_handle() },
                     Descriptor_Manager::Ray_Tracing,
-                    Ray_Tracing_Binding::e_rt_irradiance_image,
+                    (int)Ray_Tracing_Binding::e_rt_irradiance_image,
                     vk::DescriptorType::eCombinedImageSampler,
                     vk::ShaderStageFlagBits::eClosestHitKHR);
         });
-        contexts[Ray_tracing]->prepare_pipeline(rt_shader_modules);
+        auto sets = std::vector<std::shared_ptr<DescriptorSet>>((int)Ray_Tracing_Set::ray_tracing_count);
+        sets[(int)Ray_Tracing_Set::e_ray_tracing] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Ray_Tracing);
+        sets[(int)Ray_Tracing_Set::e_ray_global] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Global);
+        contexts[Ray_tracing]
+            ->prepare_pipeline(rt_shader_modules,
+                               sets,
+                               sizeof(PushContant_rtpbr));
         contexts[Ray_tracing]->post_prepare();
-        // contexts[Ray_tracing]->set_re_create([&]() {
-        //     auto rt_context = get_rt_context();
-        //     rt_context->create_offscreen_image();
-        //     Descriptor_Manager::Get_Singleton()
-        //         ->Make_DescriptorSet(std::vector { rt_context->get_out_image() },
-        //                              Descriptor_Manager::Ray_Tracing,
-        //                              Ray_Tracing_Binding::e_out_image,
-        //                              vk::DescriptorType::eStorageImage,
-        //                              vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute);
-        //     Descriptor_Manager::Get_Singleton()->update_descriptor_set(Descriptor_Manager::Ray_Tracing);
-        // });
     }
 
     { // graphic
@@ -127,8 +132,9 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
         contexts[Graphic]->set_constants_size(sizeof(PushContant));
 
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
-        graphic_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/shader/post.vert.spv"));
-        graphic_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/shader/post.frag.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shader/ray_tracing/post.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_FRAG].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shader/ray_tracing/post.frag.spv"));
+
         contexts[Graphic]->prepare();
         contexts[Graphic]->prepare_descriptorset([&]() {
             Descriptor_Manager::Get_Singleton()
@@ -137,22 +143,16 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
                                       ->get_rt_context()
                                       ->get_out_image() },
                     Descriptor_Manager::Graphic,
-                    0,
+                    1,
                     vk::DescriptorType ::eCombinedImageSampler,
                     vk::ShaderStageFlagBits::eFragment);
-            // Descriptor_Manager::Get_Singleton()
-            //     ->Make_DescriptorSet(
-            //         std::vector { test_image },
-            //         Descriptor_Manager::Graphic,
-            //         3,
-            //         vk::DescriptorType ::eCombinedImageSampler,
-            //         vk::ShaderStageFlagBits::eFragment);
         });
-        contexts[Graphic]->prepare_pipeline(graphic_shader_modules);
+        contexts[Graphic]->prepare_pipeline(graphic_shader_modules, { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Graphic) }, sizeof(PushContant));
 
         contexts[Graphic]->post_prepare();
     }
     { // compute_precompute
+
         contexts[Compute].reset(new Compute_Context);
         contexts[Compute]->set_constants_size(sizeof(PushContant_IBL));
 
@@ -184,9 +184,9 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
         { // pre_compute_irradiance
             std::shared_ptr<ShaderModule>
                 compute_shader {
-                    new ShaderModule("D:/MoChengRT/shader/PBR/IBL/irradiance.comp.spv")
+                    new ShaderModule("D:/MoCheng/MoChengRT/shader/PBR/IBL/irradiance.comp.spv")
                 };
-            contexts[Compute]->prepare_pipeline({ compute_shader });
+            contexts[Compute]->prepare_pipeline({ compute_shader }, { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) }, sizeof(PushContant_Compute));
 
             contexts[Compute]->post_prepare();
             // doing the actually work
@@ -216,10 +216,10 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
 
             std::shared_ptr<ShaderModule>
                 compute_shader {
-                    new ShaderModule("D:/MoChengRT/shader/PBR/IBL/lookup_table.comp.spv")
+                    new ShaderModule("D:/MoCheng/MoChengRT/shader/PBR/IBL/lookup_table.comp.spv")
                 };
 
-            contexts[Compute]->prepare_pipeline({ compute_shader });
+            contexts[Compute]->prepare_pipeline({ compute_shader }, { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) }, sizeof(PushContant_Compute));
 
             contexts[Compute]->post_prepare();
             // doing the actually work
@@ -250,7 +250,7 @@ void rt_pbr_context::re_create_context()
     Descriptor_Manager::Get_Singleton()
         ->Make_DescriptorSet(std::vector { rt_context->get_out_image() },
                              Descriptor_Manager::Ray_Tracing,
-                             Ray_Tracing_Binding::e_out_image,
+                             (int)Ray_Tracing_Binding::e_out_image,
                              vk::DescriptorType::eStorageImage,
                              vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eCompute);
     Descriptor_Manager::Get_Singleton()->update_descriptor_set(Descriptor_Manager::Ray_Tracing);
@@ -263,7 +263,7 @@ void rt_pbr_context::re_create_context()
                     ->get_rt_context()
                     ->get_out_image() },
             Descriptor_Manager::Graphic,
-            0,
+            1,
             vk::DescriptorType ::eCombinedImageSampler,
             vk::ShaderStageFlagBits::eFragment);
     Descriptor_Manager::Get_Singleton()
@@ -278,9 +278,13 @@ std::shared_ptr<CommandBuffer> rt_pbr_context::Begin_Frame()
 }
 void rt_pbr_context::EndFrame()
 {
-    
+
     ray_tracing_context::EndFrame();
+    // std::cout << use_normal_map << std::endl;
+    AS_Builder::Get_Singleton()->build_blas(true);
+    AS_Builder::Get_Singleton()->build_tlas(true);
 }
+
 std::shared_ptr<CommandBuffer> rt_pbr_context::BeginRTFrame()
 {
     // get_device()->get_handle().waitIdle();
@@ -291,14 +295,8 @@ std::shared_ptr<CommandBuffer> rt_pbr_context::BeginRTFrame()
         cmd->get_handle()
             .bindPipeline(vk::PipelineBindPoint ::eRayTracingKHR, rt_context->get_pipeline()->get_handle());
         std::vector<vk::DescriptorSet> descriptor_sets {
-            // descriptor_sets.push_back(
-            Descriptor_Manager::Get_Singleton()
-                ->get_DescriptorSet(Descriptor_Manager::Ray_Tracing)
-                ->get_handle()[0],
+            rt_context->get_pipeline()->get_descriptor_sets()
 
-            Descriptor_Manager::Get_Singleton()
-                ->get_DescriptorSet(Descriptor_Manager::Global)
-                ->get_handle()[0]
         };
 
         cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint ::eRayTracingKHR,
@@ -306,19 +304,22 @@ std::shared_ptr<CommandBuffer> rt_pbr_context::BeginRTFrame()
                                              0,
                                              descriptor_sets,
                                              {});
-
+        auto camero_pos { glm::vec4 { m_camera->m_position, 0 } };
         pushContant_Ray = PushContant_rtpbr {
-            // .view_inverse = glm::inverse(m_camera->Get_v_matrix()),
-            // .project_inverse = glm::inverse(m_camera->Get_p_matrix()),
-            .frame = frame_id,
+
+            .apply_normal = apply_normal,
+            .use_normal_map = use_normal_map,
+            .camera_pos { camero_pos },
+            .lightPosition { light_pos_x, light_pos_y, light_pos_z, 0 },
             .roughness = roughness,
             .metallicness = met,
+            .frame = frame_id,
+
             // .clearColor { 1 },
-            .lightPosition { light_pos_x, light_pos_y, light_pos_z, 0 },
-            .camera_pos = glm::vec4 { m_camera->m_position, 0 },
 
         };
         frame_id++;
+
         cmd->get_handle()
             .pushConstants<PushContant_rtpbr>(rt_context->get_pipeline()
                                                   ->get_layout(),
@@ -333,6 +334,7 @@ std::shared_ptr<CommandBuffer> rt_pbr_context::BeginRTFrame()
                                                                       .setDstAccessMask(vk::AccessFlagBits2::eShaderStorageRead)));
         rt_context->record_command(cmd);
     }
+
     return cmd;
 }
 
@@ -343,7 +345,6 @@ void rt_pbr_context::EndRTFrame()
 
     rt_context->Submit();
     rt_context->EndFrame();
-     
 }
 
 std::shared_ptr<CommandBuffer> rt_pbr_context::BeginComputeFrame()

@@ -5,7 +5,6 @@
 #include "shader/PBR/IBL/push_constants.h"
 #include <iostream>
 
-
 namespace MCRT {
 class Buffer;
 class Skybox;
@@ -23,6 +22,8 @@ public:
     void EndFrame() override;
 
     static float light_pos_x, light_pos_y, light_pos_z, roughness, met;
+    static int apply_normal;
+    static bool use_normal_map;
     void prepare(std::shared_ptr<Window> window) override;
     // vk::Extent2D last_extent2d;
     void re_create_context() override;

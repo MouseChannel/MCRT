@@ -2,7 +2,7 @@
 #include "Rendering/Context.hpp"
 // #include "Wrapper/Base.hpp"
 // #include "Wrapper/Instance.hpp"
-// #include "wglext.h"
+#include "Wrapper/Device.hpp"
 #include <GLFW/glfw3.h>
 #include <cstddef>
 #include <vulkan/vulkan.hpp>
@@ -17,12 +17,15 @@ Window::Window(int width, int height)
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
     // glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
-
-    m_window = glfwCreateWindow(width, height, "MoChengRT", nullptr, nullptr);
+    // std::cout << Context::Get_Singleton()->get_device()->gpu_name << std::endl;
+    // auto rr = Context::Get_Singleton()->get_device()->gpu_name;
+    m_window = glfwCreateWindow(width, height, "MOCHENG", nullptr, nullptr);
     glfwSwapInterval(0);
+    glfwSetWindowTitle(m_window, "new title");
     //   window.reset(glfwCreateWindow(width, height, "MoChengRT", nullptr, nullptr));
     //   glfwMakeContextCurrent(window);
-    // glfwSwapInterval(0);
+    glfwSwapInterval(0);
+     
     assert(m_window);
     int w = 0, h = 0;
     glfwGetFramebufferSize(m_window,

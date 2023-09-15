@@ -9,6 +9,7 @@ namespace MCRT {
 AccelerationStructure_Bottom::AccelerationStructure_Bottom(std::shared_ptr<Mesh> obj)
     : AccelerationStructure(vk::AccelerationStructureTypeKHR::eBottomLevel)
     , obj_index(obj->get_instance_index())
+    , m_mesh(obj)
     , model_matrix(obj->get_transform())
 
 {
@@ -71,10 +72,11 @@ void AccelerationStructure_Bottom::fill_build_info()
     vk::DeviceSize scratch_size { 0 };
     build_info.setType(vk::AccelerationStructureTypeKHR::eBottomLevel)
         .setMode(vk::BuildAccelerationStructureModeKHR ::eBuild)
-        .setFlags(vk::BuildAccelerationStructureFlagBitsKHR::ePreferFastBuild)
+        .setFlags(vk::BuildAccelerationStructureFlagBitsKHR::ePreferFastBuild | vk::BuildAccelerationStructureFlagBitsKHR::eAllowUpdate)
         .setGeometries(geom_ready_data.as_geom);
     range_info = geom_ready_data.offset;
     auto prim_count { range_info.primitiveCount };
+    // std::cout << "prim_count" << prim_count << std::endl;
 
     size_info = Context::Get_Singleton()
                     ->get_device()
@@ -82,42 +84,31 @@ void AccelerationStructure_Bottom::fill_build_info()
                     .getAccelerationStructureBuildSizesKHR(vk::AccelerationStructureBuildTypeKHR::eDevice,
                                                            build_info,
                                                            prim_count);
+    // std::cout << "size_info" << size_info.accelerationStructureSize << std::endl;
 }
+void AccelerationStructure_Bottom::update(std::shared_ptr<Buffer> scratch_buffer)
+{
+    object_to_vkGeometryKHR(m_mesh);
+    fill_build_info();
+    build_info.setMode(vk::BuildAccelerationStructureModeKHR::eUpdate)
+        .setSrcAccelerationStructure(m_handle)
+        .setDstAccelerationStructure(m_handle)
+        .setScratchData(scratch_buffer->get_address());
+    CommandManager::ExecuteCmd(Context::Get_Singleton()
+                                   ->get_device()
+                                   ->Get_Graphic_queue(),
+                               [&](vk::CommandBuffer cmd_buffer) {
+                                   // build  here
 
-// void AccelerationStructure_Bottom::build(std::shared_ptr<Buffer> scratch_buffer)
-// {
+                                   cmd_buffer.buildAccelerationStructuresKHR(build_info, &range_info);
 
-//     vk::AccelerationStructureCreateInfoKHR as_create_info;
-//     dst_buffer = Buffer::CreateDeviceBuffer(nullptr, size_info.accelerationStructureSize, vk::BufferUsageFlagBits::eShaderDeviceAddress | vk::BufferUsageFlagBits::eAccelerationStructureStorageKHR);
+                                   vk::MemoryBarrier2 barrier;
+                                   barrier.setSrcStageMask(vk::PipelineStageFlagBits2::eAccelerationStructureBuildKHR)
+                                       .setSrcAccessMask(vk::AccessFlagBits2::eAccelerationStructureWriteKHR)
+                                       .setDstStageMask(vk::PipelineStageFlagBits2::eAccelerationStructureBuildKHR)
+                                       .setDstAccessMask(vk::AccessFlagBits2::eAccelerationStructureReadKHR);
 
-//     Context::Get_Singleton()->get_debugger()->set_name(dst_buffer, "dst_buffer");
-//     as_create_info.setType(vk::AccelerationStructureTypeKHR::eBottomLevel)
-//         .setSize(size_info.accelerationStructureSize)
-//         .setBuffer(dst_buffer->Get_handle());
-//     // create blas structure here
-//     m_handle = Context::Get_Singleton()
-//                    ->get_device()
-//                    ->Get_handle()
-//                    .createAccelerationStructureKHR(as_create_info);
-//     // fill build_info part_2
-//     build_info.setDstAccelerationStructure(m_handle)
-//         .setScratchData(scratch_buffer->get_address());
-
-//     CommandManager::ExecuteCmd(Context::Get_Singleton()
-//                                    ->get_device()
-//                                    ->Get_Graphic_queue(),
-//                                [&](vk::CommandBuffer cmd_buffer) {
-//                                    // build blas here
-//                                    cmd_buffer.buildAccelerationStructuresKHR(build_info, &range_info);
-
-//                                    vk::MemoryBarrier barrier;
-//                                    barrier.setSrcAccessMask(vk::AccessFlagBits::eAccelerationStructureWriteKHR)
-//                                        .setDstAccessMask(vk::AccessFlagBits::eAccelerationStructureReadKHR);
-//                                    cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eAccelerationStructureBuildKHR,
-//                                                               vk::PipelineStageFlagBits::eAccelerationStructureBuildKHR,
-//                                                               {},
-//                                                               barrier,
-//                                                               {},
-//                                                               {});
-//                                });
+                                   //    cmd_buffer.pipelineBarrier2(vk::DependencyInfo {}.setMemoryBarriers(barrier));
+                               });
+}
 }

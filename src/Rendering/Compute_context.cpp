@@ -31,10 +31,10 @@ void Compute_Context::prepare_descriptorset(std::function<void()> prepare_func)
     Descriptor_Manager::Get_Singleton()->CreateDescriptorPool(Descriptor_Manager::Compute);
     Descriptor_Manager::Get_Singleton()->update_descriptor_set(Descriptor_Manager::Compute);
 }
-void Compute_Context::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
+void Compute_Context::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size)
 {
 
-    m_compute_pipeline.reset(new Compute_Pipeline(shader_modules));
+    m_compute_pipeline.reset(new Compute_Pipeline(shader_modules,   sets,   push_constants_size));
 }
 void Compute_Context::prepare()
 {

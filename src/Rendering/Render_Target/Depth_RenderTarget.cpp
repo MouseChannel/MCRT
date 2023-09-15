@@ -7,11 +7,11 @@
 namespace MCRT {
 Depth_RenderTarget::Depth_RenderTarget(std::shared_ptr<Image> image,
                                        vk::AttachmentDescription des)
-    : RenderTarget(image, des)
+    : RenderTarget(image, RenderTarget::DEPTH, des)
 {
     clear_color.setDepthStencil({ 1, 0 });
 }
-std::unique_ptr<Depth_RenderTarget> Depth_RenderTarget::Create()
+std::shared_ptr<Depth_RenderTarget> Depth_RenderTarget::Create()
 {
 
     auto sampler_count = Context::Get_Singleton()->get_device()->Get_sampler_count();
@@ -46,7 +46,7 @@ std::unique_ptr<Depth_RenderTarget> Depth_RenderTarget::Create()
                           vk::AccessFlagBits::eDepthStencilAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentRead,
                           vk::PipelineStageFlagBits::eTopOfPipe,
                           vk::PipelineStageFlagBits::eEarlyFragmentTests);
-    return std::unique_ptr<Depth_RenderTarget>(new Depth_RenderTarget(image, des));
+    return std::shared_ptr<Depth_RenderTarget>(new Depth_RenderTarget(image, des));
 }
 void Depth_RenderTarget::Make_Subpass(uint32_t attachment_index,
                                       vk::SubpassDescription& subpass)

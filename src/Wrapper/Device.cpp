@@ -17,10 +17,20 @@ Device::Device()
 
     auto avalible_physical_device = instance->get_handle().enumeratePhysicalDevices();
     physical_device = avalible_physical_device[0];
+    std::cout << "avalible_gpu" << std::endl;
+    for (auto i : avalible_physical_device) {
 
-    std::cout << "device extension: " << std::endl;
+        std::cout << i.getProperties().deviceName << std::endl;
+    }
+    std::cout << "use :" << physical_device.getProperties().deviceName << std::endl;
+    gpu_name = physical_device.getProperties().deviceName;
+    std::string window_name = gpu_name;
+    glfwSetWindowTitle(Context::Get_Singleton()->get_window()->get_handle(), window_name.c_str());
+    //    glfwSetWindowTitle(Context::Get_Singleton()->get_window()->get_handle(), physical_device.getProperties().deviceName);
+    std::cout
+        << "device extension: " << std::endl;
     for (auto& i : physical_device.enumerateDeviceExtensionProperties()) {
-        std::cout << i.extensionName << std::endl;
+        // std::cout << i.extensionName << std::endl;
     }
 
     assert(physical_device);
@@ -50,22 +60,22 @@ Device::Device()
                                                 vk::PhysicalDeviceFaultFeaturesEXT>();
     VkDeviceFaultInfoEXT a;
 
-   
-
     feature.get<vk::PhysicalDeviceFaultFeaturesEXT>().setDeviceFault(true);
     vk::DeviceCreateInfo new_create_info;
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    new_create_info
+        .setQueueCreateInfos(queue_create_info)
+        .setPEnabledExtensionNames(device_extension);
+#else
     new_create_info.setPNext(&feature.get())
         .setQueueCreateInfos(queue_create_info)
-        .setPEnabledExtensionNames(deviceRequiredExtensions)
-        // .setPEnabledFeatures(&normal_feature)
-        ;
+        .setPEnabledExtensionNames(rt_device_extension);
+#endif
 
     m_handle = physical_device.createDevice(new_create_info);
 
     graphic_queue = m_handle.getQueue(queue_family_indices.graphic_queue.value(), 0);
     present_queue = m_handle.getQueue(queue_family_indices.present_queue.value(), 0);
-    pfn_vkGetDeviceFaultInfoEXT = (PFN_vkGetDeviceFaultInfoEXT)vkGetDeviceProcAddr(m_handle, "vkGetDeviceFaultInfoEXT");
-    int e = 0;
 }
 
 void Device::get_feature()

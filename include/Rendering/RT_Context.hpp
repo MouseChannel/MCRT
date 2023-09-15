@@ -8,9 +8,9 @@
 #include "Rendering/Host_Uniform.hpp"
 #include <memory>
 #include <vector>
+#include "example/base/shader/ray_tracing/Data_struct.h"
 
-// #include "shader/Data_struct.h"
-// #include "Helper/Shader_Data_Convert.h"
+ 
 
 namespace MCRT {
 class Device;
@@ -44,7 +44,7 @@ public:
     void prepare() override;
     void post_prepare() override;
     void prepare_descriptorset(std::function<void()> prepare_func) override;
-    void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;
+    void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size) override;
     std::shared_ptr<CommandBuffer> BeginFrame() override;
     void Submit() override;
     void EndFrame() override;
@@ -71,6 +71,20 @@ public:
     }
 
     void create_offscreen_image();
+    auto& get_rgen_region()
+    {
+        return m_rgenRegion;
+    }
+    auto& get_hit_region()
+    {
+        return m_hitRegion;
+    }
+
+    auto& get_miss_region()
+    {
+        return m_missRegion;
+    }
+
 private:
     void create_shader_bind_table();
     void create_uniform_buffer();

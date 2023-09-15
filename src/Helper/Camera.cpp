@@ -14,12 +14,17 @@ void Camera::init()
 
     auto window = Context::Get_Singleton()->get_window();
     glfwSetWindowUserPointer(window->get_handle(), Context::Get_Singleton()->get_camera().get());
-    glfwSetCursorPosCallback(window->get_handle(), [](GLFWwindow* window, double xpos, double ypos) {
+    glfwSetCursorPosCallback(window->get_handle(),
+                             [](GLFWwindow* window, double xpos, double ypos) {
+                                 auto camera = (Camera*)glfwGetWindowUserPointer(window);
+                                 camera->onMouseMove(xpos, ypos);
+                             });
+    glfwSetScrollCallback(window->get_handle(), [](GLFWwindow* window, double xpos, double ypos) {
         auto camera = (Camera*)glfwGetWindowUserPointer(window);
-        camera->onMouseMove(xpos, ypos);
+        camera->onMouseScroll(xpos, ypos);
     });
 
-    setPerpective(m_fov_angel, 1, 0.1f, 100000);
+    setPerpective(m_fov_angel, 1, 1e-19f, 100000);
 
     m_vMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
 }
@@ -79,10 +84,11 @@ void Camera::move_update()
         pitch(1);
         update();
     }
+
     if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         setSentitivity(1);
     } else {
-        setSentitivity(0.5);
+        setSentitivity(0.1);
     }
 }
 void Camera::move(CAMERA_MOVE _mode)
@@ -99,16 +105,16 @@ void Camera::move(CAMERA_MOVE _mode)
         m_position += glm::normalize(glm::cross(m_front, m_up)) * m_speed * m_sensitivity;
         break;
     case CAMERA_MOVE::MOVE_TOP:
-        m_position += m_speed * m_top * m_sensitivity;
+        m_position += m_speed * m_top * m_sensitivity * 1e-1f;
         break;
     case CAMERA_MOVE::MOVE_DOWN:
-        m_position -= m_speed * m_top * m_sensitivity;
+        m_position -= m_speed * m_top * m_sensitivity * 1e-1f;
         break;
     case CAMERA_MOVE::MOVE_FRONT:
-        m_position += m_speed * m_front * m_sensitivity;
+        m_position += m_speed * m_front * m_sensitivity * 1e-1f;
         break;
     case CAMERA_MOVE::MOVE_BACK:
-        m_position -= m_speed * m_front * m_sensitivity;
+        m_position -= m_speed * m_front * m_sensitivity * 1e-1f;
         break;
     default:
         break;
@@ -122,13 +128,14 @@ void Camera::pitch(float _yOffset)
 {
     m_pitch += _yOffset * m_sensitivity;
 
-    if (m_pitch >= 89.0f) {
-        m_pitch = 89.0f;
-    }
+    // if (m_pitch >= 89.0f) {
+    //     m_pitch = 89.0f;
+    // }
 
-    if (m_pitch <= -89.0f) {
-        m_pitch = -89.0f;
-    }
+    // if (m_pitch <= -89.0f) {
+    //     m_pitch = -89.0f;
+    // }
+    m_pitch = std::clamp(m_pitch, -89.f, 89.f);
 
     m_front.y = sin(glm::radians(m_pitch));
     m_front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
@@ -159,12 +166,7 @@ void Camera::setPerpective(float angle, float ratio, float near, float far)
 
 void Camera::onMouseMove(double _xpos, double _ypos)
 {
-    return;
 
-    // onMouseMove(m_xpos + 1.0, m_ypos);
-    // std::cout << "on mouse 1" << std::endl;
-
-    // std::cout << _xpos << ' ' << _ypos << std::endl;
     if (m_firstMove) {
         m_xpos = _xpos;
         m_ypos = _ypos;
@@ -172,16 +174,38 @@ void Camera::onMouseMove(double _xpos, double _ypos)
         return;
     }
 
-    float _xOffset = _xpos - m_xpos;
-    float _yOffset = -(_ypos - m_ypos);
+    float _xOffset = m_xpos - _xpos;
+    float _yOffset = m_ypos - _ypos;
+    // std::cout << m_xpos << ' ' << m_ypos << std::endl;
 
-    // std::cout << _xOffset << ' ' << _yOffset << std::endl;
     m_xpos = _xpos;
     m_ypos = _ypos;
+    if (glfwGetMouseButton(Context::Get_Singleton()->get_window()->get_handle(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 
-    // pitch(_yOffset);
-    // yaw(_xOffset);
-    m_front = glm::normalize(glm::vec3(0) - m_position);
+        pitch(_yOffset);
+        yaw(_xOffset);
+        update();
+    }
+    if (glfwGetMouseButton(Context::Get_Singleton()->get_window()->get_handle(), GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+        glm::vec3 m_right = glm::cross(m_front, m_up);
+        auto m_left = -m_right;
+        auto m_top = glm::cross(m_right, m_front);
+        auto m_down = -m_top;
+
+        m_position += m_right * _xOffset * 1e-3f + m_top * _yOffset * 1e-3f;
+        ;
+        update();
+    }
+}
+void Camera::onMouseScroll(double _xpos, double _ypos)
+{
+    // std::cout << _xpos << ' ' << _ypos << std::endl;
+    if (_ypos > 0)
+
+        m_position += m_speed * m_front * m_sensitivity * 1e-2f;
+    else
+        m_position -= m_speed * m_front * m_sensitivity * 1e-2f;
+
     update();
 }
 }

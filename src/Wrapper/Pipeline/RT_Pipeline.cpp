@@ -5,11 +5,12 @@
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "shader/Data_struct.h"
-#include "shader/Set_binding.h"
-
+// #include "shader/Set_binding.h"
+#include <ranges>
 namespace MCRT {
 
-RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
+RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size)
+    : Pipeline_base(sets)
 {
 
     auto rgen_shader_count { 1 };
@@ -59,25 +60,36 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
         groups.push_back(create_info);
     }
     // pipeline layout
-    vk::PushConstantRange push_contant;
-    push_contant
-        .setStageFlags(vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR)
-        .setOffset(0)
-        .setSize(Context::Get_Singleton()->get_rt_context()->get_constants_size());
+    // vk::PushConstantRange push_contant;
+    // push_contant
+    //     .setStageFlags(vk::ShaderStageFlagBits::eRaygenKHR | vk::ShaderStageFlagBits::eClosestHitKHR | vk::ShaderStageFlagBits::eMissKHR)
+    //     .setOffset(0)
+    //     .setSize(Context::Get_Singleton()->get_rt_context()->get_constants_size());
 
-    std::vector<vk::DescriptorSetLayout> descriptor_layouts(Ray_Tracing_Set::ray_tracing_count);
-    descriptor_layouts[Ray_Tracing_Set::e_ray_tracing] = Descriptor_Manager::Get_Singleton()
-                                                             ->Get_DescriptorSet_layout(Descriptor_Manager::Ray_Tracing);
-    descriptor_layouts[Ray_Tracing_Set::e_ray_global] = Descriptor_Manager::Get_Singleton()
-                                                            ->Get_DescriptorSet_layout(Descriptor_Manager::Global);
-    descriptor_sets.resize(Ray_Tracing_Set::ray_tracing_count);
+    // std::vector<vk::DescriptorSetLayout> descriptor_layouts(Ray_Tracing_Set::ray_tracing_count);
+    // descriptor_layouts[Ray_Tracing_Set::e_ray_tracing] = Descriptor_Manager::Get_Singleton()
+    //                                                          ->Get_DescriptorSet_layout(Descriptor_Manager::Ray_Tracing);
+    // descriptor_layouts[Ray_Tracing_Set::e_ray_global] = Descriptor_Manager::Get_Singleton()
+    //                                                         ->Get_DescriptorSet_layout(Descriptor_Manager::Global);
+    // descriptor_sets.resize(Ray_Tracing_Set::ray_tracing_count);
 
-    descriptor_sets[Ray_Tracing_Set::e_ray_tracing] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Ray_Tracing)->get_handle()[0];
+    // descriptor_sets[Ray_Tracing_Set::e_ray_tracing] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Ray_Tracing)->get_handle()[0];
 
-    descriptor_sets[Ray_Tracing_Set::e_ray_global] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Global)->get_handle()[0];
+    // descriptor_sets[Ray_Tracing_Set::e_ray_global] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Global)->get_handle()[0];
+
     vk::PipelineLayoutCreateInfo layout_create_info;
-    layout_create_info.setSetLayouts(descriptor_layouts)
-        .setPushConstantRanges(push_contant);
+
+    // std::vector<vk::DescriptorSetLayout> layouts;
+    // for (auto set : sets) {
+    //     layouts.push_back(set->get_layout());
+    // }
+    layout_create_info.setSetLayouts(m_descriptor_layouts)
+        .setPushConstantRanges(vk::PushConstantRange()
+                                   .setStageFlags(
+                                       vk::ShaderStageFlagBits::eRaygenKHR |
+                                       vk::ShaderStageFlagBits::eClosestHitKHR |
+                                       vk::ShaderStageFlagBits::eMissKHR)
+                                   .setSize(push_constants_size));
     layout = Context::Get_Singleton()
                  ->get_device()
                  ->get_handle()

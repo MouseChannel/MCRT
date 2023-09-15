@@ -1,12 +1,14 @@
 #ifdef __cplusplus
 
-#define BEGIN_ENUM(a) enum a {
+#define BEGIN_ENUM(a) enum class a {
 #define END_ENUM() }
 
 #else
 #define BEGIN_ENUM(a) const uint
 #define END_ENUM()
 #endif
+
+#include "example/base/shader/ray_tracing/Data_struct.h"
 
 BEGIN_ENUM(Ray_Tracing_Set)
 e_ray_tracing = 0,

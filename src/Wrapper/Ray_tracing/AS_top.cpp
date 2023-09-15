@@ -1,11 +1,15 @@
 #include "Wrapper/Ray_Tracing/AS_top.hpp"
+#include "Helper/CommandManager.hpp"
 #include "Wrapper/Buffer.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Ray_Tracing/AS_bottom.hpp"
+
 namespace MCRT {
 AccelerationStructure_Top::AccelerationStructure_Top(std::vector<std::shared_ptr<AccelerationStructure_Bottom>> as_bottoms)
     : AccelerationStructure(vk::AccelerationStructureTypeKHR::eTopLevel)
+    , bottoms_as(as_bottoms)
 {
+    instances.clear();
     for (auto i : as_bottoms) {
         add_as_bottom(i);
     }
@@ -18,7 +22,7 @@ AccelerationStructure_Top::~AccelerationStructure_Top()
 void AccelerationStructure_Top::add_as_bottom(std::shared_ptr<AccelerationStructure_Bottom> as_bottom)
 {
     vk::AccelerationStructureInstanceKHR instance;
-
+    // std::cout << as_bottom->get_model_matrix().matrix[0][0] << std::endl;
     instance.setTransform(as_bottom->get_model_matrix())
         .setInstanceCustomIndex(as_bottom->get_obj_index())
         .setAccelerationStructureReference(as_bottom->get_address())
@@ -40,8 +44,11 @@ void AccelerationStructure_Top::fill_build_info()
 
     ready_data.top_as_geom.setGeometryType(vk::GeometryTypeKHR::eInstances)
         .setGeometry(ready_data.top_as_geom_data);
-    build_info.setFlags(vk::BuildAccelerationStructureFlagBitsKHR::ePreferFastTrace)
+
+    build_info.setFlags(vk::BuildAccelerationStructureFlagBitsKHR::ePreferFastTrace | vk::BuildAccelerationStructureFlagBitsKHR::eAllowUpdate)
+        // .setGeometries(ready_data.top_as_geom)
         .setGeometries(ready_data.top_as_geom)
+
         .setMode(vk::BuildAccelerationStructureModeKHR ::eBuild)
         .setType(vk::AccelerationStructureTypeKHR ::eTopLevel);
     range_info.setPrimitiveCount(instances.size());
@@ -52,21 +59,29 @@ void AccelerationStructure_Top::fill_build_info()
                                                            build_info,
                                                            instances.size());
 }
+void AccelerationStructure_Top::update(std::shared_ptr<Buffer> scratch_buffer)
+{
 
-// void AccelerationStructure_Top::build()
-// {
-
-//     dst_buffer = Buffer::create_buffer(nullptr,
-//                                        size_info.accelerationStructureSize,
-//                                        vk::BufferUsageFlagBits::eAccelerationStructureStorageKHR | vk::BufferUsageFlagBits::eShaderDeviceAddress);
-//     vk::AccelerationStructureCreateInfoKHR create_info;
-//     create_info.setType(vk::AccelerationStructureTypeKHR ::eTopLevel)
-//         .setSize(size_info.accelerationStructureSize)
-//         .setBuffer(dst_buffer->Get_handle());
-
-//     m_handle = Context::Get_Singleton()
-//                    ->get_device()
-//                    ->Get_handle()
-//                    .createAccelerationStructureKHR(create_info);
-// }
+    instances.clear();
+    for (auto i : bottoms_as) {
+        add_as_bottom(i);
+    }
+    fill_build_info();
+    build_info.setMode(vk::BuildAccelerationStructureModeKHR ::eUpdate)
+        .setSrcAccelerationStructure(m_handle)
+        .setDstAccelerationStructure(m_handle)
+        .setScratchData(scratch_buffer->get_address());
+    CommandManager::ExecuteCmd(Context::Get_Singleton()
+                                   ->get_device()
+                                   ->Get_Graphic_queue(),
+                               [&](vk::CommandBuffer cmd_buffer) {
+                                   // build  here
+                                   cmd_buffer.buildAccelerationStructuresKHR(build_info, &range_info);
+                                   vk::MemoryBarrier2 barrier;
+                                   barrier.setSrcStageMask(vk::PipelineStageFlagBits2::eAccelerationStructureBuildKHR)
+                                       .setSrcAccessMask(vk::AccessFlagBits2::eAccelerationStructureWriteKHR)
+                                       .setDstStageMask(vk::PipelineStageFlagBits2::eAccelerationStructureBuildKHR)
+                                       .setDstAccessMask(vk::AccessFlagBits2::eAccelerationStructureReadKHR);
+                               });
+}
 }

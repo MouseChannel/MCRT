@@ -17,7 +17,7 @@
 #include "hit_payload.glsl"
 #include "shader/PBR/common.h"
 #include "shader/common.glsl"
-#include "shader/math.h"
+
 #include "shader/sampling.glsl"
 
 hitAttributeEXT vec2 attribs;
@@ -95,6 +95,19 @@ void main()
     float roughness = pcRay.roughness;
     float metallicness = pcRay.metallicness;
 
+    if (material.material.metallicness_roughness_texture_index > -1) {
+        vec2 r_m = texture(textures[nonuniformEXT(material.material.metallicness_roughness_texture_index)], cur_uv).yz;
+        roughness = r_m[0];
+        metallicness = r_m[1];
+    }
+    // debugPrintfEXT("message %d \n", pcRay.use_normal_map);
+    if (bool(pcRay.use_normal_map)) {
+        // debugPrintfEXT("message \n");
+        if (material.material.normal_texture_index > -1) {
+            cur_world_normal = getNormalSpace(cur_world_normal) * texture(textures[nonuniformEXT(material.material.normal_texture_index)], cur_uv).xyz;
+        }
+    }
+
     vec3 albedo = vec3(1, 1, 1);
     if (material.material.color_texture_index > -1) {
         albedo = texture(textures[nonuniformEXT(material.material.color_texture_index)], cur_uv).xyz / PI;
@@ -104,7 +117,7 @@ void main()
     vec3 L = normalize(vec3(pcRay.lightPosition) - cur_world_pos);
     vec3 H = normalize(V + L);
 
-    vec3 F0 = vec3(0.04); // ����������(��ֱ����)
+    vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallicness);
     vec3 F = fresnelSchlick(max(dot(V, H), 0.0), F0);
     vec3 KS = F;
@@ -117,6 +130,17 @@ void main()
     vec3 prefilteredColor = textureLod(skybox, ray_dir, roughness * 11).rgb;
     vec3 brdf = texture(LUT_image, vec2(max(dot(N, V), 0.0), roughness)).rgb;
     vec3 specular = prefilteredColor * (F0 * brdf.r + brdf.g);
-    prd.hitValue = KD * diffuse + specular;
+
+    prd.hitValue = Get_IBLColor(vec3(camera_data.camera_pos),
+                                vec3(pcRay.lightPosition),
+                                cur_world_pos,
+                                cur_world_normal,
+                                metallicness,
+                                roughness,
+                                albedo,
+                                skybox,
+                                irradiance_cubemap,
+                                LUT_image);
+    // prd.hitValue = KD * diffuse + specular;
     // prd.hitValue = irradiance;
 }

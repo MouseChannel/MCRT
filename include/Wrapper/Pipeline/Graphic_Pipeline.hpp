@@ -7,14 +7,23 @@
 
 namespace MCRT {
 class ShaderModule;
+class DescriptorSet;
 class Graphic_Pipeline : public Pipeline_base {
 public:
     enum {
-        VERT,
-        FRAG,
+        Main_VERT,
+        Main_FRAG,
+        Skybox_VERT,
+        Skybox_FRAG,
         shader_stage_count
     };
-    Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shaders);
+    enum class Shader_Stage {
+        VERT,
+        FRAG
+    };
+    Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shaders,
+                     std::vector<std::shared_ptr<DescriptorSet>> sets,
+                     int push_constants_size);
     ~Graphic_Pipeline();
     void Make_Layout(vk::DescriptorSetLayout descriptor_layout, uint32_t push_constants_size, vk::ShaderStageFlags push_constants_stage);
 
@@ -24,10 +33,14 @@ public:
     void Make_viewPort();
     void Add_Shader_Modules(vk::ShaderModule shader_module, vk::ShaderStageFlagBits stage);
     void Make_Resterization();
+    void Make_DepthTest(bool inable_test = true);
     void Make_MultiSample();
-    void Make_DepthTest(bool enable_test = true);
     void Make_Blend();
     void Make_attach();
+    auto& get_colorblend_state()
+    {
+        return blend;
+    }
 
     void Build_Pipeline(std::shared_ptr<RenderPass> render_pass);
     vk::PipelineLayout get_layout() override
@@ -37,7 +50,6 @@ public:
 
 private:
     vk::PipelineVertexInputStateCreateInfo input_state;
-
     vk::PipelineInputAssemblyStateCreateInfo input_assembly;
 
     vk::PipelineViewportStateCreateInfo viewportInfo;

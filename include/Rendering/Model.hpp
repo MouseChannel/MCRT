@@ -2,9 +2,9 @@
 #include "Rendering/Material.hpp"
 #include "glm/glm.hpp"
 #include "shader/Data_struct.h"
+#include <memory>
 #include <string_view>
 #include <vulkan/vulkan.hpp>
-#include <memory>
 
 namespace MCRT {
 struct Triangle {
@@ -76,6 +76,7 @@ public:
     }
     auto get_transform()
     {
+         
         return tramsform;
     }
     auto get_pos()

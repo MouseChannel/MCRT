@@ -6,12 +6,12 @@
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 #extension GL_ARB_shader_clock : enable
 // #extension GL_GOOGLE_cpp_style_line_direcitve :  require
-#include "../Data_struct.h"
-// #include "../Set_binding.h"
+#include "/shader/Data_struct.h"
+// #include "shader/Set_binding.h"
 #include "Binding.h"
-#include "../common.glsl"
-#include "../sampling.glsl"
 #include "hit_payload.glsl"
+#include "shader/common.glsl"
+#include "shader/sampling.glsl"
 
 layout(push_constant) uniform _PushContant
 {
@@ -19,13 +19,10 @@ layout(push_constant) uniform _PushContant
 };
 layout(location = 0) rayPayloadEXT hitPayload prd;
 layout(set = e_ray_tracing, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
-layout(set = e_ray_tracing, binding = e_out_image, rgba32f) uniform image2D image;
-// gbuffer
+layout(set = e_ray_tracing, binding = e_rt_out_image, rgba32f) uniform image2D image;
+
 layout(set = e_ray_tracing, binding = e_gbuffer, rgba32f) uniform image2D gbuffer[];
 
-// layout(set = 0, binding = e_position_gbuffer, rgba32f) uniform image2D posiiotn;
-// layout(set = 0, binding = e_normal_gbuffer, rgba32f) uniform image2D normal;
-// gbuffer end
 layout(set = e_ray_global, binding = e_camera) uniform _camera_data
 {
     Camera_data camera_data;
@@ -67,13 +64,13 @@ void main()
 
     imageStore(gbuffer[normal], ivec2(gl_LaunchIDEXT.xy), vec4(prd.point_normal, 0));
 
-    imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(prd.hitValue, 1.f));
-    return;
+    // imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(prd.hitValue, 1.f));
+    // return;
     if (pcRay.frame > 0) {
         float a = 1.0f / float(pcRay.frame + 1);
         vec3 old_color = imageLoad(image, ivec2(gl_LaunchIDEXT.xy)).xyz;
         vec3 new_color = mix(old_color, prd.hitValue, a);
-        debugPrintfEXT("message %f %f %f| %f %f %f \n", old_color.x, old_color.y, old_color.z, new_color.x, new_color.y, new_color.z);
+        // debugPrintfEXT("message %f %f %f| %f %f %f \n", old_color.x, old_color.y, old_color.z, new_color.x, new_color.y, new_color.z);
         imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(new_color, 1.f));
     } else {
         // First frame, replace the value in the buffer

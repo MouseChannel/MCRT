@@ -27,6 +27,9 @@ public:
     }
     auto get_model_matrix()
     {
+        // model_matrix.matrix[0][0] += 0.005f;
+        // model_matrix.matrix[1][1] += 0.005f;
+        // model_matrix.matrix[2][2] += 0.005f;
         return model_matrix;
     }
     auto get_scratch_size()
@@ -38,6 +41,7 @@ public:
         return size_info.accelerationStructureSize;
     }
     // void build(std::shared_ptr<Buffer> scratch_buffer);
+    void update(std::shared_ptr<Buffer> scratch_buffer) override;
 
 private:
     // fill geom_ready_data
@@ -47,14 +51,9 @@ private:
     int obj_index;
     vk::TransformMatrixKHR model_matrix;
     Obj_geom_data geom_ready_data;
-    // build data
-    // vk::AccelerationStructureBuildGeometryInfoKHR build_info;
-    // vk::AccelerationStructureBuildRangeInfoKHR range_info;
-    // vk::AccelerationStructureBuildSizesInfoKHR size_info;
 
-    // std::shared_ptr<Buffer> dst_buffer;
-    // create outside and hold only one overworld
     std::shared_ptr<Buffer> scratch_buffer;
+    std::shared_ptr<Mesh> m_mesh;
 };
 
 }

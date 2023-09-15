@@ -61,6 +61,7 @@ public:
     void yaw(float _xOffset);
     void setSentitivity(float _s);
     void onMouseMove(double _xpos, double _ypos);
+    void onMouseScroll(double _xpos, double _ypos);
 
     void setPerpective(float angle, float ratio, float near, float far);
 
@@ -77,7 +78,7 @@ private:
     float m_pitch { 0 };
     float m_fov_angel { 90 };
     float m_yaw { -90 };
-    float m_sensitivity { 0.3 };
+    float m_sensitivity { 1e-2 };
     float m_xpos { 0 };
     float m_ypos { 0 };
     bool m_firstMove;

@@ -7,11 +7,13 @@
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Uniform_Manager.hpp"
 #include "Helper/math.hpp"
+#include "Rendering/Context.hpp"
 #include "Rendering/Context_base.hpp"
 #include "Rendering/Model.hpp"
 #include "Rendering/Render_Target/Color_Render_Target.hpp"
 #include "Rendering/Render_Target/Depth_Render_Target.hpp"
-#include "Rendering/Render_Target/RT_Color_RenderTarget.hpp"
+#include "example/base/shader/ray_tracing/Data_struct.h"
+
 #include "Rendering/Render_Target/Render_Target.hpp"
 #include "Wrapper/Buffer.hpp"
 #include "Wrapper/DescriptorSet.hpp"
@@ -131,12 +133,12 @@ void RT_Context::prepare_descriptorset(std::function<void()> prepare_func)
     prepare_func();
     Descriptor_Manager::Get_Singleton()
         ->Make_DescriptorSet(camera_data,
-                             Global_Binding::e_camera,
+                             (int)Global_Binding::e_camera,
                              Descriptor_Manager::Global);
-    // obj_data_address->
+
     Descriptor_Manager::Get_Singleton()
         ->Make_DescriptorSet(obj_data_address,
-                             Global_Binding::e_obj_addresses,
+                             (int)Global_Binding::e_obj_addresses,
                              Descriptor_Manager::Global);
 
     Descriptor_Manager::Get_Singleton()->CreateDescriptorPool(Descriptor_Manager::Ray_Tracing);
@@ -146,9 +148,9 @@ void RT_Context::prepare_descriptorset(std::function<void()> prepare_func)
 
     Descriptor_Manager::Get_Singleton()->update_descriptor_set(Descriptor_Manager::Global);
 }
-void RT_Context::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
+void RT_Context::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size)
 {
-    m_rt_pipeline.reset(new RT_Pipeline(shader_modules));
+    m_rt_pipeline.reset(new RT_Pipeline(shader_modules, sets, push_constants_size));
 }
 void RT_Context::create_uniform_buffer()
 {
@@ -220,6 +222,7 @@ void RT_Context::create_offscreen_image()
 {
     extent2d = Context::Get_Singleton()->get_extent2d();
     // std::cout << extent2d.width << extent2d.height << std::endl;
+    //    Context::Get_Singleton()->ge
     m_out_image.reset(new Image(extent2d.width,
                                 extent2d.height,
                                 vk::Format::eR32G32B32A32Sfloat,
@@ -236,8 +239,8 @@ void RT_Context::create_offscreen_image()
                                 vk::PipelineStageFlagBits::eBottomOfPipe);
 
     // gbuffer
-    m_gbuffer.resize(Gbuffer_Index::gbuffer_count);
-    m_gbuffer[Gbuffer_Index::position].reset(new Image(extent2d.width,
+    m_gbuffer.resize((int)Gbuffer_Index::gbuffer_count);
+    m_gbuffer[(int)Gbuffer_Index::position].reset(new Image(extent2d.width,
                                                        extent2d.height,
                                                        vk::Format::eR32G32B32A32Sfloat,
                                                        vk::ImageType::e2D,
@@ -246,9 +249,9 @@ void RT_Context::create_offscreen_image()
                                                        vk::ImageAspectFlagBits::eColor,
                                                        vk::SampleCountFlagBits::e1));
 
-    m_gbuffer[Gbuffer_Index::position]->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
+    m_gbuffer[(int)Gbuffer_Index::position]->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
 
-    m_gbuffer[Gbuffer_Index::normal].reset(new Image(extent2d.width,
+    m_gbuffer[(int)Gbuffer_Index::normal].reset(new Image(extent2d.width,
                                                      extent2d.height,
                                                      vk::Format::eR32G32B32A32Sfloat,
                                                      vk::ImageType::e2D,
@@ -257,7 +260,7 @@ void RT_Context::create_offscreen_image()
                                                      vk::ImageAspectFlagBits::eColor,
                                                      vk::SampleCountFlagBits::e1));
 
-    m_gbuffer[Gbuffer_Index::normal]
+    m_gbuffer[(int)Gbuffer_Index::normal]
         ->SetImageLayout(vk::ImageLayout::eGeneral,
                          vk::AccessFlagBits::eNone,
                          vk::AccessFlagBits::eNone,
@@ -340,7 +343,6 @@ void RT_Context::record_command(std::shared_ptr<CommandBuffer> cmd)
                                    extent.width,
                                    extent.height,
                                    1);
-    // std::cout<<extent.width<<extent.height<<std::endl;
 
     Context::Get_Singleton()
         ->get_debugger()

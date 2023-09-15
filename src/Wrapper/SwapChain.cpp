@@ -51,7 +51,7 @@ SwapChain::SwapChain()
 }
 SwapChain::~SwapChain()
 {
-    std::cout << "destroySwapchainKHR" << std::endl;
+ 
     Get_Context_Singleton()
         ->get_device()
         ->get_handle()

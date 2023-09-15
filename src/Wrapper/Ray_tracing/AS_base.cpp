@@ -26,13 +26,14 @@ void AccelerationStructure::build(std::shared_ptr<Buffer> scratch_buffer)
     // fill build_info part_2
     build_info.setDstAccelerationStructure(m_handle)
         .setScratchData(scratch_buffer->get_address());
+   
 
     CommandManager::ExecuteCmd(Context::Get_Singleton()
                                    ->get_device()
                                    ->Get_Graphic_queue(),
                                [&](vk::CommandBuffer cmd_buffer) {
                                    // build  here
-                                   //    cmd_buffer.setCheckpointNV(123);
+                                
                                    cmd_buffer.buildAccelerationStructuresKHR(build_info, &range_info);
 
                                    vk::MemoryBarrier2 barrier;
@@ -44,4 +45,5 @@ void AccelerationStructure::build(std::shared_ptr<Buffer> scratch_buffer)
                                    //    cmd_buffer.pipelineBarrier2(vk::DependencyInfo {}.setMemoryBarriers(barrier));
                                });
 }
+
 }

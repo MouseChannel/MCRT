@@ -1,6 +1,7 @@
 #include "Helper/ImGui_Context.hpp"
 
 #include "Helper/CommandManager.hpp"
+#include "Helper/Debugger.hpp"
 #include "Rendering/GLFW_Window.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/DescriptorPool.hpp"
@@ -13,6 +14,7 @@ namespace MCRT {
 ImGuiContext::ImGuiContext()
 {
 }
+
 void ImGuiContext::create_descriptor_pool()
 {
     using type = vk::DescriptorType;
@@ -40,6 +42,7 @@ void ImGuiContext::Init(std::shared_ptr<Window> window)
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     io = ImGui::GetIO();
+
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls }
@@ -62,11 +65,16 @@ void ImGuiContext::Init(std::shared_ptr<Window> window)
     // (VkSampleCountFlagBits)context->get_device()->Get_sampler_count();
     init_info.Allocator = nullptr;
     init_info.CheckVkResultFn = nullptr;
-    ImGui_ImplVulkan_Init(&init_info, context->get_renderpass()->get_handle());
+
+    ImGui_ImplVulkan_Init(&init_info, Context::Get_Singleton()->get_renderpass()->get_handle());
     // upload font
     {
+        // Load Fonts
+        // io.Fonts->AddFontFromFileTTF("D:/MoCheng/MoChengRT/OpenDyslexicAltNerdFont-Bold.otf", 25.0f, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+        io.Fonts->TexHeight = 20;
 
-        CommandManager::ExecuteCmd(context->get_device()->Get_Graphic_queue(), [&](auto cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd); });
+        CommandManager::ExecuteCmd(context->get_device()->Get_Graphic_queue(),
+                                   [&](auto cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd); });
 
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
@@ -75,13 +83,13 @@ void ImGuiContext::Update(std::shared_ptr<CommandBuffer> cmd, std::function<void
 {
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
-    int c = 1;
+
     ImGui::NewFrame();
     {
-      
+
         ImGui::Begin("its imgui window"); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
         func();
-       
+
         ImGui::End();
     }
     ImGui::Render();

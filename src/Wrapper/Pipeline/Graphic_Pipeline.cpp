@@ -1,45 +1,57 @@
 #include "Wrapper/Pipeline/Graphic_Pipeline.hpp"
 #include "Helper/DescriptorManager.hpp"
 #include "Rendering/Render_Context.hpp"
+
+#include "Rendering/Render_Target/Depth_Render_Target.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/RenderPass.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/SwapChain.hpp"
-#include "shader/Set_binding.h"
+// #include "shader/Set_binding.h"
 #include <vector>
 
 namespace MCRT {
-Graphic_Pipeline::Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
+Graphic_Pipeline::Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules,
+                                   std::vector<std::shared_ptr<DescriptorSet>> sets,
+                                   int push_constants_size)
+    : Pipeline_base(sets)
 {
-    //
-    vk::PipelineLayoutCreateInfo layout_create_info {};
-    // todo descriptor_set
-    std::vector<vk::DescriptorSetLayout> descriptor_layouts(Graphic_Set::graphic_count);
 
-    descriptor_layouts[Graphic_Set::e_graphic] =
-        Descriptor_Manager::Get_Singleton()->Get_DescriptorSet_layout(Descriptor_Manager::Graphic);
-    vk::PushConstantRange push_contant;
-    push_contant.setStageFlags(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment)
-        .setOffset(0)
-        .setSize(Context::Get_Singleton()
-                     ->get_graphic_context()
-                     ->get_constants_size());
-    layout_create_info.setSetLayouts(descriptor_layouts)
-        .setPushConstantRanges(push_contant);
+    vk::PipelineLayoutCreateInfo layout_create_info {};
+    // // todo descriptor_set
+    // std::vector<vk::DescriptorSetLayout> descriptor_layouts(Graphic_Set::graphic_count);
+
+    // descriptor_layouts[Graphic_Set::e_graphic] =
+    //     Descriptor_Manager::Get_Singleton()->Get_DescriptorSet_layout(Descriptor_Manager::Graphic);
+    // vk::PushConstantRange push_contant;
+    // push_contant.setStageFlags(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment)
+    //     .setOffset(0)
+    //     .setSize(Context::Get_Singleton()
+    //                  ->get_graphic_context()
+    //                  ->get_constants_size());
+    // std::vector<vk::DescriptorSetLayout> layouts;
+    // for (auto set : sets) {
+    //     layouts.push_back(set->get_layout());
+    //     descriptor_sets.push_back(set->get_handle()[0]);
+    // }
+    layout_create_info.setSetLayouts(m_descriptor_layouts)
+        .setPushConstantRanges(vk::PushConstantRange()
+                                   .setSize(push_constants_size)
+                                   .setStageFlags(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment));
     layout = Context::Get_Singleton()
                  ->get_device()
                  ->get_handle()
                  .createPipelineLayout(layout_create_info);
 
-    shader_stage.resize(shader_stage_count);
-    shader_stage[VERT]
+    shader_stage.resize(2);
+    shader_stage[(int)Shader_Stage::VERT]
         .setPName("main")
         .setStage(vk::ShaderStageFlagBits ::eVertex)
-        .setModule(shader_modules[VERT]->get_handle());
-    shader_stage[FRAG]
+        .setModule(shader_modules[(int)Shader_Stage::VERT]->get_handle());
+    shader_stage[(int)Shader_Stage::FRAG]
         .setPName("main")
         .setStage(vk::ShaderStageFlagBits ::eFragment)
-        .setModule(shader_modules[FRAG]->get_handle());
+        .setModule(shader_modules[(int)Shader_Stage::FRAG]->get_handle());
 }
 Graphic_Pipeline::~Graphic_Pipeline()
 {
@@ -171,14 +183,20 @@ void Graphic_Pipeline::Make_attach()
         .setColorWriteMask(
             vk::ColorComponentFlagBits::eA |
             vk::ColorComponentFlagBits::eB |
-            vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eR)
-        .setSrcColorBlendFactor(vk::BlendFactor::eOne)
+            vk::ColorComponentFlagBits::eG |
+            vk::ColorComponentFlagBits::eR)
+        .setSrcColorBlendFactor(vk::BlendFactor::eSrcAlpha)
         .setDstAlphaBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha)
         .setColorBlendOp(vk::BlendOp::eAdd)
         .setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
-        .setDstAlphaBlendFactor(vk::BlendFactor::eZero)
+        .setDstAlphaBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha)
         .setAlphaBlendOp(vk::BlendOp::eAdd);
-    attachs.push_back(attach);
+    auto graphic_context = Context::Get_Singleton()->get_graphic_context();
+    for (auto i : graphic_context->Get_render_targets()) {
+        if (i->type == RenderTarget::COLOR) {
+            attachs.push_back(attach);
+        }
+    }
 }
 void Graphic_Pipeline::Make_Blend()
 {

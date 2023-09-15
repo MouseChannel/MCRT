@@ -108,4 +108,34 @@ vec3 ImportanceSampleGGX(vec2 xi, vec3 N, float roughness)
     return normalize(H);
 }
 
+vec3 Get_IBLColor(vec3 camera_pos,
+                  vec3 light_pos,
+                  vec3 fragment_world_pos,
+                  vec3 fragment_world_nrm,
+                  float metallicness,
+                  float roughness,
+                  vec3 albedo,
+                  samplerCube skybox,
+                  samplerCube irradiance_cubemap,
+                  sampler2D LUT_image)
+{
+    vec3 V = normalize(vec3(camera_pos) - fragment_world_pos);
+    vec3 L = normalize(vec3(light_pos) - fragment_world_pos);
+    vec3 H = normalize(V + L);
 
+    vec3 F0 = vec3(0.04);
+    F0 = mix(F0, albedo, metallicness);
+    vec3 F = fresnelSchlick(max(dot(V, H), 0.0), F0);
+    vec3 KS = F;
+    vec3 KD = vec3(1.0) - KS;
+
+    vec3 irradiance = texture(irradiance_cubemap, fragment_world_nrm).rgb;
+    vec3 diffuse = albedo * irradiance;
+
+    vec3 dir = reflect(-V, fragment_world_nrm);
+    vec3 prefilteredColor = textureLod(skybox, dir, roughness * 10).rgb;
+    // prefilteredColor = texture(skybox, dir).rgb;
+    vec3 brdf = texture(LUT_image, vec2(max(dot(fragment_world_nrm, V), 0.0), roughness)).rgb;
+    vec3 specular = prefilteredColor * (F0 * brdf.r + brdf.g);
+    return KD * diffuse + specular;
+}

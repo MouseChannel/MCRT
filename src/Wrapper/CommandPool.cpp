@@ -8,8 +8,8 @@ CommandPool::CommandPool()
     m_handle =
         Get_Context_Singleton()->get_device()->get_handle().createCommandPool(
             create_info);
-    
 }
+ 
 CommandPool::~CommandPool()
 {
     Get_Context_Singleton()->get_device()->get_handle().destroyCommandPool(

@@ -18,7 +18,7 @@ using uint = unsigned int;
 
 #ifdef __cplusplus
 
-#define BEGIN_ENUM(a) enum a {
+#define BEGIN_ENUM(a) enum class a {
 #define END_ENUM() }
 
 #else
@@ -26,16 +26,10 @@ using uint = unsigned int;
 #define END_ENUM()
 #endif
 
-// BEGIN_ENUM(Ray_Tracing_Binding)
-// e_tlas = 0,
-//     e_out_image = 1,
-//     e_gbuffer = 2,
-//     e_normal_gbuffer = 3 END_ENUM();
-
-BEGIN_ENUM(Global_Binding)
-e_camera = 0,
-    e_obj_addresses = 1,
-    eTextures = 2 END_ENUM();
+// BEGIN_ENUM(Global_Binding)
+// e_camera = 0,
+//     e_obj_addresses = 1,
+//     eTextures = 2 END_ENUM();
 
 BEGIN_ENUM(Gbuffer_Index)
 position = 0,
@@ -46,7 +40,6 @@ BEGIN_ENUM(Vertex_Binding)
 e_pos = 0,
     e_nrm = 1,
     e_color = 2,
-    // e_texture_index = 3,
     e_texCoord = 3 END_ENUM();
 struct Camera_data {
 
@@ -62,26 +55,26 @@ struct Camera_matrix {
     mat4 project;
 };
 
-struct PushContant {
+// struct PushContant {
 
-    // vec4 clearColor;
-    vec4 lightPosition;
-    float lightIntensity;
-    int frame;
-};
-struct PushContant_Compute {
-    int frame;
-    int open_filter;
-};
+//     // vec4 clearColor;
+//     vec4 lightPosition;
+//     float lightIntensity;
+//     int frame;
+// };
+// struct PushContant_Compute {
+//     int frame;
+//     int open_filter;
+// };
 
-struct Address {
-    // int txtOffset; // Texture index offset in the array of textures
-    uint64_t triangle_count;
-    uint64_t vertexAddress; // Address of the Vertex buffer
-    uint64_t indexAddress; // Address of the index buffer
-    uint64_t materialAddress; // Address of the material buffer
-    uint64_t materialIndexAddress; // Address of the triangle material
-};
+// struct Address {
+//     // int txtOffset; // Texture index offset in the array of textures
+//     uint64_t triangle_count;
+//     uint64_t vertexAddress; // Address of the Vertex buffer
+//     uint64_t indexAddress; // Address of the index buffer
+//     uint64_t materialAddress; // Address of the material buffer
+//     uint64_t materialIndexAddress; // Address of the triangle material
+// };
 struct Vertex // See ObjLoader, copy of VertexObj, could be compressed for device
 {
     vec3 pos;
@@ -101,31 +94,31 @@ struct Vertex // See ObjLoader, copy of VertexObj, could be compressed for devic
     static std::vector<vk::VertexInputAttributeDescription> make_attr()
     {
         std::vector<vk::VertexInputAttributeDescription> res_attr(4);
-        res_attr[e_pos] = vk::VertexInputAttributeDescription()
-                              .setBinding(0)
-                              .setLocation(e_pos)
-                              .setFormat(vk::Format ::eR32G32B32Sfloat)
-                              .setOffset(offsetof(Vertex, pos));
-        res_attr[e_nrm] = vk::VertexInputAttributeDescription()
-                              .setBinding(0)
-                              .setLocation(e_nrm)
-                              .setFormat(vk::Format ::eR32G32B32Sfloat)
-                              .setOffset(offsetof(Vertex, nrm));
-        res_attr[e_color] = vk::VertexInputAttributeDescription()
-                                .setBinding(0)
-                                .setLocation(e_color)
-                                .setFormat(vk::Format ::eR32G32B32Sfloat)
-                                .setOffset(offsetof(Vertex, color));
+        res_attr[(int)Vertex_Binding::e_pos] = vk::VertexInputAttributeDescription()
+                                                   .setBinding(0)
+                                                   .setLocation((int)Vertex_Binding::e_pos)
+                                                   .setFormat(vk::Format ::eR32G32B32Sfloat)
+                                                   .setOffset(offsetof(Vertex, pos));
+        res_attr[(int)Vertex_Binding::e_nrm] = vk::VertexInputAttributeDescription()
+                                                   .setBinding(0)
+                                                   .setLocation((int)Vertex_Binding::e_nrm)
+                                                   .setFormat(vk::Format ::eR32G32B32Sfloat)
+                                                   .setOffset(offsetof(Vertex, nrm));
+        res_attr[(int)Vertex_Binding::e_color] = vk::VertexInputAttributeDescription()
+                                                     .setBinding(0)
+                                                     .setLocation((int)Vertex_Binding::e_color)
+                                                     .setFormat(vk::Format ::eR32G32B32Sfloat)
+                                                     .setOffset(offsetof(Vertex, color));
         // res_attr[e_texture_index] = vk::VertexInputAttributeDescription()
         //                                 .setBinding(0)
         //                                 .setLocation(e_texture_index)
         //                                 .setFormat(vk::Format ::eR32Sint)
         //                                 .setOffset(offsetof(Vertex, texture_index));
-        res_attr[e_texCoord] = vk::VertexInputAttributeDescription()
-                                   .setBinding(0)
-                                   .setLocation(e_texCoord)
-                                   .setFormat(vk::Format ::eR32G32Sfloat)
-                                   .setOffset(offsetof(Vertex, texCoord));
+        res_attr[(int)Vertex_Binding::e_texCoord] = vk::VertexInputAttributeDescription()
+                                                        .setBinding(0)
+                                                        .setLocation((int)Vertex_Binding::e_texCoord)
+                                                        .setFormat(vk::Format ::eR32G32Sfloat)
+                                                        .setOffset(offsetof(Vertex, texCoord));
         return res_attr;
     }
 

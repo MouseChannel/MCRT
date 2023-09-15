@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.0.0)
-project(MCRT VERSION 0.1.0)
+cmake_minimum_required(VERSION 3.5.0)
+project(MCRT)
 set(CMAKE_CXX_STANDARD 20)
 
 # add_compile_options("< <<<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
@@ -40,9 +40,10 @@ include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include ${PROJEC
 
 # include(cmake/FindSrc.cmake)
 file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src *.cpp)
+message(STATUS ${SRC})
 
 # set(IMGUIDIR ${PROJECT_SOURCE_DIR}/lib/imgui)
-add_library(src ${SRC})
+add_library(src SRC)
 
 target_link_libraries(src imgui)
 

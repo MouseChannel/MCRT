@@ -25,12 +25,15 @@ struct BuildTopAccelerationStructure {
 class AS_Builder : public Instance_base<AS_Builder> {
 public:
     AS_Builder();
-    void build_blas();
     vk::DeviceAddress get_blas_device_address(uint32_t blas_index);
 
     void add_blas_obj(std::shared_ptr<Mesh> obj);
 
-    void build_tlas();
+    void build_blas(bool update = false);
+    
+    void build_tlas(bool update = false);
+    void update_blas();
+    void update_tlas();
     [[nodiscard("missing tlas")]] auto get_tlas()
     {
         return top_as;

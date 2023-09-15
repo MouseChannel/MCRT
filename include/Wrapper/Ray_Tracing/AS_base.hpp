@@ -19,6 +19,7 @@ public:
     // auto get_structure_size();
     virtual void fill_build_info() = 0;
     void build(std::shared_ptr<Buffer> scratch_buffer);
+    virtual void update(std::shared_ptr<Buffer> scratch_buffer)  = 0;
 
 protected:
     vk::AccelerationStructureTypeKHR m_type;

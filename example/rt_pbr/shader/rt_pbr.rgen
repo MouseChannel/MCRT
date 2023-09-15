@@ -10,19 +10,20 @@
 #include "Push_Constants.h"
 #include "hit_payload.glsl"
 #include "shader/Data_struct.h"
-#include "shader/common.glsl"
+
+#include "/shader/common.glsl"
 #include "shader/sampling.glsl"
-// #include "shader/sampling.glsl"
+
 layout(push_constant) uniform _PushContant
 {
     PushContant_rtpbr pcRay;
 };
 layout(location = 0) rayPayloadEXT hitPayload prd;
-// layout(location = 1) rayPayloadEXT bool isShadowed;
-layout(set = 0, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
-layout(set = 0, binding = e_out_image, rgba32f) uniform image2D image;
 
-layout(set = 1, binding = e_camera) uniform _camera_data
+layout(set = e_ray_tracing, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
+layout(set = e_ray_tracing, binding = e_out_image, rgba32f) uniform image2D image;
+
+layout(set = e_ray_global, binding = e_camera) uniform _camera_data
 {
     Camera_data camera_data;
 };

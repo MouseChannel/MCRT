@@ -2,8 +2,8 @@
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#include <vulkan/vulkan.hpp>
 #include <memory>
+#include <vulkan/vulkan.hpp>
 
 namespace MCRT {
 class Window {
@@ -19,6 +19,7 @@ public:
     }
     Window(int width, int height);
     ~Window();
+
     void PollEvents();
     std::vector<int> WindowUpdate();
     bool Should_Close();

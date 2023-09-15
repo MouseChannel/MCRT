@@ -1,7 +1,9 @@
 #pragma once
 #include "Rendering/Context.hpp"
+#include "example/base/shader/ray_tracing/Data_struct.h"
 #include "shader/Data_struct.h"
 #include <iostream>
+
 namespace MCRT {
 class Buffer;
 class ray_tracing_context : public Context {

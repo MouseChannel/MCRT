@@ -5,6 +5,7 @@
 #include "Rendering/Render_Context.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Pipeline/Graphic_Pipeline.hpp"
+#include "example/raster/shader/Constants.h"
 
 namespace MCRT {
 raster_context::raster_context()
@@ -23,6 +24,7 @@ void raster_context::prepare(std::shared_ptr<Window> window)
     camera_matrix = UniformManager::make_uniform({ _camera_data },
                                                  vk::ShaderStageFlagBits::eVertex,
                                                  vk::DescriptorType ::eUniformBuffer);
+    
 }
 std::shared_ptr<CommandBuffer> raster_context::Begin_Frame()
 {
@@ -35,46 +37,58 @@ void raster_context::EndFrame()
     EndGraphicFrame();
 }
 
-void raster_context::re_create_context(){}
-// std::shared_ptr<CommandBuffer> raster_context::BeginGraphicFrame()
-// {
+void raster_context::re_create_context()
+{
+}
 
-//     auto& render_context = contexts[Graphic];
-//     std::shared_ptr<CommandBuffer> cmd = render_context->BeginFrame();
-//     {
-//         cmd->get_handle().bindPipeline(vk::PipelineBindPoint ::eGraphics, render_context->get_pipeline()->get_handle());
-//         cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-//                                              render_context->get_pipeline()->get_layout(),
-//                                              0,
-//                                              { Descriptor_Manager::Get_Singleton()
-//                                                    ->get_DescriptorSet(Descriptor_Manager::Graphic)
-//                                                    ->get_handle() },
-//                                              {});
-//         for (auto& mesh : Mesh::meshs) {
+void raster_context::SkyboxPass(std::shared_ptr<CommandBuffer> cmd, std::function<void(std::shared_ptr<CommandBuffer> cmd)> func)
+{
+    cmd->get_handle()
+        .bindPipeline(vk::PipelineBindPoint::eGraphics,
+                      get_skybox_pipeline()->get_handle());
 
-//             cmd->get_handle().bindIndexBuffer(mesh->get_indices_buffer()->get_handle(), 0, vk::IndexType ::eUint32);
-//             cmd->get_handle().bindVertexBuffers(0, {
-//                                                        mesh->get_vertex_buffer()->get_handle(),
-//                                                    },
-//                                                 { 0, 0 });
-//             cmd->get_handle()
-//                 .drawIndexed(mesh->get_vertex_count(),
-//                              1,
-//                              0,
-//                              0,
-//                              0);
-//         }
-//         render_context->record_command(cmd);
-//     }
+    cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                         get_skybox_pipeline()->get_layout(),
+                                         0,
+                                         { Descriptor_Manager::Get_Singleton()
+                                               ->get_DescriptorSet(Descriptor_Manager::Graphic)
+                                               ->get_handle() },
+                                         {});
 
-//     return cmd;
-// }
+    cmd->get_handle().bindIndexBuffer(get_skybox_mesh()->get_indices_buffer()->get_handle(),
+                                      0,
+                                      vk::IndexType ::eUint32);
+    cmd->get_handle().bindVertexBuffers(0, {
+                                               get_skybox_mesh()->get_vertex_buffer()->get_handle(),
+                                           },
+                                        { 0 });
+    // auto res = Context::Get_Singleton()
+    //                ->get_camera()
+    //                ->Get_v_matrix();
+    // res[3] = { 0, 0, 0, 1 };
 
-// void raster_context::EndGraphicFrame()
-// {
-//     auto& m_render_context = contexts[Graphic];
-//     m_render_context->Submit();
-//     m_render_context->EndFrame();
-// }
+    cmd->get_handle()
+        .pushConstants<PC_Raster>(
+            get_skybox_pipeline()->get_layout(),
+            vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+            0,
+            PC_Raster {
+
+                .view_matrix { Context::Get_Singleton()
+                                   ->get_camera()
+                                   ->Get_v_matrix() },
+                .color_texture_index = get_skybox_mesh()->m_material.color_texture_index,
+                .light_pos { 0, 0, 5, 1 },
+            });
+
+    func(cmd);
+
+    cmd->get_handle()
+        .drawIndexed(get_skybox_mesh()->get_vertex_count(),
+                     1,
+                     0,
+                     0,
+                     0);
+}
 
 }

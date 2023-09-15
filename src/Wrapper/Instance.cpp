@@ -33,7 +33,7 @@ Instance::Instance()
         .setApiVersion(VK_API_VERSION_1_3);
     std::vector<const char*> vaild_layer = {
         "VK_LAYER_KHRONOS_validation",
-        "VK_LAYER_LUNARG_monitor",
+        // "VK_LAYER_LUNARG_monitor",
         //  "VK_LAYER_KHRONOS_synchronization2"
     };
 

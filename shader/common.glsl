@@ -7,9 +7,13 @@
 #endif
 float get_radian(float angel)
 {
+
     return angel / 180. * PI;
 }
-vec3 get_camera_dir(vec2 launchID, vec2 launchSize, Camera_data camera_data)
+
+vec3 get_camera_dir(vec2 launchID,
+                    vec2 launchSize,
+                    Camera_data camera_data)
 {
     vec3 ray_origin = camera_data.camera_pos.xyz;
     // ray_origin = (camera_data.viewInverse * vec4(0, 0, 0, 1)).xyz;

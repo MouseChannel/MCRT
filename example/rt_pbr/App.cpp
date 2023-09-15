@@ -26,6 +26,8 @@ void App::run()
             ImGui::SliderFloat("light_pos_z", &rt_pbr_context::light_pos_z, 0.f, 20.0f);
             ImGui::SliderFloat("roughness", &rt_pbr_context::roughness, 0.01f, 1.0f);
             ImGui::SliderFloat("metallicness", &rt_pbr_context::met, 0.01f, 1.0f);
+            ImGui::SliderInt("normal", &rt_pbr_context::apply_normal, 0, 1);
+            ImGui::Checkbox("use_normal_map", &rt_pbr_context::use_normal_map);
             ImGui::Text("counter = %d", Context::Get_Singleton()->get_enable_filter()); });
         context->EndFrame();
     }

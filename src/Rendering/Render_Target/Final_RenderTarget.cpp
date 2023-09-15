@@ -7,7 +7,7 @@
 namespace MCRT {
 Final_RenderTarget::Final_RenderTarget(std::shared_ptr<Image> image,
     vk::AttachmentDescription des)
-    : RenderTarget(image, des)
+    : RenderTarget(image, RenderTarget::COLOR, des)
 {
     clear_color.setColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 }

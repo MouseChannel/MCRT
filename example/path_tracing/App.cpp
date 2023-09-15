@@ -9,10 +9,11 @@
 namespace MCRT {
 void App::init()
 {
-    window.reset(new Window(800, 800));
+    window.reset(new Window(1200, 801));
     Path_tracing_context::Get_Singleton()->prepare(window);
     imgui.reset(new ImGuiContext);
 
+    
     imgui->Init(window);
 }
 void App::run()

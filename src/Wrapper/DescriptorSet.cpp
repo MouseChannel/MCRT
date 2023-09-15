@@ -56,6 +56,7 @@ void DescriptorSet::add(std::vector<std::shared_ptr<AccelerationStructure_Top>> 
 
     _as[binding_data.binding] = Data_Binding(data, binding_data);
     // _as.emplace(std::pair {
+
     //     binding_data.binding,
     //     Data_Binding(data, binding_data) });
     layout_bindings.push_back(binding_data);
@@ -65,6 +66,7 @@ void DescriptorSet::update(std::vector<std::shared_ptr<Buffer>> new_data,
 {
 
     std::vector<vk::DescriptorBufferInfo> buffer_infos;
+
     for (auto& i : new_data) {
         buffer_infos.emplace_back(vk::DescriptorBufferInfo()
                                       .setBuffer(i->get_handle())

@@ -1,19 +1,19 @@
 #pragma once
 #include <cstring>
 #include <memory>
-// #include <string>
+ #include <string>
 // #include <string_view>
-#include  <array>
+#include <array>
 
 #include <tuple>
 
 namespace MCRT {
 class Texture;
 class Image;
+class Mesh;
 class Skybox {
 public:
-     
-    std::array<std::string, 6> names ;
+    std::array<std::string, 6> names;
     Skybox(const Skybox&) = default;
     Skybox(Skybox&&) = delete;
     Skybox& operator=(const Skybox&) = default;
@@ -26,10 +26,15 @@ public:
     {
         return cube_map;
     }
+    [[nodiscard]] auto get_mesh()
+    {
+        return skybox_mesh;
+    }
 
 private:
     // std::vector<std::shared_ptr<Texture>> cube_maps;
     std::shared_ptr<Image> cube_map;
+    std::shared_ptr<Mesh> skybox_mesh;
 };
 
 }

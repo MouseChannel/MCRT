@@ -18,16 +18,18 @@
 #include "Wrapper/Texture.hpp"
 #include "iostream"
 
-// #include "shader/Data_struct.h"
-// #include "shader/Raster/Constants.h"
+#include "shader/PBR/IBL/binding.h"
 
 #include "example/raster/shader/Binding.h"
+#include "shader/PBR/IBL/push_constants.h"
 
 #include "example/raster/shader/Constants.h"
 
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance { new MCRT::raster_context_pbr };
 float raster_context_pbr::light_pos_x = 0, raster_context_pbr::light_pos_y = 0, raster_context_pbr::light_pos_z = 5;
+bool raster_context_pbr::use_normal_map = false, raster_context_pbr::use_r_rm_map = false;
+int irradiance_size = 512;
 raster_context_pbr::raster_context_pbr()
 {
 }
@@ -38,13 +40,24 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
 {
     raster_context::prepare(window);
     m_camera->m_position.z = 3;
-    sky_box.reset(new Skybox("D:/MoChengRT/assets/Cubemap/farm"));
-    skybox_mesh = GLTF_Loader::load_skybox("D:/MoChengRT/assets/cube.gltf");
+    sky_box.reset(new Skybox("D:/MoCheng/MoChengRT/assets/Cubemap/farm"));
+    skybox_mesh = GLTF_Loader::load_skybox("D:/MoCheng/MoChengRT/assets/cube.gltf");
 
-    // Obj_loader::load_model("D:/MoChengRT/assets/girl.obj");
-    GLTF_Loader::load_model("D:/MoChengRT/assets/classic_model/buddha.gltf");
-    auto dd = Texture::textures;
-    auto ss = Mesh::meshs;
+    GLTF_Loader::load_model("D:/MoCheng/MoChengRT/assets/pbr/cardbox.gltf");
+    LUT.reset(new Image(1024,
+                        1024,
+                        vk::Format::eR32G32B32A32Sfloat,
+                        vk::ImageType::e2D,
+                        vk::ImageTiling::eOptimal,
+                        vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled,
+                        vk::ImageAspectFlagBits::eColor,
+                        vk::SampleCountFlagBits::e1));
+    LUT->SetImageLayout(vk::ImageLayout::eGeneral,
+                        vk::AccessFlagBits::eNone,
+                        vk::AccessFlagBits::eNone,
+                        vk::PipelineStageFlagBits::eTopOfPipe,
+                        vk::PipelineStageFlagBits::eBottomOfPipe);
+    irradiance.reset(new Skybox(irradiance_size, irradiance_size));
 
     contexts.resize(2);
 
@@ -58,38 +71,135 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
             throw std::runtime_error("not graphic context");
         }
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
-        graphic_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/example/raster/shader/raster.vert.spv"));
-        graphic_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/example/raster/shader/raster.frag.spv"));
-        std::vector<std::shared_ptr<ShaderModule>> skybox_shader_modules(Graphic_Pipeline::shader_stage_count);
-        skybox_shader_modules[Graphic_Pipeline::VERT].reset(new ShaderModule("D:/MoChengRT/example/raster/shader/skybox.vert.spv"));
-        skybox_shader_modules[Graphic_Pipeline::FRAG].reset(new ShaderModule("D:/MoChengRT/example/raster/shader/skybox.frag.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/raster/shader/raster.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_FRAG].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/raster/shader/raster.frag.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Skybox_VERT].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/raster/shader/skybox.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Skybox_FRAG].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/raster/shader/skybox.frag.spv"));
         graphic_context->prepare();
         graphic_context->prepare_descriptorset([&]() {
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(
                     camera_matrix,
-                    e_camera_matrix,
+                    (int)Graphic_Binding::e_camera_matrix,
                     Descriptor_Manager::Graphic);
 
-            Descriptor_Manager::Get_Singleton()->Make_DescriptorSet(sky_box->get_handle(),
-                                                                    Descriptor_Manager::Graphic,
-                                                                    3,
-                                                                    vk::DescriptorType ::eCombinedImageSampler,
-                                                                    vk::ShaderStageFlagBits::eFragment);
+            Descriptor_Manager::Get_Singleton()
+                ->Make_DescriptorSet(
+                    sky_box->get_handle(),
+                    Descriptor_Manager::Graphic,
+                    (int)Graphic_Binding::e_skybox,
+                    vk::DescriptorType ::eCombinedImageSampler,
+                    vk::ShaderStageFlagBits::eFragment);
 
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(
                     Texture::get_image_handles(),
                     Descriptor_Manager::Graphic,
-                    e_textures,
+                    (int)Graphic_Binding::e_textures,
                     vk::DescriptorType ::eCombinedImageSampler,
                     vk::ShaderStageFlagBits::eFragment);
+            Descriptor_Manager::Get_Singleton()
+                ->Make_DescriptorSet(
+                    std::vector { LUT },
+                    Descriptor_Manager::Graphic,
+                    (int)Graphic_Binding::e_LUT_image,
+                    vk::DescriptorType ::eCombinedImageSampler,
+                    vk::ShaderStageFlagBits::eFragment);
+            Descriptor_Manager::Get_Singleton()
+                ->Make_DescriptorSet(
+                    std::vector { irradiance->get_handle() },
+                    Descriptor_Manager::Graphic,
+                    (int)Graphic_Binding::e_irradiance_image,
+                    vk::DescriptorType::eCombinedImageSampler,
+                    vk::ShaderStageFlagBits::eFragment);
         });
-        graphic_context->prepare_pipeline(graphic_shader_modules);
-
-        graphic_context->prepare_pipeline2(skybox_shader_modules);
+        graphic_context->prepare_pipeline(graphic_shader_modules, { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Graphic) }, sizeof(PC_Raster));
 
         graphic_context->post_prepare();
+    }
+
+    { // compute_precompute
+
+        contexts[Compute].reset(new Compute_Context);
+        contexts[Compute]->set_constants_size(sizeof(PushContant_IBL));
+
+        contexts[Compute]->prepare();
+        contexts[Compute]->prepare_descriptorset([&]() {
+            Descriptor_Manager::Get_Singleton()
+                ->Make_DescriptorSet(
+                    std::vector { irradiance->get_handle() },
+                    Descriptor_Manager::Compute,
+                    IBL_Binding::e_irradiance_image,
+                    vk::DescriptorType ::eStorageImage,
+                    vk::ShaderStageFlagBits::eCompute);
+            Descriptor_Manager::Get_Singleton()
+                ->Make_DescriptorSet(
+                    std::vector { LUT },
+                    Descriptor_Manager::Compute,
+                    IBL_Binding::e_LUT_image,
+                    vk::DescriptorType ::eStorageImage,
+                    vk::ShaderStageFlagBits::eCompute);
+            Descriptor_Manager::Get_Singleton()
+                ->Make_DescriptorSet(
+                    std::vector { sky_box->get_handle() },
+                    Descriptor_Manager::Compute,
+                    IBL_Binding::e_skybox,
+                    vk::DescriptorType::eCombinedImageSampler,
+                    vk::ShaderStageFlagBits::eCompute);
+        });
+
+        { // pre_compute_irradiance
+            std::shared_ptr<ShaderModule>
+                compute_shader {
+                    new ShaderModule("D:/MoCheng/MoChengRT/shader/PBR/IBL/irradiance.comp.spv")
+                };
+            contexts[Compute]->prepare_pipeline({ compute_shader },
+                                                { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) },
+                                                sizeof(PushContant_Compute));
+
+            contexts[Compute]->post_prepare();
+            // doing the actually work
+            auto& compute_context = contexts[Compute];
+            // std::shared_ptr<CommandBuffer> cmd = compute_context->BeginFrame();
+            CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(), [&](vk::CommandBuffer& cmd) {
+                cmd.bindDescriptorSets(vk::PipelineBindPoint ::eCompute,
+                                       compute_context->get_pipeline()->get_layout(),
+                                       0,
+                                       compute_context->get_pipeline()->get_descriptor_sets(),
+                                       {});
+                cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
+                                 compute_context->get_pipeline()->get_handle());
+
+                cmd.dispatch(irradiance_size, irradiance_size, 6);
+            });
+        }
+        { // pre_compute_lut
+
+            std::shared_ptr<ShaderModule>
+                compute_shader {
+                    new ShaderModule("D:/MoCheng/MoChengRT/shader/PBR/IBL/lookup_table.comp.spv")
+                };
+
+            contexts[Compute]->prepare_pipeline({ compute_shader },
+                                                { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) },
+                                                sizeof(PushContant_Compute));
+
+            contexts[Compute]->post_prepare();
+            // doing the actually work
+            auto& compute_context = contexts[Compute];
+
+            CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(), [&](vk::CommandBuffer& cmd) {
+                cmd.bindDescriptorSets(vk::PipelineBindPoint ::eCompute,
+                                       compute_context->get_pipeline()->get_layout(),
+                                       0,
+                                       compute_context->get_pipeline()->get_descriptor_sets(),
+                                       {});
+                cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
+                                 compute_context->get_pipeline()->get_handle());
+
+                cmd.dispatch(1024, 1024, 1);
+            });
+        }
     }
 }
 std::shared_ptr<CommandBuffer> raster_context_pbr::Begin_Frame()
@@ -113,6 +223,7 @@ void raster_context_pbr::EndFrame()
 std::shared_ptr<CommandBuffer> raster_context_pbr::BeginSkyboxFrame()
 {
     raster_context::EndFrame();
+    return nullptr;
 }
 void raster_context_pbr::EndSkyboxFrame()
 {
@@ -126,74 +237,82 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
 
     std::shared_ptr<CommandBuffer> cmd = render_context->BeginFrame();
     {
-        { // sky_box
-            cmd->get_handle()
-                .bindPipeline(vk::PipelineBindPoint::eGraphics,
-                              render_context->get_pipeline2()->get_handle());
+        // { // sky_box
+        //     cmd->get_handle()
+        //         .bindPipeline(vk::PipelineBindPoint::eGraphics,
+        //                       render_context->get_pipeline2()->get_handle());
+        //     render_context->record_command(cmd);
+        //     cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+        //                                          render_context->get_pipeline()->get_layout(),
+        //                                          0,
+        //                                          { Descriptor_Manager::Get_Singleton()
+        //                                                ->get_DescriptorSet(Descriptor_Manager::Graphic)
+        //                                                ->get_handle() },
+        //                                          {});
+
+        //     cmd->get_handle().bindIndexBuffer(skybox_mesh->get_indices_buffer()->get_handle(),
+        //                                       0,
+        //                                       vk::IndexType ::eUint32);
+        //     cmd->get_handle().bindVertexBuffers(0, {
+        //                                                skybox_mesh->get_vertex_buffer()->get_handle(),
+        //                                            },
+        //                                         { 0 });
+        //     auto res = Context::Get_Singleton()
+        //                    ->get_camera()
+        //                    ->Get_v_matrix();
+        //     res[3] = { 0, 0, 0, 1 };
+        //     pc = PC_Raster {
+        //         // .model_matrix {
+        //         //     glm::rotate(skybox_mesh->get_model_matrix(), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f))
+        //         // },
+
+        //         .model_matrix { res },
+
+        //         .view_matrix { Context::Get_Singleton()
+        //                            ->get_camera()
+        //                            ->Get_v_matrix() },
+        //         .texture_index = skybox_mesh->m_material.color_texture_index,
+        //         .light_pos { 0, 0, 5 },
+        //     };
+        //     // angle++;
+
+        //     cmd->get_handle()
+        //         .pushConstants<PC_Raster>(
+        //             render_context
+        //                 ->get_pipeline()
+        //                 ->get_layout(),
+        //             vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+        //             0,
+        //             pc);
+        //     cmd->get_handle()
+        //         .drawIndexed(skybox_mesh->get_vertex_count(),
+        //                      1,
+        //                      0,
+        //                      0,
+        //                      0);
+        // }
+        auto res = Context::Get_Singleton()
+                       ->get_camera()
+                       ->Get_v_matrix();
+        res[3] = { 0, 0, 0, 1 };
+        SkyboxPass(cmd, [&](std::shared_ptr<CommandBuffer> cmd) {
             render_context->record_command(cmd);
-            cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                                 render_context->get_pipeline()->get_layout(),
-                                                 0,
-                                                 { Descriptor_Manager::Get_Singleton()
-                                                       ->get_DescriptorSet(Descriptor_Manager::Graphic)
-                                                       ->get_handle() },
-                                                 {});
+        });
 
-            cmd->get_handle().bindIndexBuffer(skybox_mesh->get_indices_buffer()->get_handle(),
-                                              0,
-                                              vk::IndexType ::eUint32);
-            cmd->get_handle().bindVertexBuffers(0, {
-                                                       skybox_mesh->get_vertex_buffer()->get_handle(),
-                                                   },
-                                                { 0 });
-            auto res = Context::Get_Singleton()
-                           ->get_camera()
-                           ->Get_v_matrix();
-            res[3] = { 0, 0, 0, 1 };
-            pc = PC_Raster {
-                // .model_matrix {
-                //     glm::rotate(skybox_mesh->get_model_matrix(), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f))
-                // },
-                .light_pos { 0, 0, 5 },
-                .model_matrix { res },
-
-                .view_matrix { Context::Get_Singleton()
-                                   ->get_camera()
-                                   ->Get_v_matrix() },
-                .texture_index = skybox_mesh->m_material.color_texture_index
-            };
-            // angle++;
-
-            cmd->get_handle()
-                .pushConstants<PC_Raster>(
-                    render_context
-                        ->get_pipeline()
-                        ->get_layout(),
-                    vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
-                    0,
-                    pc);
-            cmd->get_handle()
-                .drawIndexed(skybox_mesh->get_vertex_count(),
-                             1,
-                             0,
-                             0,
-                             0);
-        }
         {
             cmd->get_handle()
                 .bindPipeline(vk::PipelineBindPoint ::eGraphics,
                               render_context->get_pipeline()->get_handle());
             render_context->record_command(cmd);
 
-            cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                                 render_context->get_pipeline()->get_layout(),
-                                                 0,
-                                                 { Descriptor_Manager::Get_Singleton()
-                                                       ->get_DescriptorSet(Descriptor_Manager::Graphic)
-                                                       ->get_handle() },
-                                                 {});
-
             for (auto& mesh : Mesh::meshs) {
+                cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                                     render_context->get_pipeline()->get_layout(),
+                                                     0,
+                                                     { Descriptor_Manager::Get_Singleton()
+                                                           ->get_DescriptorSet(Descriptor_Manager::Graphic)
+                                                           ->get_handle() },
+                                                     {});
 
                 cmd->get_handle().bindIndexBuffer(mesh->get_indices_buffer()->get_handle(),
                                                   0,
@@ -202,17 +321,24 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                                                            mesh->get_vertex_buffer()->get_handle(),
                                                        },
                                                     { 0 });
-
+                // std::cout << mesh->get_vertex_buffer()->get_handle() << std::endl;
+                auto m = glm::mat4(1);
+                auto pos = mesh->get_pos();
+                m[3] = glm::vec4(pos, 1);
                 pc = PC_Raster {
-                    .model_matrix {
-                        glm::rotate(mesh->get_model_matrix(), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f)) },
+                    .model_matrix { m },
 
                     .view_matrix { Context::Get_Singleton()
                                        ->get_camera()
                                        ->Get_v_matrix() },
-                    .texture_index = mesh->m_material.color_texture_index,
-                    .camera_pos = m_camera->get_pos(),
-                    .light_pos = { light_pos_x, light_pos_y, light_pos_z }
+
+                    .camera_pos = glm::vec4(m_camera->get_pos(), 1),
+                    .color_texture_index = mesh->m_material.color_texture_index,
+                    .metallicness_roughness_texture_index = mesh->m_material.metallicness_roughness_texture_index,
+                    .normal_texture_index = mesh->m_material.normal_texture_index,
+                    .light_pos = { light_pos_x, light_pos_y, light_pos_z, 1 },
+                    .use_normal_map = use_normal_map,
+                    .use_r_m_map = use_r_rm_map,
                 };
                 // angle++;
 

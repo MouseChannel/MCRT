@@ -42,9 +42,10 @@ public:
     {
         return fences[current_frame];
     }
-    // [[nodiscard]] auto get_swapchain()
-    // {
-    // }
+    [[nodiscard]] auto get_skybox_pipeline()
+    {
+        return m_skybox_pipeline;
+    } 
     std::vector<std::shared_ptr<RenderTarget>>& Get_render_targets()
     {
         return all_rendertargets[0];
@@ -61,6 +62,7 @@ public:
     {
         return command_buffer;
     }
+
     std::shared_ptr<Framebuffer>& get_framebuffer();
     void Prepare_RenderPass();
     void prepare() override;
@@ -69,8 +71,8 @@ public:
     void Prepare_Framebuffer();
     void re_create_swapchain();
     void prepare_descriptorset(std::function<void()> prepare_func) override;
-    void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules) override;
-    void prepare_pipeline2(std::vector<std::shared_ptr<ShaderModule>> shader_modules);
+    void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size) override;
+    // void prepare_pipeline2(std::vector<std::shared_ptr<ShaderModule>> shader_modules);
     std::shared_ptr<CommandBuffer> BeginFrame() override;
     void Submit() override;
     void EndFrame() override;

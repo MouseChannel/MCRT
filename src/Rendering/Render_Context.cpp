@@ -76,6 +76,7 @@ void RenderContext::fill_render_targets()
                       vk::ImageAspectFlagBits::eColor)
         };
         all_rendertargets[i].emplace_back(Color_RenderTarget::Create(swapchain_image));
+
         all_rendertargets[i].emplace_back(Depth_RenderTarget::Create());
     }
 }
@@ -98,6 +99,7 @@ void RenderContext::Prepare_RenderPass()
         render_pass->Add_Attachment_description(render_target->Get_attachment_description());
     }
     render_pass->Build();
+    Context::Get_Singleton()->get_debugger()->set_name(render_pass, "main renderpass");
 }
 void RenderContext::prepare_descriptorset(std::function<void()> prepare)
 {
@@ -108,43 +110,56 @@ void RenderContext::prepare_descriptorset(std::function<void()> prepare)
     Descriptor_Manager::Get_Singleton()
         ->update_descriptor_set(Descriptor_Manager::Graphic);
 }
-void RenderContext::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
+void RenderContext::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size)
 {
 
-    m_graphic_pipeline.reset(new Graphic_Pipeline(shader_modules));
+    { // main
+        m_graphic_pipeline.reset(new Graphic_Pipeline(
+            { shader_modules[Graphic_Pipeline::Main_VERT],
+              shader_modules[Graphic_Pipeline::Main_FRAG] },
+            sets,
+            push_constants_size));
 
-    auto binds = Vertex::make_bind();
-    auto attrs = Vertex::make_attr();
+        auto binds = Vertex::make_bind();
+        auto attrs = Vertex::make_attr();
 
-    m_graphic_pipeline->Make_VertexInput(binds, attrs);
-    m_graphic_pipeline->Make_VertexAssembly();
-    m_graphic_pipeline->Make_viewPort();
-    m_graphic_pipeline->Make_MultiSample();
-    m_graphic_pipeline->Make_Resterization();
-    m_graphic_pipeline->Make_attach();
-    m_graphic_pipeline->Make_Blend();
-    m_graphic_pipeline->Make_DepthTest();
+        m_graphic_pipeline->Make_VertexInput(binds, attrs);
+        m_graphic_pipeline->Make_VertexAssembly();
+        m_graphic_pipeline->Make_viewPort();
+        m_graphic_pipeline->Make_MultiSample();
+        m_graphic_pipeline->Make_Resterization();
+        m_graphic_pipeline->Make_attach();
+        m_graphic_pipeline->Make_Blend();
+        m_graphic_pipeline->Make_DepthTest();
 
-    m_graphic_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
+        m_graphic_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
+    }
+    { // skybox
+        if (!shader_modules[Graphic_Pipeline::Skybox_VERT]) {
+            return;
+        }
+        m_skybox_pipeline.reset(new Graphic_Pipeline(
+            { shader_modules[Graphic_Pipeline::Skybox_VERT],
+              shader_modules[Graphic_Pipeline::Skybox_FRAG] },
+            sets,
+            push_constants_size));
+
+        auto binds = Vertex::make_bind();
+        auto attrs = Vertex::make_attr();
+
+        m_skybox_pipeline->Make_VertexInput(binds, attrs);
+        m_skybox_pipeline->Make_VertexAssembly();
+        m_skybox_pipeline->Make_viewPort();
+        m_skybox_pipeline->Make_MultiSample();
+        m_skybox_pipeline->Make_Resterization();
+        m_skybox_pipeline->Make_attach();
+        m_skybox_pipeline->Make_Blend();
+        m_skybox_pipeline->Make_DepthTest(false);
+
+        m_skybox_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
+    }
 }
-void RenderContext::prepare_pipeline2(std::vector<std::shared_ptr<ShaderModule>> shader_modules)
-{
-    m_skybox_pipeline.reset(new Graphic_Pipeline(shader_modules));
-
-    auto binds = Vertex::make_bind();
-    auto attrs = Vertex::make_attr();
-
-    m_skybox_pipeline->Make_VertexInput(binds, attrs);
-    m_skybox_pipeline->Make_VertexAssembly();
-    m_skybox_pipeline->Make_viewPort();
-    m_skybox_pipeline->Make_MultiSample();
-    m_skybox_pipeline->Make_Resterization();
-    m_skybox_pipeline->Make_attach();
-    m_skybox_pipeline->Make_Blend();
-    m_skybox_pipeline->Make_DepthTest(false);
-
-    m_skybox_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
-}
+ 
 void RenderContext::prepare()
 {
     fill_render_targets();
@@ -335,7 +350,6 @@ void RenderContext::re_create()
         ->setPerpective(90, (float)cur_width / (float)cur_height, 0.1f, 10000);
     //---
     Context::Get_Singleton()->re_create_context();
-   
 }
 void RenderContext::re_create_swapchain()
 {

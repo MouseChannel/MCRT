@@ -1,6 +1,7 @@
 #pragma once
 #include "example/base/raster_context.hpp"
 // #include "shader/Data_struct.h"
+#include "Rendering/Render_Context.hpp"
 #include "example/raster/shader/Constants.h"
 #include <iostream>
 
@@ -43,8 +44,17 @@ public:
         throw std::runtime_error("it is not Ray_Tracing context");
     }
     static float light_pos_x, light_pos_y, light_pos_z;
+    static bool use_normal_map, use_r_rm_map;
 
     void prepare(std::shared_ptr<Window> window) override;
+    std::shared_ptr<Graphic_Pipeline> get_skybox_pipeline() override
+    {
+        return get_graphic_context()->get_skybox_pipeline();
+    }
+    std::shared_ptr<Mesh> get_skybox_mesh() override
+    {
+        return skybox_mesh;
+    }
 
 private:
     std::shared_ptr<CommandBuffer> BeginGraphicFrame() override;
@@ -59,7 +69,8 @@ private:
     float angle;
     std::shared_ptr<Mesh> skybox_mesh;
     std::shared_ptr<Skybox> sky_box;
-    // std::shared_ptr<Buffer> index_buffer, vertex_buffer, uv_buffer;
+    std::shared_ptr<Image> LUT;
+    std::shared_ptr<Skybox> irradiance;
 };
 
 }

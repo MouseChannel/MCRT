@@ -23,7 +23,7 @@ public:
         Global,
         Compute,
         Compute2,
-        Sky_box,
+       
         e_type_count
     };
     enum Type {
@@ -39,7 +39,7 @@ public:
     template <typename T>
     void Make_DescriptorSet(std::vector<std::shared_ptr<T>> data,
                             Which_Set which_set,
-                            uint32_t binding_index,
+                            int binding_index,
                             vk::DescriptorType type,
                             vk::ShaderStageFlags shader_stage)
     {
@@ -66,7 +66,7 @@ public:
     template <typename T>
     void Make_DescriptorSet(std::shared_ptr<T> data,
                             Which_Set which_set,
-                            uint32_t binding_index,
+                            int binding_index,
                             vk::DescriptorType type,
                             vk::ShaderStageFlags shader_stage)
     {
@@ -77,7 +77,7 @@ public:
 
     template <typename T>
     void Make_DescriptorSet(std::shared_ptr<Uniform_Stuff<T>> uniform_data,
-                            uint32_t binding_index,
+                            int binding_index,
                             Which_Set which_set)
     {
         Make_DescriptorSet(std::vector { uniform_data->buffer }, which_set, binding_index, uniform_data->type, uniform_data->shader_stage);
@@ -93,7 +93,7 @@ public:
 private:
     std::vector<std::shared_ptr<DescriptorPool>> descriptorPools { e_type_count };
 
-    std::vector<std::unique_ptr<DescriptorSet>> descriptorsets { e_type_count };
+    std::vector<std::shared_ptr<DescriptorSet>> descriptorsets { e_type_count };
 };
 
 }

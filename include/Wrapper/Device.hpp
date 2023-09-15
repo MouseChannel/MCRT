@@ -1,7 +1,6 @@
 #pragma once
-// #include "Rendering/GLFW_Window.hpp"
+
 #include "Wrapper/Component.hpp"
-// #include "Wrapper/Instance.hpp"
 
 #include <memory>
 #include <optional>
@@ -15,15 +14,9 @@ public:
     ~Device();
     const std::vector<std::string> device_extension {
         "VK_KHR_swapchain",
-        "VK_KHR_acceleration_structure",
-        "VK_KHR_ray_tracing_pipeline",
-        "VK_KHR_deferred_host_operations",
-        // "VK_EXT_descriptor_indexing",
-        // "VK_KHR_buffer_device_address",
-        // "VK_KHR_deferred_host_operations",
-        // "VK_KHR_get_physical_device_properties"
+
     };
-    const std::vector<const char*> deviceRequiredExtensions {
+    const std::vector<const char*> rt_device_extension {
         "VK_KHR_swapchain",
 
         "VK_KHR_ray_query",
@@ -32,11 +25,10 @@ public:
         "VK_KHR_acceleration_structure",
         "VK_KHR_ray_tracing_pipeline",
         "VK_KHR_shader_clock",
-        // VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME,
         VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
         VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
         VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
-        // VK_EXT_DEVICE_FAULT_EXTENSION_NAME
+
     };
     [[nodiscard("missing physical device")]] auto Get_Physical_device()
     {
@@ -65,6 +57,8 @@ public:
         }
     } queue_family_indices;
     //   QueueFamilyIndices queue_family_indices;
+    char* gpu_name;
+
 private:
     void QueryQueueFamilyIndices();
     void get_feature();

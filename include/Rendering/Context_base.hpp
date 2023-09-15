@@ -1,12 +1,14 @@
 #pragma once
 #include <functional>
 #include <memory>
+
 namespace MCRT {
 class CommandBuffer;
 class RenderTarget;
 class Image;
 class RenderPass;
 class ShaderModule;
+class DescriptorSet;
 class Pipeline_base;
 class Framebuffer;
 class Context_base {
@@ -27,7 +29,7 @@ public:
 
     virtual void prepare_descriptorset(std::function<void()> prepare_func) = 0;
 
-    virtual void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules) = 0;
+    virtual void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size) = 0;
     // virtual void set_re_create(std::function<void()> re_create)
     // {
     //     re_create_context = re_create;

@@ -76,10 +76,12 @@ std::shared_ptr<CommandBuffer> ray_tracing_context::BeginGraphicFrame()
         cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                              render_context->get_pipeline()->get_layout(),
                                              0,
-                                             { //
-                                               Descriptor_Manager::Get_Singleton()
-                                                   ->get_DescriptorSet(Descriptor_Manager::Graphic)
-                                                   ->get_handle() },
+                                             {
+                                                 render_context->get_pipeline()->get_descriptor_sets()
+                                                 //  Descriptor_Manager::Get_Singleton()
+                                                 //      ->get_DescriptorSet(Descriptor_Manager::Graphic)
+                                                 //      ->get_handle()
+                                             },
 
                                              {});
         cmd->get_handle().bindIndexBuffer(index_buffer->get_handle(), 0, vk::IndexType ::eUint32);

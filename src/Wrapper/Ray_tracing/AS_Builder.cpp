@@ -23,7 +23,7 @@ void AS_Builder::add_blas_obj(std::shared_ptr<Mesh> obj)
     Mesh::obj_instances.emplace_back(ObjInstance { .obj_index = (int)Mesh::obj_instances.size() });
 }
 
-void AS_Builder::build_blas()
+void AS_Builder::build_blas(bool update)
 {
 
     vk::DeviceSize max_scratch_sice { 0 };
@@ -46,7 +46,11 @@ void AS_Builder::build_blas()
         if (batchSize > batchLimit || i == count - 1) {
             // actually create blas
             for (auto idx : indices) {
-                m_accelerate_structures[idx]->build(scratch_buffer);
+                if (update) {
+                    m_accelerate_structures[idx]->update(scratch_buffer);
+                } else {
+                    m_accelerate_structures[idx]->build(scratch_buffer);
+                }
             }
 
             indices.clear();
@@ -57,14 +61,27 @@ void AS_Builder::build_blas()
     // a.setBuffer(vk::Buffer buffer_) auto as = m_device->Get_handle().createAccelerationStructureKHR(a);
 }
 
-void AS_Builder::build_tlas()
+void AS_Builder::build_tlas(bool update)
 {
-    top_as.reset(new AccelerationStructure_Top(m_accelerate_structures));
+    if (!update) {
+
+        top_as.reset(new AccelerationStructure_Top(m_accelerate_structures));
+    }
 
     auto scratch_buffer = Buffer::create_buffer(nullptr,
                                                 top_as->get_scratch_size(),
                                                 vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress);
-    top_as->build(scratch_buffer);
+    if (update) {
+        top_as->update(scratch_buffer);
+    } else {
+        top_as->build(scratch_buffer);
+    }
+}
+void AS_Builder::update_blas()
+{
+}
+void AS_Builder::update_tlas()
+{
 }
 
 }

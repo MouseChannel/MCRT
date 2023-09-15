@@ -5,7 +5,7 @@
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "Helper/ThreadPool.hpp"
+// #include "Helper/ThreadPool.hpp"
 #include "Tool/tiny_gltf.h"
 #include <glm/gtc/type_ptr.hpp>
 #define using_threadpool1
@@ -170,6 +170,7 @@ std::shared_ptr<Mesh> GLTF_Loader::load_skybox(std::string_view path)
     load_model(path);
     auto sky_box = Mesh::meshs[Mesh::meshs.size() - 1];
     Mesh::meshs.pop_back();
+    std::cout << "mesh :" << Mesh::meshs.size() << std::endl;
     return sky_box;
 }
 glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,

@@ -1,8 +1,8 @@
 #include "Rendering/Render_Context.hpp"
 #include "Helper/CommandManager.hpp"
 #include "Helper/DescriptorManager.hpp"
+#include "Rendering/AppWindow.hpp"
 #include "Rendering/Compute_context.hpp"
-#include "Rendering/GLFW_Window.hpp"
 #include "Rendering/Model.hpp"
 #include "Rendering/RT_Context.hpp"
 #include "Rendering/Render_Frame.hpp"
@@ -284,10 +284,10 @@ void RenderContext::Submit()
         sub.signalSemaphoreCount = 1;
         sub.pSignalSemaphores = (VkSemaphore*)&Get_cur_present_semaphore()->get_handle();
 
-        auto res = vkQueueSubmit(graphic_queue,
+        auto res =  vkQueueSubmit((VkQueue)graphic_queue,
                                  1,
                                  &sub,
-                                 Get_cur_fence()->get_handle());
+                                  (VkFence)Get_cur_fence()->get_handle());
 
         // auto res = graphic_queue.submit(1, &submit_info, Get_cur_fence()->get_handle(), m_device->get_handle());
         if (res == VK_ERROR_DEVICE_LOST) {
@@ -329,6 +329,8 @@ void RenderContext::EndFrame()
 }
 void RenderContext::re_create()
 {
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#else
     int cur_width = 0, cur_height = 0;
     glfwGetFramebufferSize(Context::Get_Singleton()->get_window()->get_handle(),
                            &cur_width,
@@ -350,6 +352,7 @@ void RenderContext::re_create()
         ->setPerpective(90, (float)cur_width / (float)cur_height, 0.1f, 10000);
     //---
     Context::Get_Singleton()->re_create_context();
+#endif
 }
 void RenderContext::re_create_swapchain()
 {

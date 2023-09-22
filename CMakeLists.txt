@@ -13,22 +13,21 @@ file(GLOB_RECURSE RGEN ${CMAKE_SOURCE_DIR}/shader/*.rgen)
 file(GLOB_RECURSE RCHIT ${CMAKE_SOURCE_DIR}/shader/*.rchit)
 file(GLOB_RECURSE RMISS ${CMAKE_SOURCE_DIR}/shader/*.rmiss)
 file(GLOB_RECURSE VERT ${CMAKE_SOURCE_DIR}/shader/*.vert)
-file(GLOB_RECURSE FRAG ${CMAKE_SOURCE_DIR}/shader/*.frag)
-list(APPEND ALL_RT_SHADER ${RGEN} ${RCHIT} ${RMISS} ${VERT} ${FRAG})
-message(STATUS "run glslangValidator to compile shaders ...")
-message("-----all ray tracing shader------ ")
-
-foreach(var ${ALL_RT_SHADER})
-    # message(${var})
-    get_filename_component(file_name ${var} NAME)
-
-    string(CONCAT name ${file_name} .spv)
-
+#file(GLOB_RECURSE FRAG
     # message(${name})
-    # execute_process(COMMAND ${GLSLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/${name})
+    # execute_process(COMMAND ${GL${CMAKE_SOURCE_DIR}/shader/*.frag)
+    #list(APPEND ALL_RT_SHADER ${RGEN} ${RCHIT} ${RMISS} ${VERT} ${FRAG})
+    #message(STATUS "run glslangValidator to compile shaders ...")
+    #message("-----all ray tracing shader------ ")
+    #
+    #foreach(var ${ALL_RT_SHADER})
+    #    # message(${var})
+    #    get_filename_component(file_name ${var} NAME)
+    #
+    #    string(CONCAT name ${file_name} .spv)SLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/${name})
 
     # execute_process(COMMAND ${GLSLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/${name})
-endforeach()
+#endforeach()
 
 message("---------------------------------")
 
@@ -39,11 +38,11 @@ message(STATUS "compile shader OK")
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/Tool)
 
 # include(cmake/FindSrc.cmake)
-file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src *.cpp)
+file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src/*.cpp)
 message(STATUS ${SRC})
 
 # set(IMGUIDIR ${PROJECT_SOURCE_DIR}/lib/imgui)
-add_library(src SRC)
+add_library(src ${SRC})
 
 target_link_libraries(src imgui)
 

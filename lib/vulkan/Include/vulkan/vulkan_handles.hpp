@@ -7942,7 +7942,7 @@ namespace VULKAN_HPP_NAMESPACE
 
   public:
     VULKAN_HPP_CONSTEXPR Device() = default;
-    VULKAN_HPP_CONSTEXPR Device( std::nullptr_t ) VULKAN_HPP_NOEXCEPT {}
+    VULKAN_HPP_CONSTEXPR  Device( std::nullptr_t ) VULKAN_HPP_NOEXCEPT {}
     Device( VkDevice device ) VULKAN_HPP_NOEXCEPT : m_device( device ) {}
 
     Device & operator=( VkDevice device ) VULKAN_HPP_NOEXCEPT

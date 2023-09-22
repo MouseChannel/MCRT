@@ -2,8 +2,8 @@
 #include "Helper/Link_Util.hpp"
 
 // #include "src/Helper/Link_Util.cpp"
+#include "Rendering/AppWindow.hpp"
 #include "Rendering/Context.hpp"
-#include "Rendering/GLFW_Window.hpp"
 #include "Wrapper/Instance.hpp"
 #include "Wrapper/Window_Surface.hpp"
 #include <cassert>
@@ -25,7 +25,7 @@ Device::Device()
     std::cout << "use :" << physical_device.getProperties().deviceName << std::endl;
     gpu_name = physical_device.getProperties().deviceName;
     std::string window_name = gpu_name;
-    glfwSetWindowTitle(Context::Get_Singleton()->get_window()->get_handle(), window_name.c_str());
+//    glfwSetWindowTitle(Context::Get_Singleton()->get_window()->get_handle(), window_name.c_str());
     //    glfwSetWindowTitle(Context::Get_Singleton()->get_window()->get_handle(), physical_device.getProperties().deviceName);
     std::cout
         << "device extension: " << std::endl;
@@ -48,6 +48,12 @@ Device::Device()
         .setQueueFamilyIndex(queue_family_indices.graphic_queue.value());
 
     get_feature();
+    vk::DeviceCreateInfo new_create_info;
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    new_create_info
+        .setQueueCreateInfos(queue_create_info)
+        .setPEnabledExtensionNames(device_extension);
+#else
 
     auto feature = physical_device.getFeatures2<vk::PhysicalDeviceFeatures2,
                                                 vk::PhysicalDeviceVulkan13Features,
@@ -61,12 +67,6 @@ Device::Device()
     VkDeviceFaultInfoEXT a;
 
     feature.get<vk::PhysicalDeviceFaultFeaturesEXT>().setDeviceFault(true);
-    vk::DeviceCreateInfo new_create_info;
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-    new_create_info
-        .setQueueCreateInfos(queue_create_info)
-        .setPEnabledExtensionNames(device_extension);
-#else
     new_create_info.setPNext(&feature.get())
         .setQueueCreateInfos(queue_create_info)
         .setPEnabledExtensionNames(rt_device_extension);
@@ -86,8 +86,8 @@ void Device::get_feature()
                        vk::PhysicalDeviceVulkan11Features>
         features;
 
-    auto feature = physical_device.getFeatures2<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceVulkan12Features, vk::PhysicalDeviceVulkan11Features>();
-    int t = 0;
+//    auto feature = physical_device.getFeatures2<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceVulkan12Features, vk::PhysicalDeviceVulkan11Features>();
+//    int t = 0;
 }
 Device::~Device()
 {

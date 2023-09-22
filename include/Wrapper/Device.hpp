@@ -12,7 +12,7 @@ class Device : public Component<vk::Device, Device> {
 public:
     Device();
     ~Device();
-    const std::vector<std::string> device_extension {
+    const std::vector<const char*> device_extension {
         "VK_KHR_swapchain",
 
     };

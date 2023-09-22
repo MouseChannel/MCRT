@@ -15,7 +15,7 @@ public:
     {
         descriptor_sets = sets;
     }
-
+virtual ~Pipeline_base() = default;
 protected:
     std::vector<vk::DescriptorSet> descriptor_sets;
     std::vector<vk::DescriptorSetLayout> m_descriptor_layouts;

@@ -11,7 +11,7 @@ template <typename T, typename K>
 class Component {
 
 protected:
-    T m_handle { VK_NULL_HANDLE };
+    T m_handle  ;
 
     [[nodiscard]] auto& Get_Context_Singleton()
     {

@@ -1,6 +1,6 @@
 #include "Helper/Camera.hpp"
+#include "Rendering/AppWindow.hpp"
 #include "Rendering/Context.hpp"
-#include "Rendering/GLFW_Window.hpp"
 #include "Rendering/RT_Context.hpp"
 #include "iostream"
 
@@ -13,6 +13,9 @@ void Camera::init()
 {
 
     auto window = Context::Get_Singleton()->get_window();
+
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#else
     glfwSetWindowUserPointer(window->get_handle(), Context::Get_Singleton()->get_camera().get());
     glfwSetCursorPosCallback(window->get_handle(),
                              [](GLFWwindow* window, double xpos, double ypos) {
@@ -23,6 +26,7 @@ void Camera::init()
         auto camera = (Camera*)glfwGetWindowUserPointer(window);
         camera->onMouseScroll(xpos, ypos);
     });
+#endif
 
     setPerpective(m_fov_angel, 1, 1e-19f, 100000);
 
@@ -47,6 +51,8 @@ void Camera::update()
 
 void Camera::move_update()
 {
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#else
     if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_W) == GLFW_PRESS) {
         move(CAMERA_MOVE::MOVE_FRONT);
     }
@@ -90,6 +96,7 @@ void Camera::move_update()
     } else {
         setSentitivity(0.1);
     }
+#endif
 }
 void Camera::move(CAMERA_MOVE _mode)
 {
@@ -166,6 +173,8 @@ void Camera::setPerpective(float angle, float ratio, float near, float far)
 
 void Camera::onMouseMove(double _xpos, double _ypos)
 {
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#else
 
     if (m_firstMove) {
         m_xpos = _xpos;
@@ -196,6 +205,7 @@ void Camera::onMouseMove(double _xpos, double _ypos)
         ;
         update();
     }
+#endif
 }
 void Camera::onMouseScroll(double _xpos, double _ypos)
 {

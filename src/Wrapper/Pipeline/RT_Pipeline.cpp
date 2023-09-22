@@ -6,7 +6,7 @@
 #include "Wrapper/Shader_module.hpp"
 #include "shader/Data_struct.h"
 // #include "shader/Set_binding.h"
-#include <ranges>
+
 namespace MCRT {
 
 RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size)
@@ -97,7 +97,13 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
     Context::Get_Singleton()->get_debugger()->set_handle_name(layout, "my_lyout");
 
     vk::RayTracingPipelineCreateInfoKHR pipeline_create_info;
-
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    pipeline_create_info.setStages(stages)
+            .setGroups(groups)
+            .setLayout(layout)
+            .setMaxPipelineRayRecursionDepth(
+                    2);
+#else
     pipeline_create_info.setStages(stages)
         .setGroups(groups)
         .setLayout(layout)
@@ -110,6 +116,7 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
                 .get<vk::PhysicalDeviceRayTracingPipelinePropertiesKHR>()
                 .maxRayRecursionDepth);
     std::cout << pipeline_create_info.maxPipelineRayRecursionDepth << std::endl;
+#endif
 
     auto res = Context::Get_Singleton()
                    ->get_device()

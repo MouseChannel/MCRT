@@ -3,14 +3,14 @@
 
 #extension GL_GOOGLE_include_directive : enable
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
-#include "../../Set_binding.h"
+// #include "../../Set_binding.h"
 #include "../../sampling.glsl"
 #include "../common.h"
 #include "./binding.h"
 
-layout(set = e_compute, binding = e_skybox) uniform samplerCube skybox;
+layout(set = 0, binding = e_skybox) uniform samplerCube skybox;
 
-layout(set = e_compute, binding = e_LUT_image, rgba32f) uniform image2D LUT;
+layout(set = 0, binding = e_LUT_image, rgba32f) uniform image2D LUT;
 
 vec2 calculateLUT(float NoV, float roughness, float size)
 {

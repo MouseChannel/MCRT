@@ -1,4 +1,3 @@
-#include "Helper/Model_Loader/gltf_loader.hpp"
 #include "Rendering/Model.hpp"
 #include "Wrapper/Texture.hpp"
 #include <iostream>
@@ -6,8 +5,17 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 // #include "Helper/ThreadPool.hpp"
-#include "Tool/tiny_gltf.h"
 #include <glm/gtc/type_ptr.hpp>
+#include "Rendering/Context.hpp"
+
+
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#define TINYGLTF_ANDROID_LOAD_FROM_ASSETS
+#define TINYGLTF_IMPLEMENTATION
+#endif
+//#include "Tool/tiny_gltf.h"
+#include "Helper/Model_Loader/gltf_loader.hpp"
+
 #define using_threadpool1
 namespace MCRT {
 static std::mutex texture_lock;
@@ -366,6 +374,9 @@ void GLTF_Loader::load_model(std::string_view path)
     std::string err;
     std::string warn;
     bool ret = false;
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    tinygltf::asset_manager =  Context::Get_Singleton()->Get_app()->activity->assetManager;
+#endif
     auto file_extension = GetFilePathExtension(std::string(path));
     if (file_extension == "glb")
         ret = loader.LoadBinaryFromFile(&model, &err, &warn, std::string(path)); // for binary glTF(.glb)

@@ -194,6 +194,9 @@ std::shared_ptr<Buffer> Buffer::create_buffer(void* data, size_t size, vk::Buffe
 }
 vk::DeviceAddress Buffer::get_address()
 {
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    throw new std::runtime_error("android not support gpu address");
+#else
     if (m_buffer_address == 0) {
 
         vk::BufferDeviceAddressInfo address_info;
@@ -205,6 +208,7 @@ vk::DeviceAddress Buffer::get_address()
                                    address_info);
     }
     return m_buffer_address;
+#endif
 }
 
 } // namespace MCRT

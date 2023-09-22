@@ -4,8 +4,8 @@
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Model_Loader/Obj_Loader.hpp"
 #include "Helper/Ray_Tracing/RT_Manager.hpp"
+#include "Rendering/AppWindow.hpp"
 #include "Rendering/Compute_context.hpp"
-#include "Rendering/GLFW_Window.hpp"
 #include "Rendering/Model.hpp"
 #include "Rendering/RT_Context.hpp"
 #include "Rendering/Render_Context.hpp"
@@ -26,9 +26,25 @@
 
 namespace MCRT {
 
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+void Context::prepare(std::shared_ptr<Window> window)
+{
+
+    m_window = window;
+    do_prepare();
+}
+#else
+ 
 void Context::prepare(std::shared_ptr<Window> window)
 {
     m_window = window;
+    do_prepare();
+  }
+#endif
+
+
+  void Context::do_prepare()
+  {
     m_instance.reset(new Instance);
     m_surface.reset(new Surface);
     m_device.reset(new Device);
@@ -37,9 +53,13 @@ void Context::prepare(std::shared_ptr<Window> window)
     m_debugger.reset(new Debugger);
     m_sampler.reset(new Sampler);
     m_camera.reset(new Camera);
+    
     m_camera->init();
+    
   }
-
+  
+  
+ 
  
 std::shared_ptr<RenderPass> Context::get_renderpass()
 {

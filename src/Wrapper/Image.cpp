@@ -6,6 +6,7 @@
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Device.hpp"
 #include <cmath>
+
 namespace MCRT {
 Image::Image(uint32_t width,
              uint32_t height,
@@ -45,6 +46,7 @@ Image::Image(uint32_t width,
             0);
     Create_ImageView(format);
 }
+
 Image::Image(uint32_t width,
              uint32_t height,
              vk::Format format,
@@ -61,7 +63,6 @@ Image::Image(uint32_t width,
     , m_aspect(aspect)
     , layer_count(layer_count)
     , mipmap_level_count(mipmap_level_count)
-
     , need_delete(true)
 {
     auto& device = Get_Context_Singleton()->get_device();
@@ -169,7 +170,8 @@ void Image::Create_ImageView(vk::Format format)
                      .createImageView(
                          view_create_info);
     if (layer_count == 6) {
-        Context::Get_Singleton()->get_debugger()->set_handle_name(image_view, "skybox_image_view");
+        Context::Get_Singleton()->get_debugger()->set_handle_name(image_view,
+                                                                  "skybox_image_view");
     }
 }
 
@@ -179,7 +181,8 @@ void Image::AllocateMemory()
                                         ->get_device()
                                         ->get_handle()
                                         .getImageMemoryRequirements(m_handle);
-    auto memory_index = FindMemoryTypeIndex(image_memory_requirement.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
+    auto memory_index = FindMemoryTypeIndex(image_memory_requirement.memoryTypeBits,
+                                            vk::MemoryPropertyFlagBits::eDeviceLocal);
     vk::MemoryAllocateInfo allocate_info;
     allocate_info.setAllocationSize(image_memory_requirement.size)
         .setMemoryTypeIndex(memory_index);
@@ -188,6 +191,7 @@ void Image::AllocateMemory()
                  ->get_handle()
                  .allocateMemory(allocate_info);
 }
+
 uint32_t Image::FindMemoryTypeIndex(uint32_t requirement_type,
                                     vk::MemoryPropertyFlags flag)
 {
@@ -196,7 +200,8 @@ uint32_t Image::FindMemoryTypeIndex(uint32_t requirement_type,
                                  ->Get_Physical_device()
                                  .getMemoryProperties();
     for (int i = 0; i < memory_properties.memoryTypeCount; i++) {
-        if ((1 << i) & requirement_type && memory_properties.memoryTypes[i].propertyFlags & flag) {
+        if ((1 << i) & requirement_type &&
+            memory_properties.memoryTypes[i].propertyFlags & flag) {
             return i;
         }
     }
@@ -239,6 +244,7 @@ void Image::SetImageLayout(vk::ImageLayout dst_layout,
         image_layout = dst_layout;
     });
 }
+
 void Image::FillImageData(size_t size, void* data)
 {
     std::unique_ptr<Buffer> image_buffer {
@@ -268,6 +274,7 @@ void Image::FillImageData(size_t size, void* data)
                                      region);
     });
 }
+
 void Image::FillImageData(std::vector<size_t> size, std::vector<void*> data)
 {
     size_t total_size = 0;
@@ -305,7 +312,8 @@ void Image::FillImageData(std::vector<size_t> size, std::vector<void*> data)
                                      copys);
     });
 }
-void Image::generate_mipmap( )
+
+void Image::generate_mipmap()
 {
     int count = std::log2(std::min(width, height));
 
@@ -313,79 +321,211 @@ void Image::generate_mipmap( )
 
         CommandManager::ExecuteCmd(Context::Get_Singleton()->get_device()->Get_Graphic_queue(),
                                    [&](vk::CommandBuffer cmd) {
-                                       cmd.pipelineBarrier2(
-                                           vk::DependencyInfo()
-                                               .setImageMemoryBarriers(
-                                                   vk::ImageMemoryBarrier2()
-                                                       .setImage(m_handle)
-                                                       .setOldLayout(vk::ImageLayout::eUndefined)
-                                                       .setNewLayout(vk::ImageLayout::eTransferDstOptimal)
-                                                       .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                                                       .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                                                       .setSrcStageMask(vk::PipelineStageFlagBits2::eTransfer)
-                                                       .setSrcAccessMask(vk::AccessFlagBits2::eNone)
-                                                       .setDstStageMask(vk::PipelineStageFlagBits2::eTransfer)
-                                                       .setDstAccessMask(vk::AccessFlagBits2::eTransferWrite)
-                                                       .setSubresourceRange(
-                                                           vk::ImageSubresourceRange()
-                                                               .setAspectMask(vk::ImageAspectFlagBits::eColor)
-                                                               .setLayerCount(layer_count)
-                                                               .setBaseArrayLayer(0)
-                                                               .setLevelCount(1)
-                                                               .setBaseMipLevel(i))));
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+                                       auto image_barrier = vk::ImageMemoryBarrier {}.setImage(
+                                                                                         m_handle)
+                                                                .setOldLayout(vk::ImageLayout::eUndefined)
+                                                                .setNewLayout(
+                                                                    vk::ImageLayout::eTransferDstOptimal)
+                                                                .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                                                .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                                                //                    .setSrcStageMask(vk::PipelineStageFlagBits::eTransfer)
+                                                                .setSrcAccessMask(vk::AccessFlagBits::eNone)
+                                                                //                    .setDstStageMask(vk::PipelineStageFlagBits2::eTransfer)
+                                                                .setDstAccessMask(
+                                                                    vk::AccessFlagBits::eTransferWrite)
+                                                                .setSubresourceRange(
+                                                                    vk::ImageSubresourceRange()
+                                                                        .setAspectMask(
+                                                                            vk::ImageAspectFlagBits::eColor)
+                                                                        .setLayerCount(layer_count)
+                                                                        .setBaseArrayLayer(0)
+                                                                        .setLevelCount(1)
+                                                                        .setBaseMipLevel(i));
+                                       cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                                                           vk::PipelineStageFlagBits::eTransfer,
+                                                           {},
+                                                           {},
+                                                           {},
+                                                           image_barrier);
+
+#else
+                cmd.pipelineBarrier2(
+                    vk::DependencyInfo()
+                        .setImageMemoryBarriers(
+                            vk::ImageMemoryBarrier2()
+                                .setImage(m_handle)
+                                .setOldLayout(vk::ImageLayout::eUndefined)
+                                .setNewLayout(vk::ImageLayout::eTransferDstOptimal)
+                                .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                .setSrcStageMask(vk::PipelineStageFlagBits2::eTransfer)
+                                .setSrcAccessMask(vk::AccessFlagBits2::eNone)
+                                .setDstStageMask(vk::PipelineStageFlagBits2::eTransfer)
+                                .setDstAccessMask(vk::AccessFlagBits2::eTransferWrite)
+                                .setSubresourceRange(
+                                    vk::ImageSubresourceRange()
+                                        .setAspectMask(vk::ImageAspectFlagBits::eColor)
+                                        .setLayerCount(layer_count)
+                                        .setBaseArrayLayer(0)
+                                        .setLevelCount(1)
+                                        .setBaseMipLevel(i))));
+#endif
                                    });
 
         CommandManager::ExecuteCmd(Context::Get_Singleton()->get_device()->Get_Graphic_queue(),
                                    [&](vk::CommandBuffer cmd) {
-                                       cmd.blitImage2(vk::BlitImageInfo2()
-                                                          .setSrcImage(m_handle)
-                                                          .setSrcImageLayout(vk::ImageLayout ::eTransferSrcOptimal)
-                                                          .setDstImage(m_handle)
-                                                          .setDstImageLayout(vk::ImageLayout ::eTransferDstOptimal)
-                                                          .setRegions(
-                                                              vk::ImageBlit2()
-                                                                  .setSrcOffsets({ vk::Offset3D { 0, 0, 0 },
-                                                                                   vk::Offset3D { (int)width >> (i - 1), (int)height >> (i - 1), 1 } })
-                                                                  .setDstOffsets({ vk::Offset3D { 0, 0, 0 },
-                                                                                   vk::Offset3D { (int)width >> i, (int)height >> i, 1 } })
-                                                                  .setSrcSubresource(vk::ImageSubresourceLayers()
-                                                                                         .setAspectMask(vk::ImageAspectFlagBits::eColor)
-                                                                                         .setBaseArrayLayer(0)
-                                                                                         .setLayerCount(layer_count)
-                                                                                         .setMipLevel(i - 1))
-                                                                  .setDstSubresource(vk::ImageSubresourceLayers()
-                                                                                         .setAspectMask(vk::ImageAspectFlagBits::eColor)
-                                                                                         .setBaseArrayLayer(0)
-                                                                                         .setLayerCount(layer_count)
-                                                                                         .setMipLevel(i)))
-                                                          .setFilter(vk::Filter ::eLinear));
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+                                       cmd.blitImage(m_handle,
+                                                     vk::ImageLayout::eTransferSrcOptimal,
+                                                     m_handle,
+                                                     vk::ImageLayout::eTransferDstOptimal,
+                                                     vk::ImageBlit {}
+                                                         .setSrcOffsets(
+                                                             { vk::Offset3D { 0, 0, 0 },
+                                                               vk::Offset3D { (int)width >> (i - 1), (int)height >> (i - 1), 1 } })
+                                                         .setDstOffsets({ vk::Offset3D { 0, 0, 0 }, vk::Offset3D { (int)width >> i, (int)height >> i, 1 } })
+                                                         .setSrcSubresource(
+                                                             vk::ImageSubresourceLayers()
+                                                                 .setAspectMask(vk::ImageAspectFlagBits::eColor)
+                                                                 .setBaseArrayLayer(0)
+                                                                 .setLayerCount(layer_count)
+                                                                 .setMipLevel(i - 1))
+                                                         .setDstSubresource(
+                                                             vk::ImageSubresourceLayers()
+                                                                 .setAspectMask(
+                                                                     vk::ImageAspectFlagBits::eColor)
+                                                                 .setBaseArrayLayer(
+                                                                     0)
+                                                                 .setLayerCount(
+                                                                     layer_count)
+                                                                 .setMipLevel(
+                                                                     i)),vk::Filter::eLinear
+                                       );
+#else
+                cmd.blitImage2(vk::BlitImageInfo2()
+                                   .setSrcImage(m_handle)
+                                   .setSrcImageLayout(
+                                       vk::ImageLayout::eTransferSrcOptimal)
+                                   .setDstImage(m_handle)
+                                   .setDstImageLayout(
+                                       vk::ImageLayout::eTransferDstOptimal)
+                                   .setRegions(
+                                       vk::ImageBlit2()
+                                           .setSrcOffsets(
+                                               { vk::Offset3D {
+                                                     0,
+                                                     0,
+                                                     0 },
+                                                 vk::Offset3D {
+                                                     (int)width >> (i - 1),
+                                                     (int)height >> (i - 1),
+                                                     1 } })
+                                           .setDstOffsets(
+                                               { vk::Offset3D {
+                                                     0,
+                                                     0,
+                                                     0 },
+                                                 vk::Offset3D {
+                                                     (int)width >> i,
+                                                     (int)height >> i,
+                                                     1 } })
+                                           .setSrcSubresource(
+                                               vk::ImageSubresourceLayers()
+                                                   .setAspectMask(
+                                                       vk::ImageAspectFlagBits::eColor)
+                                                   .setBaseArrayLayer(
+                                                       0)
+                                                   .setLayerCount(
+                                                       layer_count)
+                                                   .setMipLevel(
+                                                       i -
+                                                       1))
+                                           .setDstSubresource(
+                                               vk::ImageSubresourceLayers()
+                                                   .setAspectMask(
+                                                       vk::ImageAspectFlagBits::eColor)
+                                                   .setBaseArrayLayer(
+                                                       0)
+                                                   .setLayerCount(
+                                                       layer_count)
+                                                   .setMipLevel(
+                                                       i)))
+                                   .setFilter(vk::Filter::eLinear));
+              
+
+          
+#endif
                                    });
         CommandManager::ExecuteCmd(Context::Get_Singleton()->get_device()->Get_Graphic_queue(),
                                    [&](vk::CommandBuffer cmd) {
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+                                       auto image_barrier = vk::ImageMemoryBarrier {}.setImage(
+                                                       m_handle)
+                                               .setOldLayout(vk::ImageLayout::eTransferDstOptimal)
+                                               .setNewLayout(
+                                                       vk::ImageLayout::eTransferSrcOptimal)
+                                               .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                               .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                                       //                    .setSrcStageMask(vk::PipelineStageFlagBits::eTransfer)
+                                               .setSrcAccessMask(vk::AccessFlagBits::eTransferWrite)
+                                                       //                    .setDstStageMask(vk::PipelineStageFlagBits2::eTransfer)
+                                               .setDstAccessMask(
+                                                       vk::AccessFlagBits::eTransferRead)
+                                               .setSubresourceRange(
+                                                       vk::ImageSubresourceRange()
+                                                               .setAspectMask(
+                                                                       vk::ImageAspectFlagBits::eColor)
+                                                               .setLayerCount(layer_count)
+                                                               .setBaseArrayLayer(0)
+                                                               .setLevelCount(1)
+                                                               .setBaseMipLevel(i));
+                                       cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                                                           vk::PipelineStageFlagBits::eTransfer,
+                                                           {},
+                                                           {},
+                                                           {},
+                                                           image_barrier);
+#else
                                        cmd.pipelineBarrier2(
                                            vk::DependencyInfo()
                                                .setImageMemoryBarriers(
                                                    vk::ImageMemoryBarrier2()
                                                        .setImage(m_handle)
-                                                       .setOldLayout(vk::ImageLayout::eTransferDstOptimal)
-                                                       .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
-                                                       .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                                                       .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                                                       .setSrcStageMask(vk::PipelineStageFlagBits2::eTransfer)
-                                                       .setSrcAccessMask(vk::AccessFlagBits2::eTransferWrite)
-                                                       .setDstStageMask(vk::PipelineStageFlagBits2::eTransfer)
-                                                       .setDstAccessMask(vk::AccessFlagBits2::eTransferRead)
+                                                       .setOldLayout(
+                                                           vk::ImageLayout::eTransferDstOptimal)
+                                                       .setNewLayout(
+                                                           vk::ImageLayout::eTransferSrcOptimal)
+                                                       .setSrcQueueFamilyIndex(
+                                                           VK_QUEUE_FAMILY_IGNORED)
+                                                       .setDstQueueFamilyIndex(
+                                                           VK_QUEUE_FAMILY_IGNORED)
+                                                       .setSrcStageMask(
+                                                           vk::PipelineStageFlagBits2::eTransfer)
+                                                       .setSrcAccessMask(
+                                                           vk::AccessFlagBits2::eTransferWrite)
+                                                       .setDstStageMask(
+                                                           vk::PipelineStageFlagBits2::eTransfer)
+                                                       .setDstAccessMask(
+                                                           vk::AccessFlagBits2::eTransferRead)
                                                        .setSubresourceRange(
                                                            vk::ImageSubresourceRange()
-                                                               .setAspectMask(vk::ImageAspectFlagBits::eColor)
-                                                               .setLayerCount(layer_count)
-                                                               .setBaseArrayLayer(0)
-                                                               .setLevelCount(1)
-                                                               .setBaseMipLevel(i))));
+                                                               .setAspectMask(
+                                                                   vk::ImageAspectFlagBits::eColor)
+                                                               .setLayerCount(
+                                                                   layer_count)
+                                                               .setBaseArrayLayer(
+                                                                   0)
+                                                               .setLevelCount(
+                                                                   1)
+                                                               .setBaseMipLevel(
+                                                                   i))));
+#endif
                                    });
         int a = 0;
     }
 }
+
 Image::~Image()
 {
     auto& device = Get_Context_Singleton()

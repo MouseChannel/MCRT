@@ -1,11 +1,19 @@
 #include "Wrapper/Instance.hpp"
 #include "Helper/Link_Util.hpp"
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#include "vulkan/vulkan_android.h"
+#else
 #include "glfw/glfw3.h"
+#endif
 
 namespace MCRT {
 
 auto Instance::get_required_extension()
 {
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    std::vector<const char*> extensions{};
+    extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+#else
     uint32_t glfwExtensionCount = 0;
 
     const char** glfwExtensions =
@@ -18,6 +26,7 @@ auto Instance::get_required_extension()
     extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 
     extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+#endif
     // extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 
     //   extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);

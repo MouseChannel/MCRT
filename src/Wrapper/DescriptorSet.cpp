@@ -7,7 +7,6 @@
 #include "Wrapper/Sampler.hpp"
 #include "Wrapper/SwapChain.hpp"
 #include <map>
-#include <ranges>
 
 namespace MCRT {
 DescriptorSet::DescriptorSet()

@@ -1,10 +1,9 @@
 #include "example/path_tracing/App.hpp"
 #include "Helper/ImGui_Context.hpp"
 #include "Helper/Uniform_Manager.hpp"
+#include "Rendering/AppWindow.hpp"
 #include "Rendering/Context.hpp"
-#include "Rendering/GLFW_Window.hpp"
 #include "example/path_tracing/Path_tracing_Context.hpp"
-
 
 namespace MCRT {
 void App::init()

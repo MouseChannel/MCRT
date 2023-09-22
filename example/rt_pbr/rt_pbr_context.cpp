@@ -186,7 +186,9 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
                 compute_shader {
                     new ShaderModule("D:/MoCheng/MoChengRT/shader/PBR/IBL/irradiance.comp.spv")
                 };
-            contexts[Compute]->prepare_pipeline({ compute_shader }, { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) }, sizeof(PushContant_Compute));
+            contexts[Compute]->prepare_pipeline({ compute_shader },
+                                                { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) },
+                                                sizeof(PushContant_Compute));
 
             contexts[Compute]->post_prepare();
             // doing the actually work

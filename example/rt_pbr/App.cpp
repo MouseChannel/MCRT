@@ -1,8 +1,8 @@
 #include "example/rt_pbr/App.hpp"
 #include "Helper/ImGui_Context.hpp"
 #include "Helper/Uniform_Manager.hpp"
+#include "Rendering/AppWindow.hpp"
 #include "Rendering/Context.hpp"
-#include "Rendering/GLFW_Window.hpp"
 #include "example/rt_pbr/rt_pbr_context.hpp"
 
 namespace MCRT {

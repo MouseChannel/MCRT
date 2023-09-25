@@ -1,8 +1,8 @@
 #pragma once
 #include "Helper/Uniform_Manager.hpp"
 #include "Rendering/Context.hpp"
-#include "example/base/shader/raster/Data_struct.h"
-#include "shader/Data_struct.h"
+#include "example/base/shaders/raster/Data_struct.h"
+#include "shaders/Data_struct.h"
 #include <functional>
 #include <iostream>
 

@@ -12,7 +12,7 @@
 #include "Rendering/Model.hpp"
 #include "Rendering/Render_Target/Color_Render_Target.hpp"
 #include "Rendering/Render_Target/Depth_Render_Target.hpp"
-#include "example/base/shader/ray_tracing/Data_struct.h"
+#include "example/base/shaders/ray_tracing/Data_struct.h"
 
 #include "Rendering/Render_Target/Render_Target.hpp"
 #include "Wrapper/Buffer.hpp"
@@ -25,7 +25,7 @@
 #include "Wrapper/RenderPass.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/SwapChain.hpp"
-#include "shader/Data_struct.h"
+#include "shaders/Data_struct.h"
 
 namespace MCRT {
     RT_Context::RT_Context(std::shared_ptr<Device> device)

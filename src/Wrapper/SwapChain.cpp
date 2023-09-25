@@ -30,7 +30,11 @@ namespace MCRT {
         vk::SwapchainCreateInfoKHR createInfo;
 
         createInfo.setClipped(true)
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+                .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eInherit)
+#else
                 .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
+#endif
                 .setImageExtent(surfaceInfo.extent)
                 .setImageColorSpace(surfaceInfo.format.colorSpace)
                 .setImageFormat(surfaceInfo.format.format)

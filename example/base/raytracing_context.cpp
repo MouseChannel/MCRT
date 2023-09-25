@@ -15,7 +15,7 @@
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/Texture.hpp"
 #include "iostream"
-#include "shader/Data_struct.h"
+#include "shaders/Data_struct.h"
 
 namespace MCRT {
 ray_tracing_context::ray_tracing_context()

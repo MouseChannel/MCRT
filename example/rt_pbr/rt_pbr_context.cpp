@@ -16,11 +16,11 @@
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/Skybox.hpp"
 #include "Wrapper/Texture.hpp"
-#include "example/base/shader/ray_tracing/Data_struct.h"
+#include "example/base/shaders/ray_tracing/Data_struct.h"
 #include "example/rt_pbr/shader/Binding.h"
 #include "example/rt_pbr/shader/Push_Constants.h"
 #include "iostream"
-#include "shader/PBR/IBL/binding.h"
+#include "shaders/PBR/IBL/binding.h"
 // #include ""
 
 namespace MCRT {
@@ -132,8 +132,8 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
         contexts[Graphic]->set_constants_size(sizeof(PushContant));
 
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
-        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shader/ray_tracing/post.vert.spv"));
-        graphic_shader_modules[Graphic_Pipeline::Main_FRAG].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shader/ray_tracing/post.frag.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shaders/ray_tracing/post.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_FRAG].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shaders/ray_tracing/post.frag.spv"));
 
         contexts[Graphic]->prepare();
         contexts[Graphic]->prepare_descriptorset([&]() {
@@ -184,7 +184,7 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
         { // pre_compute_irradiance
             std::shared_ptr<ShaderModule>
                 compute_shader {
-                    new ShaderModule("D:/MoCheng/MoChengRT/shader/PBR/IBL/irradiance.comp.spv")
+                    new ShaderModule("D:/MoCheng/MoChengRT/shaders/PBR/IBL/irradiance.comp.spv")
                 };
             contexts[Compute]->prepare_pipeline({ compute_shader },
                                                 { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) },
@@ -218,7 +218,7 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
 
             std::shared_ptr<ShaderModule>
                 compute_shader {
-                    new ShaderModule("D:/MoCheng/MoChengRT/shader/PBR/IBL/lookup_table.comp.spv")
+                    new ShaderModule("D:/MoCheng/MoChengRT/shaders/PBR/IBL/lookup_table.comp.spv")
                 };
 
             contexts[Compute]->prepare_pipeline({ compute_shader }, { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) }, sizeof(PushContant_Compute));

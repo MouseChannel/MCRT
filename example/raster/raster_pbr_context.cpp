@@ -18,10 +18,10 @@
 #include "Wrapper/Texture.hpp"
 #include "iostream"
 
-#include "shader/PBR/IBL/binding.h"
+#include "shaders/PBR/IBL/binding.h"
 
 #include "example/raster/shader/Binding.h"
-#include "shader/PBR/IBL/push_constants.h"
+#include "shaders/PBR/IBL/push_constants.h"
 
 #include "example/raster/shader/Constants.h"
 
@@ -43,7 +43,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     sky_box.reset(new Skybox("D:/MoCheng/MoChengRT/assets/Cubemap/farm"));
     skybox_mesh = GLTF_Loader::load_skybox("D:/MoCheng/MoChengRT/assets/cube.gltf");
 
-    GLTF_Loader::load_model("D:/MoCheng/MoChengRT/assets/pbr/cardbox.gltf");
+    GLTF_Loader::load_model("D:/MoCheng/MoChengRT/assets/mocheng_android.glb");
     LUT.reset(new Image(1024,
                         1024,
                         vk::Format::eR32G32B32A32Sfloat,
@@ -151,7 +151,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
         { // pre_compute_irradiance
             std::shared_ptr<ShaderModule>
                 compute_shader {
-                    new ShaderModule("D:/MoCheng/MoChengRT/shader/PBR/IBL/irradiance.comp.spv")
+                    new ShaderModule("D:/MoCheng/MoChengRT/shaders/PBR/IBL/irradiance.comp.spv")
                 };
             contexts[Compute]->prepare_pipeline({ compute_shader },
                                                 { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) },
@@ -170,14 +170,14 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                 cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
                                  compute_context->get_pipeline()->get_handle());
 
-                cmd.dispatch(irradiance_size, irradiance_size, 6);
+                cmd.dispatch(irradiance_size/16, irradiance_size/16, 6);
             });
         }
         { // pre_compute_lut
 
             std::shared_ptr<ShaderModule>
                 compute_shader {
-                    new ShaderModule("D:/MoCheng/MoChengRT/shader/PBR/IBL/lookup_table.comp.spv")
+                    new ShaderModule("D:/MoCheng/MoChengRT/shaders/PBR/IBL/lookup_table.comp.spv")
                 };
 
             contexts[Compute]->prepare_pipeline({ compute_shader },
@@ -197,7 +197,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                 cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
                                  compute_context->get_pipeline()->get_handle());
 
-                cmd.dispatch(1024, 1024, 1);
+                cmd.dispatch(1024/16, 1024/16, 1);
             });
         }
     }

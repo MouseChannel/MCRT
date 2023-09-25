@@ -7,11 +7,11 @@
 #extension GL_ARB_shader_clock : enable
 // #extension GL_GOOGLE_cpp_style_line_direcitve :  require
 #include "/shader/Data_struct.h"
-// #include "shader/Set_binding.h"
+// #include "shaders/Set_binding.h"
 #include "Binding.h"
 #include "hit_payload.glsl"
-#include "shader/common.glsl"
-#include "shader/sampling.glsl"
+#include "shaders/common.glsl"
+#include "shaders/sampling.glsl"
 
 layout(push_constant) uniform _PushContant
 {

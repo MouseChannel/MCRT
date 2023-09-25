@@ -4,7 +4,7 @@
 #extension GL_GOOGLE_include_directive : enable
 
 #include "Binding.h"
-#include "shader/Data_struct.h"
+#include "shaders/Data_struct.h"
 
 // #inclu
 #include "Constants.h"

@@ -6,10 +6,10 @@
 #extension GL_EXT_nonuniform_qualifier : enable
 #include "Binding.h"
 #include "Constants.h"
-#include "shader/Data_struct.h"
-#include "shader/sampling.glsl"
+#include "shaders/Data_struct.h"
+#include "shaders/sampling.glsl"
 
-#include "shader/PBR/common.h"
+#include "shaders/PBR/common.h"
 layout(location = e_pos) in vec3 in_pos;
 layout(location = e_nrm) in vec3 in_nrm;
 layout(location = e_texCoord) in vec2 in_texCoord;

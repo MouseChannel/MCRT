@@ -2,7 +2,7 @@
 #include "Rendering/Context.hpp"
 #include "example/base/raytracing_context.hpp"
 #include "example/rt_pbr/shader/Push_Constants.h"
-#include "shader/PBR/IBL/push_constants.h"
+#include "shaders/PBR/IBL/push_constants.h"
 #include <iostream>
 
 namespace MCRT {

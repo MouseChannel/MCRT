@@ -179,11 +179,13 @@ std::shared_ptr<Framebuffer>& RenderContext::get_framebuffer()
 
 std::shared_ptr<CommandBuffer> RenderContext::BeginFrame()
 {
-    //
+   
     auto result = m_device->get_handle().acquireNextImageKHR(
         m_swapchain->get_handle(),
         std::numeric_limits<uint64_t>::max(),
         Get_cur_render_semaphore()->get_handle());
+ 
+    
 
     if (result.result != vk::Result::eSuccess) {
         std::cout << "render fail" << std::endl;
@@ -284,23 +286,32 @@ void RenderContext::Submit()
         sub.signalSemaphoreCount = 1;
         sub.pSignalSemaphores = (VkSemaphore*)&Get_cur_present_semaphore()->get_handle();
 
-        auto res =  vkQueueSubmit((VkQueue)graphic_queue,
-                                 1,
-                                 &sub,
-                                  (VkFence)Get_cur_fence()->get_handle());
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+        VkFence fence = VK_NULL_HANDLE;
+#else
+        VkFence fence =  (VkFence)Get_cur_fence()->get_handle();
+#endif
+        graphic_queue.submit(submit_info);
+//        auto res =  vkQueueSubmit((VkQueue)graphic_queue,
+//                                 1,
+//                                 &sub,
+//                                  fence);
 
         // auto res = graphic_queue.submit(1, &submit_info, Get_cur_fence()->get_handle(), m_device->get_handle());
-        if (res == VK_ERROR_DEVICE_LOST) {
-            auto r = m_device->get_handle().getFaultInfoEXT();
-            int tt = 0;
-        }
+//        if (res == VK_ERROR_DEVICE_LOST) {
+//            auto r = m_device->get_handle().getFaultInfoEXT();
+//            int tt = 0;
+//        }
     } catch (std::exception e) {
         auto r = m_device->get_handle().getFaultInfoEXT();
         int rr = 9;
     }
+    graphic_queue.waitIdle();
 }
 void RenderContext::EndFrame()
 {
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#else
     auto fence_res = m_device->get_handle().waitForFences(
         Get_cur_fence()->get_handle(),
         true,
@@ -310,6 +321,7 @@ void RenderContext::EndFrame()
     }
 
     m_device->get_handle().resetFences(Get_cur_fence()->get_handle());
+#endif
 
     vk::PresentInfoKHR present_info;
     present_info.setImageIndices(current_index)
@@ -318,7 +330,7 @@ void RenderContext::EndFrame()
 
     auto present_queue = m_device->Get_present_queue();
 
-    auto present_result = present_queue.presentKHR(&present_info);
+    auto present_result = present_queue.presentKHR( present_info);
 
     if (present_result == vk::Result::eErrorOutOfDateKHR || present_result == vk::Result::eSuboptimalKHR) {
         std::cout << "present fail" << std::endl;

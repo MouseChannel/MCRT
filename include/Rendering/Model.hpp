@@ -1,7 +1,7 @@
 #pragma once
 #include "Rendering/Material.hpp"
 #include "glm/glm.hpp"
-#include "shader/Data_struct.h"
+#include "shaders/Data_struct.h"
 #include <memory>
 #include <string_view>
 #include <vulkan/vulkan.hpp>

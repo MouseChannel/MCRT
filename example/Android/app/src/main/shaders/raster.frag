@@ -15,7 +15,10 @@ layout(location = e_nrm) in vec3 in_nrm;
 layout(location = e_texCoord) in vec2 in_texCoord;
 layout(location = e_skybox_uv) in vec3 in_skybox_uv;
 
-layout(set = e_graphic, binding = e_textures) uniform sampler2D[] textures;
+//layout(set = e_graphic, binding = e_textures) uniform sampler2D[] textures;
+layout(set = e_graphic, binding = e_albedo_image) uniform sampler2D  albedo_image;
+layout(set = e_graphic, binding = e_normal_image) uniform sampler2D  normal_image;
+layout(set = e_graphic, binding = e_m_r_image) uniform sampler2D  m_r_image;
 layout(set = e_graphic, binding = e_skybox) uniform samplerCube skybox;
 layout(location = 0) out vec4 outColor;
 layout(push_constant) uniform _PushContant
@@ -48,7 +51,7 @@ void main()
         float roughness = 1;
         float metallicness = 1;
         if (pc_raster.metallicness_roughness_texture_index > -1 && bool(pc_raster.use_r_m_map)) {
-            vec2 r_m = texture(textures[nonuniformEXT(pc_raster.metallicness_roughness_texture_index)], in_texCoord).yz;
+            vec2 r_m = texture(m_r_image, in_texCoord).yz;
             roughness = r_m[0];
             metallicness = r_m[1];
             // debugPrintfEXT("message m_r \n");
@@ -56,13 +59,13 @@ void main()
 
         vec3 iinormal = in_nrm;
         if (pc_raster.normal_texture_index > -1 && bool(pc_raster.use_normal_map)) {
-            iinormal = getNormalSpace(in_nrm) * texture(textures[nonuniformEXT(pc_raster.normal_texture_index)], in_texCoord).xyz;
+            iinormal = getNormalSpace(in_nrm) * texture(normal_image, in_texCoord).xyz;
         }
         // }
 
         vec3 albedo = vec3(1, 1, 1);
         if (pc_raster.color_texture_index > -1) {
-            albedo = texture(textures[nonuniformEXT(pc_raster.color_texture_index)], in_texCoord).xyz;
+            albedo = texture(albedo_image, in_texCoord).xyz;
         }
 
         vec3 color = Get_IBLColor(vec3(pc_raster.camera_pos),

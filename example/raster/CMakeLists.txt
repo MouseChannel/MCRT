@@ -1,4 +1,4 @@
-file(GLOB_RECURSE RASTER_PBR ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
+file(GLOB_RECURSE RASTER_PBR ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 add_library(raster_pbr_lib ${RASTER_PBR})
 

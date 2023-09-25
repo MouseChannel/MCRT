@@ -4,7 +4,7 @@
 #extension GL_EXT_debug_printf : enable
 #extension GL_GOOGLE_include_directive : enable
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
-#include "shader/Data_struct.h"
+#include "shaders/Data_struct.h"
 #include "hit_payload.glsl"
 
 layout(location = 0) rayPayloadInEXT hitPayload prd;

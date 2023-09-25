@@ -7,7 +7,7 @@
 #include "Wrapper/RenderPass.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "Wrapper/SwapChain.hpp"
-// #include "shader/Set_binding.h"
+// #include "shaders/Set_binding.h"
 #include <vector>
 
 namespace MCRT {
@@ -77,6 +77,7 @@ void Graphic_Pipeline::Build_Pipeline(std::shared_ptr<RenderPass> render_pass)
         .setPMultisampleState(&multi_sample)
         .setPDepthStencilState(&depth_test)
         .setPColorBlendState(&blend)
+//        .setFlags(vk::PipelineCreateFlagBits:)
         .setPDynamicState(&vk::PipelineDynamicStateCreateInfo().setDynamicStates(dynamic_state));
 
     auto res = Get_Context_Singleton()->get_device()->get_handle().createGraphicsPipeline(nullptr, create_info);

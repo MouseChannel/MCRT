@@ -1,6 +1,6 @@
 #pragma once
 #include "glm/glm.hpp"
-#include "shader/Data_struct.h"
+#include "shaders/Data_struct.h"
 
 static Mat4f convert_to_shader_data(glm::mat4 data)
 {

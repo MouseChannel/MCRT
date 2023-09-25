@@ -18,7 +18,7 @@
             android:exported="true">
             <meta-data
                 android:name="android.app.lib_name"
-                android:value="mochengtest" />
+                android:value="mocheng_vulkan" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

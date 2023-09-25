@@ -19,6 +19,10 @@ namespace MCRT {
 
     Window::Window(ANativeWindow *android_window) {
         m_window = android_window;
+        auto h = ANativeWindow_getHeight(m_window);
+        auto w = ANativeWindow_getWidth(m_window);
+        Context::Get_Singleton()->set_extent2d(ANativeWindow_getWidth(m_window),
+                                               ANativeWindow_getHeight(m_window));
     }
 
 #else
@@ -58,6 +62,7 @@ namespace MCRT {
         glfwTerminate();
 #endif
     }
+
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 #else
     void Window::PollEvents() {

@@ -9,10 +9,10 @@
 #include "Binding.h"
 #include "Push_Constants.h"
 #include "hit_payload.glsl"
-#include "shader/Data_struct.h"
+#include "shaders/Data_struct.h"
 
 #include "/shader/common.glsl"
-#include "shader/sampling.glsl"
+#include "shaders/sampling.glsl"
 
 layout(push_constant) uniform _PushContant
 {

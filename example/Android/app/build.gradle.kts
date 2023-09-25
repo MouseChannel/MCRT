@@ -24,7 +24,7 @@ android {
         versionCode = 1
         versionName = "1.0"
         shaders {
-            glslcArgs += listOf("--target-env=vulkan1.3")
+            glslcArgs += listOf("--target-env=vulkan1.1")
 
 //            glslcScopedArgs("lights", "-DLIGHT1=1", "-DLIGHT2=0")
         }

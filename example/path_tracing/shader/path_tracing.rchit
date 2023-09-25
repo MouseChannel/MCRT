@@ -9,13 +9,13 @@
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 #extension GL_EXT_buffer_reference2 : require
 
-#include "shader/Data_struct.h"
+#include "shaders/Data_struct.h"
 
-// #include "shader/Set_binding.h"
+// #include "shaders/Set_binding.h"
 #include "Binding.h"
 #include "hit_payload.glsl"
-#include "shader/common.glsl"
-#include "shader/sampling.glsl"
+#include "shaders/common.glsl"
+#include "shaders/sampling.glsl"
 
 
 hitAttributeEXT vec2 attribs;

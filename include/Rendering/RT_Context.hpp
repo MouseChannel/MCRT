@@ -8,7 +8,7 @@
 #include "Rendering/Host_Uniform.hpp"
 #include <memory>
 #include <vector>
-#include "example/base/shader/ray_tracing/Data_struct.h"
+#include "example/base/shaders/ray_tracing/Data_struct.h"
 
  
 

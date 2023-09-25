@@ -25,7 +25,23 @@ Skybox::Skybox(std::string file_dir)
 
     for (int i = 0; i < 6; i++) {
         auto name = file_dir + "/" + names[i] + ".png";
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+        auto m_app = Context::Get_Singleton()->Get_app();
+        AAsset* file = AAssetManager_open(m_app->activity->assetManager,
+                                          ((std::string)name.data()).c_str(), AASSET_MODE_BUFFER);
+
+        size_t fileLength = AAsset_getLength(file);
+
+        std::vector<stbi_uc> source;
+        source.resize(fileLength);
+
+        AAsset_read(file, source.data(), fileLength);
+        AAsset_close(file);
+
+        datas[i] = stbi_load_from_memory(source.data(), fileLength, &width, &height, &channel, STBI_rgb_alpha);
+#else
         datas[i] = stbi_load(name.data(), &width, &height, &channel, STBI_rgb_alpha);
+#endif
 
         { // check vaild
             std::cout << width << ' ' << height << std::endl;

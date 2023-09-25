@@ -10,15 +10,15 @@
 #extension GL_EXT_buffer_reference2 : require
 #extension GL_EXT_nonuniform_qualifier : enable
 
-#include "shader/Data_struct.h"
+#include "shaders/Data_struct.h"
 
 #include "Binding.h"
 #include "Push_Constants.h"
 #include "hit_payload.glsl"
-#include "shader/PBR/common.h"
-#include "shader/common.glsl"
+#include "shaders/PBR/common.h"
+#include "shaders/common.glsl"
 
-#include "shader/sampling.glsl"
+#include "shaders/sampling.glsl"
 
 hitAttributeEXT vec2 attribs;
 

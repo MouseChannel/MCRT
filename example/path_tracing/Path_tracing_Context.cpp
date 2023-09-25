@@ -128,10 +128,10 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
         contexts[Graphic]->set_constants_size(sizeof(PushContant));
 
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
-        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shader/ray_tracing/post.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shaders/ray_tracing/post.vert.spv"));
 
         graphic_shader_modules[Graphic_Pipeline::Main_FRAG]
-            .reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shader/ray_tracing/post.frag.spv"));
+            .reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shaders/ray_tracing/post.frag.spv"));
 
         contexts[Graphic]
             ->prepare();

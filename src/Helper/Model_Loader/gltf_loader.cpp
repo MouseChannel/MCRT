@@ -219,7 +219,7 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
 
     glm::mat4 local_matrix = translation_matrix * rotate_matrix * scale_matrix;
     local_matrix = father_matrix * local_matrix;
-    std::array<std::array<float, 4>, 3> transform;
+    std::array<std::array<float, 4>, 3> transform{};
     {
         transform[0] = {
             local_matrix[0][0],
@@ -286,8 +286,7 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
 
             if (accessor_texcoord.type != TINYGLTF_TYPE_VEC2) {
                 throw std::runtime_error("texcoord format is not vec2");
-                // std::cout << "texcoord not vec3" << std::endl;
-                return local_matrix;
+                
             }
             copy_data(texcoord, model.buffers[buffer_view.buffer].data, buffer_view, accessor_texcoord.count);
         }
@@ -295,7 +294,7 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
     vertexs.clear();
     indices.clear();
     triangles.clear();
-    std::array<glm::vec3, 3> triangle_pos;
+    std::array<glm::vec3, 3> triangle_pos{};
     for (int i = 0; i < indexs.size(); i += 3) {
 
         for (int j = 0; j < 3; j++) {
@@ -420,7 +419,11 @@ void GLTF_Loader::load_model(std::string_view path)
 
     for (auto& node_index : model.scenes[model.defaultScene].nodes) {
         auto node = model.nodes[node_index];
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+
+#else
         std::cout << ++node_number << "/" << model.scenes[model.defaultScene].nodes.size() << "    loading: " << node.name << std::endl;
+#endif
         if (node.name == "teacherDesk") {
             int r = 0;
         }

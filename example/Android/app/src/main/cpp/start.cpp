@@ -24,11 +24,13 @@ void handle_cmd(android_app *pApp, int32_t cmd) {
     switch (cmd) {
         case APP_CMD_INIT_WINDOW:
 //            context.reset(new MCRT::raster_context_pbr);
+            LOGE("mocheng");
             app = pApp;
             m_window.reset(new MCRT::Window(app->window));
-            MCRT::raster_context_pbr::Get_Singleton()->prepare(m_window);
             MCRT::raster_context_pbr::Get_Singleton()->set_Android_app(app);
+            MCRT::raster_context_pbr::Get_Singleton()->prepare(m_window);
             isready = true;
+            break;
 
         case APP_CMD_TERM_WINDOW:
             terminate();

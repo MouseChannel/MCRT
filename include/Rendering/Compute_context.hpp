@@ -2,7 +2,7 @@
 
 #include "Helper/Uniform_Manager.hpp"
 #include "Rendering/Context_base.hpp"
-#include "shader/Data_struct.h"
+#include "shaders/Data_struct.h"
 namespace MCRT {
 struct test_Compute {
     int a, b;

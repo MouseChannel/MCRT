@@ -23,19 +23,23 @@ Mesh::Mesh(std::string name,
 
 {
     assert(m_vertexs.size() > 0);
-    auto ray_tracing_flag =
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    auto extra_flag = (vk::BufferUsageFlagBits)0;
+#else
+    auto extra_flag =
         vk::BufferUsageFlagBits::eShaderDeviceAddress |
         vk::BufferUsageFlagBits::eStorageBuffer |
         vk::BufferUsageFlagBits::eAccelerationStructureBuildInputReadOnlyKHR;
+#endif
     vertexs_buffer = Buffer::CreateDeviceBuffer(
         m_vertexs.data(),
         m_vertexs.size() * sizeof(m_vertexs[0]),
-        vk::BufferUsageFlagBits::eVertexBuffer | ray_tracing_flag);
+        vk::BufferUsageFlagBits::eVertexBuffer | extra_flag);
     indices_buffer = Buffer::CreateDeviceBuffer(
         m_index.data(),
         m_index.size() * sizeof(m_index[0]),
-        vk::BufferUsageFlagBits::eIndexBuffer | ray_tracing_flag);
-    material_buffer = Buffer::CreateDeviceBuffer(&m_material, sizeof(m_material), ray_tracing_flag);
+        vk::BufferUsageFlagBits::eIndexBuffer | extra_flag);
+    material_buffer = Buffer::CreateDeviceBuffer(&m_material, sizeof(m_material), extra_flag);
 }
 
 void Mesh::update_accelerate_structure_data()

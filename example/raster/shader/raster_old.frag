@@ -3,13 +3,13 @@
 #extension GL_EXT_debug_printf : enable
 #extension GL_GOOGLE_include_directive : enable
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
-#include "shader/Data_struct.h"
+#include "shaders/Data_struct.h"
 #extension GL_EXT_nonuniform_qualifier : enable
 #include "Binding.h"
 #include "Constants.h"
-#include "shader/sampling.glsl"
+#include "shaders/sampling.glsl"
 // #include "Binding.h"
-#include "shader/PBR/common.h"
+#include "shaders/PBR/common.h"
 layout(location = e_nrm) in vec3 in_nrm;
 // layout(location = e_texture_index) in flat int in_texture_index;
 layout(location = e_texCoord) in vec2 in_texCoord;

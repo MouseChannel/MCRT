@@ -8,7 +8,7 @@
 #define END_ENUM()
 #endif
 
-#include "example/base/shader/ray_tracing/Data_struct.h"
+#include "example/base/shaders/ray_tracing/Data_struct.h"
 #include "example/path_tracing/shader/Push_constants.h"
 BEGIN_ENUM(Ray_Tracing_Set)
 e_ray_tracing = 0,

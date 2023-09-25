@@ -4,8 +4,8 @@
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Shader_module.hpp"
-#include "shader/Data_struct.h"
-// #include "shader/Set_binding.h"
+#include "shaders/Data_struct.h"
+// #include "shaders/Set_binding.h"
 
 namespace MCRT {
 

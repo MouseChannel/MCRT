@@ -68,11 +68,14 @@ void Buffer::AllocateMemory()
     vk::MemoryAllocateInfo allocate_info;
     allocate_info.setMemoryTypeIndex(memory_info.index)
         .setAllocationSize(memory_info.size);
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#else
     vk::MemoryAllocateFlagsInfo flag;
     flag.setFlags(vk::MemoryAllocateFlagBits::eDeviceAddress);
     if (m_usage & vk::BufferUsageFlagBits::eShaderDeviceAddress) {
         allocate_info.setPNext(&flag);
     }
+#endif
 
     memory = Get_Context_Singleton()
                  ->get_device()

@@ -2,6 +2,7 @@
 #include "Rendering/AppWindow.hpp"
 #include "Rendering/Context.hpp"
 #include "Rendering/RT_Context.hpp"
+#include "Wrapper/SwapChain.hpp"
 #include "iostream"
 
 namespace MCRT {
@@ -9,12 +10,17 @@ namespace MCRT {
 Camera::Camera()
 {
 }
+
 void Camera::init()
 {
 
     auto window = Context::Get_Singleton()->get_window();
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    auto w = ANativeWindow_getWidth(Context::Get_Singleton()->get_window()->get_handle());
+
+    auto h = ANativeWindow_getHeight(Context::Get_Singleton()->get_window()->get_handle());
+
 #else
     glfwSetWindowUserPointer(window->get_handle(), Context::Get_Singleton()->get_camera().get());
     glfwSetCursorPosCallback(window->get_handle(),
@@ -26,9 +32,11 @@ void Camera::init()
         auto camera = (Camera*)glfwGetWindowUserPointer(window);
         camera->onMouseScroll(xpos, ypos);
     });
+    int w, h;
+    glfwGetFramebufferSize(window->get_handle(), &w, &h);
 #endif
-
-    setPerpective(m_fov_angel, 1, 1e-19f, 100000);
+    //        auto extent = Context::Get_Singleton()->get_swapchain()->Get_Extent2D();
+    setPerpective(m_fov_angel, (float)w / (float)h, 1e-19f, 100000);
 
     m_vMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
 }
@@ -98,6 +106,7 @@ void Camera::move_update()
     }
 #endif
 }
+
 void Camera::move(CAMERA_MOVE _mode)
 {
     // std::cout << (int)_mode << std::endl;
@@ -150,6 +159,7 @@ void Camera::pitch(float _yOffset)
 
     m_front = glm::normalize(m_front);
 }
+
 void Camera::yaw(float _xOffset)
 {
     m_yaw += _xOffset * m_sensitivity;
@@ -161,6 +171,7 @@ void Camera::yaw(float _xOffset)
     m_front = glm::normalize(m_front);
     // std::cout << m_front.x << " |" << m_front.y << "| " << m_front.z << std::endl;
 }
+
 void Camera::setSentitivity(float _s)
 {
     m_sensitivity = _s;
@@ -171,11 +182,86 @@ void Camera::setPerpective(float angle, float ratio, float near, float far)
     m_pMatrx = glm::perspective(glm::radians(angle), ratio, near, far);
 }
 
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+
+int32_t Camera::handleAppInput(struct android_app* app, AInputEvent* event)
+{
+    switch (AInputEvent_getType(event)) {
+    case AINPUT_EVENT_TYPE_MOTION:
+        switch (AInputEvent_getSource(event)) {
+
+        case AINPUT_SOURCE_TOUCHSCREEN: {
+            int32_t action = AMotionEvent_getAction(event);
+            int32_t eventX = AMotionEvent_getX(event, 0);
+            int32_t eventY = AMotionEvent_getY(event, 0);
+            switch (action) {
+            case AMOTION_EVENT_ACTION_UP:
+
+                break;
+            case AMOTION_EVENT_ACTION_DOWN:
+                m_xpos = eventX;
+                m_ypos = eventY;
+                break;
+            case AMOTION_EVENT_ACTION_MOVE:
+
+                onMouseMove(eventX, eventY);
+                ((void)__android_log_print(ANDROID_LOG_ERROR, "mocheng", "%d", eventX));
+                ((void)__android_log_print(ANDROID_LOG_ERROR, "mocheng", "%d", eventY));
+
+                break;
+            }
+        }
+        }
+        break;
+    case AINPUT_EVENT_TYPE_KEY:
+        int32_t keyCode = AKeyEvent_getKeyCode(event);
+        switch (AKeyEvent_getKeyCode(event)) {
+        case AKEYCODE_VOLUME_UP:
+            //                        LOGE("volume up");
+            m_position += m_front * 1e-1f;
+            ;
+            update();
+            break;
+        case AKEYCODE_VOLUME_DOWN:
+            //                        LOGE("volume down");
+            m_position -= m_front * 1e-1f;
+            ;
+            update();
+            break;
+        }
+
+        break;
+    }
+
+    return 1;
+}
+
+#else
+ 
+#endif
+
 void Camera::onMouseMove(double _xpos, double _ypos)
 {
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-#else
 
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    if (m_firstMove) {
+        m_xpos = _xpos;
+        m_ypos = _ypos;
+        m_firstMove = false;
+        return;
+    }
+
+    float _xOffset = m_xpos - _xpos;
+    float _yOffset = m_ypos - _ypos;
+    // std::cout << m_xpos << ' ' << m_ypos << std::endl;
+
+    m_xpos = _xpos;
+    m_ypos = _ypos;
+    pitch(_yOffset * 10);
+    yaw(_xOffset * 10);
+
+    update();
+#else
     if (m_firstMove) {
         m_xpos = _xpos;
         m_ypos = _ypos;
@@ -207,6 +293,7 @@ void Camera::onMouseMove(double _xpos, double _ypos)
     }
 #endif
 }
+
 void Camera::onMouseScroll(double _xpos, double _ypos)
 {
     // std::cout << _xpos << ' ' << _ypos << std::endl;

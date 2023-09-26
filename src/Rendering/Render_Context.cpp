@@ -64,7 +64,7 @@ std::shared_ptr<Pipeline_base> RenderContext::get_pipeline2()
 }
 void RenderContext::fill_render_targets()
 {
-    auto count { enable_swapchain ? 3 : 1 };
+    auto count { enable_swapchain ? render_frame_count : 1 };
     all_rendertargets.clear();
     all_rendertargets.resize(count);
     for (auto i { 0 }; i < count; i++) {
@@ -82,7 +82,7 @@ void RenderContext::fill_render_targets()
 }
 void RenderContext::Prepare_Framebuffer()
 {
-    auto count { enable_swapchain ? 3 : 1 };
+    auto count { enable_swapchain ? render_frame_count : 1 };
     render_frames.resize(count);
     for (auto i { 0 }; i < count; i++) {
         render_frames[i].reset(new RenderFrame(m_renderpass, all_rendertargets[i]));
@@ -99,7 +99,7 @@ void RenderContext::Prepare_RenderPass()
         render_pass->Add_Attachment_description(render_target->Get_attachment_description());
     }
     render_pass->Build();
-    Context::Get_Singleton()->get_debugger()->set_name(render_pass, "main renderpass");
+//    Context::Get_Singleton()->get_debugger()->set_name(render_pass, "main renderpass");
 }
 void RenderContext::prepare_descriptorset(std::function<void()> prepare)
 {
@@ -151,7 +151,7 @@ void RenderContext::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> 
         m_skybox_pipeline->Make_VertexAssembly();
         m_skybox_pipeline->Make_viewPort();
         m_skybox_pipeline->Make_MultiSample();
-        m_skybox_pipeline->Make_Resterization();
+        m_skybox_pipeline->Make_Resterization(vk::CullModeFlagBits::eNone);
         m_skybox_pipeline->Make_attach();
         m_skybox_pipeline->Make_Blend();
         m_skybox_pipeline->Make_DepthTest(false);
@@ -159,7 +159,7 @@ void RenderContext::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> 
         m_skybox_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
     }
 }
- 
+
 void RenderContext::prepare()
 {
     fill_render_targets();
@@ -179,13 +179,11 @@ std::shared_ptr<Framebuffer>& RenderContext::get_framebuffer()
 
 std::shared_ptr<CommandBuffer> RenderContext::BeginFrame()
 {
-   
+    auto cur_semaphone = Get_cur_render_semaphore()->get_handle();
     auto result = m_device->get_handle().acquireNextImageKHR(
         m_swapchain->get_handle(),
         std::numeric_limits<uint64_t>::max(),
-        Get_cur_render_semaphore()->get_handle());
- 
-    
+        cur_semaphone);
 
     if (result.result != vk::Result::eSuccess) {
         std::cout << "render fail" << std::endl;
@@ -235,9 +233,10 @@ std::shared_ptr<CommandBuffer> RenderContext::Begin_Record_Command_Buffer()
 }
 void RenderContext::record_command(std::shared_ptr<CommandBuffer> cmd)
 {
-
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#else
     auto extent2d = Context::Get_Singleton()->get_extent2d();
-    // std::cout<<123<<extent2d.width<<extent2d.height<<std::endl;
+
     cmd->get_handle().setViewport(0,
                                   vk::Viewport()
                                       .setHeight(extent2d.height)
@@ -254,6 +253,7 @@ void RenderContext::record_command(std::shared_ptr<CommandBuffer> cmd)
                                                     .setY(0)));
 
     Context::Get_Singleton()->get_debugger()->set_name(cmd, "render command_buffer");
+#endif
 }
 
 //---
@@ -287,21 +287,21 @@ void RenderContext::Submit()
         sub.pSignalSemaphores = (VkSemaphore*)&Get_cur_present_semaphore()->get_handle();
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
-        VkFence fence = VK_NULL_HANDLE;
+        auto fence = Get_cur_fence()->get_handle();
 #else
-        VkFence fence =  (VkFence)Get_cur_fence()->get_handle();
+        auto fence = Get_cur_fence()->get_handle();
 #endif
-        graphic_queue.submit(submit_info);
-//        auto res =  vkQueueSubmit((VkQueue)graphic_queue,
-//                                 1,
-//                                 &sub,
-//                                  fence);
+        graphic_queue.submit(submit_info, fence);
+        //        auto res =  vkQueueSubmit((VkQueue)graphic_queue,
+        //                                 1,
+        //                                 &sub,
+        //                                  fence);
 
         // auto res = graphic_queue.submit(1, &submit_info, Get_cur_fence()->get_handle(), m_device->get_handle());
-//        if (res == VK_ERROR_DEVICE_LOST) {
-//            auto r = m_device->get_handle().getFaultInfoEXT();
-//            int tt = 0;
-//        }
+        //        if (res == VK_ERROR_DEVICE_LOST) {
+        //            auto r = m_device->get_handle().getFaultInfoEXT();
+        //            int tt = 0;
+        //        }
     } catch (std::exception e) {
         auto r = m_device->get_handle().getFaultInfoEXT();
         int rr = 9;
@@ -311,6 +311,16 @@ void RenderContext::Submit()
 void RenderContext::EndFrame()
 {
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    auto fence_res = m_device->get_handle().waitForFences(
+        Get_cur_fence()->get_handle(),
+        true,
+        std::numeric_limits<uint64_t>::max());
+    if (fence_res != vk::Result::eSuccess) {
+        std::cout << "Wait fence fail" << std::endl;
+    }
+
+    m_device->get_handle().resetFences(Get_cur_fence()->get_handle());
+
 #else
     auto fence_res = m_device->get_handle().waitForFences(
         Get_cur_fence()->get_handle(),
@@ -330,11 +340,16 @@ void RenderContext::EndFrame()
 
     auto present_queue = m_device->Get_present_queue();
 
-    auto present_result = present_queue.presentKHR( present_info);
+    auto present_result = present_queue.presentKHR(&present_info);
 
     if (present_result == vk::Result::eErrorOutOfDateKHR || present_result == vk::Result::eSuboptimalKHR) {
         std::cout << "present fail" << std::endl;
         re_create();
+    }
+//    re_create();
+
+    if (present_result != vk::Result::eSuccess) {
+        int r = 0;
     }
     current_frame++;
     current_frame %= render_frame_count;
@@ -342,7 +357,21 @@ void RenderContext::EndFrame()
 void RenderContext::re_create()
 {
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    m_device->get_handle().waitIdle();
+    Context::Get_Singleton()->get_swapchain().reset(new SwapChain);
+    m_swapchain = Context::Get_Singleton()->get_swapchain();
+    auto extent = m_swapchain->Get_Extent2D();
+
+    Context::Get_Singleton()->set_extent2d(extent.width,extent.height);
+    fill_render_targets();
+    Prepare_Framebuffer();
+//    Context::Get_Singleton()
+//        ->get_camera()
+//        ->setPerpective(90, (float)extent.width / (float)extent.height, 0.1f, 10000);
+    //---
+    Context::Get_Singleton()->re_create_context();
 #else
+    m_device->get_handle().waitIdle();
     int cur_width = 0, cur_height = 0;
     glfwGetFramebufferSize(Context::Get_Singleton()->get_window()->get_handle(),
                            &cur_width,

@@ -38,11 +38,11 @@ namespace MCRT {
         // std::cout << Context::Get_Singleton()->get_device()->gpu_name << std::endl;
         // auto rr = Context::Get_Singleton()->get_device()->gpu_name;
         m_window = glfwCreateWindow(width, height, "MOCHENG", nullptr, nullptr);
-        glfwSwapInterval(0);
+//        glfwSwapInterval(0);
         glfwSetWindowTitle(m_window, "new title");
         //   window.reset(glfwCreateWindow(width, height, "MoChengRT", nullptr, nullptr));
         //   glfwMakeContextCurrent(window);
-        glfwSwapInterval(0);
+//        glfwSwapInterval(0);
 
         assert(m_window);
         int w = 0, h = 0;

@@ -37,7 +37,8 @@ Graphic_Pipeline::Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> sh
     layout_create_info.setSetLayouts(m_descriptor_layouts)
         .setPushConstantRanges(vk::PushConstantRange()
                                    .setSize(push_constants_size)
-                                   .setStageFlags(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment));
+                                   .setStageFlags(vk::ShaderStageFlagBits::eVertex |
+                                                  vk::ShaderStageFlagBits::eFragment));
     layout = Context::Get_Singleton()
                  ->get_device()
                  ->get_handle()
@@ -46,21 +47,24 @@ Graphic_Pipeline::Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> sh
     shader_stage.resize(2);
     shader_stage[(int)Shader_Stage::VERT]
         .setPName("main")
-        .setStage(vk::ShaderStageFlagBits ::eVertex)
+        .setStage(vk::ShaderStageFlagBits::eVertex)
         .setModule(shader_modules[(int)Shader_Stage::VERT]->get_handle());
     shader_stage[(int)Shader_Stage::FRAG]
         .setPName("main")
-        .setStage(vk::ShaderStageFlagBits ::eFragment)
+        .setStage(vk::ShaderStageFlagBits::eFragment)
         .setModule(shader_modules[(int)Shader_Stage::FRAG]->get_handle());
 }
+
 Graphic_Pipeline::~Graphic_Pipeline()
 {
     Get_Context_Singleton()->get_device()->get_handle().destroyPipelineLayout(layout);
     Get_Context_Singleton()->get_device()->get_handle().destroyPipeline(m_handle);
 }
+
 void Graphic_Pipeline::Build_Pipeline(std::shared_ptr<RenderPass> render_pass)
 {
-    std::vector<vk::DynamicState> dynamic_state = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
+    std::vector<vk::DynamicState> dynamic_state = { vk::DynamicState::eViewport,
+                                                    vk::DynamicState::eScissor };
     vk::GraphicsPipelineCreateInfo create_info;
     create_info.setLayout(layout)
         .setRenderPass(render_pass->get_handle())
@@ -76,11 +80,16 @@ void Graphic_Pipeline::Build_Pipeline(std::shared_ptr<RenderPass> render_pass)
         .setPRasterizationState(&rasterization_info)
         .setPMultisampleState(&multi_sample)
         .setPDepthStencilState(&depth_test)
-        .setPColorBlendState(&blend)
-//        .setFlags(vk::PipelineCreateFlagBits:)
-        .setPDynamicState(&vk::PipelineDynamicStateCreateInfo().setDynamicStates(dynamic_state));
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#else
+        .setPDynamicState(
+            &vk::PipelineDynamicStateCreateInfo().setDynamicStates(dynamic_state))
+#endif
+        .setPColorBlendState(&blend);
 
-    auto res = Get_Context_Singleton()->get_device()->get_handle().createGraphicsPipeline(nullptr, create_info);
+    auto res = Get_Context_Singleton()->get_device()->get_handle().createGraphicsPipeline(
+        nullptr,
+        create_info);
     // vk::GraphicsPipelineCreateInfo create_info;
     // create_info.setLayout(layout)
     //     .setRenderPass(render_pass->get_handle())
@@ -106,6 +115,7 @@ void Graphic_Pipeline::Build_Pipeline(std::shared_ptr<RenderPass> render_pass)
         throw std::runtime_error("fail to create graphic pipeline ");
     m_handle = res.value;
 }
+
 void Graphic_Pipeline::Make_Layout(vk::DescriptorSetLayout descriptor_layout,
                                    uint32_t push_constants_size,
                                    vk::ShaderStageFlags push_constants_stage)
@@ -120,11 +130,15 @@ void Graphic_Pipeline::Make_Layout(vk::DescriptorSetLayout descriptor_layout,
                  .createPipelineLayout(createInfo);
     // layout = pipeline_layout;
 }
-void Graphic_Pipeline::Make_VertexInput(vk::ArrayProxyNoTemporaries<const vk::VertexInputBindingDescription> const bind,
-                                        vk::ArrayProxyNoTemporaries<const vk::VertexInputAttributeDescription> const attr)
+
+void Graphic_Pipeline::Make_VertexInput(
+    vk::ArrayProxyNoTemporaries<const vk::VertexInputBindingDescription> const bind,
+    vk::ArrayProxyNoTemporaries<const vk::VertexInputAttributeDescription> const attr)
 {
-    input_state.setVertexAttributeDescriptions(attr).setVertexBindingDescriptions(bind);
+    input_state.setVertexAttributeDescriptions(attr)
+        .setVertexBindingDescriptions(bind);
 }
+
 void Graphic_Pipeline::Make_VertexAssembly()
 {
     input_assembly.setTopology(vk::PrimitiveTopology::eTriangleList)
@@ -150,7 +164,11 @@ void Graphic_Pipeline::Make_viewPort()
         .setViewportCount(1)
         .setScissorCount(1);
 }
-void Graphic_Pipeline::Add_Shader_Modules(vk::ShaderModule module, vk::ShaderStageFlagBits stage)
+
+void Graphic_Pipeline::Add_Shader_Modules(vk::ShaderModule
+
+                                              module,
+                                          vk::ShaderStageFlagBits stage)
 {
     vk::PipelineShaderStageCreateInfo shader_create_info;
     shader_create_info.setModule(module)
@@ -158,25 +176,30 @@ void Graphic_Pipeline::Add_Shader_Modules(vk::ShaderModule module, vk::ShaderSta
         .setStage(stage);
     shader_stage.push_back(shader_create_info);
 }
-void Graphic_Pipeline::Make_Resterization()
+
+void Graphic_Pipeline::Make_Resterization(vk::CullModeFlags cull_mode)
 {
-    rasterization_info.setCullMode(vk::CullModeFlagBits::eNone)
-        .setFrontFace(vk::FrontFace::eCounterClockwise)
+    rasterization_info.setCullMode(cull_mode)
+        .setFrontFace(vk::FrontFace::eClockwise)
         .setLineWidth(1)
         .setPolygonMode(vk::PolygonMode::eFill)
         .setRasterizerDiscardEnable(false);
 }
+
 void Graphic_Pipeline::Make_MultiSample()
 {
     multi_sample.setSampleShadingEnable(false)
         .setRasterizationSamples(vk::SampleCountFlagBits::e1);
 }
+
 void Graphic_Pipeline::Make_DepthTest(bool enable_test)
 {
     depth_test.setDepthTestEnable(enable_test)
-        .setDepthWriteEnable(enable_test)
-        .setDepthCompareOp(vk::CompareOp ::eLessOrEqual);
+        .setDepthWriteEnable(enable_test);
+    //    if (enable_test)
+    depth_test.setDepthCompareOp(vk::CompareOp::eLessOrEqual);
 }
+
 void Graphic_Pipeline::Make_attach()
 {
     vk::PipelineColorBlendAttachmentState attach;
@@ -199,6 +222,7 @@ void Graphic_Pipeline::Make_attach()
         }
     }
 }
+
 void Graphic_Pipeline::Make_Blend()
 {
     blend.setAttachments(attachs).setLogicOpEnable(false);

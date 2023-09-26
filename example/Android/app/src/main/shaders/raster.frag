@@ -79,12 +79,12 @@ void main()
                                   irradiance_cubemap,
                                   LUT_image);
         // outColor = 2 * vec4(color, 1);
-        if (bool(pc_raster.use_normal_map)) {
-
-            outColor = pow(vec4(color, 1), vec4(1. / 2.2));
-        } else {
+//        if (bool(pc_raster.use_normal_map)) {
+//
+//            outColor = pow(vec4(color, 1), vec4(1. / 2.2));
+//        } else {
+//        }
             outColor = vec4(color, 1);
-        }
     }
     // outColor = color;
 }

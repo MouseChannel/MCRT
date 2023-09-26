@@ -21,15 +21,15 @@ public:
     const std::vector<const char*> rt_device_extension {
         "VK_KHR_swapchain",
 
-        "VK_KHR_ray_query",
-        "VK_KHR_shader_non_semantic_info",
-
-        "VK_KHR_acceleration_structure",
-        "VK_KHR_ray_tracing_pipeline",
-        "VK_KHR_shader_clock",
-        VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
-        VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
-        VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
+//        "VK_KHR_ray_query",
+//        "VK_KHR_shader_non_semantic_info",
+//
+//        "VK_KHR_acceleration_structure",
+//        "VK_KHR_ray_tracing_pipeline",
+//        "VK_KHR_shader_clock",
+//        VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
+//        VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+//        VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
 
     };
     [[nodiscard("missing physical device")]] auto Get_Physical_device()

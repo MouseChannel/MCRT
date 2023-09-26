@@ -43,7 +43,9 @@ namespace MCRT {
         sky_box.reset(new Skybox("Cubemap/farm"));
         skybox_mesh = GLTF_Loader::load_skybox("cube.gltf");
 
-        GLTF_Loader::load_model("mocheng_android.glb");
+        GLTF_Loader::load_model("box.gltf");
+//        GLTF_Loader::load_model("box.gltf");
+
         LUT.reset(new Image(1024,
                             1024,
                             vk::Format::eR32G32B32A32Sfloat,
@@ -223,7 +225,7 @@ namespace MCRT {
                                                cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
                                                                 compute_context->get_pipeline()->get_handle());
 
-                                               cmd.dispatch(irradiance_size/16, irradiance_size/16, 6);
+                                               cmd.dispatch(irradiance_size, irradiance_size, 6);
                                            });
             }
             { // pre_compute_lut
@@ -253,7 +255,7 @@ namespace MCRT {
                                                cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
                                                                 compute_context->get_pipeline()->get_handle());
 
-                                               cmd.dispatch(1024/16, 1024/16, 1);
+                                               cmd.dispatch(1024, 1024, 1);
                                            });
             }
         }

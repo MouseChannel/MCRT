@@ -9,6 +9,11 @@
 #include "shaders/Data_struct.h"
 
 layout(location = 0) in vec3 inPos;
+//not used
+layout(location = e_nrm) in vec3 in_nrm;
+layout(location = e_color) in vec3 in_color;
+layout(location = e_texCoord) in vec2 in_texCoord;
+
 
 layout(push_constant) uniform _PushContant
 {

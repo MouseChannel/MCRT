@@ -43,7 +43,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     sky_box.reset(new Skybox("D:/MoCheng/MoChengRT/assets/Cubemap/farm"));
     skybox_mesh = GLTF_Loader::load_skybox("D:/MoCheng/MoChengRT/assets/cube.gltf");
 
-    GLTF_Loader::load_model("D:/MoCheng/MoChengRT/assets/mocheng_android.glb");
+    GLTF_Loader::load_model("D:/MoCheng/MoChengRT/assets/box.gltf");
     LUT.reset(new Image(1024,
                         1024,
                         vk::Format::eR32G32B32A32Sfloat,
@@ -170,7 +170,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                 cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
                                  compute_context->get_pipeline()->get_handle());
 
-                cmd.dispatch(irradiance_size/16, irradiance_size/16, 6);
+                cmd.dispatch(irradiance_size, irradiance_size, 6);
             });
         }
         { // pre_compute_lut
@@ -197,7 +197,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                 cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
                                  compute_context->get_pipeline()->get_handle());
 
-                cmd.dispatch(1024/16, 1024/16, 1);
+                cmd.dispatch(1024, 1024, 1);
             });
         }
     }

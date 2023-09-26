@@ -40,7 +40,7 @@ protected:
     vk::AttachmentDescription attachment_description;
     vk::AttachmentReference attach_reference;
 
-    vk::ClearValue clear_color;
+    vk::ClearValue clear_color{};
 };
 
 }

@@ -1,6 +1,6 @@
 # 🤷🏼‍♂️A RenderingEngine powered by Vulkan🤷🏼‍♂️
 
-## 🔨Setup
+# 🔨Setup
 has tested by MSVC,Clang,GCC
 ```
 cmake  -GNinja 
@@ -9,13 +9,13 @@ ninja
 
 
 
-## 🌞Overview🌞
+# 🌞Overview🌞
 
 ### support platform
 
-- :heavy_check_mark: **Windows** 💻
-- :heavy_check_mark: **Linux** 💻
-- :heavy_check_mark: **Android** 📱 (Not all features are supported)
+- :white_check_mark: **Windows** 💻
+- :white_check_mark: **Linux** 💻
+- :white_check_mark: **Android** 📱 (Not all features are supported)
 - :x: **Mac** 💻 todo
 
 
@@ -24,7 +24,7 @@ ninja
 - **Graphic pipeline**:  :muscle: support all platform
 
 
-### :fire:  Detail  /  Feature:fire:
+# :fire:  Detail  /  Feature:fire:
 
 #### PBR By IBL pre_rendering
 - pre_calculate IBL_Gbuffer by `Compute_pipeline`
@@ -55,6 +55,6 @@ raytracing feature need **NVIDIA RTX 20-Series** or higher version, and **AMD Ra
 - so on
 
 
-### :trollface: TODO
+# :trollface: TODO
 - :bookmark: SDF
 - :bookmark: NVidia Restir sampling Path tracing

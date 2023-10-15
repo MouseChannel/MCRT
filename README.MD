@@ -32,8 +32,8 @@ ninja
 - pbr in RayTracing Pipeline using IBL_Gbuffer,with single bounce to make it real-time
 
 #### Model Format
-- :heavy_check_mark: **GLTF** , support most gltf_material_feature,like `KHR_materials_emissive_strength`and normal_map,AO_Metallic_Roughness_map and so on
-- :heavy_check_mark: **OBJ**
+- :white_check_mark: **GLTF** , support most gltf_material_feature,like `KHR_materials_emissive_strength`and normal_map,AO_Metallic_Roughness_map and so on
+- :white_check_mark: **OBJ**
 - :x: **FBX** 💻 todo
 
 #### Off-line Rendering 
@@ -44,7 +44,7 @@ raytracing feature need **NVIDIA RTX 20-Series** or higher version, and **AMD Ra
  - :star2: Disney style BRDF shading in Path Tracing
  - :star2: Noise reduction using joint bilateral filtering by `compute pipeline` 
 
-### :rainbow: other basics in Rendering engine 
+# :rainbow: other basics in Rendering engine :rainbow: 
 - :+1: imgui
 - :+1: skybox
 - :+1: hdr

@@ -10,7 +10,7 @@
 namespace MCRT {
 Skybox::Skybox(std::string file_dir)
 {
-    // skybox_mesh = GLTF_Loader::load_skybox("D:/MoCheng/MoChengRT/assets/cube.gltf");
+    // skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
     names[0] = "right";
     names[1] = "left";
     names[2] = "top";

@@ -6,7 +6,7 @@
 #include "vulkan/vulkan_android.h"
 
 #else
-#include "glfw/glfw3.h"
+#include "GLFW/glfw3.h"
 #endif
 
 namespace MCRT {

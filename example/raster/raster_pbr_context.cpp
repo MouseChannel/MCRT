@@ -36,14 +36,15 @@ raster_context_pbr::raster_context_pbr()
 raster_context_pbr::~raster_context_pbr()
 {
 }
+
 void raster_context_pbr::prepare(std::shared_ptr<Window> window)
 {
     raster_context::prepare(window);
     m_camera->m_position.z = 3;
-    sky_box.reset(new Skybox("D:/MoCheng/MoChengRT/assets/Cubemap/farm"));
-    skybox_mesh = GLTF_Loader::load_skybox("D:/MoCheng/MoChengRT/assets/cube.gltf");
+    sky_box.reset(new Skybox("/home/mocheng/project/MCRT/assets/Cubemap/farm"));
+    skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
 
-    GLTF_Loader::load_model("D:/MoCheng/MoChengRT/assets/box.gltf");
+    GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/cat.gltf");
     LUT.reset(new Image(1024,
                         1024,
                         vk::Format::eR32G32B32A32Sfloat,
@@ -71,10 +72,10 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
             throw std::runtime_error("not graphic context");
         }
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
-        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/raster/shader/raster.vert.spv"));
-        graphic_shader_modules[Graphic_Pipeline::Main_FRAG].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/raster/shader/raster.frag.spv"));
-        graphic_shader_modules[Graphic_Pipeline::Skybox_VERT].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/raster/shader/skybox.vert.spv"));
-        graphic_shader_modules[Graphic_Pipeline::Skybox_FRAG].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/raster/shader/skybox.frag.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("/home/mocheng/project/MCRT/example/raster/shader/raster.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_FRAG].reset(new ShaderModule("/home/mocheng/project/MCRT/example/raster/shader/raster.frag.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Skybox_VERT].reset(new ShaderModule("/home/mocheng/project/MCRT/example/raster/shader/skybox.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Skybox_FRAG].reset(new ShaderModule("/home/mocheng/project/MCRT/example/raster/shader/skybox.frag.spv"));
         graphic_context->prepare();
         graphic_context->prepare_descriptorset([&]() {
             Descriptor_Manager::Get_Singleton()
@@ -151,7 +152,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
         { // pre_compute_irradiance
             std::shared_ptr<ShaderModule>
                 compute_shader {
-                    new ShaderModule("D:/MoCheng/MoChengRT/shaders/PBR/IBL/irradiance.comp.spv")
+                    new ShaderModule("/home/mocheng/project/MCRT/shaders/PBR/IBL/irradiance.comp.spv")
                 };
             contexts[Compute]->prepare_pipeline({ compute_shader },
                                                 { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) },
@@ -177,7 +178,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
 
             std::shared_ptr<ShaderModule>
                 compute_shader {
-                    new ShaderModule("D:/MoCheng/MoChengRT/shaders/PBR/IBL/lookup_table.comp.spv")
+                    new ShaderModule("/home/mocheng/project/MCRT/shaders/PBR/IBL/lookup_table.comp.spv")
                 };
 
             contexts[Compute]->prepare_pipeline({ compute_shader },

@@ -390,7 +390,7 @@ void GLTF_Loader::load_model(std::string_view path)
     }
 
     if (!ret) {
-        throw std::runtime_error("Failed to parse glTF\n");
+        throw std::runtime_error("Failed to parse glTF\n"); 
     }
 
     int node_number = 0;

@@ -76,7 +76,7 @@ namespace MCRT {
         // upload font
         {
             // Load Fonts
-            // io.Fonts->AddFontFromFileTTF("D:/MoCheng/MoChengRT/OpenDyslexicAltNerdFont-Bold.otf", 25.0f, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+            // io.Fonts->AddFontFromFileTTF("/home/mocheng/project/MCRT/OpenDyslexicAltNerdFont-Bold.otf", 25.0f, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
             io.Fonts->TexHeight = 20;
 
             CommandManager::ExecuteCmd(context->get_device()->Get_Graphic_queue(),

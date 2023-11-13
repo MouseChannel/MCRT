@@ -31,7 +31,7 @@ Path_tracing_context::~Path_tracing_context()
 void Path_tracing_context::prepare(std::shared_ptr<Window> window)
 {
     ray_tracing_context::prepare(window);
-    GLTF_Loader::load_model("D:/MoCheng/MoChengRT/assets/girl.gltf");
+    GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/girl.gltf");
     auto mm = Mesh::meshs;
     auto tt = Texture::textures;
 
@@ -43,9 +43,9 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
         //        std::make_shared<RT_Context>(m_device);
         contexts[Context_index::Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
         std::vector<std::shared_ptr<ShaderModule>> rt_shader_modules(RT_Pipeline::eShaderGroupCount);
-        rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/path_tracing/shader/path_tracing.rgen.spv"));
-        rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/path_tracing/shader/path_tracing.rmiss.spv"));
-        rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/path_tracing/shader/path_tracing.rchit.spv"));
+        rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("/home/mocheng/project/MCRT/example/path_tracing/shader/path_tracing.rgen.spv"));
+        rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("/home/mocheng/project/MCRT/example/path_tracing/shader/path_tracing.rmiss.spv"));
+        rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("/home/mocheng/project/MCRT/example/path_tracing/shader/path_tracing.rchit.spv"));
         Context::Get_Singleton()->get_rt_context()->set_hit_shader_count(1);
         Context::Get_Singleton()->get_rt_context()->set_miss_shader_count(1);
         Context::Get_Singleton()->get_rt_context()->set_constants_size(sizeof(PushContant));
@@ -100,7 +100,7 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
         // contexts[Compute]->set_constants_size(sizeof(PushContant));
         std::shared_ptr<ShaderModule>
             compute_shader {
-                new ShaderModule("D:/MoCheng/MoChengRT/example/path_tracing/shader/filter.comp.spv")
+                new ShaderModule("/home/mocheng/project/MCRT/example/path_tracing/shader/filter.comp.spv")
             };
         contexts[Compute]->prepare();
         contexts[Compute]->prepare_descriptorset([&]() {
@@ -128,10 +128,10 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
         contexts[Graphic]->set_constants_size(sizeof(PushContant));
 
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
-        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shaders/ray_tracing/post.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("/home/mocheng/project/MCRT/example/base/shaders/ray_tracing/post.vert.spv"));
 
         graphic_shader_modules[Graphic_Pipeline::Main_FRAG]
-            .reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shaders/ray_tracing/post.frag.spv"));
+            .reset(new ShaderModule("/home/mocheng/project/MCRT/example/base/shaders/ray_tracing/post.frag.spv"));
 
         contexts[Graphic]
             ->prepare();

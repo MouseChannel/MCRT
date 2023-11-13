@@ -38,11 +38,11 @@ rt_pbr_context::~rt_pbr_context()
 void rt_pbr_context::prepare(std::shared_ptr<Window> window)
 {
     ray_tracing_context::prepare(window);
-    m_skybox.reset(new Skybox("D:/MoCheng/MoChengRT/assets/Cubemap/farm"));
-    skybox_mesh = GLTF_Loader::load_skybox("D:/MoCheng/MoChengRT/assets/cube.gltf");
-    // GLTF_Loader::load_model("D:/MoCheng/MoChengRT/assets/pbr/cardbox.gltf");
+    m_skybox.reset(new Skybox("/home/mocheng/project/MCRT/assets/Cubemap/farm"));
+    skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
+    // GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/cardbox.gltf");
 
-    GLTF_Loader::load_model("D:/MoCheng/MoChengRT/assets/pbr/cat/cat.glb");
+    GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/cat/cat.glb");
 
     LUT.reset(new Image(1024,
                         1024,
@@ -65,10 +65,10 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
 
         contexts[Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
         std::vector<std::shared_ptr<ShaderModule>> rt_shader_modules(RT_Pipeline::eShaderGroupCount);
-        rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/RT_pbr/shader/rt_pbr.rgen.spv"));
-        rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/RT_pbr/shader/rt_pbr.rmiss.spv"));
-        // rt_shader_modules[RT_Pipeline::eMiss2].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/RT_pbr/shader/rt_pbr_shadow.rmiss.spv"));
-        rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/RT_pbr/shader/rt_pbr.rchit.spv"));
+        rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("/home/mocheng/project/MCRT/example/RT_pbr/shader/rt_pbr.rgen.spv"));
+        rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("/home/mocheng/project/MCRT/example/RT_pbr/shader/rt_pbr.rmiss.spv"));
+        // rt_shader_modules[RT_Pipeline::eMiss2].reset(new ShaderModule("/home/mocheng/project/MCRT/example/RT_pbr/shader/rt_pbr_shadow.rmiss.spv"));
+        rt_shader_modules[RT_Pipeline::eClosestHit].reset(new ShaderModule("/home/mocheng/project/MCRT/example/RT_pbr/shader/rt_pbr.rchit.spv"));
         Context::Get_Singleton()->get_rt_context()->set_hit_shader_count(1);
         Context::Get_Singleton()->get_rt_context()->set_miss_shader_count(1);
         Context::Get_Singleton()->get_rt_context()->set_constants_size(sizeof(PushContant_rtpbr));
@@ -132,8 +132,8 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
         contexts[Graphic]->set_constants_size(sizeof(PushContant));
 
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
-        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shaders/ray_tracing/post.vert.spv"));
-        graphic_shader_modules[Graphic_Pipeline::Main_FRAG].reset(new ShaderModule("D:/MoCheng/MoChengRT/example/base/shaders/ray_tracing/post.frag.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("/home/mocheng/project/MCRT/example/base/shaders/ray_tracing/post.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_FRAG].reset(new ShaderModule("/home/mocheng/project/MCRT/example/base/shaders/ray_tracing/post.frag.spv"));
 
         contexts[Graphic]->prepare();
         contexts[Graphic]->prepare_descriptorset([&]() {
@@ -184,7 +184,7 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
         { // pre_compute_irradiance
             std::shared_ptr<ShaderModule>
                 compute_shader {
-                    new ShaderModule("D:/MoCheng/MoChengRT/shaders/PBR/IBL/irradiance.comp.spv")
+                    new ShaderModule("/home/mocheng/project/MCRT/shaders/PBR/IBL/irradiance.comp.spv")
                 };
             contexts[Compute]->prepare_pipeline({ compute_shader },
                                                 { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) },
@@ -218,7 +218,7 @@ void rt_pbr_context::prepare(std::shared_ptr<Window> window)
 
             std::shared_ptr<ShaderModule>
                 compute_shader {
-                    new ShaderModule("D:/MoCheng/MoChengRT/shaders/PBR/IBL/lookup_table.comp.spv")
+                    new ShaderModule("/home/mocheng/project/MCRT/shaders/PBR/IBL/lookup_table.comp.spv")
                 };
 
             contexts[Compute]->prepare_pipeline({ compute_shader }, { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) }, sizeof(PushContant_Compute));

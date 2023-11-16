@@ -34,11 +34,14 @@ Graphic_Pipeline::Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> sh
     //     layouts.push_back(set->get_layout());
     //     descriptor_sets.push_back(set->get_handle()[0]);
     // }
+    auto push_range = vk::PushConstantRange()
+                                            .setSize(push_constants_size)
+                                            .setStageFlags(vk::ShaderStageFlagBits::eVertex |
+                                                vk::ShaderStageFlagBits::eFragment);
     layout_create_info.setSetLayouts(m_descriptor_layouts)
-        .setPushConstantRanges(vk::PushConstantRange()
-                                   .setSize(push_constants_size)
-                                   .setStageFlags(vk::ShaderStageFlagBits::eVertex |
-                                                  vk::ShaderStageFlagBits::eFragment));
+                      .setPushConstantRanges(push_range);
+    
+    
     layout = Context::Get_Singleton()
                  ->get_device()
                  ->get_handle()

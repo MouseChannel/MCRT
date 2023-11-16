@@ -20,65 +20,77 @@ namespace MCRT {
 //     left = GLFW_KEY_LEFT,
 //     right = GLFW_KEY_RIGHT
 // };
-    enum class CAMERA_MOVE {
-        MOVE_LEFT,
-        MOVE_RIGHT,
-        MOVE_FRONT,
-        MOVE_BACK,
-        MOVE_TOP,
-        MOVE_DOWN,
+enum class CAMERA_MOVE {
+    MOVE_LEFT,
+    MOVE_RIGHT,
+    MOVE_FRONT,
+    MOVE_BACK,
+    MOVE_TOP,
+    MOVE_DOWN,
+};
+
+class Camera {
+public:
+    Camera();
+
+    [[nodiscard("missing v_matrix")]] auto& Get_v_matrix()
+    {
+        return m_vMatrix;
+    }
+
+    [[nodiscard("missing p_matrix")]] auto& Get_p_matrix()
+    {
+        return m_pMatrx;
+    }
+
+    [[nodiscard]] auto get_pos()
+    {
+        return m_position;
+    }
+
+    [[nodiscard]] auto get_front()
+    {
+        return m_front;
+    }
+
+    [[nodiscard]] auto get_fov_angel()
+    {
+        return m_fov_angel;
+    }
+
+    void init();
+
+    void lookAt(glm::vec3 _pos, glm::vec3 _front, glm::vec3 _up);
+
+    // update view_matrix
+    void update();
+
+    void setSpeed(float _speed)
+    {
+        m_speed = _speed;
+    }
+
+    void move_update();
+
+    void move(CAMERA_MOVE _mode);
+
+    void pitch(float _yOffset);
+
+    void yaw(float _xOffset);
+
+    void setSentitivity(float _s);
+
+    void onMouseMove(double _xpos, double _ypos);
+
+    void onMouseScroll(double _xpos, double _ypos);
+
+    void setPerpective(float angle, float ratio, float near, float far);
+    void orbit(float x_offset, float y_offset);
+
+    enum MOVE_MODE {
+        ORBIT,
+        FREE
     };
-
-    class Camera {
-    public:
-        Camera();
-
-        [[nodiscard("missing v_matrix")]] auto &Get_v_matrix() {
-            return m_vMatrix;
-        }
-
-        [[nodiscard("missing p_matrix")]] auto &Get_p_matrix() {
-            return m_pMatrx;
-        }
-
-        [[nodiscard]] auto get_pos() {
-            return m_position;
-        }
-
-        [[nodiscard]] auto get_front() {
-            return m_front;
-        }
-
-        [[nodiscard]] auto get_fov_angel() {
-            return m_fov_angel;
-        }
-
-        void init();
-
-        void lookAt(glm::vec3 _pos, glm::vec3 _front, glm::vec3 _up);
-
-        // update view_matrix
-        void update();
-
-        void setSpeed(float _speed) {
-            m_speed = _speed;
-        }
-
-        void move_update();
-
-        void move(CAMERA_MOVE _mode);
-
-        void pitch(float _yOffset);
-
-        void yaw(float _xOffset);
-
-        void setSentitivity(float _s);
-
-        void onMouseMove(double _xpos, double _ypos);
-
-        void onMouseScroll(double _xpos, double _ypos);
-
-        void setPerpective(float angle, float ratio, float near, float far);
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 
@@ -87,23 +99,24 @@ namespace MCRT {
 #else
 #endif
 
-        glm::vec3 m_position{0, 0, 10};
+    glm::vec3 m_position{ 0, 0, 10 };
 
-    private:
-        float m_speed = 1.0f;
-        glm::vec3 m_front{0, 0, -1};
-        glm::vec3 m_up{0, 1, 0};
-        glm::mat4 m_vMatrix;
-        glm::mat4 m_pMatrx;
-        // int cur_
+private:
+    float m_speed = 1.0f;
+    glm::vec3 m_front{ 0, 0, -1 };
+    glm::vec3 m_up{ 0, 1, 0 };
+    glm::mat4 m_vMatrix;
+    glm::mat4 m_pMatrx;
+    // int cur_
 
-        float m_pitch{0};
-        float m_fov_angel{90};
-        float m_yaw{-90};
-        float m_sensitivity{1e-2};
-        float m_xpos{0};
-        float m_ypos{0};
-        bool m_firstMove;
-    };
+    float m_pitch{ 0 };
+    float m_fov_angel{ 90 };
+    float m_yaw{ -90 };
+    float m_sensitivity{ 1e-2 };
+    float m_xpos{ 0 };
+    float m_ypos{ 0 };
+    bool m_firstMove;
+    MOVE_MODE move_mode{ MOVE_MODE::ORBIT };
+};
 
 }

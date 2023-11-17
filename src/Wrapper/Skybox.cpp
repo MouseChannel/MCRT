@@ -6,8 +6,27 @@
 #include "Wrapper/Texture.hpp"
 #include "vulkan/vulkan.hpp"
 #include <cmath>
+#include "Helper/Model_Loader/HDRI2PNG.hpp"
+
+#include <filesystem>
 
 namespace MCRT {
+
+Skybox::Skybox(std::string hdr_path, int cubemap_size)
+{
+    namespace fs = std::filesystem;
+    auto get_filename = [&]() {
+        auto file_name = fs::path(hdr_path).filename();
+        if (hdr_path.find_last_of(".") != std::string::npos)
+            return hdr_path.substr(0, hdr_path.find_last_of("."));
+        return std::string();
+    };
+    if (!fs::exists(fs::path(get_filename()))) {
+        fs::create_directory("/home/mocheng/project/MCRT/assets/Cubemap/" + get_filename());
+    }
+
+}
+
 Skybox::Skybox(std::string file_dir)
 {
     // skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
@@ -43,7 +62,8 @@ Skybox::Skybox(std::string file_dir)
         datas[i] = stbi_load(name.data(), &width, &height, &channel, STBI_rgb_alpha);
 #endif
 
-        { // check vaild
+        {
+            // check vaild
             std::cout << width << ' ' << height << std::endl;
             if (i > 0 && (width != p_width || height != p_height)) {
                 throw std::runtime_error("failed to load cube_map");
@@ -88,6 +108,7 @@ Skybox::Skybox(std::string file_dir)
         vk::PipelineStageFlagBits::eTransfer,
         vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eComputeShader | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
 }
+
 Skybox::Skybox(int height, int width)
 {
 
@@ -110,6 +131,7 @@ Skybox::Skybox(int height, int width)
         vk::PipelineStageFlagBits::eTransfer,
         vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eComputeShader | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
 }
+
 Skybox::~Skybox()
 {
 }

@@ -33,12 +33,6 @@ Skybox::Skybox(std::string hdr_path, int cubemap_size)
 
 void Skybox::Init(std::string face_dir)
 {
-    names[0] = "right";
-    names[1] = "left";
-    names[2] = "top";
-    names[3] = "bottom";
-    names[4] = "forward";
-    names[5] = "backward";
 
     std::vector<void*> datas(6);
     std::vector<size_t> sizes(6);
@@ -126,7 +120,7 @@ Skybox::Skybox(int height, int width)
                              vk::Format::eR8G8B8A8Unorm,
                              vk::ImageType::e2D,
                              vk::ImageTiling::eOptimal,
-                             vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eStorage,
+                             vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eTransferSrc,
                              vk::ImageAspectFlagBits::eColor,
                              vk::SampleCountFlagBits::e1,
                              6,

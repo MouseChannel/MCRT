@@ -3,7 +3,7 @@
 #include "Helper/Debugger.hpp"
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Model_Loader/Obj_Loader.hpp"
-#include "Helper/Ray_Tracing/RT_Manager.hpp"
+// #include "Helper/Ray_Tracing/RT_Manager.hpp"
 #include "Rendering/AppWindow.hpp"
 #include "Rendering/Compute_context.hpp"
 #include "Rendering/Model.hpp"

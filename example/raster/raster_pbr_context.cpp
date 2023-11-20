@@ -1,4 +1,3 @@
-
 #include "example/raster/raster_pbr_context.hpp"
 #include "Helper/Camera.hpp"
 #include "Helper/CommandManager.hpp"
@@ -25,14 +24,18 @@
 
 #include "example/raster/shader/Constants.h"
 
+#include <Helper/Model_Loader/ImageWriter.hpp>
+
 namespace MCRT {
-std::unique_ptr<Context> Context::_instance { new MCRT::raster_context_pbr };
+std::unique_ptr<Context> Context::_instance{ new MCRT::raster_context_pbr };
 float raster_context_pbr::light_pos_x = 0, raster_context_pbr::light_pos_y = 0, raster_context_pbr::light_pos_z = 5;
 bool raster_context_pbr::use_normal_map = false, raster_context_pbr::use_r_rm_map = false;
 int irradiance_size = 512;
+
 raster_context_pbr::raster_context_pbr()
 {
 }
+
 raster_context_pbr::~raster_context_pbr()
 {
 }
@@ -44,15 +47,16 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     sky_box.reset(new Skybox("/home/mocheng/project/MCRT/assets/kart_club_2k.hdr"));
     skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
 
-    // GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/untitled.obj");
-    Obj_loader::load_model("/home/mocheng/project/MCRT/assets/untitled.obj");
-    
+    GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/cat.gltf");
+    // Obj_loader::load_model("/home/mocheng/project/MCRT/assets/untitled.obj");
+
     LUT.reset(new Image(1024,
                         1024,
-                        vk::Format::eR32G32B32A32Sfloat,
+                        // vk::Format::eR32G32B32A32Sfloat,
+                        vk::Format::eR8G8B8A8Snorm,
                         vk::ImageType::e2D,
                         vk::ImageTiling::eOptimal,
-                        vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled,
+                        vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc,
                         vk::ImageAspectFlagBits::eColor,
                         vk::SampleCountFlagBits::e1));
     LUT->SetImageLayout(vk::ImageLayout::eGeneral,
@@ -65,7 +69,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     contexts.resize(2);
 
     {
-        contexts[Context_index::Graphic] = std::shared_ptr<RenderContext> { new RenderContext(m_device) };
+        contexts[Context_index::Graphic] = std::shared_ptr<RenderContext>{ new RenderContext(m_device) };
         Context::Get_Singleton()
             ->get_graphic_context()
             ->set_constants_size(sizeof(PC_Raster));
@@ -91,7 +95,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                     sky_box->get_handle(),
                     Descriptor_Manager::Graphic,
                     (int)Graphic_Binding::e_skybox,
-                    vk::DescriptorType ::eCombinedImageSampler,
+                    vk::DescriptorType::eCombinedImageSampler,
                     vk::ShaderStageFlagBits::eFragment);
 
             Descriptor_Manager::Get_Singleton()
@@ -99,18 +103,18 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                     Texture::get_image_handles(),
                     Descriptor_Manager::Graphic,
                     (int)Graphic_Binding::e_textures,
-                    vk::DescriptorType ::eCombinedImageSampler,
+                    vk::DescriptorType::eCombinedImageSampler,
                     vk::ShaderStageFlagBits::eFragment);
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(
-                    std::vector { LUT },
+                    std::vector{ LUT },
                     Descriptor_Manager::Graphic,
                     (int)Graphic_Binding::e_LUT_image,
-                    vk::DescriptorType ::eCombinedImageSampler,
+                    vk::DescriptorType::eCombinedImageSampler,
                     vk::ShaderStageFlagBits::eFragment);
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(
-                    std::vector { irradiance->get_handle() },
+                    std::vector{ irradiance->get_handle() },
                     Descriptor_Manager::Graphic,
                     (int)Graphic_Binding::e_irradiance_image,
                     vk::DescriptorType::eCombinedImageSampler,
@@ -121,7 +125,8 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
         graphic_context->post_prepare();
     }
 
-    { // compute_precompute
+    {
+        // compute_precompute
 
         contexts[Compute].reset(new Compute_Context);
         contexts[Compute]->set_constants_size(sizeof(PushContant_IBL));
@@ -130,30 +135,31 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
         contexts[Compute]->prepare_descriptorset([&]() {
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(
-                    std::vector { irradiance->get_handle() },
+                    std::vector{ irradiance->get_handle() },
                     Descriptor_Manager::Compute,
                     IBL_Binding::e_irradiance_image,
-                    vk::DescriptorType ::eStorageImage,
+                    vk::DescriptorType::eStorageImage,
                     vk::ShaderStageFlagBits::eCompute);
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(
-                    std::vector { LUT },
+                    std::vector{ LUT },
                     Descriptor_Manager::Compute,
                     IBL_Binding::e_LUT_image,
-                    vk::DescriptorType ::eStorageImage,
+                    vk::DescriptorType::eStorageImage,
                     vk::ShaderStageFlagBits::eCompute);
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(
-                    std::vector { sky_box->get_handle() },
+                    std::vector{ sky_box->get_handle() },
                     Descriptor_Manager::Compute,
                     IBL_Binding::e_skybox,
                     vk::DescriptorType::eCombinedImageSampler,
                     vk::ShaderStageFlagBits::eCompute);
         });
 
-        { // pre_compute_irradiance
+        {
+            // pre_compute_irradiance
             std::shared_ptr<ShaderModule>
-                compute_shader {
+                compute_shader{
                     new ShaderModule("/home/mocheng/project/MCRT/shaders/PBR/IBL/irradiance.comp.spv")
                 };
             contexts[Compute]->prepare_pipeline({ compute_shader },
@@ -164,22 +170,25 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
             // doing the actually work
             auto& compute_context = contexts[Compute];
             // std::shared_ptr<CommandBuffer> cmd = compute_context->BeginFrame();
-            CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(), [&](vk::CommandBuffer& cmd) {
-                cmd.bindDescriptorSets(vk::PipelineBindPoint ::eCompute,
-                                       compute_context->get_pipeline()->get_layout(),
-                                       0,
-                                       compute_context->get_pipeline()->get_descriptor_sets(),
-                                       {});
-                cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
-                                 compute_context->get_pipeline()->get_handle());
+            CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(),
+                                       [&](vk::CommandBuffer& cmd) {
+                                           cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
+                                                                  compute_context->get_pipeline()->get_layout(),
+                                                                  0,
+                                                                  compute_context->get_pipeline()->get_descriptor_sets(),
+                                                                  {});
+                                           cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
+                                                            compute_context->get_pipeline()->get_handle());
 
-                cmd.dispatch(irradiance_size, irradiance_size, 6);
-            });
+                                           cmd.dispatch(irradiance_size, irradiance_size, 6);
+                                       });
+            ImageWriter::WriteCubemap(irradiance->get_handle());
         }
-        { // pre_compute_lut
+        {
+            // pre_compute_lut
 
             std::shared_ptr<ShaderModule>
-                compute_shader {
+                compute_shader{
                     new ShaderModule("/home/mocheng/project/MCRT/shaders/PBR/IBL/lookup_table.comp.spv")
                 };
 
@@ -191,43 +200,50 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
             // doing the actually work
             auto& compute_context = contexts[Compute];
 
-            CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(), [&](vk::CommandBuffer& cmd) {
-                cmd.bindDescriptorSets(vk::PipelineBindPoint ::eCompute,
-                                       compute_context->get_pipeline()->get_layout(),
-                                       0,
-                                       compute_context->get_pipeline()->get_descriptor_sets(),
-                                       {});
-                cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
-                                 compute_context->get_pipeline()->get_handle());
+            CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(),
+                                       [&](vk::CommandBuffer& cmd) {
+                                           cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
+                                                                  compute_context->get_pipeline()->get_layout(),
+                                                                  0,
+                                                                  compute_context->get_pipeline()->get_descriptor_sets(),
+                                                                  {});
+                                           cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
+                                                            compute_context->get_pipeline()->get_handle());
 
-                cmd.dispatch(1024, 1024, 1);
-            });
+                                           cmd.dispatch(1024, 1024, 1);
+                                       });
+            ImageWriter::WriteImage(LUT);
+
         }
     }
 }
+
 std::shared_ptr<CommandBuffer> raster_context_pbr::Begin_Frame()
 {
     CommandManager::ExecuteCmd(Context::Get_Singleton()
-                                   ->get_device()
-                                   ->Get_Graphic_queue(),
+                               ->get_device()
+                               ->Get_Graphic_queue(),
                                [&](vk::CommandBuffer& cmd) {
                                    cmd.updateBuffer<Camera_matrix>(camera_matrix->buffer->get_handle(),
                                                                    0,
-                                                                   Camera_matrix {
-                                                                       .view { m_camera->Get_v_matrix() },
-                                                                       .project { m_camera->Get_p_matrix() } });
+                                                                   Camera_matrix{
+                                                                       .view{ m_camera->Get_v_matrix() },
+                                                                       .project{ m_camera->Get_p_matrix() } });
                                });
     return raster_context::Begin_Frame();
 }
+
 void raster_context_pbr::EndFrame()
 {
     raster_context::EndFrame();
 }
+
 std::shared_ptr<CommandBuffer> raster_context_pbr::BeginSkyboxFrame()
 {
     raster_context::EndFrame();
     return nullptr;
 }
+
 void raster_context_pbr::EndSkyboxFrame()
 {
     raster_context::EndFrame();
@@ -295,17 +311,18 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
         //                      0);
         // }
         auto res = Context::Get_Singleton()
-                       ->get_camera()
-                       ->Get_v_matrix();
+                   ->get_camera()
+                   ->Get_v_matrix();
         res[3] = { 0, 0, 0, 1 };
-        SkyboxPass(cmd, [&](std::shared_ptr<CommandBuffer> cmd) {
-            render_context->record_command(cmd);
-        });
+        SkyboxPass(cmd,
+                   [&](std::shared_ptr<CommandBuffer> cmd) {
+                       render_context->record_command(cmd);
+                   });
 
         {
             cmd->get_handle()
-                .bindPipeline(vk::PipelineBindPoint ::eGraphics,
-                              render_context->get_pipeline()->get_handle());
+               .bindPipeline(vk::PipelineBindPoint::eGraphics,
+                             render_context->get_pipeline()->get_handle());
             render_context->record_command(cmd);
 
             for (auto& mesh : Mesh::meshs) {
@@ -313,27 +330,28 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                                                      render_context->get_pipeline()->get_layout(),
                                                      0,
                                                      { Descriptor_Manager::Get_Singleton()
-                                                           ->get_DescriptorSet(Descriptor_Manager::Graphic)
-                                                           ->get_handle() },
+                                                       ->get_DescriptorSet(Descriptor_Manager::Graphic)
+                                                       ->get_handle() },
                                                      {});
 
                 cmd->get_handle().bindIndexBuffer(mesh->get_indices_buffer()->get_handle(),
                                                   0,
-                                                  vk::IndexType ::eUint32);
-                cmd->get_handle().bindVertexBuffers(0, {
-                                                           mesh->get_vertex_buffer()->get_handle(),
-                                                       },
+                                                  vk::IndexType::eUint32);
+                cmd->get_handle().bindVertexBuffers(0,
+                                                    {
+                                                        mesh->get_vertex_buffer()->get_handle(),
+                                                    },
                                                     { 0 });
                 // std::cout << mesh->get_vertex_buffer()->get_handle() << std::endl;
                 auto m = glm::mat4(1);
                 auto pos = mesh->get_pos();
                 m[3] = glm::vec4(pos, 1);
-                pc = PC_Raster {
-                    .model_matrix { m },
+                pc = PC_Raster{
+                    .model_matrix{ m },
 
-                    .view_matrix { Context::Get_Singleton()
-                                       ->get_camera()
-                                       ->Get_v_matrix() },
+                    .view_matrix{ Context::Get_Singleton()
+                                  ->get_camera()
+                                  ->Get_v_matrix() },
 
                     .camera_pos = glm::vec4(m_camera->get_pos(), 1),
                     .color_texture_index = mesh->m_material.color_texture_index,
@@ -346,19 +364,19 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                 // angle++;
 
                 cmd->get_handle()
-                    .pushConstants<PC_Raster>(
-                        render_context
-                            ->get_pipeline()
-                            ->get_layout(),
-                        vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
-                        0,
-                        pc);
+                   .pushConstants<PC_Raster>(
+                       render_context
+                       ->get_pipeline()
+                       ->get_layout(),
+                       vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+                       0,
+                       pc);
                 cmd->get_handle()
-                    .drawIndexed(mesh->get_vertex_count(),
-                                 1,
-                                 0,
-                                 0,
-                                 0);
+                   .drawIndexed(mesh->get_vertex_count(),
+                                1,
+                                0,
+                                0,
+                                0);
             }
         }
     }
@@ -372,6 +390,7 @@ void raster_context_pbr::EndGraphicFrame()
     m_render_context->Submit();
     m_render_context->EndFrame();
 }
+
 // std::shared_ptr<CommandBuffer> raster_context_pbr::BeginComputeFrame()
 // {
 

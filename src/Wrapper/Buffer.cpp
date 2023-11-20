@@ -1,4 +1,3 @@
-
 #include "Wrapper/Buffer.hpp"
 #include "Helper/CommandManager.hpp"
 #include "Wrapper/CommandBuffer.hpp"
@@ -11,8 +10,8 @@ Buffer::Buffer(size_t size,
                vk::MemoryPropertyFlags property,
                bool permanent)
     : m_usage(usage)
-    , permanent(permanent)
-    , m_size(size)
+      , permanent(permanent)
+      , m_size(size)
 {
     CreateBuffer(size, usage);
     memory_info = QueryMemoryInfo(property);
@@ -20,6 +19,7 @@ Buffer::Buffer(size_t size,
     AllocateMemory();
     BindMemory2Buffer();
 }
+
 Buffer::~Buffer()
 {
 
@@ -28,30 +28,32 @@ Buffer::~Buffer()
     device.freeMemory(memory);
     // vkDestroyBuffer(device, m_handle, nullptr);
 }
+
 void Buffer::CreateBuffer(size_t size, vk::BufferUsageFlags usage)
 {
     vk::BufferCreateInfo allocate_info;
     allocate_info.setSize(size)
-        .setUsage(usage)
-        .setSharingMode(vk::SharingMode::eExclusive);
+                 .setUsage(usage)
+                 .setSharingMode(vk::SharingMode::eExclusive);
     m_handle = Get_Context_Singleton()
-                   ->get_device()
-                   ->get_handle()
-                   .createBuffer(allocate_info);
+               ->get_device()
+               ->get_handle()
+               .createBuffer(allocate_info);
 }
+
 Buffer::MemoryInfo Buffer::QueryMemoryInfo(vk::MemoryPropertyFlags property)
 {
     MemoryInfo info;
     auto requirements = Get_Context_Singleton()
-                            ->get_device()
-                            ->get_handle()
-                            .getBufferMemoryRequirements(m_handle);
+                        ->get_device()
+                        ->get_handle()
+                        .getBufferMemoryRequirements(m_handle);
     // auto re = requirements.
     info.size = requirements.size;
     auto properties = Get_Context_Singleton()
-                          ->get_device()
-                          ->Get_Physical_device()
-                          .getMemoryProperties();
+                      ->get_device()
+                      ->Get_Physical_device()
+                      .getMemoryProperties();
 
     for (int i = 0; i < properties.memoryTypeCount; i++) {
         // satisfy both buffer memory_property AND asked memory_property
@@ -63,11 +65,12 @@ Buffer::MemoryInfo Buffer::QueryMemoryInfo(vk::MemoryPropertyFlags property)
     }
     return info;
 }
+
 void Buffer::AllocateMemory()
 {
     vk::MemoryAllocateInfo allocate_info;
     allocate_info.setMemoryTypeIndex(memory_info.index)
-        .setAllocationSize(memory_info.size);
+                 .setAllocationSize(memory_info.size);
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 #else
     vk::MemoryAllocateFlagsInfo flag;
@@ -78,11 +81,12 @@ void Buffer::AllocateMemory()
 #endif
 
     memory = Get_Context_Singleton()
-                 ->get_device()
-                 ->get_handle()
-                 .allocateMemory(allocate_info);
+             ->get_device()
+             ->get_handle()
+             .allocateMemory(allocate_info);
     int a = 0;
 }
+
 void Buffer::BindMemory2Buffer()
 {
     Get_Context_Singleton()
@@ -92,15 +96,18 @@ void Buffer::BindMemory2Buffer()
                           memory,
                           0);
 }
-void Buffer::Map(uint32_t offset, uint32_t size)
+
+void* Buffer::Map(uint32_t offset, uint32_t size)
 {
     mapped_data = Get_Context_Singleton()
-                      ->get_device()
-                      ->get_handle()
-                      .mapMemory(memory,
-                                 offset,
-                                 size);
+                  ->get_device()
+                  ->get_handle()
+                  .mapMemory(memory,
+                             offset,
+                             VK_WHOLE_SIZE);
+    return mapped_data;
 }
+
 void Buffer::Unmap()
 {
     Get_Context_Singleton()
@@ -108,6 +115,17 @@ void Buffer::Unmap()
         ->get_handle()
         .unmapMemory(memory);
 }
+
+std::vector<uint8_t> Buffer::Get_mapped_data(uint32_t offset)
+{
+    Map(offset, m_size);
+    std::vector<uint8_t> dst_data(m_size  );
+    std::memcpy(dst_data.data(), mapped_data, m_size);
+    Unmap();
+    return dst_data;
+}
+
+
 void Buffer::Update(void* data, size_t size)
 {
 
@@ -118,6 +136,7 @@ void Buffer::Update(void* data, size_t size)
     }
     Unmap();
 }
+
 void Buffer::Update(std::vector<void*> data, std::vector<size_t> size)
 {
 
@@ -139,6 +158,7 @@ void Buffer::Update(std::vector<void*> data, std::vector<size_t> size)
     }
     Unmap();
 }
+
 std::shared_ptr<Buffer> Buffer::CreateDeviceBuffer(void* data,
                                                    size_t size,
                                                    vk::BufferUsageFlags usage)
@@ -155,10 +175,10 @@ std::shared_ptr<Buffer> Buffer::CreateDeviceBuffer(void* data,
     host_buffer.reset(new Buffer(size,
                                  vk::BufferUsageFlagBits::eTransferSrc,
                                  vk::MemoryPropertyFlagBits::eHostVisible |
-                                     vk::MemoryPropertyFlagBits::eHostCoherent));
+                                 vk::MemoryPropertyFlagBits::eHostCoherent));
     if (data) {
-        std::vector<void*> d { data };
-        std::vector<size_t> s { size };
+        std::vector<void*> d{ data };
+        std::vector<size_t> s{ size };
         host_buffer->Update(d, s);
     }
 
@@ -168,22 +188,24 @@ std::shared_ptr<Buffer> Buffer::CreateDeviceBuffer(void* data,
                                    true));
 
     auto graphic_queue = Context::Get_Singleton()
-                             ->get_device()
-                             ->Get_Graphic_queue();
+                         ->get_device()
+                         ->Get_Graphic_queue();
 
-    CommandManager::ExecuteCmd(graphic_queue, [&](auto& cmd_buffer) {
-        vk::BufferCopy regin;
-        regin.setSize(host_buffer->GetSize())
-            .setDstOffset(0)
-            .setSrcOffset(0);
-        cmd_buffer.copyBuffer(
-            host_buffer->get_handle(),
-            device_buffer->get_handle(),
-            regin);
-    });
+    CommandManager::ExecuteCmd(graphic_queue,
+                               [&](auto& cmd_buffer) {
+                                   vk::BufferCopy regin;
+                                   regin.setSize(host_buffer->GetSize())
+                                        .setDstOffset(0)
+                                        .setSrcOffset(0);
+                                   cmd_buffer.copyBuffer(
+                                       host_buffer->get_handle(),
+                                       device_buffer->get_handle(),
+                                       regin);
+                               });
 
     return device_buffer;
 }
+
 std::shared_ptr<Buffer> Buffer::create_buffer(void* data, size_t size, vk::BufferUsageFlags usage)
 {
     std::shared_ptr<Buffer> res;
@@ -195,6 +217,7 @@ std::shared_ptr<Buffer> Buffer::create_buffer(void* data, size_t size, vk::Buffe
         res->Update(data, size);
     return res;
 }
+
 vk::DeviceAddress Buffer::get_address()
 {
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -205,10 +228,10 @@ vk::DeviceAddress Buffer::get_address()
         vk::BufferDeviceAddressInfo address_info;
         address_info.setBuffer(m_handle);
         m_buffer_address = Get_Context_Singleton()
-                               ->get_device()
-                               ->get_handle()
-                               .getBufferAddress(
-                                   address_info);
+                           ->get_device()
+                           ->get_handle()
+                           .getBufferAddress(
+                               address_info);
     }
     return m_buffer_address;
 #endif

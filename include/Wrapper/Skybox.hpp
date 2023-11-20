@@ -14,7 +14,14 @@ class Mesh;
 
 class Skybox {
 public:
-    std::array<std::string, 6> names;
+     std::array<std::string, 6> names{
+        "right",
+        "left",
+        "top",
+        "bottom",
+        "forward",
+        "backward"
+    };
     Skybox(const Skybox&) = default;
     Skybox(Skybox&&) = delete;
     Skybox& operator=(const Skybox&) = default;

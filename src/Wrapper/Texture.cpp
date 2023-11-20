@@ -1,9 +1,11 @@
 #include "Wrapper/Texture.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Image.hpp"
+// #if !defined(STB_IMAGE_IMPLEMENTATION)
 // #define STB_IMAGE_IMPLEMENTATION
+// #endif
 #include "Tool/stb_image.h"
- 
+
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 #include <android/asset_manager.h>
 #include <android_native_app_glue.h>
@@ -11,10 +13,11 @@
 #endif
 namespace MCRT {
 std::vector<std::shared_ptr<Texture>> Texture::textures;
+
 Texture::Texture(std::string_view path)
 {
     int width, height, channel;
-    
+
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     auto m_app = Context::Get_Singleton()->Get_app();
     AAsset* file = AAssetManager_open(m_app->activity->assetManager,
@@ -31,8 +34,8 @@ Texture::Texture(std::string_view path)
     stbi_uc* pixels = stbi_load_from_memory(source.data(), fileLength, &width, &height, &channel, STBI_rgb_alpha);
 #else
 
-//    stbi_uc* pixels
-//        = stbi_load(file_name.data(), &w, &h, &channel, STBI_rgb_alpha);
+    //    stbi_uc* pixels
+    //        = stbi_load(file_name.data(), &w, &h, &channel, STBI_rgb_alpha);
     void* pixels = stbi_load(path.data(), &width, &height, &channel, STBI_rgb_alpha);
 #endif
     size_t size = width * height * 4;
@@ -61,6 +64,7 @@ Texture::Texture(std::string_view path)
         vk::PipelineStageFlagBits::eTransfer,
         vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
 }
+
 Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t size)
 {
     image.reset(new Image(
@@ -85,6 +89,7 @@ Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t size)
         vk::PipelineStageFlagBits::eTransfer,
         vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
 }
+
 Texture::~Texture()
 {
     image.reset();
@@ -101,7 +106,7 @@ std::vector<std::shared_ptr<Image>> Texture::get_image_handles()
     }
 
     // add white textures
-    std::shared_ptr<Image> white_image {
+    std::shared_ptr<Image> white_image{
         new Image(1,
                   1,
                   vk::Format::eR8G8B8A8Srgb,

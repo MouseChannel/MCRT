@@ -6,11 +6,33 @@
 #include "Wrapper/Texture.hpp"
 #include "vulkan/vulkan.hpp"
 #include <cmath>
+#include "Helper/Model_Loader/HDRI2PNG.hpp"
+
+#include <filesystem>
 
 namespace MCRT {
-Skybox::Skybox(std::string file_dir)
+
+Skybox::Skybox(std::string hdr_path, int cubemap_size)
 {
-    // skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
+    namespace fs = std::filesystem;
+    auto get_filename = [&]() {
+        auto file_name = fs::path(hdr_path).filename();
+        if (hdr_path.find_last_of(".") != std::string::npos)
+            return hdr_path.substr(0, hdr_path.find_last_of("."));
+        return std::string();
+    };
+    auto dir_path = HDRI_Helper::get_hdr_out_dir(hdr_path);
+
+    // auto dir_path = fs::path(path).parent_path() / "Cubemap" / file_name;
+    if (!fs::exists(fs::path(dir_path))) {
+        HDRI_Helper::HDR2Cubemap(hdr_path);
+    }
+    Init(dir_path);
+
+}
+
+void Skybox::Init(std::string face_dir)
+{
     names[0] = "right";
     names[1] = "left";
     names[2] = "top";
@@ -24,7 +46,7 @@ Skybox::Skybox(std::string file_dir)
     int p_width = 0, p_height = 0;
 
     for (int i = 0; i < 6; i++) {
-        auto name = file_dir + "/" + names[i] + ".png";
+        auto name = face_dir + "/" + names[i] + ".png";
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
         auto m_app = Context::Get_Singleton()->Get_app();
         AAsset* file = AAssetManager_open(m_app->activity->assetManager,
@@ -43,7 +65,8 @@ Skybox::Skybox(std::string file_dir)
         datas[i] = stbi_load(name.data(), &width, &height, &channel, STBI_rgb_alpha);
 #endif
 
-        { // check vaild
+        {
+            // check vaild
             std::cout << width << ' ' << height << std::endl;
             if (i > 0 && (width != p_width || height != p_height)) {
                 throw std::runtime_error("failed to load cube_map");
@@ -88,6 +111,13 @@ Skybox::Skybox(std::string file_dir)
         vk::PipelineStageFlagBits::eTransfer,
         vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eComputeShader | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
 }
+
+// Skybox::Skybox(std::string file_dir)
+// {
+//     // skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
+//
+// }
+
 Skybox::Skybox(int height, int width)
 {
 
@@ -110,6 +140,7 @@ Skybox::Skybox(int height, int width)
         vk::PipelineStageFlagBits::eTransfer,
         vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eComputeShader | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
 }
+
 Skybox::~Skybox()
 {
 }

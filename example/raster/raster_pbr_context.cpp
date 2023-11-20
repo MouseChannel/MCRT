@@ -41,10 +41,12 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
 {
     raster_context::prepare(window);
     m_camera->m_position.z = 3;
-    sky_box.reset(new Skybox("/home/mocheng/project/MCRT/assets/Cubemap/farm"));
+    sky_box.reset(new Skybox("/home/mocheng/project/MCRT/assets/kart_club_2k.hdr"));
     skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
 
-    GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/cat.gltf");
+    // GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/untitled.obj");
+    Obj_loader::load_model("/home/mocheng/project/MCRT/assets/untitled.obj");
+    
     LUT.reset(new Image(1024,
                         1024,
                         vk::Format::eR32G32B32A32Sfloat,

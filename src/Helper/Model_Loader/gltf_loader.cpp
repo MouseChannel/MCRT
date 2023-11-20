@@ -1,9 +1,15 @@
 #include "Rendering/Model.hpp"
 #include "Wrapper/Texture.hpp"
 #include <iostream>
+#if !defined(TINYGLTF_IMPLEMENTATION)
 #define TINYGLTF_IMPLEMENTATION
+#endif
+#if !defined(STB_IMAGE_IMPLEMENTATION)
 #define STB_IMAGE_IMPLEMENTATION
+#endif
+#if !defined(STB_IMAGE_WRITE_IMPLEMENTATION)
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#endif
 // #include "Helper/ThreadPool.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include "Rendering/Context.hpp"
@@ -17,8 +23,10 @@
 #include "Helper/Model_Loader/gltf_loader.hpp"
 
 #define using_threadpool1
+
 namespace MCRT {
 static std::mutex texture_lock;
+
 int get_size(int componentType)
 {
     switch (componentType) {
@@ -36,12 +44,14 @@ int get_size(int componentType)
         throw std::runtime_error("unsupport type");
     }
 }
+
 static std::string GetFilePathExtension(const std::string& FileName)
 {
     if (FileName.find_last_of(".") != std::string::npos)
         return FileName.substr(FileName.find_last_of(".") + 1);
     return "";
 }
+
 glm::mat4 translation_to_matrix(const std::vector<double>& translation)
 {
     double x = translation[0];
@@ -52,11 +62,12 @@ glm::mat4 translation_to_matrix(const std::vector<double>& translation)
     // mat[0][3] = x;
     // mat[1][3] = y;
     // mat[2][3] = z;
-    mat = glm::translate(mat, glm::vec3 { x, y, z });
+    mat = glm::translate(mat, glm::vec3{ x, y, z });
 
     return mat;
 }
-glm::mat4 scale_to_matrix(const std ::vector<double>& scale)
+
+glm::mat4 scale_to_matrix(const std::vector<double>& scale)
 {
     double x = scale[0];
     double y = scale[1];
@@ -70,7 +81,8 @@ glm::mat4 scale_to_matrix(const std ::vector<double>& scale)
 
     return mat;
 }
-glm::mat4 quaternion_to_matrix(std ::vector<double> quaternion)
+
+glm::mat4 quaternion_to_matrix(std::vector<double> quaternion)
 {
     auto x = quaternion[0];
     auto y = quaternion[1];
@@ -154,6 +166,7 @@ int handle_texture(tinygltf::Model model, tinygltf::TextureInfo texture_info)
     texture_lock.unlock();
     return index;
 }
+
 int handle_texture(tinygltf::Model model, tinygltf::NormalTextureInfo texture_info)
 {
 
@@ -173,6 +186,7 @@ int handle_texture(tinygltf::Model model, tinygltf::NormalTextureInfo texture_in
     texture_lock.unlock();
     return index;
 }
+
 std::shared_ptr<Mesh> GLTF_Loader::load_skybox(std::string_view path)
 {
     load_model(path);
@@ -181,6 +195,7 @@ std::shared_ptr<Mesh> GLTF_Loader::load_skybox(std::string_view path)
     std::cout << "mesh :" << Mesh::meshs.size() << std::endl;
     return sky_box;
 }
+
 glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
                                       const tinygltf::Model& model,
                                       const tinygltf::Node& node,
@@ -243,7 +258,8 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
     if (primitive.mode != 4) {
         throw std::runtime_error("not triangle");
     }
-    { // indices
+    {
+        // indices
         indexs.clear();
         auto indices_index = primitive.indices;
         auto accessor_indices = get_accessor(indices_index);
@@ -251,7 +267,8 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
 
         copy_data(indexs, model.buffers[buffer_view.buffer].data, buffer_view, accessor_indices.count);
     }
-    { // position
+    {
+        // position
         positions.clear();
         auto position_index = primitive.attributes["POSITION"];
         auto accessor_position = get_accessor(position_index);
@@ -263,7 +280,8 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
         }
         copy_data(positions, model.buffers[buffer_view.buffer].data, buffer_view, accessor_position.count);
     }
-    { // normal
+    {
+        // normal
         normals.clear();
         auto normal_index = primitive.attributes["NORMAL"];
         auto accessor_normal = get_accessor(normal_index);
@@ -275,7 +293,8 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
         }
         copy_data(normals, model.buffers[buffer_view.buffer].data, buffer_view, accessor_normal.count);
     }
-    { // texcoord
+    {
+        // texcoord
         texcoord.clear();
         if (primitive.attributes.contains("TEXCOORD_0")) {
 
@@ -286,7 +305,7 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
 
             if (accessor_texcoord.type != TINYGLTF_TYPE_VEC2) {
                 throw std::runtime_error("texcoord format is not vec2");
-                
+
             }
             copy_data(texcoord, model.buffers[buffer_view.buffer].data, buffer_view, accessor_texcoord.count);
         }
@@ -298,10 +317,10 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
     for (int i = 0; i < indexs.size(); i += 3) {
 
         for (int j = 0; j < 3; j++) {
-            vertexs.emplace_back(Vertex {
+            vertexs.emplace_back(Vertex{
                 .pos = positions[indexs[i + j]],
                 .nrm = normals[indexs[i + j]],
-                .texCoord = texcoord.empty() ? glm::vec2 { 0 } : texcoord[indexs[i + j]] });
+                .texCoord = texcoord.empty() ? glm::vec2{ 0 } : texcoord[indexs[i + j]] });
             indices.push_back(indices.size());
             triangle_pos[j] = positions[indexs[i + j]];
         }
@@ -312,13 +331,13 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
     Material cur_material;
     {
         tinygltf::Material material;
-        material.emissiveFactor = std::vector<double> { 0, 0, 0 };
+        material.emissiveFactor = std::vector<double>{ 0, 0, 0 };
         if (primitive.material >= 0) {
             material = model.materials[primitive.material];
         }
 
-        cur_material = Material {
-            .color {
+        cur_material = Material{
+            .color{
                 material.pbrMetallicRoughness.baseColorFactor[0],
                 material.pbrMetallicRoughness.baseColorFactor[1],
                 material.pbrMetallicRoughness.baseColorFactor[2],
@@ -349,9 +368,10 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
     texture_lock.unlock();
     return local_matrix;
 }
+
 void GLTF_Loader::load_mesh(glm::mat4 local_matrix, const tinygltf::Model& model, const tinygltf::Node& node)
 {
-    glm::mat4 cur_marix { 1 };
+    glm::mat4 cur_marix{ 1 };
     if (node.mesh >= 0) {
 
         auto mesh = model.meshes[node.mesh];
@@ -390,7 +410,7 @@ void GLTF_Loader::load_model(std::string_view path)
     }
 
     if (!ret) {
-        throw std::runtime_error("Failed to parse glTF\n"); 
+        throw std::runtime_error("Failed to parse glTF\n");
     }
 
     int node_number = 0;
@@ -427,7 +447,7 @@ void GLTF_Loader::load_model(std::string_view path)
         if (node.name == "teacherDesk") {
             int r = 0;
         }
-        load_mesh(glm::mat4 { 1 }, model, node);
+        load_mesh(glm::mat4{ 1 }, model, node);
     }
 #endif
 }

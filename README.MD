@@ -12,7 +12,7 @@ ninja
 # 🌞Overview🌞
 
 
-### support platform
+### 🫱 support platform
 
 - :white_check_mark: **Windows** 💻
 - :white_check_mark: **Linux** 💻
@@ -20,11 +20,11 @@ ninja
 - :x: **Mac** 💻 todo
 
 
-### work flows
+### 🫱 work flows
 - **RayTracing Pipeline**:  :pray: has not support in Mobile
 - **Graphic pipeline**:  :muscle: support all platform
 
-### some showcase
+### 🫱 some showcase
  
 <div align=center>
     <img src="assets/showcase/android1.jpg" width="25%"><img src="assets/showcase/android2.jpg" width="25%"><img src="assets/showcase/android3.jpg" width="25%">
@@ -48,27 +48,27 @@ IBL-PBR workflow in RedMI📱 12
  
 
 # :fire:  Detail  /  Feature:fire:
-#### Native SKYBOX
+#### 🫱 Native SKYBOX
 - render a native (2048*1024)HDRI to SKYBOX
 
-#### PBR By IBL(Image Base Lighting) pre_rendering
+#### 🫱 PBR By IBL(Image Base Lighting) pre_rendering
 - pre_calculate IBL_Gbuffer by `Compute_pipeline`
 - pbr in Graphic Pipeline using IBL_Gbuffer,and also works on Android
 - pbr in RayTracing Pipeline using IBL_Gbuffer,with single bounce to make it real-time
 
-#### Model Format
+#### 🫱 Model Format
 - :white_check_mark: **GLTF** , support most gltf_material_feature,like `KHR_materials_emissive_strength`and normal_map,AO_Metallic_Roughness_map and so on
 - :white_check_mark: **OBJ**
 - :x: **FBX** 💻 todo
 
-#### Off-line Rendering 
+#### 🫱 Off-line Rendering 
 support offline rendering using Path Tracing by vulkan raytracing pipeline
 
 raytracing feature need **NVIDIA RTX 20-Series** or higher version, and **AMD Radeon RX 6600 XT** or higher version
  - :star2: Importance Sampling Path Tracing  
  - :star2: Disney style BRDF shading in Path Tracing
  - :star2: Noise reduction using joint bilateral filtering by `compute pipeline` 
-#### Volume rendering
+#### 🫱 Volume rendering
 - //TODO
 
 

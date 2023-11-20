@@ -21,15 +21,18 @@ Skybox::Skybox(std::string hdr_path, int cubemap_size)
             return hdr_path.substr(0, hdr_path.find_last_of("."));
         return std::string();
     };
-    if (!fs::exists(fs::path(get_filename()))) {
-        fs::create_directory("/home/mocheng/project/MCRT/assets/Cubemap/" + get_filename());
+    auto dir_path = HDRI_Helper::get_hdr_out_dir(hdr_path);
+
+    // auto dir_path = fs::path(path).parent_path() / "Cubemap" / file_name;
+    if (!fs::exists(fs::path(dir_path))) {
+        HDRI_Helper::HDR2Cubemap(hdr_path);
     }
+    Init(dir_path);
 
 }
 
-Skybox::Skybox(std::string file_dir)
+void Skybox::Init(std::string face_dir)
 {
-    // skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
     names[0] = "right";
     names[1] = "left";
     names[2] = "top";
@@ -43,7 +46,7 @@ Skybox::Skybox(std::string file_dir)
     int p_width = 0, p_height = 0;
 
     for (int i = 0; i < 6; i++) {
-        auto name = file_dir + "/" + names[i] + ".png";
+        auto name = face_dir + "/" + names[i] + ".png";
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
         auto m_app = Context::Get_Singleton()->Get_app();
         AAsset* file = AAssetManager_open(m_app->activity->assetManager,
@@ -108,6 +111,12 @@ Skybox::Skybox(std::string file_dir)
         vk::PipelineStageFlagBits::eTransfer,
         vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eComputeShader | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
 }
+
+// Skybox::Skybox(std::string file_dir)
+// {
+//     // skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
+//
+// }
 
 Skybox::Skybox(int height, int width)
 {

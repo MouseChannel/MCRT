@@ -6,27 +6,31 @@ set(CMAKE_CXX_STANDARD 20)
 include(cmake/FindVulkan.cmake)
 include(cmake/FindGLFW.cmake)
 include(cmake/FindIMGUI.cmake)
-target_link_libraries(imgui glfw Vulkan::Vulkan)
-
+IF (WIN32)
+    target_link_libraries(imgui glfw Vulkan)
+ELSEIF (UNIX)
+    # in linux link Vulkan::Vulkan
+    target_link_libraries(imgui glfw Vulkan::Vulkan)
+ENDIF ()
 #find_program(GLSLANGV ${VULKAN_DIR}/Bin/glslangValidator.exe REQUIRED)
 #file(GLOB_RECURSE RGEN ${CMAKE_SOURCE_DIR}/shader/*.rgen)
 #file(GLOB_RECURSE RCHIT ${CMAKE_SOURCE_DIR}/shader/*.rchit)
 #file(GLOB_RECURSE RMISS ${CMAKE_SOURCE_DIR}/shader/*.rmiss)
 #file(GLOB_RECURSE VERT ${CMAKE_SOURCE_DIR}/shader/*.vert)
 #file(GLOB_RECURSE FRAG
-    # message(${name})
-    # execute_process(COMMAND ${GL${CMAKE_SOURCE_DIR}/shader/*.frag)
-    #list(APPEND ALL_RT_SHADER ${RGEN} ${RCHIT} ${RMISS} ${VERT} ${FRAG})
-    #message(STATUS "run glslangValidator to compile shaders ...")
-    #message("-----all ray tracing shader------ ")
-    #
-    #foreach(var ${ALL_RT_SHADER})
-    #    # message(${var})
-    #    get_filename_component(file_name ${var} NAME)
-    #
-    #    string(CONCAT name ${file_name} .spv)SLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/${name})
+# message(${name})
+# execute_process(COMMAND ${GL${CMAKE_SOURCE_DIR}/shader/*.frag)
+#list(APPEND ALL_RT_SHADER ${RGEN} ${RCHIT} ${RMISS} ${VERT} ${FRAG})
+#message(STATUS "run glslangValidator to compile shaders ...")
+#message("-----all ray tracing shader------ ")
+#
+#foreach(var ${ALL_RT_SHADER})
+#    # message(${var})
+#    get_filename_component(file_name ${var} NAME)
+#
+#    string(CONCAT name ${file_name} .spv)SLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/${name})
 
-    # execute_process(COMMAND ${GLSLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/${name})
+# execute_process(COMMAND ${GLSLANGV} -V --target-env vulkan1.3 ${var} -o ${CMAKE_SOURCE_DIR}/shader/${name})
 #endforeach()
 
 message("---------------------------------")
@@ -35,7 +39,7 @@ message("---------------------------------")
 
 # execute_process(COMMAND ${GLSLANGV} -V ${CMAKE_SOURCE_DIR}/Shader/frag.frag -o ${CMAKE_SOURCE_DIR}/Shader/frag.spv)
 message(STATUS "compile shader OK")
-include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/Tool ${PROJECT_SOURCE_DIR}/lib/vulkan/Include)
+include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/Tool)
 
 # include(cmake/FindSrc.cmake)
 file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src/*.cpp)

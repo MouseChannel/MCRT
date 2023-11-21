@@ -50,5 +50,5 @@ void main()
 
     vec2 LUT_value = calculateLUT(NoV, roughness, size);
 
-    imageStore(LUT, ivec2(gl_GlobalInvocationID), vec4(LUT_value, 0., 0.));
+    imageStore(LUT, ivec2(gl_GlobalInvocationID), vec4(LUT_value, 0., 1));
 }

@@ -69,8 +69,8 @@ private:
     float angle;
     std::shared_ptr<Mesh> skybox_mesh;
     std::shared_ptr<Skybox> sky_box;
-    std::shared_ptr<Image> LUT;
-    std::shared_ptr<Skybox> irradiance;
+    // std::shared_ptr<Image> LUT;
+    // std::shared_ptr<Skybox> irradiance;
 };
 
 }

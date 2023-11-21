@@ -25,6 +25,8 @@
 #include "example/raster/shader/Constants.h"
 
 #include <Helper/Model_Loader/ImageWriter.hpp>
+#include "Rendering/PBR/IBL_Manager.hpp"
+ 
 
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance{ new MCRT::raster_context_pbr };
@@ -34,6 +36,7 @@ int irradiance_size = 512;
 
 raster_context_pbr::raster_context_pbr()
 {
+
 }
 
 raster_context_pbr::~raster_context_pbr()
@@ -49,24 +52,9 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
 
     GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/cat.gltf");
     // Obj_loader::load_model("/home/mocheng/project/MCRT/assets/untitled.obj");
+    IBLManager::Get_Singleton()->Init(sky_box);
 
-    LUT.reset(new Image(1024,
-                        1024,
-                        // vk::Format::eR32G32B32A32Sfloat,
-                        vk::Format::eR8G8B8A8Snorm,
-                        vk::ImageType::e2D,
-                        vk::ImageTiling::eOptimal,
-                        vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc,
-                        vk::ImageAspectFlagBits::eColor,
-                        vk::SampleCountFlagBits::e1));
-    LUT->SetImageLayout(vk::ImageLayout::eGeneral,
-                        vk::AccessFlagBits::eNone,
-                        vk::AccessFlagBits::eNone,
-                        vk::PipelineStageFlagBits::eTopOfPipe,
-                        vk::PipelineStageFlagBits::eBottomOfPipe);
-    irradiance.reset(new Skybox(irradiance_size, irradiance_size));
-
-    contexts.resize(2);
+    contexts.resize(1);
 
     {
         contexts[Context_index::Graphic] = std::shared_ptr<RenderContext>{ new RenderContext(m_device) };
@@ -107,14 +95,14 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                     vk::ShaderStageFlagBits::eFragment);
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(
-                    std::vector{ LUT },
+                    std::vector{ IBLManager::Get_Singleton()->get_LUT() },
                     Descriptor_Manager::Graphic,
                     (int)Graphic_Binding::e_LUT_image,
                     vk::DescriptorType::eCombinedImageSampler,
                     vk::ShaderStageFlagBits::eFragment);
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(
-                    std::vector{ irradiance->get_handle() },
+                    std::vector{ IBLManager::Get_Singleton()->get_irradiance()->get_handle() },
                     Descriptor_Manager::Graphic,
                     (int)Graphic_Binding::e_irradiance_image,
                     vk::DescriptorType::eCombinedImageSampler,
@@ -126,95 +114,11 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     }
 
     {
-        // compute_precompute
+        IBLManager::Get_Singleton()->pre_compute_irradiance();
+        IBLManager::Get_Singleton()->pre_compute_LUT();
+        ImageWriter::WriteImage(IBLManager::Get_Singleton()->get_LUT());
+        ImageWriter::WriteCubemap(IBLManager::Get_Singleton()->get_irradiance()->get_handle());
 
-        contexts[Compute].reset(new Compute_Context);
-        contexts[Compute]->set_constants_size(sizeof(PushContant_IBL));
-
-        contexts[Compute]->prepare();
-        contexts[Compute]->prepare_descriptorset([&]() {
-            Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(
-                    std::vector{ irradiance->get_handle() },
-                    Descriptor_Manager::Compute,
-                    IBL_Binding::e_irradiance_image,
-                    vk::DescriptorType::eStorageImage,
-                    vk::ShaderStageFlagBits::eCompute);
-            Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(
-                    std::vector{ LUT },
-                    Descriptor_Manager::Compute,
-                    IBL_Binding::e_LUT_image,
-                    vk::DescriptorType::eStorageImage,
-                    vk::ShaderStageFlagBits::eCompute);
-            Descriptor_Manager::Get_Singleton()
-                ->Make_DescriptorSet(
-                    std::vector{ sky_box->get_handle() },
-                    Descriptor_Manager::Compute,
-                    IBL_Binding::e_skybox,
-                    vk::DescriptorType::eCombinedImageSampler,
-                    vk::ShaderStageFlagBits::eCompute);
-        });
-
-        {
-            // pre_compute_irradiance
-            std::shared_ptr<ShaderModule>
-                compute_shader{
-                    new ShaderModule("/home/mocheng/project/MCRT/shaders/PBR/IBL/irradiance.comp.spv")
-                };
-            contexts[Compute]->prepare_pipeline({ compute_shader },
-                                                { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) },
-                                                sizeof(PushContant_Compute));
-
-            contexts[Compute]->post_prepare();
-            // doing the actually work
-            auto& compute_context = contexts[Compute];
-            // std::shared_ptr<CommandBuffer> cmd = compute_context->BeginFrame();
-            CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(),
-                                       [&](vk::CommandBuffer& cmd) {
-                                           cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
-                                                                  compute_context->get_pipeline()->get_layout(),
-                                                                  0,
-                                                                  compute_context->get_pipeline()->get_descriptor_sets(),
-                                                                  {});
-                                           cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
-                                                            compute_context->get_pipeline()->get_handle());
-
-                                           cmd.dispatch(irradiance_size, irradiance_size, 6);
-                                       });
-            ImageWriter::WriteCubemap(irradiance->get_handle());
-        }
-        {
-            // pre_compute_lut
-
-            std::shared_ptr<ShaderModule>
-                compute_shader{
-                    new ShaderModule("/home/mocheng/project/MCRT/shaders/PBR/IBL/lookup_table.comp.spv")
-                };
-
-            contexts[Compute]->prepare_pipeline({ compute_shader },
-                                                { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute) },
-                                                sizeof(PushContant_Compute));
-
-            contexts[Compute]->post_prepare();
-            // doing the actually work
-            auto& compute_context = contexts[Compute];
-
-            CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(),
-                                       [&](vk::CommandBuffer& cmd) {
-                                           cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
-                                                                  compute_context->get_pipeline()->get_layout(),
-                                                                  0,
-                                                                  compute_context->get_pipeline()->get_descriptor_sets(),
-                                                                  {});
-                                           cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
-                                                            compute_context->get_pipeline()->get_handle());
-
-                                           cmd.dispatch(1024, 1024, 1);
-                                       });
-            ImageWriter::WriteImage(LUT);
-
-        }
     }
 }
 

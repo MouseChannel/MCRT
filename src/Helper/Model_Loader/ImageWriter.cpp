@@ -6,6 +6,7 @@
 
 #include "Tool/stb_image_write.h"
 
+#include <filesystem>
 #include <Wrapper/Skybox.hpp>
 
 namespace MCRT {
@@ -53,11 +54,12 @@ void ImageWriter::WriteImage(std::shared_ptr<Image> image)
 
     for (int i = 0; i < mapped_data.size(); i++) {
         //set alpha = 1
-        if (i % 4 == 3) {
-            mapped_data[i] = 255;
-        }
+        // if (i % 4 == 3) {
+        //     mapped_data[i] = 255;
+        // }
+        temp[i] = mapped_data[i];
     }
-    
+
     stbi_write_png("testout.png", image->width, image->height, channel, mapped_data.data(), image->width * channel);
 
 }
@@ -109,15 +111,22 @@ void ImageWriter::WriteCubemap(std::shared_ptr<Image> cubemap)
 
     // std::vector<int> temp(mapped_data.size());
 
-    for (int i = 0; i < mapped_data.size(); i++) {
-        //set alpha = 1
-        if (i % 4 == 3) {
-            mapped_data[i] = 255;
-        }
-    }
+    // for (int i = 0; i < mapped_data.size(); i++) {
+    //     //set alpha = 1
+    //     if (i % 4 == 3) {
+    //         mapped_data[i] = 255;
+    //     }
+    // }
 
+        std::filesystem::path out_dir{ "/home/mocheng/project/MCRT/assets/Cubemap/out" };
+
+    if (!std::filesystem::exists(out_dir)) {
+        std::filesystem::create_directory(out_dir);
+    }
     for (int i = 0; i < 6; i++) {
-        auto tt = std::to_string(i) + "testout.png";
+
+        auto tt = out_dir / (names[i] + ".png");
+
         // std::vector<uint8_t> temp(mapped_data.begin()+)
         stbi_write_png(tt.c_str(),
                        cubemap->width,

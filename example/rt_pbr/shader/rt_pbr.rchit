@@ -94,23 +94,28 @@ void main()
 
     float roughness = pcRay.roughness;
     float metallicness = pcRay.metallicness;
+ 
+    
 
-    if (material.material.metallicness_roughness_texture_index > -1) {
+    if (bool(pcRay.use_RM_map) && material.material.metallicness_roughness_texture_index > -1) {
         vec2 r_m = texture(textures[nonuniformEXT(material.material.metallicness_roughness_texture_index)], cur_uv).yz;
         roughness = r_m[0];
         metallicness = r_m[1];
+       //  debugPrintfEXT("message in rm \n");
     }
-    // debugPrintfEXT("message %d \n", pcRay.use_normal_map);
-    if (bool(pcRay.use_normal_map)) {
+   
+    // if (bool(pcRay.use_normal_map)) {
         // debugPrintfEXT("message \n");
-        if (material.material.normal_texture_index > -1) {
+    if (bool(pcRay.use_normal_map) && material.material.normal_texture_index > -1) {
             cur_world_normal = getNormalSpace(cur_world_normal) * texture(textures[nonuniformEXT(material.material.normal_texture_index)], cur_uv).xyz;
-        }
+               //    debugPrintfEXT("message in normal \n");
     }
+    // }
 
     vec3 albedo = vec3(1, 1, 1);
-    if (material.material.color_texture_index > -1) {
+    if (bool(pcRay.use_abedo) && material.material.color_texture_index > -1) {
         albedo = texture(textures[nonuniformEXT(material.material.color_texture_index)], cur_uv).xyz / PI;
+             //  debugPrintfEXT("message in albedo \n");
     }
     vec3 N = cur_world_normal;
     vec3 V = normalize(vec3(camera_data.camera_pos) - cur_world_pos);
@@ -141,6 +146,8 @@ void main()
                                 skybox,
                                 irradiance_cubemap,
                                 LUT_image);
+                                
+    prd.hitValue = pow(prd.hitValue, vec3(1. / 2.2));
     // prd.hitValue = KD * diffuse + specular;
     // prd.hitValue = irradiance;
 }

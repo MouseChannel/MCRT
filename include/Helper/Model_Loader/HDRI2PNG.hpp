@@ -81,7 +81,7 @@ public:
         };
 
         auto file_name = get_filename(hdr_path);
-        auto dir_path = fs::path(hdr_path).parent_path() / "Cubemap" / file_name;
+        auto dir_path = fs::path(hdr_path).parent_path()  / file_name;
         return dir_path;
         if (!fs::exists(fs::path(dir_path))) {
             fs::create_directory(dir_path);

@@ -1,4 +1,3 @@
-
 #ifndef RT_PBR_PC
 #define RT_PBR_PC
 
@@ -13,6 +12,7 @@ struct PushContant_rtpbr {
     int apply_normal;
 
     int use_normal_map;
+    int use_abedo, use_RM_map;
 
     vec4 camera_pos;
     vec4 lightPosition;

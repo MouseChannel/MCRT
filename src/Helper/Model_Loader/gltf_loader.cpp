@@ -450,5 +450,6 @@ void GLTF_Loader::load_model(std::string_view path)
         load_mesh(glm::mat4{ 1 }, model, node);
     }
 #endif
+    // loader.WriteGltfSceneToFile(&model, "test.gltf", true, true, true);
 }
 }

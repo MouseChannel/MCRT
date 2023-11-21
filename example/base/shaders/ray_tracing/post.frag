@@ -3,7 +3,7 @@
 #extension GL_EXT_debug_printf : enable
 #extension GL_GOOGLE_include_directive : enable
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
-#include "/shader/Data_struct.h"
+#include "shaders/Data_struct.h"
 
 layout(location = e_nrm) in vec3 in_nrm;
 
@@ -18,5 +18,5 @@ layout(location = 0) out vec4 outColor;
 void main()
 {
 
-    outColor = pow(texture(Sampler, in_texCoord).rgba, vec4(1. / 2.2));
+    outColor = pow(texture(Sampler, in_texCoord).rgba, vec4(1. / 1));
 }

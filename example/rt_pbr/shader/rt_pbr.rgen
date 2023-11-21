@@ -11,7 +11,7 @@
 #include "hit_payload.glsl"
 #include "shaders/Data_struct.h"
 
-#include "/shader/common.glsl"
+#include "shaders/common.glsl"
 #include "shaders/sampling.glsl"
 
 layout(push_constant) uniform _PushContant

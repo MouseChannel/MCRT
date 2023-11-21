@@ -23,7 +23,7 @@ public:
 
     static float light_pos_x, light_pos_y, light_pos_z, roughness, met;
     static int apply_normal;
-    static bool use_normal_map;
+    static bool use_normal_map,use_abedo,use_RM_map;
     void prepare(std::shared_ptr<Window> window) override;
     // vk::Extent2D last_extent2d;
     void re_create_context() override;
@@ -42,8 +42,8 @@ private:
     std::shared_ptr<Buffer> index_buffer, vertex_buffer, uv_buffer;
     std::shared_ptr<Skybox> m_skybox;
     std::shared_ptr<Mesh> skybox_mesh;
-    std::shared_ptr<Image> LUT;
-    std::shared_ptr<Skybox> irradiance;
+    // std::shared_ptr<Image> LUT;
+    // std::shared_ptr<Skybox> irradiance;
     std::shared_ptr<Texture> test_texture;
     std::shared_ptr<Image> test_image;
 };

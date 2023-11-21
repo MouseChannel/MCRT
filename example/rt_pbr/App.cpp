@@ -28,6 +28,8 @@ void App::run()
             ImGui::SliderFloat("metallicness", &rt_pbr_context::met, 0.01f, 1.0f);
             ImGui::SliderInt("normal", &rt_pbr_context::apply_normal, 0, 1);
             ImGui::Checkbox("use_normal_map", &rt_pbr_context::use_normal_map);
+            ImGui::Checkbox("use_diffuse_map", &rt_pbr_context::use_abedo);
+            ImGui::Checkbox("use_RM_map", &rt_pbr_context::use_RM_map);
             ImGui::Text("counter = %d", Context::Get_Singleton()->get_enable_filter()); });
         context->EndFrame();
     }

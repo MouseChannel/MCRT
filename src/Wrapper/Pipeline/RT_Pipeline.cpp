@@ -13,9 +13,9 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
     : Pipeline_base(sets)
 {
 
-    auto rgen_shader_count { 1 };
-    auto rmiss_shader_count { Context::Get_Singleton()->get_rt_context()->get_miss_shader_count() };
-    auto rhit_shader_count { Context::Get_Singleton()->get_rt_context()->get_hit_shader_count() };
+    auto rgen_shader_count{ 1 };
+    auto rmiss_shader_count{ Context::Get_Singleton()->get_rt_context()->get_miss_shader_count() };
+    auto rhit_shader_count{ Context::Get_Singleton()->get_rt_context()->get_hit_shader_count() };
 
     auto rgen_index = 0;
     auto rmiss_index = rgen_shader_count;
@@ -24,26 +24,26 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
         stages(rgen_shader_count + rmiss_shader_count + rhit_shader_count);
     stages[rgen_index]
         .setPName("main")
-        .setStage(vk::ShaderStageFlagBits ::eRaygenKHR)
+        .setStage(vk::ShaderStageFlagBits::eRaygenKHR)
         .setModule(shader_modules[eRaygen]->get_handle());
 
     for (int i = 0; i < rmiss_shader_count; i++) {
         stages[rmiss_index + i]
             .setPName("main")
-            .setStage(vk::ShaderStageFlagBits ::eMissKHR)
+            .setStage(vk::ShaderStageFlagBits::eMissKHR)
             .setModule(shader_modules[eMiss + i]->get_handle());
     }
 
     for (int i = 0; i < rhit_shader_count; i++) {
         stages[rhit_index + i]
             .setPName("main")
-            .setStage(vk::ShaderStageFlagBits ::eClosestHitKHR)
+            .setStage(vk::ShaderStageFlagBits::eClosestHitKHR)
             .setModule(shader_modules[eClosestHit + i]->get_handle());
     }
 
     vk::RayTracingShaderGroupCreateInfoKHR create_info;
     create_info
-        .setType(vk::RayTracingShaderGroupTypeKHR ::eGeneral)
+        .setType(vk::RayTracingShaderGroupTypeKHR::eGeneral)
         .setAnyHitShader(VK_SHADER_UNUSED_KHR)
         .setClosestHitShader(VK_SHADER_UNUSED_KHR)
         .setIntersectionShader(VK_SHADER_UNUSED_KHR)
@@ -54,9 +54,9 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
         groups.push_back(create_info);
     }
     for (int i = 0; i < rhit_shader_count; i++) {
-        create_info.setType(vk::RayTracingShaderGroupTypeKHR ::eTrianglesHitGroup)
-            .setClosestHitShader(rhit_index + i)
-            .setGeneralShader(VK_SHADER_UNUSED_KHR);
+        create_info.setType(vk::RayTracingShaderGroupTypeKHR::eTrianglesHitGroup)
+                   .setClosestHitShader(rhit_index + i)
+                   .setGeneralShader(VK_SHADER_UNUSED_KHR);
         groups.push_back(create_info);
     }
     // pipeline layout
@@ -79,21 +79,18 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
 
     vk::PipelineLayoutCreateInfo layout_create_info;
 
-    // std::vector<vk::DescriptorSetLayout> layouts;
-    // for (auto set : sets) {
-    //     layouts.push_back(set->get_layout());
-    // }
+    auto push_range = vk::PushConstantRange()
+                      .setStageFlags(
+                          vk::ShaderStageFlagBits::eRaygenKHR |
+                          vk::ShaderStageFlagBits::eClosestHitKHR |
+                          vk::ShaderStageFlagBits::eMissKHR)
+                      .setSize(push_constants_size);
     layout_create_info.setSetLayouts(m_descriptor_layouts)
-        .setPushConstantRanges(vk::PushConstantRange()
-                                   .setStageFlags(
-                                       vk::ShaderStageFlagBits::eRaygenKHR |
-                                       vk::ShaderStageFlagBits::eClosestHitKHR |
-                                       vk::ShaderStageFlagBits::eMissKHR)
-                                   .setSize(push_constants_size));
+                      .setPushConstantRanges(push_range);
     layout = Context::Get_Singleton()
-                 ->get_device()
-                 ->get_handle()
-                 .createPipelineLayout(layout_create_info);
+             ->get_device()
+             ->get_handle()
+             .createPipelineLayout(layout_create_info);
     Context::Get_Singleton()->get_debugger()->set_handle_name(layout, "my_lyout");
 
     vk::RayTracingPipelineCreateInfoKHR pipeline_create_info;
@@ -105,28 +102,29 @@ RT_Pipeline::RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modul
                     2);
 #else
     pipeline_create_info.setStages(stages)
-        .setGroups(groups)
-        .setLayout(layout)
-        .setMaxPipelineRayRecursionDepth(
-            Context::Get_Singleton()
-                ->get_device()
-                ->Get_Physical_device()
-                .getProperties2<vk::PhysicalDeviceProperties2KHR,
-                                vk::PhysicalDeviceRayTracingPipelinePropertiesKHR>()
-                .get<vk::PhysicalDeviceRayTracingPipelinePropertiesKHR>()
-                .maxRayRecursionDepth);
+                        .setGroups(groups)
+                        .setLayout(layout)
+                        .setMaxPipelineRayRecursionDepth(
+                            Context::Get_Singleton()
+                            ->get_device()
+                            ->Get_Physical_device()
+                            .getProperties2<vk::PhysicalDeviceProperties2KHR,
+                                            vk::PhysicalDeviceRayTracingPipelinePropertiesKHR>()
+                            .get<vk::PhysicalDeviceRayTracingPipelinePropertiesKHR>()
+                            .maxRayRecursionDepth);
     std::cout << pipeline_create_info.maxPipelineRayRecursionDepth << std::endl;
 #endif
 
     auto res = Context::Get_Singleton()
-                   ->get_device()
-                   ->get_handle()
-                   .createRayTracingPipelineKHR({}, {}, pipeline_create_info);
+               ->get_device()
+               ->get_handle()
+               .createRayTracingPipelineKHR({}, {}, pipeline_create_info);
     if (res.result != vk::Result::eSuccess) {
         throw std::runtime_error("fail to create ray tracing pipeline");
     }
     m_handle = res.value;
 }
+
 RT_Pipeline::~RT_Pipeline()
 {
 }

@@ -36,7 +36,6 @@ layout(push_constant) uniform PushContant_
 
 layout(set = 1, binding = e_camera) uniform _camera_data
 {
-
     Camera_data camera_data;
 };
 layout(set = 0, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;

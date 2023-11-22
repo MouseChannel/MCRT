@@ -11,7 +11,7 @@ class Buffer;
 class Graphic_Pipeline;
 class raster_context : public Context {
 public:
-    enum Context_index { Graphic,
+    enum Pass_index { Graphic,
 
                          Compute };
     raster_context();
@@ -19,7 +19,8 @@ public:
     virtual std::shared_ptr<CommandBuffer> Begin_Frame() override;
     virtual void EndFrame() override;
     virtual void prepare(std::shared_ptr<Window> window) override;
-    void SkyboxPass(std::shared_ptr<CommandBuffer> cmd, std::function<void(std::shared_ptr<CommandBuffer> cmd)> func);
+    //TODO make a skybox context
+    void SkyboxPass(std::shared_ptr<CommandBuffer> cmd,std::shared_ptr<GraphicPass> graphic_context, std::function<void(std::shared_ptr<CommandBuffer> cmd)> func);
     virtual void re_create_context() override;
 
 protected:

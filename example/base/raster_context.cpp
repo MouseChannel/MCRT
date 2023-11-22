@@ -1,8 +1,8 @@
 #include "example/base/raster_context.hpp"
 #include "Helper/Camera.hpp"
 #include "Helper/DescriptorManager.hpp"
+#include "Rendering/GraphicPass.hpp"
 #include "Rendering/Model.hpp"
-#include "Rendering/Render_Context.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Pipeline/Graphic_Pipeline.hpp"
 #include "example/raster/shader/Constants.h"
@@ -24,7 +24,6 @@ void raster_context::prepare(std::shared_ptr<Window> window)
     camera_matrix = UniformManager::make_uniform({ _camera_data },
                                                  vk::ShaderStageFlagBits::eVertex,
                                                  vk::DescriptorType ::eUniformBuffer);
-    
 }
 std::shared_ptr<CommandBuffer> raster_context::Begin_Frame()
 {
@@ -41,7 +40,7 @@ void raster_context::re_create_context()
 {
 }
 
-void raster_context::SkyboxPass(std::shared_ptr<CommandBuffer> cmd, std::function<void(std::shared_ptr<CommandBuffer> cmd)> func)
+void raster_context::SkyboxPass(std::shared_ptr<CommandBuffer> cmd, std::shared_ptr<GraphicPass> graphic_context, std::function<void(std::shared_ptr<CommandBuffer> cmd)> func)
 {
     cmd->get_handle()
         .bindPipeline(vk::PipelineBindPoint::eGraphics,
@@ -50,8 +49,8 @@ void raster_context::SkyboxPass(std::shared_ptr<CommandBuffer> cmd, std::functio
     cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                          get_skybox_pipeline()->get_layout(),
                                          0,
-                                         { Descriptor_Manager::Get_Singleton()
-                                               ->get_DescriptorSet(Descriptor_Manager::Graphic)
+                                         { graphic_context->get_descriptor_manager()
+                                               ->get_DescriptorSet(DescriptorManager::Graphic)
                                                ->get_handle() },
                                          {});
 

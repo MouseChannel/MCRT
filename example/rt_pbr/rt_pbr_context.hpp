@@ -11,7 +11,7 @@ class Skybox;
 class Texture;
 class rt_pbr_context : public ray_tracing_context {
 public:
-    enum Context_index { Graphic,
+    enum Pass_index { Graphic,
                          Ray_tracing,
                          //  Compute_LUT,
                          Compute };

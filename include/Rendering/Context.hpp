@@ -28,7 +28,7 @@ namespace MCRT {
 
     class CommandBuffer;
 
-    class RenderContext;
+    class GraphicPass;
 
     class Sampler;
 
@@ -44,13 +44,13 @@ namespace MCRT {
 
     class Camera;
 
-    class Context_base;
+    class BasePass;
 
     class RenderPass;
 
-    class Compute_Context;
+    class ComputePass;
 
-    class RT_Context;
+    class RaytracingPass;
 
     class Context {
     public:
@@ -111,11 +111,11 @@ namespace MCRT {
             return enable_filter;
         }
 
-        virtual std::shared_ptr <RT_Context> get_rt_context() = 0;
+        virtual std::shared_ptr <RaytracingPass> get_rt_context() = 0;
 
-        virtual std::shared_ptr <Compute_Context> get_compute_context() = 0;
+        virtual std::shared_ptr <ComputePass> get_compute_context() = 0;
 
-        virtual std::shared_ptr <RenderContext> get_graphic_context() = 0;
+        virtual std::shared_ptr <GraphicPass> get_graphic_context() = 0;
 
         [[nodiscard("missing camera")]] auto &get_camera() {
             return m_camera;
@@ -185,7 +185,7 @@ namespace MCRT {
         std::shared_ptr <CommandPool> m_command_pool;
         std::shared_ptr <Debugger> m_debugger;
         std::shared_ptr <Sampler> m_sampler;
-        std::vector <std::shared_ptr<Context_base>> contexts;
+        std::vector <std::shared_ptr<BasePass>> PASS;
         std::shared_ptr <Camera> m_camera;
         bool enable_filter = false;
         int frame_id = 0;

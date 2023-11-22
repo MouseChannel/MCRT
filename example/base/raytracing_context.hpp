@@ -8,7 +8,7 @@ namespace MCRT {
 class Buffer;
 class ray_tracing_context : public Context {
 public:
-    enum Context_index { Graphic,
+    enum Pass_index { Graphic,
                          Ray_tracing,
                          Compute };
     ray_tracing_context();
@@ -16,27 +16,27 @@ public:
     // void init(std::shared_ptr<Window>) override;
     virtual std::shared_ptr<CommandBuffer> Begin_Frame() override;
     virtual void EndFrame() override;
-    std::shared_ptr<RT_Context> get_rt_context() override
+    std::shared_ptr<RaytracingPass> get_rt_context() override
     {
-        auto base = contexts[Context_index::Ray_tracing];
-        if (auto context = std::reinterpret_pointer_cast<RT_Context>(base); context != nullptr) {
+        auto base = PASS[Pass_index::Ray_tracing];
+        if (auto context = std::reinterpret_pointer_cast<RaytracingPass>(base); context != nullptr) {
             return context;
         }
         throw std::runtime_error("it is not Ray_Tracing context");
     }
-    std::shared_ptr<Compute_Context> get_compute_context() override
+    std::shared_ptr<ComputePass> get_compute_context() override
     {
-        auto base = contexts[Context_index::Compute];
-        if (auto context = std::reinterpret_pointer_cast<Compute_Context>(base); context != nullptr) {
+        auto base = PASS[Pass_index::Compute];
+        if (auto context = std::reinterpret_pointer_cast<ComputePass>(base); context != nullptr) {
             return context;
         }
         throw std::runtime_error("it is not compute context");
     }
 
-    std::shared_ptr<RenderContext> get_graphic_context() override
+    std::shared_ptr<GraphicPass> get_graphic_context() override
     {
-        auto base = contexts[Context_index::Graphic];
-        if (auto context = std::reinterpret_pointer_cast<RenderContext>(base); context != nullptr) {
+        auto base = PASS[Pass_index::Graphic];
+        if (auto context = std::reinterpret_pointer_cast<GraphicPass>(base); context != nullptr) {
             return context;
         }
         throw std::runtime_error("it is not Ray_Tracing context");

@@ -15,6 +15,7 @@ add_subdirectory(raster)
 # add_subdirectory(path_tracing_light)
 # add_subdirectory(rt_skybox)
 add_subdirectory(rt_pbr)
+add_subdirectory(test)
 
 # add_subdirectory(tiled_rendering)
 

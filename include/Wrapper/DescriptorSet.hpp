@@ -98,7 +98,7 @@ private:
     // std::vector<Data_Binding<Buffer>> buffers;
     // std::vector<Data_Binding<AccelerationStructure_Top>> as;
 
-    std::unordered_map<int, Data_Binding<Image>> _images;
+    std::unordered_map<uint32_t , Data_Binding<Image>> _images;
     std::unordered_map<int, Data_Binding<Buffer>> _buffers;
     std::unordered_map<int, Data_Binding<AccelerationStructure_Top>> _as;
 };

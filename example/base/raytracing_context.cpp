@@ -4,10 +4,10 @@
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Model_Loader/Obj_Loader.hpp"
 #include "Helper/Model_Loader/gltf_loader.hpp"
-#include "Rendering/Compute_context.hpp"
+#include "Rendering/ComputePass.hpp"
+#include "Rendering/GraphicPass.hpp"
 #include "Rendering/Model.hpp"
-#include "Rendering/RT_Context.hpp"
-#include "Rendering/Render_Context.hpp"
+#include "Rendering/RaytracingPass.hpp"
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Pipeline/Graphic_Pipeline.hpp"
 #include "Wrapper/Pipeline/RT_pipeline.hpp"
@@ -69,7 +69,7 @@ void ray_tracing_context::EndFrame()
 std::shared_ptr<CommandBuffer> ray_tracing_context::BeginGraphicFrame()
 {
 
-    auto& render_context = contexts[Graphic];
+    auto& render_context = PASS[Graphic];
     std::shared_ptr<CommandBuffer> cmd = render_context->BeginFrame();
     {
         cmd->get_handle().bindPipeline(vk::PipelineBindPoint ::eGraphics, render_context->get_pipeline()->get_handle());
@@ -96,7 +96,7 @@ std::shared_ptr<CommandBuffer> ray_tracing_context::BeginGraphicFrame()
 
 void ray_tracing_context::EndGraphicFrame()
 {
-    auto& m_render_context = contexts[Graphic];
+    auto& m_render_context = PASS[Graphic];
     m_render_context->Submit();
     m_render_context->EndFrame();
 }

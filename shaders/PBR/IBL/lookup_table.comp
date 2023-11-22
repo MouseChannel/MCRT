@@ -10,7 +10,9 @@
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(set = 0, binding = e_skybox) uniform samplerCube skybox;
 
-layout(set = 0, binding = e_LUT_image, rgba32f) uniform image2D LUT;
+// layout(set = 0, binding = e_LUT_image, rgba32f) uniform image2D LUT;
+
+layout(set = 0, binding = e_LUT_image, rgba8) uniform image2D LUT;
 
 vec2 calculateLUT(float NoV, float roughness, float size)
 {

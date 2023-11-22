@@ -1,6 +1,6 @@
 #include "Wrapper/Pipeline/Graphic_Pipeline.hpp"
 #include "Helper/DescriptorManager.hpp"
-#include "Rendering/Render_Context.hpp"
+#include "Rendering/GraphicPass.hpp"
 
 #include "Rendering/Render_Target/Depth_Render_Target.hpp"
 #include "Wrapper/Device.hpp"

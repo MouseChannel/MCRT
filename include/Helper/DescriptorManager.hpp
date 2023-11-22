@@ -26,13 +26,13 @@ public:
        
         e_type_count
     };
-    enum Type {
-        e_undefined,
-        e_buffer,
-        e_image,
-        e_tlas,
-        // e_type_count
-    };
+//    enum Type {
+//        e_undefined,
+//        e_buffer,
+//        e_image,
+//        e_tlas,
+//        // e_type_count
+//    };
     vk::DescriptorSetLayout Get_DescriptorSet_layout(Which_Set which_set);
     Descriptor_Manager() = default;
     ~Descriptor_Manager();
@@ -55,13 +55,10 @@ public:
             descriptorsets[which_set].reset(new DescriptorSet);
         descriptorsets[which_set]->Add(data, binding);
         // Context::Get_Singleton()->get_debugger()->set_handle_name(descriptorsets[which_set]->get_handle()[0], "binding" + std::to_string(binding_index));
+        int r = 0;
     }
 
-    template <typename T>
-    void replace_DescriptorSet()
-    {
-        
-    }
+ 
 
     template <typename T>
     void Make_DescriptorSet(std::shared_ptr<T> data,

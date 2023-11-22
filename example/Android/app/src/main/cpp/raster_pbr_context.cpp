@@ -5,10 +5,10 @@
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Model_Loader/Obj_Loader.hpp"
 #include "Helper/Model_Loader/gltf_loader.hpp"
-#include "Rendering/Compute_context.hpp"
+#include "Rendering/ComputePass.hpp"
+#include "Rendering/GraphicPass.hpp"
 #include "Rendering/Model.hpp"
-#include "Rendering/RT_Context.hpp"
-#include "Rendering/Render_Context.hpp"
+#include "Rendering/RaytracingPass.hpp"
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Pipeline/Graphic_Pipeline.hpp"
 #include "Wrapper/Pipeline/RT_pipeline.hpp"
@@ -61,15 +61,15 @@ namespace MCRT {
                             vk::PipelineStageFlagBits::eBottomOfPipe);
         irradiance.reset(new Skybox(irradiance_size, irradiance_size));
 
-        contexts.resize(2);
+        PASS.resize(2);
 
         {
-            contexts[Context_index::Graphic] = std::shared_ptr<RenderContext>{
+            PASS[Pass_index::Graphic] = std::shared_ptr<RenderContext>{
                     new RenderContext(m_device)};
             Context::Get_Singleton()
                     ->get_graphic_context()
                     ->set_constants_size(sizeof(PC_Raster));
-            auto graphic_context = std::dynamic_pointer_cast<RenderContext>(contexts[Graphic]);
+            auto graphic_context = std::dynamic_pointer_cast<RenderContext>(PASS[Graphic]);
             if (graphic_context == nullptr) {
                 throw std::runtime_error("not graphic context");
             }
@@ -160,11 +160,11 @@ namespace MCRT {
 
         { // compute_precompute
 
-            contexts[Compute].reset(new Compute_Context);
-            contexts[Compute]->set_constants_size(sizeof(PushContant_IBL));
+            PASS[Compute].reset(new Compute_Context);
+            PASS[Compute]->set_constants_size(sizeof(PushContant_IBL));
 
-            contexts[Compute]->prepare();
-            contexts[Compute]->prepare_descriptorset([&]() {
+            PASS[Compute]->prepare();
+            PASS[Compute]->prepare_descriptorset([&]() {
                 Descriptor_Manager::Get_Singleton()
                         ->Make_DescriptorSet(
                                 std::vector{irradiance->get_handle()},
@@ -205,14 +205,14 @@ namespace MCRT {
 //                    vkCmdSetValidationFeaturesEXT(commandBuffer, 1, &validationFeatures); // 添加
                 }
 
-                contexts[Compute]->prepare_pipeline({compute_shader},
+                PASS[Compute]->prepare_pipeline({compute_shader},
                                                     {Descriptor_Manager::Get_Singleton()->get_DescriptorSet(
                                                             Descriptor_Manager::Compute)},
                                                     sizeof(PushContant_Compute));
 
-                contexts[Compute]->post_prepare();
+                PASS[Compute]->post_prepare();
                 // doing the actually work
-                auto &compute_context = contexts[Compute];
+                auto &compute_context = PASS[Compute];
                 // std::shared_ptr<CommandBuffer> cmd = compute_context->BeginFrame();
                 CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(),
                                            [&](vk::CommandBuffer &cmd) {
@@ -235,14 +235,14 @@ namespace MCRT {
                         new ShaderModule("shaders/lookup_table.comp.spv")
                 };
 
-                contexts[Compute]->prepare_pipeline({compute_shader},
+                PASS[Compute]->prepare_pipeline({compute_shader},
                                                     {Descriptor_Manager::Get_Singleton()->get_DescriptorSet(
                                                             Descriptor_Manager::Compute)},
                                                     sizeof(PushContant_Compute));
 
-                contexts[Compute]->post_prepare();
+                PASS[Compute]->post_prepare();
                 // doing the actually work
-                auto &compute_context = contexts[Compute];
+                auto &compute_context = PASS[Compute];
 
                 CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(),
                                            [&](vk::CommandBuffer &cmd) {
@@ -291,7 +291,7 @@ namespace MCRT {
 
     std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame() {
         // get_device()->get_handle().waitIdle();
-        auto render_context = std::dynamic_pointer_cast<RenderContext>(contexts[Graphic]);
+        auto render_context = std::dynamic_pointer_cast<RenderContext>(PASS[Graphic]);
 
         std::shared_ptr<CommandBuffer> cmd = render_context->BeginFrame();
         {
@@ -424,7 +424,7 @@ namespace MCRT {
     }
 
     void raster_context_pbr::EndGraphicFrame() {
-        auto &m_render_context = contexts[Graphic];
+        auto &m_render_context = PASS[Graphic];
         m_render_context->Submit();
         m_render_context->EndFrame();
     }
@@ -432,7 +432,7 @@ namespace MCRT {
 // {
 
 //     // compute_context->record_command(cmd);
-//     auto& compute_context = contexts[2];
+//     auto& compute_context = PASS[2];
 //     std::shared_ptr<CommandBuffer> cmd = compute_context->BeginFrame();
 //     {
 //         cmd->get_handle()
@@ -495,7 +495,7 @@ namespace MCRT {
 // }
 // void raster_context_pbr::EndComputeFrame()
 // {
-//     auto& compute_context = contexts[2];
+//     auto& compute_context = PASS[2];
 //     compute_context->Submit();
 // }
 }

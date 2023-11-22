@@ -154,7 +154,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     }
     {
         // test
-//        TAA_Manager::Get_Singleton()->Init(IBLManager::Get_Singleton()->get_LUT());
+        TAA_Manager::Get_Singleton()->Init(IBLManager::Get_Singleton()->get_LUT());
     }
 }
 

@@ -1,4 +1,6 @@
 #pragma once
+// #include <memory>
+// #include <vector>
 #include "Helper/Instance_base.hpp"
 #include "Helper/Uniform_Manager.hpp"
 #include "Wrapper//Ray_Tracing/AS_top.hpp"
@@ -6,36 +8,25 @@
 #include "Wrapper/Component.hpp"
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Ray_Tracing/AS_top.hpp"
-#include <any>
-#include <map>
-#include <vulkan/vulkan.hpp>
-
 namespace MCRT {
+
 class Buffer;
 class DescriptorPool;
 class Image;
-class Descriptor_Manager : public Instance_base<Descriptor_Manager> {
-
+class DescriptorManager {
 public:
     enum Which_Set {
         Graphic,
         Ray_Tracing,
-        Global,
         Compute,
-        Compute2,
-       
+        Global,
+        
         e_type_count
     };
-//    enum Type {
-//        e_undefined,
-//        e_buffer,
-//        e_image,
-//        e_tlas,
-//        // e_type_count
-//    };
+
     vk::DescriptorSetLayout Get_DescriptorSet_layout(Which_Set which_set);
-    Descriptor_Manager() = default;
-    ~Descriptor_Manager();
+    DescriptorManager() = default;
+    ~DescriptorManager();
     template <typename T>
     void Make_DescriptorSet(std::vector<std::shared_ptr<T>> data,
                             Which_Set which_set,
@@ -58,7 +49,10 @@ public:
         int r = 0;
     }
 
- 
+    template <typename T>
+    void replace_DescriptorSet()
+    {
+    }
 
     template <typename T>
     void Make_DescriptorSet(std::shared_ptr<T> data,
@@ -92,5 +86,4 @@ private:
 
     std::vector<std::shared_ptr<DescriptorSet>> descriptorsets { e_type_count };
 };
-
 }

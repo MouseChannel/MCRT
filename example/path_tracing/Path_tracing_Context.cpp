@@ -4,10 +4,10 @@
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Model_Loader/Obj_Loader.hpp"
 #include "Helper/Model_Loader/gltf_loader.hpp"
-#include "Rendering/Compute_context.hpp"
+#include "Rendering/ComputePass.hpp"
+#include "Rendering/GraphicPass.hpp"
 #include "Rendering/Model.hpp"
-#include "Rendering/RT_Context.hpp"
-#include "Rendering/Render_Context.hpp"
+#include "Rendering/RaytracingPass.hpp"
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Pipeline/Graphic_Pipeline.hpp"
 #include "Wrapper/Pipeline/RT_pipeline.hpp"
@@ -37,11 +37,11 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
 
     // return;
 
-    contexts.resize(3);
+    PASS.resize(3);
     // raytracing
     {
         //        std::make_shared<RT_Context>(m_device);
-        contexts[Context_index::Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
+        PASS[Pass_index::Ray_tracing] = std::shared_ptr<RT_Context> { new RT_Context(m_device) };
         std::vector<std::shared_ptr<ShaderModule>> rt_shader_modules(RT_Pipeline::eShaderGroupCount);
         rt_shader_modules[RT_Pipeline::eRaygen].reset(new ShaderModule("/home/mocheng/project/MCRT/example/path_tracing/shader/path_tracing.rgen.spv"));
         rt_shader_modules[RT_Pipeline::eMiss].reset(new ShaderModule("/home/mocheng/project/MCRT/example/path_tracing/shader/path_tracing.rmiss.spv"));
@@ -50,8 +50,8 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
         Context::Get_Singleton()->get_rt_context()->set_miss_shader_count(1);
         Context::Get_Singleton()->get_rt_context()->set_constants_size(sizeof(PushContant));
 
-        contexts[Ray_tracing]->prepare();
-        contexts[Ray_tracing]->prepare_descriptorset([&]() {
+        PASS[Ray_tracing]->prepare();
+        PASS[Ray_tracing]->prepare_descriptorset([&]() {
             auto rt_context = Context::Get_Singleton()->get_rt_context();
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(AS_Builder::Get_Singleton()->get_tlas(),
@@ -87,23 +87,23 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
                                                         ->get_DescriptorSet(Descriptor_Manager::Ray_Tracing);
         sets[(int)Ray_Tracing_Set::e_ray_global] = Descriptor_Manager::Get_Singleton()
                                                        ->get_DescriptorSet(Descriptor_Manager::Global);
-        contexts[Ray_tracing]
+        PASS[Ray_tracing]
             ->prepare_pipeline(rt_shader_modules,
                                sets,
                                sizeof(PushContant));
 
-        contexts[Ray_tracing]->post_prepare();
+        PASS[Ray_tracing]->post_prepare();
     }
     {
         // Compute_Context
-        contexts[Context_index::Compute] = std::shared_ptr<Compute_Context> { new Compute_Context };
-        // contexts[Compute]->set_constants_size(sizeof(PushContant));
+        PASS[Pass_index::Compute] = std::shared_ptr<Compute_Context> { new Compute_Context };
+        // PASS[Compute]->set_constants_size(sizeof(PushContant));
         std::shared_ptr<ShaderModule>
             compute_shader {
                 new ShaderModule("/home/mocheng/project/MCRT/example/path_tracing/shader/filter.comp.spv")
             };
-        contexts[Compute]->prepare();
-        contexts[Compute]->prepare_descriptorset([&]() {
+        PASS[Compute]->prepare();
+        PASS[Compute]->prepare_descriptorset([&]() {
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(Context::Get_Singleton()
                                          ->get_compute_context()
@@ -116,16 +116,16 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
         auto sets = std::vector<std::shared_ptr<DescriptorSet>>((int)Compute_Set::compute_count);
         sets[(int)Compute_Set::e_comp_raytracing] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Ray_Tracing);
         sets[(int)Compute_Set::e_compute] = Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Compute);
-        contexts[Compute]
+        PASS[Compute]
             ->prepare_pipeline({ compute_shader },
                                sets,
                                sizeof(PushContant));
-        contexts[Compute]->post_prepare();
-        contexts[Compute]->post_prepare();
+        PASS[Compute]->post_prepare();
+        PASS[Compute]->post_prepare();
     }
     { // graphic
-        contexts[Graphic] = std::shared_ptr<RenderContext> { new RenderContext(m_device) };
-        contexts[Graphic]->set_constants_size(sizeof(PushContant));
+        PASS[Graphic] = std::shared_ptr<RenderContext> { new RenderContext(m_device) };
+        PASS[Graphic]->set_constants_size(sizeof(PushContant));
 
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
         graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("/home/mocheng/project/MCRT/example/base/shaders/ray_tracing/post.vert.spv"));
@@ -133,9 +133,9 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
         graphic_shader_modules[Graphic_Pipeline::Main_FRAG]
             .reset(new ShaderModule("/home/mocheng/project/MCRT/example/base/shaders/ray_tracing/post.frag.spv"));
 
-        contexts[Graphic]
+        PASS[Graphic]
             ->prepare();
-        contexts[Graphic]->prepare_descriptorset([&]() {
+        PASS[Graphic]->prepare_descriptorset([&]() {
             Descriptor_Manager::Get_Singleton()
                 ->Make_DescriptorSet(
                     std::vector { Context::Get_Singleton()
@@ -146,12 +146,12 @@ void Path_tracing_context::prepare(std::shared_ptr<Window> window)
                     vk::DescriptorType ::eCombinedImageSampler,
                     vk::ShaderStageFlagBits::eFragment);
         });
-        contexts[Graphic]->prepare_pipeline(graphic_shader_modules, { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Graphic) }, sizeof(PushContant));
-        // contexts[Graphic]->prepare_pipeline(graphic_shader_modules, { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Graphic)
+        PASS[Graphic]->prepare_pipeline(graphic_shader_modules, { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Graphic) }, sizeof(PushContant));
+        // PASS[Graphic]->prepare_pipeline(graphic_shader_modules, { Descriptor_Manager::Get_Singleton()->get_DescriptorSet(Descriptor_Manager::Graphic)
 
         //                         },
         // 3);
-        contexts[Graphic]->post_prepare();
+        PASS[Graphic]->post_prepare();
     }
 }
 std::shared_ptr<CommandBuffer> Path_tracing_context::Begin_Frame()
@@ -171,7 +171,7 @@ void Path_tracing_context::EndFrame()
 std::shared_ptr<CommandBuffer> Path_tracing_context::BeginRTFrame()
 {
     // get_device()->get_handle().waitIdle();
-    auto& rt_context = contexts[Ray_tracing];
+    auto& rt_context = PASS[Ray_tracing];
     auto cmd = rt_context->BeginFrame();
     {
 
@@ -204,7 +204,7 @@ std::shared_ptr<CommandBuffer> Path_tracing_context::BeginRTFrame()
 
 void Path_tracing_context::EndRTFrame()
 {
-    auto& rt_context = contexts[Ray_tracing];
+    auto& rt_context = PASS[Ray_tracing];
     rt_context->Submit();
 }
 
@@ -212,7 +212,7 @@ std::shared_ptr<CommandBuffer> Path_tracing_context::BeginComputeFrame()
 {
 
     // compute_context->record_command(cmd);
-    auto& compute_context = contexts[Compute];
+    auto& compute_context = PASS[Compute];
     std::shared_ptr<CommandBuffer> cmd = compute_context->BeginFrame();
     {
         cmd->get_handle()
@@ -270,7 +270,7 @@ std::shared_ptr<CommandBuffer> Path_tracing_context::BeginComputeFrame()
 }
 void Path_tracing_context::EndComputeFrame()
 {
-    auto& compute_context = contexts[2];
+    auto& compute_context = PASS[2];
     compute_context->Submit();
 }
 }

@@ -1,8 +1,8 @@
 #include "Rendering/Context.hpp"
 #include "Helper/DescriptorManager.hpp"
 //#include "Rendering/GLFW_Window.hpp"
+#include "Rendering/GraphicPass.hpp"
 #include "Rendering/Model.hpp"
-#include "Rendering/Render_Context.hpp"
 #include "Rendering/Render_Frame.hpp"
 #include "Wrapper/Buffer.hpp"
 #include "Wrapper/CommandBuffer.hpp"
@@ -110,7 +110,7 @@ void Context::Init()
     // CreatePipelineLayout();
     CreateDescriptorSet();
 
-    render_context.reset(new RenderContext(device));
+    render_context.reset(new GraphicPass(device));
     render_context->Prepare();
     Build_pipeline();
 }

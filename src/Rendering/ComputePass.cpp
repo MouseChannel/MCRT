@@ -27,15 +27,15 @@ std::shared_ptr<Image> ComputePass::get_out_image()
 void ComputePass::prepare_descriptorset(std::function<void()> prepare_func)
 {
     prepare_func();
-    get_descriptor_manager()->CreateDescriptorPool(DescriptorManager::Compute);
+    //    get_descriptor_manager()->CreateDescriptorPool(DescriptorManager::Compute);
     get_descriptor_manager()->update_descriptor_set(DescriptorManager::Compute);
-//    Descriptor_Manager::Get_Singleton()->CreateDescriptorPool(Descriptor_Manager::Compute);
-//    Descriptor_Manager::Get_Singleton()->update_descriptor_set(Descriptor_Manager::Compute);
+    //    Descriptor_Manager::Get_Singleton()->CreateDescriptorPool(Descriptor_Manager::Compute);
+    //    Descriptor_Manager::Get_Singleton()->update_descriptor_set(Descriptor_Manager::Compute);
 }
 void ComputePass::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size)
 {
 
-    m_compute_pipeline.reset(new Compute_Pipeline(shader_modules,   sets,   push_constants_size));
+    m_compute_pipeline.reset(new Compute_Pipeline(shader_modules, sets, push_constants_size));
 }
 void ComputePass::prepare()
 {
@@ -50,7 +50,11 @@ void ComputePass::prepare()
                                 vk::ImageAspectFlagBits::eColor,
                                 vk::SampleCountFlagBits::e1));
 
-    m_out_image->SetImageLayout(vk::ImageLayout::eGeneral, vk::AccessFlagBits::eNone, vk::AccessFlagBits::eNone, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe);
+    m_out_image->SetImageLayout(vk::ImageLayout::eGeneral,
+                                vk::AccessFlagBits::eNone,
+                                vk::AccessFlagBits::eNone,
+                                vk::PipelineStageFlagBits::eTopOfPipe,
+                                vk::PipelineStageFlagBits::eBottomOfPipe);
 
     // prepare_descriptorset();
     // prepare_pipeline(shader_modules);
@@ -89,4 +93,9 @@ void ComputePass::EndFrame()
 void ComputePass::re_create()
 {
 }
+// void ComputePass::update_descriptorset(std::function<void()> update_func)
+//{
+//     update_func();
+//     get_descriptor_manager()->update_descriptor_set(DescriptorManager::Compute);
+// }
 }

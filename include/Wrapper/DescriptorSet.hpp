@@ -32,10 +32,9 @@ public:
         add(data, binding_data);
     }
     // std::vector<vk::DescriptorSet>& get_handle() override;
-    void create(std::shared_ptr<DescriptorPool> pool);
-    void create_descriptor_pool();
-
-    void Update()
+    void create(std::shared_ptr<DescriptorPool> pool, int size = 1);
+    //    void create_descriptor_pool();
+    void Update(int set_index)
     {
         // for (auto& i : images) {
         //     update(i.data, i.binding);
@@ -47,13 +46,13 @@ public:
         //     update(i.data, i.binding);
         // }
         for (auto& [index, i] : _images) {
-            update(i.data, i.binding);
+            update(i.data, i.binding, set_index);
         }
         for (auto& [index, i] : _buffers) {
-            update(i.data, i.binding);
+            update(i.data, i.binding, set_index);
         }
         for (auto& [index, i] : _as) {
-            update(i.data, i.binding);
+            update(i.data, i.binding, set_index);
         }
     }
 
@@ -80,13 +79,16 @@ private:
     void add(std::vector<std::shared_ptr<Buffer>> data, vk::DescriptorSetLayoutBinding binding_data);
     void add(std::vector<std::shared_ptr<AccelerationStructure_Top>> data, vk::DescriptorSetLayoutBinding binding_data);
     void update(std::vector<std::shared_ptr<Buffer>> new_data,
-                vk::DescriptorSetLayoutBinding binding_data);
+                vk::DescriptorSetLayoutBinding binding_data,
+                int set_index);
 
     void update(std::vector<std::shared_ptr<Image>> new_data,
-                vk::DescriptorSetLayoutBinding binding_data);
+                vk::DescriptorSetLayoutBinding binding_data,
+                int set_index);
 
     void update(std::vector<std::shared_ptr<AccelerationStructure_Top>> new_data,
-                vk::DescriptorSetLayoutBinding binding_data);
+                vk::DescriptorSetLayoutBinding binding_data,
+                int set_index);
 
     std::vector<vk::DescriptorSetLayoutBinding> layout_bindings;
     vk::DescriptorSetLayout layout;
@@ -98,7 +100,7 @@ private:
     // std::vector<Data_Binding<Buffer>> buffers;
     // std::vector<Data_Binding<AccelerationStructure_Top>> as;
 
-    std::unordered_map<uint32_t , Data_Binding<Image>> _images;
+    std::unordered_map<uint32_t, Data_Binding<Image>> _images;
     std::unordered_map<int, Data_Binding<Buffer>> _buffers;
     std::unordered_map<int, Data_Binding<AccelerationStructure_Top>> _as;
 };

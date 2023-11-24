@@ -86,6 +86,7 @@ raytracing feature need **NVIDIA RTX 20-Series** or higher version, and **AMD Ra
 
 - :+1: imgui
 - :+1: skybox
+- :+1: TAA (Temporal Anti-Aliasing)
 - :+1: hdr tone mapping
 - :+1: real-time AO calculate (by rayquery extension)
 - :+1: AO map

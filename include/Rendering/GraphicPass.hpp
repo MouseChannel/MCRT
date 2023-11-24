@@ -28,11 +28,15 @@ public:
     }
     [[nodiscard("Missing semaphore")]] auto& Get_cur_render_semaphore()
     {
-        return Get_RenderFrame(current_frame)->Get_render_semaphore();
+//        return Get_RenderFrame(current_frame)->Get_render_semaphore();
+        return Get_RenderFrame(current_index)->Get_render_semaphore();
+
     }
     [[nodiscard("Missing semaphore")]] auto& Get_cur_present_semaphore()
     {
-        return Get_RenderFrame(current_frame)->Get_present_semaphore();
+//        return Get_RenderFrame(current_frame)->Get_present_semaphore();
+        return Get_RenderFrame(current_index)->Get_present_semaphore();
+
     }
     [[nodiscard]] auto Get_cur_index()
     {
@@ -40,19 +44,33 @@ public:
     }
     [[nodiscard("missing fence")]] auto& Get_cur_fence()
     {
-        return fences[current_frame];
+//        return fences[current_frame];
+        return fences[current_index];
+
     }
     [[nodiscard]] auto get_skybox_pipeline()
     {
         return m_skybox_pipeline;
     } 
-    std::vector<std::shared_ptr<RenderTarget>>& Get_render_targets()
-    {
-        return all_rendertargets[0];
+    auto get_present_render_target(){
+        return Get_render_targets(current_index)[2];
     }
+    auto get_gbuffer_target(){
+        return Get_render_targets(current_index)[3];
+    }
+    auto get_depth_render_target()
+    {
+        return Get_render_targets(current_index)[4];
+    }
+
+    std::vector<std::shared_ptr<RenderTarget>>& Get_render_targets(int swapchain_frame = 0)
+    {
+        return all_rendertargets[swapchain_frame];
+    }
+    
     void re_create() override;
     std::shared_ptr<Pipeline_base> get_pipeline() override;
-    std::shared_ptr<Pipeline_base> get_pipeline2();
+//    std::shared_ptr<Pipeline_base> get_pipeline2();
 
     std::shared_ptr<RenderPass>& Get_render_pass()
     {
@@ -79,6 +97,7 @@ public:
     void record_command(std::shared_ptr<CommandBuffer> cmd) override;
 
 private:
+    bool started{false};
     bool enable_swapchain { true };
     int render_frame_count { 1 };
     std::shared_ptr<Device> m_device;
@@ -90,7 +109,7 @@ private:
     std::shared_ptr<Graphic_Pipeline> m_skybox_pipeline;
     std::shared_ptr<ShaderModule> vert_shader, frag_shader;
     std::vector<std::shared_ptr<Fence>> fences;
-    uint32_t current_frame { 0 };
+//    uint32_t current_frame { 0 };
     uint32_t current_index { 0 };
     std::shared_ptr<Buffer> index_buffer, vertex_buffer, uv_buffer;
     std::shared_ptr<CommandBuffer> command_buffer;

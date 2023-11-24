@@ -27,6 +27,7 @@ DescriptorSet::DescriptorSet()
 
 DescriptorSet::~DescriptorSet()
 {
+    
     Context::Get_Singleton()
         ->get_device()
         ->get_handle()
@@ -36,8 +37,9 @@ void DescriptorSet::add(std::vector<std::shared_ptr<Image>> data, vk::Descriptor
 {
 
     _images[binding_data.binding] = Data_Binding(data, binding_data);
-
-    layout_bindings.push_back(binding_data);
+    if (!layout) {
+        layout_bindings.push_back(binding_data);
+    }
 }
 void DescriptorSet::add(std::vector<std::shared_ptr<Buffer>> data, vk::DescriptorSetLayoutBinding binding_data)
 {
@@ -46,7 +48,10 @@ void DescriptorSet::add(std::vector<std::shared_ptr<Buffer>> data, vk::Descripto
     // _buffers.emplace(std::pair {
     //     binding_data.binding,
     //     Data_Binding(data, binding_data) });
-    layout_bindings.push_back(binding_data);
+    if (!layout) {
+
+        layout_bindings.push_back(binding_data);
+    }
 }
 void DescriptorSet::add(std::vector<std::shared_ptr<AccelerationStructure_Top>> data, vk::DescriptorSetLayoutBinding binding_data)
 {
@@ -58,10 +63,14 @@ void DescriptorSet::add(std::vector<std::shared_ptr<AccelerationStructure_Top>> 
 
     //     binding_data.binding,
     //     Data_Binding(data, binding_data) });
-    layout_bindings.push_back(binding_data);
+    if (!layout) {
+
+        layout_bindings.push_back(binding_data);
+    }
 }
 void DescriptorSet::update(std::vector<std::shared_ptr<Buffer>> new_data,
-                           vk::DescriptorSetLayoutBinding binding_data)
+                           vk::DescriptorSetLayoutBinding binding_data,
+                           int set_index)
 {
 
     std::vector<vk::DescriptorBufferInfo> buffer_infos;
@@ -77,12 +86,13 @@ void DescriptorSet::update(std::vector<std::shared_ptr<Buffer>> new_data,
     writer.setDescriptorType(binding_data.descriptorType)
         .setBufferInfo(buffer_infos)
         .setDstBinding(binding_data.binding)
-        .setDstSet(get_handle()[0])
+        .setDstSet(get_handle()[set_index])
         .setDstArrayElement(0);
     Get_Context_Singleton()->get_device()->get_handle().updateDescriptorSets(writer, {});
 }
 void DescriptorSet::update(std::vector<std::shared_ptr<Image>> new_data,
-                           vk::DescriptorSetLayoutBinding binding_data)
+                           vk::DescriptorSetLayoutBinding binding_data,
+                           int set_index)
 {
     std::vector<vk::DescriptorImageInfo> image_infos;
     for (auto& i : new_data) {
@@ -98,7 +108,7 @@ void DescriptorSet::update(std::vector<std::shared_ptr<Image>> new_data,
     writer.setDescriptorType(binding_data.descriptorType)
         .setImageInfo(image_infos)
         .setDstBinding(binding_data.binding)
-        .setDstSet(get_handle()[0])
+        .setDstSet(get_handle()[set_index])
         .setDstArrayElement(0);
     Get_Context_Singleton()
         ->get_device()
@@ -106,7 +116,8 @@ void DescriptorSet::update(std::vector<std::shared_ptr<Image>> new_data,
         .updateDescriptorSets(writer, {});
 }
 void DescriptorSet::update(std::vector<std::shared_ptr<AccelerationStructure_Top>> new_data,
-                           vk::DescriptorSetLayoutBinding binding_data)
+                           vk::DescriptorSetLayoutBinding binding_data,
+                           int set_index)
 {
 
     std::vector<vk::AccelerationStructureKHR> as_handles;
@@ -122,14 +133,14 @@ void DescriptorSet::update(std::vector<std::shared_ptr<AccelerationStructure_Top
     writer.setDescriptorType(binding_data.descriptorType)
 
         .setDstBinding(binding_data.binding)
-        .setDstSet(get_handle()[0])
+        .setDstSet(get_handle()[set_index])
         .setDstArrayElement(0)
         .setDescriptorCount(as_handles.size())
         .setPNext(&dst_as_info);
     Get_Context_Singleton()->get_device()->get_handle().updateDescriptorSets(writer, {});
 }
 
-void DescriptorSet::create(std::shared_ptr<DescriptorPool> pool)
+void DescriptorSet::create(std::shared_ptr<DescriptorPool> pool, int size)
 {
 
     vk::DescriptorSetAllocateInfo allocate_info;
@@ -138,7 +149,7 @@ void DescriptorSet::create(std::shared_ptr<DescriptorPool> pool)
     allocate_info.setDescriptorPool(pool->get_handle())
         .setSetLayouts(descriptor_layouts)
         // TODO swapchain_size
-        .setDescriptorSetCount(1);
+        .setDescriptorSetCount(size);
     m_handle = Get_Context_Singleton()
                    ->get_device()
                    ->get_handle()

@@ -24,11 +24,13 @@ public:
 
     void record_command(std::shared_ptr<CommandBuffer>) override;
     void prepare_descriptorset(std::function<void()> prepare_func) override;
-
+//    void update_descriptorset(std::function<void()> update_func) override;
+    
     void set_barrier(std::shared_ptr<CommandBuffer> cmd);
     void re_create() override;
 
     void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size) override;
+    
 
 private:
     // void Make_DescriptorSet();

@@ -13,6 +13,10 @@ public:
     {
         return subpass;
     }
+    auto& get_attach_references()
+    {
+        return attach_references;
+    }
 
 private:
     std::vector<vk::AttachmentDescription> attachment_descriptions;

@@ -73,7 +73,7 @@ public:
     {
         Make_DescriptorSet(std::vector { uniform_data->buffer }, which_set, binding_index, uniform_data->type, uniform_data->shader_stage);
     }
-    void update_descriptor_set(Which_Set which_set);
+    void update_descriptor_set(Which_Set which_set,int set_index = 0);
     void CreateDescriptorPool(Which_Set which_set);
     // void CreateUpdateDescriptorSet(Which_Set which_set);
     [[nodiscard("missing descriptor_set")]] auto& get_DescriptorSet(Which_Set which_set)

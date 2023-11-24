@@ -17,7 +17,7 @@ e_graphic = 0,
     graphic_count = 1 END_ENUM();
 
 BEGIN_ENUM(Graphic_Binding)
-    e_camera_matrix = 0,
+e_camera_matrix = 0,
     e_textures = 1,
     e_skybox = 2,
     e_irradiance_image = 3,
@@ -28,5 +28,5 @@ BEGIN_ENUM(Graphic_Binding)
 
     END_ENUM();
 
-const int e_skybox_uv = 4;
+const int e_skybox_uv = 5;
 // const int e_out_uv = 5;

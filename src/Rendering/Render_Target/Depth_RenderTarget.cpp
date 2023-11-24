@@ -2,6 +2,7 @@
 #include "Rendering/Render_Target/Depth_Render_Target.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Image.hpp"
+#include "Wrapper/RenderPass.hpp"
 #include "Wrapper/SwapChain.hpp"
 
 namespace MCRT {
@@ -16,7 +17,10 @@ std::shared_ptr<Depth_RenderTarget> Depth_RenderTarget::Create()
 
     auto sampler_count = Context::Get_Singleton()->get_device()->Get_sampler_count();
     auto depth_format = Context::Get_Singleton()->get_device()->Get_supported_format(
-        { vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint },
+        { 
+            vk::Format::eD32Sfloat,
+          vk::Format::eD32SfloatS8Uint,
+          vk::Format::eD24UnormS8Uint },
         vk::ImageTiling::eOptimal,
         vk::FormatFeatureFlagBits::eDepthStencilAttachment);
 
@@ -37,7 +41,7 @@ std::shared_ptr<Depth_RenderTarget> Depth_RenderTarget::Create()
         depth_format,
         vk::ImageType::e2D,
         vk::ImageTiling::eOptimal,
-        vk::ImageUsageFlagBits::eDepthStencilAttachment,
+        vk::ImageUsageFlagBits::eDepthStencilAttachment  ,
         vk::ImageAspectFlagBits::eDepth,
         vk::SampleCountFlagBits::e1) };
 
@@ -49,11 +53,11 @@ std::shared_ptr<Depth_RenderTarget> Depth_RenderTarget::Create()
     return std::shared_ptr<Depth_RenderTarget>(new Depth_RenderTarget(image, des));
 }
 void Depth_RenderTarget::Make_Subpass(uint32_t attachment_index,
-                                      vk::SubpassDescription& subpass)
+                                      std::shared_ptr<RenderPass> renderPass)
 {
 
     attach_reference.setAttachment(attachment_index)
         .setLayout(image->Get_image_layout());
-    subpass.setPDepthStencilAttachment(&attach_reference);
+    renderPass->Get_Subpass().setPDepthStencilAttachment(&attach_reference);
 }
 }

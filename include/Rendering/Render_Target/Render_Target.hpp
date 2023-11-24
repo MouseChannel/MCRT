@@ -24,7 +24,7 @@ public:
     {
         return attachment_description;
     }
-    virtual void Make_Subpass(uint32_t attachment_index, vk::SubpassDescription& subpass) = 0;
+    virtual void Make_Subpass(uint32_t attachment_index, std::shared_ptr<RenderPass> render_pass) = 0;
 
     [[nodiscard("missing render_target")]] auto& Get_clearcolor()
     {

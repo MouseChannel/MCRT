@@ -50,6 +50,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
 
     GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/cat.gltf");
+    //    GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/elephant.gltf");
     // Obj_loader::load_model("/home/mocheng/project/MCRT/assets/untitled.obj");
     IBLManager::Get_Singleton()->Init(sky_box);
 
@@ -154,13 +155,18 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     }
     {
         // test
-        TAA_Manager::Get_Singleton()->Init(IBLManager::Get_Singleton()->get_LUT());
+        TAA_Manager::Get_Singleton()->Init(get_graphic_context()
+                                               ->get_present_render_target()
+                                               //                                               ->get_gbuffer_target()
+                                               ->Get_Image());
     }
 }
 
 std::shared_ptr<CommandBuffer> raster_context_pbr::Begin_Frame()
 {
-//    TAA_Manager::Get_Singleton()->TAA_Pass();
+//    TAA_Manager::Get_Singleton()->TAA_Pass(get_graphic_context()->get_present_render_target()->Get_Image(),
+//                                           get_graphic_context()->get_depth_render_target()->Get_Image(),
+//                                           get_graphic_context()->get_gbuffer_target()->Get_Image());
 
     CommandManager::ExecuteCmd(Context::Get_Singleton()
                                    ->get_device()
@@ -223,6 +229,7 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                 auto m = glm::mat4(1);
                 auto pos = mesh->get_pos();
                 m[3] = glm::vec4(pos, 1);
+                use_r_rm_map = !use_r_rm_map;
                 pc = PC_Raster {
                     .model_matrix { m },
 
@@ -257,6 +264,16 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
             }
         }
     }
+
+    TAA_Manager::Get_Singleton()->TAA_Pass(get_graphic_context()
+                                               ->get_present_render_target()
+                                               ->Get_Image(),
+                                           get_graphic_context()
+                                               ->get_depth_render_target()
+                                               ->Get_Image(),
+                                           get_graphic_context()
+                                               ->get_gbuffer_target()
+                                               ->Get_Image());
 
     return cmd;
 }

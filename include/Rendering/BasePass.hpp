@@ -43,8 +43,9 @@ public:
 
     // std::shared_ptr<CommandBuffer> Begin_Record_Command_Buffer();
     virtual void record_command(std::shared_ptr<CommandBuffer>) = 0;
-
+    // need register all descriptor in the first time
     virtual void prepare_descriptorset(std::function<void()> prepare_func) = 0;
+    //    virtual void update_descriptorset(std::function<void()> update_func) = 0;
 
     virtual void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules,
                                   std::vector<std::shared_ptr<DescriptorSet>> sets,
@@ -82,6 +83,6 @@ protected:
     void Prepare_RenderPass();
 
     int push_constants_size;
-    std::shared_ptr<DescriptorManager> descriptor_manager{new DescriptorManager};
+    std::shared_ptr<DescriptorManager> descriptor_manager { new DescriptorManager };
 };
 }

@@ -45,14 +45,14 @@ void raster_context::SkyboxPass(std::shared_ptr<CommandBuffer> cmd, std::shared_
     cmd->get_handle()
         .bindPipeline(vk::PipelineBindPoint::eGraphics,
                       get_skybox_pipeline()->get_handle());
-
+ 
     cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                          get_skybox_pipeline()->get_layout(),
                                          0,
                                          { graphic_context->get_descriptor_manager()
                                                ->get_DescriptorSet(DescriptorManager::Graphic)
                                                ->get_handle() },
-                                         {});
+                                     nullptr);
 
     cmd->get_handle().bindIndexBuffer(get_skybox_mesh()->get_indices_buffer()->get_handle(),
                                       0,

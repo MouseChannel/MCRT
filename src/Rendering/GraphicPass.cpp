@@ -8,8 +8,8 @@
 #include "Rendering/Render_Frame.hpp"
 #include "Rendering/Render_Target/Color_Render_Target.hpp"
 #include "Rendering/Render_Target/Depth_Render_Target.hpp"
-#include "Rendering/Render_Target/Final_RenderTarget.hpp"
-#include "Rendering/Render_Target/MultiSampler_Render_Target.hpp"
+#include "Rendering/Render_Target/Gbuffer_RenderTarget.hpp"
+
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Device.hpp"
@@ -58,10 +58,10 @@ std::shared_ptr<Pipeline_base> GraphicPass::get_pipeline()
 {
     return m_graphic_pipeline;
 }
-std::shared_ptr<Pipeline_base> GraphicPass::get_pipeline2()
-{
-    return m_skybox_pipeline;
-}
+// std::shared_ptr<Pipeline_base> GraphicPass::get_pipeline2()
+//{
+//     return m_skybox_pipeline;
+// }
 void GraphicPass::fill_render_targets()
 {
     auto count { enable_swapchain ? render_frame_count : 1 };
@@ -76,8 +76,13 @@ void GraphicPass::fill_render_targets()
                       vk::ImageAspectFlagBits::eColor)
         };
         all_rendertargets[i].emplace_back(Color_RenderTarget::Create(swapchain_image));
-
         all_rendertargets[i].emplace_back(Depth_RenderTarget::Create());
+
+        all_rendertargets[i].emplace_back(GBuffer_RenderTarget::Create(vk::ImageUsageFlagBits::eColorAttachment, vk::Format::eR32G32B32A32Sfloat));
+        all_rendertargets[i].emplace_back(GBuffer_RenderTarget::Create(vk::ImageUsageFlagBits::eColorAttachment, vk::Format::eR32G32B32A32Sfloat));
+        // depth
+        all_rendertargets[i].emplace_back(GBuffer_RenderTarget::Create(vk::ImageUsageFlagBits::eColorAttachment, vk::Format::eR32Sfloat));
+        all_rendertargets[i].emplace_back(GBuffer_RenderTarget::Create(vk::ImageUsageFlagBits::eColorAttachment, vk::Format::eR32G32B32A32Sfloat));
     }
 }
 void GraphicPass::Prepare_Framebuffer()
@@ -94,8 +99,8 @@ void GraphicPass::Prepare_RenderPass()
     auto render_pass = Get_render_pass();
     for (int i = 0; i < Get_render_targets().size(); i++) {
         auto& render_target = Get_render_targets()[i];
-        auto& subpass = render_pass->Get_Subpass();
-        render_target->Make_Subpass(i, subpass);
+        //        auto& subpass = render_pass->Get_Subpass();
+        render_target->Make_Subpass(i, render_pass);
         render_pass->Add_Attachment_description(render_target->Get_attachment_description());
     }
     render_pass->Build();
@@ -107,10 +112,10 @@ void GraphicPass::prepare_descriptorset(std::function<void()> prepare)
     get_descriptor_manager()->CreateDescriptorPool(DescriptorManager::Graphic);
     get_descriptor_manager()
         ->update_descriptor_set(DescriptorManager::Graphic);
-//    Descriptor_Manager::Get_Singleton()
-//        ->CreateDescriptorPool(Descriptor_Manager::Graphic);
-//    Descriptor_Manager::Get_Singleton()
-//        ->update_descriptor_set(Descriptor_Manager::Graphic);
+    //    Descriptor_Manager::Get_Singleton()
+    //        ->CreateDescriptorPool(Descriptor_Manager::Graphic);
+    //    Descriptor_Manager::Get_Singleton()
+    //        ->update_descriptor_set(Descriptor_Manager::Graphic);
 }
 void GraphicPass::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size)
 {
@@ -182,6 +187,13 @@ std::shared_ptr<Framebuffer>& GraphicPass::get_framebuffer()
 std::shared_ptr<CommandBuffer> GraphicPass::BeginFrame()
 {
     auto cur_semaphone = Get_cur_render_semaphore()->get_handle();
+    if (started) {
+        cur_semaphone = Get_RenderFrame((current_index + 1) % render_frame_count)->Get_render_semaphore()->get_handle();
+
+    } else {
+        cur_semaphone = Get_cur_render_semaphore()->get_handle();
+    }
+    started = true;
     auto result = m_device->get_handle().acquireNextImageKHR(
         m_swapchain->get_handle(),
         std::numeric_limits<uint64_t>::max(),
@@ -353,8 +365,8 @@ void GraphicPass::EndFrame()
     if (present_result != vk::Result::eSuccess) {
         int r = 0;
     }
-    current_frame++;
-    current_frame %= render_frame_count;
+    //    current_frame++;
+    //    current_frame %= render_frame_count;
 }
 void GraphicPass::re_create()
 {

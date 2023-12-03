@@ -14,6 +14,9 @@ namespace MCRT {
 
 Skybox::Skybox(std::string hdr_path, int cubemap_size)
 {
+    // Init(hdr_path);
+    // return;
+    
     namespace fs = std::filesystem;
     auto get_filename = [&]() {
         auto file_name = fs::path(hdr_path).filename();

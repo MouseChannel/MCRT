@@ -46,7 +46,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
 {
     raster_context::prepare(window);
     m_camera->m_position.z = 3;
-    sky_box.reset(new Skybox("/home/mocheng/project/MCRT/assets/kart_club_2k.hdr"));
+    sky_box.reset(new Skybox("/home/mocheng/project/MCRT/assets/Cubemap/rainforest_trail_4k.hdr"));
     skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
 
     GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/cat.gltf");
@@ -57,6 +57,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     PASS.resize(1);
 
     {
+        
         PASS[Pass_index::Graphic] = std::shared_ptr<GraphicPass> { new GraphicPass(m_device) };
         Context::Get_Singleton()
             ->get_graphic_context()
@@ -65,6 +66,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
         if (graphic_context == nullptr) {
             throw std::runtime_error("not graphic context");
         }
+        
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
         graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("/home/mocheng/project/MCRT/example/raster/shader/raster.vert.spv"));
         graphic_shader_modules[Graphic_Pipeline::Main_FRAG].reset(new ShaderModule("/home/mocheng/project/MCRT/example/raster/shader/raster.frag.spv"));

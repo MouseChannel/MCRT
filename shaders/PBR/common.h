@@ -134,8 +134,10 @@ vec3 Get_IBLColor(vec3 camera_pos,
 
     vec3 dir = reflect(-V, fragment_world_nrm);
     vec3 prefilteredColor = textureLod(skybox, dir, roughness * 10).rgb;
+    
     // prefilteredColor = texture(skybox, dir).rgb;
     vec3 brdf = texture(LUT_image, vec2(max(dot(fragment_world_nrm, V), 0.0), roughness)).rgb;
+    debugPrintfEXT("message %f %f %f  \n ",brdf.r,brdf.g,brdf.b );
     vec3 specular = prefilteredColor * (F0 * brdf.r + brdf.g);
     return KD * diffuse + specular;
 }

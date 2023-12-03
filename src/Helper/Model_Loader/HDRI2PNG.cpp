@@ -44,7 +44,6 @@ std::vector<stbi_uc> HDRI_Helper::copyPixelBilinear(std::vector<stbi_uc> source_
             auto dst_index = channels * (y * max_width + x);
             //set alpha
             // dst_data[dst_index + 3] = 255;
-
             auto xl = glm::clamp(glm::floor(xFrom), 0., double(source_width - 1));
             auto xr = glm::clamp(glm::ceil(xFrom), 0., double(source_width - 1));
             auto xf = xFrom - xl;

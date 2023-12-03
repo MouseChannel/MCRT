@@ -28,23 +28,23 @@ public:
     }
     [[nodiscard("Missing semaphore")]] auto& Get_cur_render_semaphore()
     {
-//        return Get_RenderFrame(current_frame)->Get_render_semaphore();
+        // return Get_RenderFrame(current_frame)->Get_render_semaphore();
         return Get_RenderFrame(current_index)->Get_render_semaphore();
 
     }
     [[nodiscard("Missing semaphore")]] auto& Get_cur_present_semaphore()
     {
-//        return Get_RenderFrame(current_frame)->Get_present_semaphore();
+        // return Get_RenderFrame(current_frame)->Get_present_semaphore();
         return Get_RenderFrame(current_index)->Get_present_semaphore();
 
     }
-    [[nodiscard]] auto Get_cur_index()
-    {
-        return current_index;
-    }
+    // [[nodiscard]] auto Get_cur_index()
+    // {
+    //     return current_index;
+    // }
     [[nodiscard("missing fence")]] auto& Get_cur_fence()
     {
-//        return fences[current_frame];
+        // return fences[current_frame];
         return fences[current_index];
 
     }
@@ -81,7 +81,7 @@ public:
         return command_buffer;
     }
 
-    std::shared_ptr<Framebuffer>& get_framebuffer();
+    // std::shared_ptr<Framebuffer>& get_framebuffer();
     void Prepare_RenderPass();
     void prepare() override;
     void post_prepare() override;
@@ -97,7 +97,7 @@ public:
     void record_command(std::shared_ptr<CommandBuffer> cmd) override;
 
 private:
-    bool started{false};
+    bool has_inited{false};
     bool enable_swapchain { true };
     int render_frame_count { 1 };
     std::shared_ptr<Device> m_device;
@@ -109,7 +109,7 @@ private:
     std::shared_ptr<Graphic_Pipeline> m_skybox_pipeline;
     std::shared_ptr<ShaderModule> vert_shader, frag_shader;
     std::vector<std::shared_ptr<Fence>> fences;
-//    uint32_t current_frame { 0 };
+    // uint32_t current_frame { 0 };
     uint32_t current_index { 0 };
     std::shared_ptr<Buffer> index_buffer, vertex_buffer, uv_buffer;
     std::shared_ptr<CommandBuffer> command_buffer;

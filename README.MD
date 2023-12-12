@@ -13,9 +13,9 @@ ninja
 
 ### 🫱 support platform
 
-- :white_check_mark: **Windows** 💻
-- :white_check_mark: **Linux** 💻
-- :white_check_mark: **Android** 📱 (Not all features are supported)
+- ✅ **Windows** 💻
+- ✅ **Linux** 💻
+- ✅ **Android** 📱 (Not all features are supported)
 - :x: **Mac** 💻 todo
 
 ### 🫱 work flows
@@ -49,7 +49,7 @@ IBL-PBR workflow in RedMI📱 12
 
 [//]: # (</div>)
 
-# :fire:  Detail / Feature:fire:
+# 🔥  Detail / Feature🔥
 
 #### 🫱 Native SKYBOX
 
@@ -63,10 +63,10 @@ IBL-PBR workflow in RedMI📱 12
 
 #### 🫱 Model Format
 
-- :white_check_mark: **GLTF** , support most gltf_material_feature,like `KHR_materials_emissive_strength`and
+- ✅ **GLTF** , support most gltf_material_feature,like `KHR_materials_emissive_strength`and
   normal_map,AO_Metallic_Roughness_map and so on
-- :white_check_mark: **OBJ**
-- :x: **FBX** 💻 todo
+- ✅ **OBJ**
+- ❌ **FBX** 💻 todo
 
 #### 🫱 Off-line Rendering
 
@@ -74,28 +74,28 @@ support offline rendering using Path Tracing by vulkan raytracing pipeline
 
 raytracing feature need **NVIDIA RTX 20-Series** or higher version, and **AMD Radeon RX 6600 XT** or higher version
 
-- :star2: Importance Sampling Path Tracing
-- :star2: Disney style BRDF shading in Path Tracing
-- :star2: Noise reduction using joint bilateral filtering by `compute pipeline`
+- 🌟 Importance Sampling Path Tracing
+- 🌟 Disney style BRDF shading in Path Tracing
+- 🌟 Noise reduction using joint bilateral filtering by `compute pipeline`
 
 #### 🫱 Volume rendering
 
 - //TODO
 
-# :rainbow: other basics in Rendering engine :rainbow:
+# ⛱️ other basics in Rendering engine ⛱️
 
-- :+1: imgui
-- :+1: skybox
-- :+1: TAA (Temporal Anti-Aliasing)
-- :+1: hdr tone mapping
-- :+1: real-time AO calculate (by rayquery extension)
-- :+1: AO map
-- :+1: texture mipmap
-- :+1: Metallic_Roughness PBR material work flow
+- 👏 imgui
+- 👏 skybox
+- 👏 TAA (Temporal Anti-Aliasing)
+- 👏 hdr tone mapping
+- 👏 real-time AO calculate (by rayquery extension)
+- 👏 AO map
+- 👏 texture mipmap
+- 👏 Metallic_Roughness PBR material work flow
 - so on
 
-# :trollface: TODO
+# ♿ TODO
 
-- :bookmark: NERF Work flow
-- :bookmark: SDF
-- :bookmark: NVidia Restir sampling Path tracing
+- 🔖 NERF Work flow
+- 🔖 SDF
+- 🔖 NVidia Restir sampling Path tracing

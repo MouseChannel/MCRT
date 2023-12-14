@@ -10,7 +10,6 @@
 #include <vector>
 #include "example/base/shaders/ray_tracing/Data_struct.h"
 
- 
 
 namespace MCRT {
 class Device;
@@ -35,12 +34,14 @@ public:
             m_command_buffer.reset(new CommandBuffer);
         return m_command_buffer;
     }
+
     std::shared_ptr<Image> get_out_image();
 
     auto get_gbuffer()
     {
         return m_gbuffer;
     }
+
     void prepare() override;
     void post_prepare() override;
     void prepare_descriptorset(std::function<void()> prepare_func) override;
@@ -53,28 +54,43 @@ public:
     void re_create() override;
     // void re_create_descriptorset() override;
     void build_accelerate_structure();
+
     void set_hit_shader_count(int count)
     {
         hit_shader_count = count;
     }
+
     auto get_hit_shader_count()
     {
         return hit_shader_count;
     }
+    void set_anyhit_shader_count(int count)
+    {
+        anyhit_shader_count = count;
+    }
+
+    auto get_anyhit_shader_count()
+    {
+        return anyhit_shader_count;
+    }
+
     void set_miss_shader_count(int count)
     {
         miss_shader_count = count;
     }
+
     auto get_miss_shader_count()
     {
         return miss_shader_count;
     }
 
     void create_offscreen_image();
+
     auto& get_rgen_region()
     {
         return m_rgenRegion;
     }
+
     auto& get_hit_region()
     {
         return m_hitRegion;
@@ -104,6 +120,8 @@ private:
     vk::StridedDeviceAddressRegionKHR m_rgenRegion;
     vk::StridedDeviceAddressRegionKHR m_missRegion;
     vk::StridedDeviceAddressRegionKHR m_hitRegion;
+    vk::StridedDeviceAddressRegionKHR m_anyhitRegion;
+    
     vk::StridedDeviceAddressRegionKHR m_callRegion;
     std::shared_ptr<Buffer> m_SBT_buffer;
 
@@ -112,8 +130,10 @@ private:
     std::shared_ptr<Buffer> m_SBT_buffer_rmiss;
 
     std::shared_ptr<Buffer> m_SBT_buffer_rhit;
+    std::shared_ptr<Buffer> m_SBT_buffer_rahit;
 
-    int miss_shader_count { 0 };
-    int hit_shader_count { 0 };
+    int miss_shader_count{ 0 };
+    int hit_shader_count{ 0 };
+    int anyhit_shader_count{ 0 };
 };
 }

@@ -2,6 +2,7 @@
 #include "Helper/Debugger.hpp"
 #include "Wrapper/Buffer.hpp"
 #include <vulkan/vulkan.hpp>
+#include <typeinfo>
 
 namespace MCRT {
 template <typename T>
@@ -26,6 +27,7 @@ public:
         default:
             break;
         }
+        
         buffer = Buffer::create_buffer(this->data.data(), sizeof(T) * data.size(), buffer_usage);
         Context::Get_Singleton()->get_debugger()->set_name(buffer, "des_buffer");
     }

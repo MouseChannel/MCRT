@@ -1,0 +1,94 @@
+#version 460
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_debug_printf : enable
+#include "PerlinNoise.glsl"
+#include "binding.h"
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(set = 0, binding = e_permutations) readonly buffer _Permutations
+{
+
+    int permutations[];
+};
+
+layout(set = 0, binding = e_noiseData, rgba32f) uniform writeonly image3D noiseData;
+int size = 128;
+float noise(float x, float y, float z)
+{
+    // Find unit cube that contains point
+    int X = int(floor(x)) & 255;
+    int Y = int(floor(y)) & 255;
+    int Z = int(floor(z)) & 255;
+    // Find relative x,y,z of point in cube
+    x -= floor(x);
+    y -= floor(y);
+    z -= floor(z);
+
+    // Compute fade curves for each of x,y,z
+    float u = fade(x);
+    float v = fade(y);
+    float w = fade(z);
+
+    // Hash coordinates of the 8 cube corners
+    uint A = permutations[X] + Y;
+    uint AA = permutations[A] + Z;
+    uint AB = permutations[A + 1] + Z;
+    uint B = permutations[X + 1] + Y;
+    uint BA = permutations[B] + Z;
+    uint BB = permutations[B + 1] + Z;
+
+//    permutations[permutations[permutations[X] + Y] + Z]
+        // And add blended results for 8 corners of the cube;
+        float res = mix(
+            mix(
+                mix(
+                    grad(permutations[AA], x, y, z),
+                    grad(permutations[BA], x - 1, y, z),
+                    u),
+                mix(
+                    grad(permutations[AB], x, y - 1, z),
+                    grad(permutations[BB], x - 1, y - 1, z),
+                    u),
+                v),
+            mix(
+                mix(
+                    grad(permutations[AA + 1], x, y, z - 1),
+                    grad(permutations[BA + 1], x - 1, y, z - 1),
+                    u),
+                mix(
+                    grad(permutations[AB + 1], x, y - 1, z - 1),
+                    grad(permutations[BB + 1], x - 1, y - 1, z - 1),
+                    u),
+                v),
+            w);
+    return res;
+}
+
+void main()
+{
+    vec3 xyz = gl_GlobalInvocationID.xyz / vec3(size);
+     xyz *= 10.f;
+    float cur_data = 0.;
+    // = noise(xyz.x, xyz.y, xyz.z);
+    bool use_frac = true;
+    if (use_frac) {
+        float sum = 0;
+        float frequency = 1;
+        float amplitude = 1;
+        float max = 0;
+        float persistence = 0.5;
+        for (uint i = 0; i < 8; i++) {
+            xyz *= frequency;
+            sum += noise(xyz.x, xyz.y, xyz.z) * amplitude;
+            max += amplitude;
+            amplitude *= persistence;
+            frequency *= 2;
+        }
+        sum = sum / max;
+        cur_data = (sum + 1.f) / 2.f;
+    }
+
+    cur_data -= floor(cur_data);
+    imageStore(noiseData, ivec3(gl_GlobalInvocationID.xyz), vec4(cur_data, 0, 0, 1.f));
+    //    debugPrintfEXT("message comp\n" );
+}

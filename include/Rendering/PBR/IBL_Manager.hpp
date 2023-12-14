@@ -1,3 +1,4 @@
+#pragma once
 #include <Helper/Instance_base.hpp>
 
 namespace MCRT {

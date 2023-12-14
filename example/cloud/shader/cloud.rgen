@@ -1,0 +1,78 @@
+
+#version 460
+#extension GL_EXT_ray_tracing : require
+#extension GL_EXT_debug_printf : enable
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_ARB_shader_clock : enable
+// #extension GL_GOOGLE_cpp_style_line_direcitve :  require
+#include "Binding.h"
+#include "Push_Constants.h"
+#include "hit_payload.glsl"
+#include "shaders/Data_struct.h"
+
+#include "shaders/common.glsl"
+#include "shaders/sampling.glsl"
+
+layout(push_constant) uniform _PushContant
+{
+    PushContant_Cloud pcRay;
+};
+layout(location = 0) rayPayloadEXT hitPayload prd;
+
+layout(set = e_ray_tracing, binding = e_tlas) uniform accelerationStructureEXT topLevelAS;
+layout(set = e_ray_tracing, binding = e_out_image, rgba32f) uniform image2D image;
+
+layout(set = e_ray_global, binding = e_camera) uniform _camera_data
+{
+    Camera_data camera_data;
+};
+void main()
+{
+
+    vec3 ray_origin = camera_data.camera_pos.xyz;
+
+    vec3 ray_dir = get_camera_dir(gl_LaunchIDEXT.xy, gl_LaunchSizeEXT.xy, camera_data);
+
+       uint rayFlags = gl_RayFlagsNoneEXT;
+ //  uint rayFlags =gl_HitKindFrontFacingTriangleEXT;
+    float tMin = 0.001;
+    float tMax = 10000.0;
+
+    prd.ray_origin = ray_origin;
+    prd.ray_dir = ray_dir;
+    prd.hitValue = vec3(0);
+    prd.depth = 0;
+    prd.hashit = 0;
+
+    traceRayEXT(topLevelAS, // acceleration structure
+                rayFlags, // rayFlags
+                0xFF, // cullMask
+                0, // sbtRecordOffset '0 for cloud front here'
+                0, // sbtRecordStride
+                0, // missIndex '0 for skybox here'
+                prd.ray_origin, // ray origin
+                tMin, // ray min range
+                prd.ray_dir, // ray direction
+                tMax, // ray max range
+                0 // payload (location = 0)
+    );
+    // debugPrintfEXT("message 2 \n");
+    // uvec3 seed = uvec3(pcRay.camera_pos.xyz * 10);
+    // pcg3d_random(seed);
+    // imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(pcg3d_random(seed), 1.));
+    imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(prd.hitValue, 1.));
+
+    return;
+
+    if (pcRay.frame > 0) {
+        float a = 1.0f / float(pcRay.frame + 1);
+        vec3 old_color = imageLoad(image, ivec2(gl_LaunchIDEXT.xy)).xyz;
+        vec3 new_color = mix(old_color, prd.hitValue, a);
+
+        imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(new_color, 1.f));
+    } else {
+        // First frame, replace the value in the buffer
+        imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(prd.hitValue, 1.f));
+    }
+}

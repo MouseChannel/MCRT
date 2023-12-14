@@ -18,6 +18,21 @@ public:
           vk::ImageUsageFlags usage,
           vk::ImageAspectFlags aspect,
           vk::SampleCountFlagBits sample);
+    /*
+    * for Noise image
+    */
+    Image(uint32_t width,
+          uint32_t height,
+          uint32_t depth,
+          vk::Format format,
+          vk::ImageType type,
+          vk::ImageTiling tiling,
+          vk::ImageUsageFlags usage,
+          vk::ImageAspectFlags aspect,
+          vk::SampleCountFlagBits sample);
+    /*
+     * for cubemap image
+     */
     Image(uint32_t width,
           uint32_t height,
           vk::Format format,
@@ -33,16 +48,7 @@ public:
           vk::ImageLayout image_layout,
           vk::Format format,
           vk::ImageAspectFlags aspect);
-    Image(
-        vk::Format format,
-        vk::Image other_image,
-        size_t width,
-        size_t height);
-    // only for cubemap
-    Image(vk::Image other_image,
-          vk::Format format,
-          size_t width,
-          size_t height);
+ 
     ~Image();
     void Create_ImageView(vk::Format format);
 
@@ -63,13 +69,14 @@ public:
         return image_layout;
     }
 
-    uint32_t width, height;
+    uint32_t width, height,depth;
     vk::ImageView image_view;
 private:
     uint32_t layer_count = 1, mipmap_level_count = 1;
     vk::DeviceMemory memory;
     vk::ImageLayout image_layout { vk::ImageLayout::eUndefined };
     vk::ImageAspectFlags m_aspect;
+    vk::ImageType image_type{vk::ImageType::e2D};
     bool need_delete;
     void AllocateMemory();
     uint32_t FindMemoryTypeIndex(uint32_t requirement_type,

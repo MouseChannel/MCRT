@@ -26,6 +26,10 @@ using vec4 = glm::vec4;
 struct PushContant_Cloud{
     vec4 lightPosition;
     int frame;
+    int offset;
+    float noise_scale;
+    float  thickness;
+
 };
 struct PushContant_Compute {
     int frame;

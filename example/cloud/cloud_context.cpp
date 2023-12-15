@@ -26,11 +26,10 @@
 
 namespace MCRT {
     std::unique_ptr<Context> Context::_instance{new MCRT::cloud_context};
-    float cloud_context::light_pos_x = 0, cloud_context::light_pos_y = 0, cloud_context::light_pos_z = -5, cloud_context::roughness = 0.1, cloud_context::met = 0.1;
-    int cloud_context::apply_normal = 0;
-    bool cloud_context::use_normal_map = false;
-    bool cloud_context::use_abedo = false;
-    bool cloud_context::use_RM_map = false;
+    float cloud_context::noise_scale = 1.f;
+    float cloud_context::thickness = 1.f;
+    float cloud_context::light_pos_x = 0, cloud_context::light_pos_y = 0, cloud_context::light_pos_z = -5;
+     
 
     int irradiance_size = 512;
 
@@ -69,13 +68,18 @@ namespace MCRT {
             // regular miss
             rt_shader_modules[RT_Pipeline::eMiss].reset(
                     new ShaderModule("/home/mocheng/project/MCRT/example/cloud/shader/cloud.rmiss.spv"));
-            // ray marching by miss
+            // ray marching cloud density
             rt_shader_modules[RT_Pipeline::eMiss2].reset(
-                    new ShaderModule("/home/mocheng/project/MCRT/example/cloud/shader/ray_marching.rmiss.spv"));
+                    new ShaderModule("/home/mocheng/project/MCRT/example/cloud/shader/ray_marching_cloud.rmiss.spv"));
+            // ray marching light density
+            rt_shader_modules[RT_Pipeline::eMiss3].reset(
+                    new ShaderModule("/home/mocheng/project/MCRT/example/cloud/shader/ray_marching_light.rmiss.spv"));
             rt_shader_modules[RT_Pipeline::eClosestHit].reset(
                     new ShaderModule("/home/mocheng/project/MCRT/example/cloud/shader/cloud_front.rchit.spv"));
             rt_shader_modules[RT_Pipeline::eClosestHit2].reset(
                     new ShaderModule("/home/mocheng/project/MCRT/example/cloud/shader/cloud_behind.rchit.spv"));
+//            rt_shader_modules[RT_Pipeline::eClosestHit3].reset(
+//                    new ShaderModule("/home/mocheng/project/MCRT/example/cloud/shader/light_behind.rchit.spv"));
             Context::Get_Singleton()->get_rt_context()->set_hit_shader_count(2);
 //          Context::Get_Singleton()->get_rt_context()->set_anyhit_shader_count(1);
 
@@ -108,7 +112,8 @@ namespace MCRT {
                                              DescriptorManager::Ray_Tracing,
                                              (int) Ray_Tracing_Binding::e_noise_data,
                                              vk::DescriptorType::eCombinedImageSampler,
-                                             vk::ShaderStageFlagBits::eMissKHR| vk::ShaderStageFlagBits::eClosestHitKHR);
+                                             vk::ShaderStageFlagBits::eMissKHR |
+                                             vk::ShaderStageFlagBits::eClosestHitKHR);
                 descriptor_manager
                         ->Make_DescriptorSet(std::vector{m_skybox->get_handle()},
                                              DescriptorManager::Ray_Tracing,
@@ -259,13 +264,18 @@ namespace MCRT {
                                                  descriptor_sets,
                                                  {});
             auto camero_pos{glm::vec4{m_camera->m_position, 0}};
+            auto cur_time = std::chrono::system_clock::now().time_since_epoch();
+            auto ee = std::chrono::duration_cast<std::chrono::milliseconds>(cur_time).count();
+//            std::cout<<ee<<std::endl;
             pushContant_Ray = PushContant_Cloud{
 
 
                     .lightPosition{light_pos_x, light_pos_y, light_pos_z, 0},
 
                     .frame = frame_id,
-
+                    .offset = offset++,
+                    .noise_scale = 1.f / (5.f * noise_scale),
+                    .thickness = thickness
                     // .clearColor { 1 },
 
             };

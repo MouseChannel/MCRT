@@ -12,6 +12,8 @@ public:
         eMiss3,
         eClosestHit,
         eClosestHit2,
+
+        eClosestHit3,
         eAnyHit,
         eShaderGroupCount
     };

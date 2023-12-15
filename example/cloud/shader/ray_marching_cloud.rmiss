@@ -68,7 +68,7 @@ void main()
         // debugPrintfEXT("message %d\n", r);
         // cloud_prd.total_density += pow(imageLoad(noise, cur_uvw).r, 5);
         {
-            vec3 cur_sim = cur_world_pos * pcRay.noise_scale + float(pcRay.offset) / 1000.f;
+            vec3 cur_sim = cur_world_pos * pcRay.noise_scale + float(pcRay.offset) * pcRay.speed / 10000.f;
             cloud_prd.total_density += transmittance * pow(texture(noise, cur_sim).r, 5);
         }
 

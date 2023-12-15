@@ -29,7 +29,7 @@ struct PushContant_Cloud{
     int offset;
     float noise_scale;
     float  thickness;
-
+float speed;
 };
 struct PushContant_Compute {
     int frame;

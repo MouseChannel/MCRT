@@ -34,7 +34,7 @@ namespace MCRT {
 //    , roughness, met;
 //    static int apply_normal;
 //    static bool use_normal_map,use_abedo,use_RM_map;
-        static float noise_scale,thickness;
+        static float noise_scale,thickness,speed;
 
         void prepare(std::shared_ptr<Window> window) override;
 

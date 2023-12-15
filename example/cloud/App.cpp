@@ -23,6 +23,8 @@ void App::run()
         imgui->Update(cmd, [&]() {  ImGui::Text("im a sentence!");
             ImGui::SliderFloat("noise_scale", &cloud_context::noise_scale, 0.5f, 5.0f);
             ImGui::SliderFloat("thickness", &cloud_context::thickness, 0.5f, 3.0f);
+            ImGui::SliderFloat("speed", &cloud_context::speed, 0.1f, 100.0f);
+
 //            ImGui::SliderFloat("light_pos_y", &cloud_context::light_pos_y, -2.0f, 2.0f);
 //            ImGui::SliderFloat("light_pos_z", &cloud_context::light_pos_z, 0.f, 20.0f);
 //            ImGui::SliderFloat("roughness", &cloud_context::roughness, 0.01f, 1.0f);

@@ -27,9 +27,10 @@
 namespace MCRT {
     std::unique_ptr<Context> Context::_instance{new MCRT::cloud_context};
     float cloud_context::noise_scale = 1.f;
-    float cloud_context::thickness = 1.f;
+    float cloud_context::thickness = 1.5f;
+    float cloud_context::speed = 1.f;
     float cloud_context::light_pos_x = 0, cloud_context::light_pos_y = 0, cloud_context::light_pos_z = -5;
-     
+
 
     int irradiance_size = 512;
 
@@ -275,7 +276,8 @@ namespace MCRT {
                     .frame = frame_id,
                     .offset = offset++,
                     .noise_scale = 1.f / (5.f * noise_scale),
-                    .thickness = thickness
+                    .thickness = thickness,
+                    .speed = speed
                     // .clearColor { 1 },
 
             };

@@ -4,7 +4,7 @@
 #include "Rendering/RaytracingPass.hpp"
 #include "Wrapper/SwapChain.hpp"
 #include "iostream"
-
+#include "lib/imgui/imgui.h"
 namespace MCRT {
 
 Camera::Camera()
@@ -243,6 +243,8 @@ int32_t Camera::handleAppInput(struct android_app* app, AInputEvent* event)
 
 void Camera::onMouseMove(double _xpos, double _ypos)
 {
+    if(ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureMouse)
+        return;
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     if (m_firstMove) {

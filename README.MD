@@ -34,53 +34,65 @@ PBR raytracing
     <img src="assets/showcase/android1.jpg" width="25%"><img src="assets/showcase/android2.jpg" width="25%"><img src="assets/showcase/android3.jpg" width="25%">
 <br>
 IBL-PBR workflow in RedMI📱 12
+<br>
 </div>
 
 
-<div align=center>
+<div align=center >
     <img src="assets/showcase/ao_showcase.png" width="75%" >
 <br> realtime Ambient Occlusion
 <br>
+ <img src="assets/showcase/cloud.gif" width="43%"> 
 
-
- <img src="assets/showcase/cube.png" width="40%"> 
-<br> path tracing 
+ <img src="assets/showcase/cube.png"  width="37%"> 
+<br>
+ Volumetric cloud 👈👈-----------------👉👉 Path tracing 
 </div>
+ 
 
 [//]: # (</div>)
 
-# 🔥  Detail / Feature🔥
+# 🔥 Detail / Feature🔥
 
-#### 🫱 Native SKYBOX
+### 🫱 Native SKYBOX
 
 - render a native (2048*1024)HDRI to SKYBOX
 
-#### 🫱 PBR By IBL(Image Base Lighting) pre_rendering
+### 🫱 PBR By IBL(Image Base Lighting) pre_rendering
 
 - pre_calculate IBL_Gbuffer by `Compute_pipeline`
 - pbr in Graphic Pipeline using IBL_Gbuffer,and also works on Android
 - pbr in RayTracing Pipeline using IBL_Gbuffer,with single bounce to make it real-time
 
-#### 🫱 Model Format
+### 🫱 Model Format
 
 - ✅ **GLTF** , support most gltf_material_feature,like `KHR_materials_emissive_strength`and
   normal_map,AO_Metallic_Roughness_map and so on
 - ✅ **OBJ**
 - ❌ **FBX** 💻 todo
 
-#### 🫱 Off-line Rendering
+
+### 🫱 Volumetric cloud rendering
+
+raymarching cloud density from 3D perlin noise.
+
+Use vulkan raytracing pipeline to raymarching, so [A supported GPU and Driver](https://www.khronos.org/blog/ray-tracing-in-vulkan#blog_Call_to_Action) is necessary.
+- 🌟 pre_compute 3D(256x256x256) Perlin-Noise by compute shader, and sampling by boundary mirror uv to make it continuous
+- 🌟 raymarching in **rmiss** shader-stage, use `ray-max-range` in `traceRayEXT` to simulate one step in raymarching
+
+
+### 🫱 Off-line Rendering
 
 support offline rendering using Path Tracing by vulkan raytracing pipeline
 
-raytracing feature need **NVIDIA RTX 20-Series** or higher version, and **AMD Radeon RX 6600 XT** or higher version
+also [A supported GPU and Driver](https://www.khronos.org/blog/ray-tracing-in-vulkan#blog_Call_to_Action) is needed, like **NVIDIA RTX 20-Series** or higher version, and **AMD Radeon RX 6600 XT** or higher version
 
 - 🌟 Importance Sampling Path Tracing
 - 🌟 Disney style BRDF shading in Path Tracing
 - 🌟 Noise reduction using joint bilateral filtering by `compute pipeline`
 
-#### 🫱 Volume rendering
 
-- //TODO
+
 
 # ⛱️ other basics in Rendering engine ⛱️
 

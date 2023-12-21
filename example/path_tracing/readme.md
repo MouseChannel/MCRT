@@ -8,6 +8,11 @@
   
 ```
 
-![path_tracing](../../assets/cube.png "👍👍")
+![path_tracing](../../assets/showcase/cube.png "👍👍")
 
-![path_tracing](../../assets/path_tracing.gif "👍👍")
+
+
+<div align=center>
+     <img src="../../assets/showcase/cook_torrance_path_tracing.png"  width="50%" ><img src="../../assets/showcase/path_tracing.gif"  width="50%" >
+</div>
+ 

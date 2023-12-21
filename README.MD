@@ -26,9 +26,9 @@ ninja
 ### 🫱 some showcase
 
 <div align=center>
-    <img src="assets/showcase/cat.png"  >
+    <img src="assets/showcase/cat1.png"  width="30%" ><img src="assets/showcase/cat2.png"  width="30%" ><img src="assets/showcase/cat3.png"  width="30%" >
 <br>
-PBR raytracing
+IBL-PBR raytracing
 </div> 
 <div align=center>
     <img src="assets/showcase/android1.jpg" width="25%"><img src="assets/showcase/android2.jpg" width="25%"><img src="assets/showcase/android3.jpg" width="25%">

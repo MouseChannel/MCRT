@@ -66,6 +66,10 @@ IBL-PBR workflow in RedMI📱 12
 - pre_calculate IBL_Gbuffer by `Compute_pipeline`
 - pbr in Graphic Pipeline using IBL_Gbuffer,and also works on Android
 - pbr in RayTracing Pipeline using IBL_Gbuffer,with single bounce to make it real-time
+### 🫱 Vulkan CUDA interOP
+- Vulkan-CUDA Memory share and Image_data share
+- 🔞(**in Develop**) Embedding DL-Pretrain-model by **Pytorch ➡️ ONNX ➡️libTorch ➡️CUDA➡️Vulkan**  workflow
+
 
 ### 🫱 Model Format
 

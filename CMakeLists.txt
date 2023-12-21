@@ -1,5 +1,15 @@
-cmake_minimum_required(VERSION 3.5.0)
-project(MCRT)
+cmake_minimum_required(VERSION 3.27.0)
+#if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+ 
+
+set(CMAKE_CUDA_ARCHITECTURES 75)
+set(CMAKE_CUDA_COMPILER /usr/local/cuda/bin/nvcc)
+#set(CMAKE_CUDA_COMPILER nvcc)
+
+#endif()
+#include(CheckLanguage)
+#check_language(CUDA)
+project(MCRT LANGUAGES CXX CUDA)
 set(CMAKE_CXX_STANDARD 20)
 
 # add_compile_options("< <<<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
@@ -42,12 +52,22 @@ message(STATUS "compile shader OK")
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/Tool)
 
 # include(cmake/FindSrc.cmake)
-file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/src/*.cu)
 message(STATUS ${SRC})
 
 # set(IMGUIDIR ${PROJECT_SOURCE_DIR}/lib/imgui)
 add_library(src ${SRC})
 
-target_link_libraries(src imgui)
 
+target_link_libraries(src imgui)
+find_package(CUDAToolkit REQUIRED)
+if(CUDAToolkit_FOUND)
+    include_directories(${CUDAToolkit_INCLUDE_DIRS})
+    link_directories(${CUDAToolkit_LIBRARY_DIR})
+#    message("CUDA 库文件目录: ${CUDAToolkit_INCLUDE_DIRS} ${CUDAToolkit_LIBRARY_DIR}")
+    target_link_libraries(src cuda cudart)
+
+endif()
+#include_directories(/usr/local/cuda/include)
+#target_link_directories(src PUBLIC /usr/local/cuda/lib64/)
 add_subdirectory(example)

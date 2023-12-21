@@ -1,4 +1,3 @@
-
 #include "Helper/Link_Util.hpp"
 #include "Rendering/Context.hpp"
 #include "Wrapper/Device.hpp"
@@ -6,7 +5,8 @@
 #include <vulkan/vulkan.hpp>
 
 VKAPI_ATTR VkResult VKAPI_CALL vkSetDebugUtilsObjectNameEXT(
-    VkDevice device, const VkDebugUtilsObjectNameInfoEXT* pNameInfo)
+    VkDevice device,
+    const VkDebugUtilsObjectNameInfoEXT* pNameInfo)
 {
     auto instance = MCRT::Context::Get_Singleton()->get_instance()->get_handle();
     auto func = (PFN_vkSetDebugUtilsObjectNameEXT)vkGetInstanceProcAddr(instance, "vkSetDebugUtilsObjectNameEXT");
@@ -47,6 +47,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateAccelerationStructureKHR(
     auto func = (PFN_vkCreateAccelerationStructureKHR)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkCreateAccelerationStructureKHR");
     return func(device, pCreateInfo, pAllocator, pAccelerationStructure);
 }
+
 VKAPI_ATTR VkDeviceAddress VKAPI_CALL vkGetAccelerationStructureDeviceAddressKHR(
     VkDevice device,
     const VkAccelerationStructureDeviceAddressInfoKHR* pInfo)
@@ -67,6 +68,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateRayTracingPipelinesKHR(
     auto func = (PFN_vkCreateRayTracingPipelinesKHR)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkCreateRayTracingPipelinesKHR");
     return func(device, deferredOperation, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
 }
+
 VKAPI_ATTR VkResult VKAPI_CALL vkGetRayTracingShaderGroupHandlesKHR(
     VkDevice device,
     VkPipeline pipeline,
@@ -76,11 +78,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetRayTracingShaderGroupHandlesKHR(
     void* pData)
 {
     auto func = (PFN_vkGetRayTracingShaderGroupHandlesKHR)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()
-                                                                                  ->get_device()
-                                                                                  ->get_handle(),
+                                                                              ->get_device()
+                                                                              ->get_handle(),
                                                                               "vkGetRayTracingShaderGroupHandlesKHR");
     return func(device, pipeline, firstGroup, groupCount, dataSize, pData);
 }
+
 VKAPI_ATTR void VKAPI_CALL vkCmdTraceRaysKHR(
     VkCommandBuffer commandBuffer,
     const VkStridedDeviceAddressRegionKHR* pRaygenShaderBindingTable,
@@ -92,11 +95,12 @@ VKAPI_ATTR void VKAPI_CALL vkCmdTraceRaysKHR(
     uint32_t depth)
 {
     auto func = (PFN_vkCmdTraceRaysKHR)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()
-                                                               ->get_device()
-                                                               ->get_handle(),
+                                                           ->get_device()
+                                                           ->get_handle(),
                                                            "vkCmdTraceRaysKHR");
     return func(commandBuffer, pRaygenShaderBindingTable, pMissShaderBindingTable, pHitShaderBindingTable, pCallableShaderBindingTable, width, height, depth);
 }
+
 // static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallBack(
 //     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 //     VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -108,7 +112,10 @@ VKAPI_ATTR void VKAPI_CALL vkCmdTraceRaysKHR(
 //     return VK_FALSE;
 // }
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
-    VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pMessenger)
+    VkInstance instance,
+    const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkDebugUtilsMessengerEXT* pMessenger)
 {
     auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
         instance,
@@ -135,6 +142,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetQueueCheckpointData2NV(
         throw std::runtime_error("fail get point");
     }
 }
+
 VKAPI_ATTR void VKAPI_CALL vkGetQueueCheckpointDataNV(
     VkQueue queue,
     uint32_t* pCheckpointDataCount,
@@ -162,6 +170,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetCheckpointNV(
         throw std::runtime_error("fail set point");
     }
 }
+
 VKAPI_ATTR VkResult VKAPI_CALL vkGetDeviceFaultInfoEXT(
     VkDevice device,
     VkDeviceFaultCountsEXT* pFaultCounts,
@@ -174,5 +183,36 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetDeviceFaultInfoEXT(
         func(device, pFaultCounts, pFaultInfo);
     } else {
         throw std::runtime_error("fail set point");
+    }
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL vkGetSemaphoreFdKHR(
+    VkDevice device,
+    const VkSemaphoreGetFdInfoKHR* pGetFdInfo,
+    int* pFd)
+{
+    auto func = (PFN_vkGetSemaphoreFdKHR)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkGetSemaphoreFdKHR");
+
+    if (func != nullptr) {
+        std::cout << "in" << std::endl;
+        return func(device, pGetFdInfo, pFd);
+    } else {
+        throw std::runtime_error("fail set vkGetSemaphoreFdKHR");
+    }
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL vkGetMemoryFdKHR(
+    VkDevice device,
+    const VkMemoryGetFdInfoKHR* pGetFdInfo,
+    int* pFd)
+{
+
+    auto func = (PFN_vkGetMemoryFdKHR)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkGetMemoryFdKHR");
+
+    if (func != nullptr) {
+        std::cout << "in" << std::endl;
+        return func(device, pGetFdInfo, pFd);
+    } else {
+        throw std::runtime_error("fail set vkGetMemoryFdKHR");
     }
 }

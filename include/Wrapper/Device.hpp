@@ -31,6 +31,8 @@ public:
         "VK_KHR_deferred_host_operations",
         //  VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
         VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
+        "VK_KHR_external_semaphore_fd",
+        "VK_KHR_external_memory_fd"
 
     };
 
@@ -52,6 +54,11 @@ public:
     [[nodiscard("missing queue_family_index")]] auto get_queuefamily_index()
     {
         return queue_family_indices;
+    }
+
+    auto get_deviceUUID()
+    {
+        return m_deviceUUID;
     }
 
     [[nodiscard]] vk::SampleCountFlagBits Get_sampler_count();
@@ -79,5 +86,6 @@ private:
     vk::Queue present_queue;
     vk::SampleCountFlagBits sampler_count;
     vk::FormatProperties supported_formats;
+    uint8_t m_deviceUUID[VK_UUID_SIZE];
 };
 } // namespace MoCheng3D

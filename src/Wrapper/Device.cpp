@@ -18,6 +18,7 @@ Device::Device()
 
     auto avalible_physical_device = instance->get_handle().enumeratePhysicalDevices();
     physical_device = avalible_physical_device[0];
+
     std::cout << "avalible_gpu" << std::endl;
     for (auto i : avalible_physical_device) {
 
@@ -49,8 +50,8 @@ Device::Device()
     }
 
     queue_create_info.setPQueuePriorities(&priorities)
-        .setQueueCount(1)
-        .setQueueFamilyIndex(queue_family_indices.graphic_queue.value());
+                     .setQueueCount(1)
+                     .setQueueFamilyIndex(queue_family_indices.graphic_queue.value());
 
     get_feature();
     vk::DeviceCreateInfo new_create_info;
@@ -81,6 +82,15 @@ Device::Device()
         //                .setPEnabledFeatures(&feature)
         .setPEnabledExtensionNames(device_extension);
 #else
+    {
+        //get deviceuuid
+        vk::PhysicalDeviceIDPropertiesKHR deviceID;
+        vk::PhysicalDeviceProperties2 properties2;
+        properties2.pNext = &deviceID;
+
+        physical_device.getProperties2(&properties2);
+        memcpy(m_deviceUUID, deviceID.deviceUUID,VK_UUID_SIZE);
+    }
 
     auto feature = physical_device.getFeatures2<vk::PhysicalDeviceFeatures2,
                                                 vk::PhysicalDeviceVulkan13Features,
@@ -92,9 +102,6 @@ Device::Device()
                                                 vk::PhysicalDeviceShaderClockFeaturesKHR,
                                                 vk::PhysicalDeviceFaultFeaturesEXT>();
 
-    //        feature.get<vk::PhysicalDeviceFaultFeaturesEXT>().setDeviceFault(true);
-    //        vk::PhysicalDeviceMaintenance4Features aa;
-    //        aa.setMaintenance4(true);
     new_create_info
         .setPNext(&feature.get())
         .setQueueCreateInfos(queue_create_info)
@@ -107,7 +114,7 @@ Device::Device()
     int r = 0;
 
 #endif
-//    physical_device.createDevice(&new_create_info,nullptr, &m_handle);
+    //    physical_device.createDevice(&new_create_info,nullptr, &m_handle);
     m_handle = physical_device.createDevice(new_create_info);
     std::cout << "success create device" << std::endl;
     graphic_queue = m_handle.getQueue(queue_family_indices.graphic_queue.value(), 0);
@@ -161,7 +168,7 @@ vk::SampleCountFlagBits Device::Get_sampler_count()
     auto count = std::min(res.limits.framebufferColorSampleCounts,
                           res.limits.framebufferDepthSampleCounts);
 
-    for (auto i { VkSampleCountFlags(vk::SampleCountFlagBits::e64) };
+    for (auto i{ VkSampleCountFlags(vk::SampleCountFlagBits::e64) };
          i != VkSampleCountFlags(vk::SampleCountFlagBits::e1);
          i >>= 1) {
         auto cur = vk::SampleCountFlagBits(i);

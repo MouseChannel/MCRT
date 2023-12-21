@@ -5,7 +5,7 @@
 namespace MCRT {
 class Semaphore : public Component<vk::Semaphore, Semaphore> {
 public:
-    Semaphore();
+    Semaphore(bool need_export = false);
     ~Semaphore();
 
 private:

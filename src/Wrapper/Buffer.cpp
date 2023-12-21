@@ -4,21 +4,74 @@
 #include "Wrapper/Command_Pool.hpp"
 #include "Wrapper/Device.hpp"
 
+#include <ranges>
+// #define VK_USE_CUDA
+
 namespace MCRT {
 Buffer::Buffer(size_t size,
                vk::BufferUsageFlags usage,
                vk::MemoryPropertyFlags property,
-               bool permanent)
+               bool permanent,
+               bool need_export)
     : m_usage(usage)
-      , permanent(permanent)
+      , m_permanent(permanent)
       , m_size(size)
+      , m_need_export(need_export)
+
+
 {
     CreateBuffer(size, usage);
     memory_info = QueryMemoryInfo(property);
 
     AllocateMemory();
     BindMemory2Buffer();
+    // BufferInit(size, usage, property, permanent);
 }
+
+void Buffer::BufferInit(size_t size,
+                        vk::BufferUsageFlags usage,
+                        vk::MemoryPropertyFlags property,
+                        bool permanent)
+{
+    m_usage = usage;
+    m_size = size;
+    m_permanent = permanent;
+    CreateBuffer(size, usage);
+    memory_info = QueryMemoryInfo(property);
+
+    AllocateMemory();
+    BindMemory2Buffer();
+
+}
+
+
+// Buffer::Buffer(size_t size,
+//                vk::BufferUsageFlags usage,
+//                vk::MemoryPropertyFlags property,
+//                vk::ExternalMemoryHandleTypeFlagsKHR extMemHandleType)
+// {
+// #if defined(VK_USE_CUDA)
+//
+//     auto externalMemoryBufferInfo = vk::ExternalMemoryBufferCreateInfo()
+//         .setHandleTypes(extMemHandleType);
+// #endif
+//
+//     vk::BufferCreateInfo allocate_info;
+//     allocate_info.setSize(size)
+//                  .setUsage(usage)
+//                  .setSharingMode(vk::SharingMode::eExclusive)
+//                  .setPNext(&externalMemoryBufferInfo);
+//     m_handle = Get_Context_Singleton()
+//                ->get_device()
+//                ->get_handle()
+//                .createBuffer(allocate_info);
+//     memory_info = QueryMemoryInfo(property);
+//     //allocate memory
+//     auto vulkanExportMemoryAllocateInfoKHR = vk::ExportMemoryAllocateInfoKHR()
+//         .setHandleTypes(extMemHandleType);
+//
+// }
+
 
 Buffer::~Buffer()
 {
@@ -32,9 +85,20 @@ Buffer::~Buffer()
 void Buffer::CreateBuffer(size_t size, vk::BufferUsageFlags usage)
 {
     vk::BufferCreateInfo allocate_info;
-    allocate_info.setSize(size)
-                 .setUsage(usage)
-                 .setSharingMode(vk::SharingMode::eExclusive);
+    vk::ExternalMemoryBufferCreateInfo externalMemoryBufferInfo;
+    if (m_need_export) {
+        externalMemoryBufferInfo = vk::ExternalMemoryBufferCreateInfo()
+            .setHandleTypes(m_extMemHandleType);
+        allocate_info.setSize(size)
+                     .setUsage(usage)
+                     .setPNext(&externalMemoryBufferInfo)
+                     .setSharingMode(vk::SharingMode::eExclusive);
+    } else {
+
+        allocate_info.setSize(size)
+                     .setUsage(usage)
+                     .setSharingMode(vk::SharingMode::eExclusive);
+    }
     m_handle = Get_Context_Singleton()
                ->get_device()
                ->get_handle()
@@ -69,14 +133,43 @@ Buffer::MemoryInfo Buffer::QueryMemoryInfo(vk::MemoryPropertyFlags property)
 void Buffer::AllocateMemory()
 {
     vk::MemoryAllocateInfo allocate_info;
-    allocate_info.setMemoryTypeIndex(memory_info.index)
-                 .setAllocationSize(memory_info.size);
+    vk::ExportMemoryAllocateInfoKHR vulkanExportMemoryAllocateInfoKHR;
+    if (m_need_export) {
+        vulkanExportMemoryAllocateInfoKHR = vk::ExportMemoryAllocateInfoKHR()
+            .setHandleTypes(m_extMemHandleType);
+
+        allocate_info.setMemoryTypeIndex(memory_info.index)
+                     .setPNext(&vulkanExportMemoryAllocateInfoKHR)
+                     .setAllocationSize(memory_info.size);
+    } else {
+
+        allocate_info.setMemoryTypeIndex(memory_info.index)
+                     .setAllocationSize(memory_info.size);
+    }
+    // #if defined(VK_USE_CUDA)
+    //
+    //     auto vulkanExportMemoryAllocateInfoKHR = vk::ExportMemoryAllocateInfoKHR()
+    //         .setHandleTypes(m_extMemHandleType);
+    // #endif
+    //     vk::MemoryAllocateInfo allocate_info;
+    //     allocate_info.setMemoryTypeIndex(memory_info.index)
+    // #if defined(VK_USE_CUDA)
+    //         .setPNext(&vulkanExportMemoryAllocateInfoKHR)
+    // #endif
+    //
+    //         .setAllocationSize(memory_info.size);
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 #else
     vk::MemoryAllocateFlagsInfo flag;
     flag.setFlags(vk::MemoryAllocateFlagBits::eDeviceAddress);
     if (m_usage & vk::BufferUsageFlagBits::eShaderDeviceAddress) {
-        allocate_info.setPNext(&flag);
+        if (m_need_export) {
+
+            vulkanExportMemoryAllocateInfoKHR.setPNext(&flag);
+        } else {
+            allocate_info.setPNext(&flag);
+        }
+
     }
 #endif
 
@@ -84,7 +177,7 @@ void Buffer::AllocateMemory()
              ->get_device()
              ->get_handle()
              .allocateMemory(allocate_info);
-    int a = 0;
+
 }
 
 void Buffer::BindMemory2Buffer()
@@ -119,7 +212,7 @@ void Buffer::Unmap()
 std::vector<uint8_t> Buffer::Get_mapped_data(uint32_t offset)
 {
     Map(offset, m_size);
-    std::vector<uint8_t> dst_data(m_size  );
+    std::vector<uint8_t> dst_data(m_size);
     std::memcpy(dst_data.data(), mapped_data, m_size);
     Unmap();
     return dst_data;
@@ -131,7 +224,7 @@ void Buffer::Update(void* data, size_t size)
 
     Map(0, size);
     std::memcpy(mapped_data, data, size);
-    if (permanent) {
+    if (m_permanent) {
         return;
     }
     Unmap();
@@ -153,7 +246,7 @@ void Buffer::Update(std::vector<void*> data, std::vector<size_t> size)
         std::memcpy((uint8_t*)mapped_data + cur_s, d, s);
         cur_s += s;
     }
-    if (permanent) {
+    if (m_permanent) {
         return;
     }
     Unmap();
@@ -218,6 +311,14 @@ std::shared_ptr<Buffer> Buffer::create_buffer(void* data, size_t size, vk::Buffe
     return res;
 }
 
+std::shared_ptr<Buffer> Buffer::CreateExternalBuffer(void* data, size_t size, vk::BufferUsageFlags usage_flags, vk::MemoryPropertyFlags properties, vk::ExternalMemoryHandleTypeFlagsKHR extMemHandleType)
+{
+#define VK_USE_CUDA
+    // std::shared_ptr<Buffer> res(new Buffer(size, usage_flags, properties, extMemHandleType));
+    // res->CreateBuffer(size, usage_flags);
+#undef VK_USE_CUDA
+}
+
 vk::DeviceAddress Buffer::get_address()
 {
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -235,6 +336,25 @@ vk::DeviceAddress Buffer::get_address()
     }
     return m_buffer_address;
 #endif
+}
+
+void Buffer::CopyBuffer(std::shared_ptr<Buffer> src, std::shared_ptr<Buffer> dst)
+{
+    auto graphic_queue = Context::Get_Singleton()
+                         ->get_device()
+                         ->Get_Graphic_queue();
+
+    CommandManager::ExecuteCmd(graphic_queue,
+                               [&](auto& cmd_buffer) {
+                                   vk::BufferCopy regin;
+                                   regin.setSize(src->GetSize())
+                                        .setDstOffset(0)
+                                        .setSrcOffset(0);
+                                   cmd_buffer.copyBuffer(
+                                       src->get_handle(),
+                                       dst->get_handle(),
+                                       regin);
+                               });
 }
 
 } // namespace MCRT

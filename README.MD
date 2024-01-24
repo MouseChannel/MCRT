@@ -42,8 +42,8 @@ IBL-PBR workflow in RedMI📱 12
     <img src="assets/showcase/ao_showcase.png" width="75%" >
 <br> realtime Ambient Occlusion
 <br>
-<a href="./assets/showcase/cloud.mp4">
- <img src="assets/showcase/cloud.gif" width="43%"> 
+<a href="./assets/showcase/cloudDemo.webm">
+ <img src="assets/showcase/cloudDemo.gif" width="43%"> 
 </a>
  <img src="assets/showcase/cube.png"  width="37%"> 
 <br>

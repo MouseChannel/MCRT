@@ -14,4 +14,4 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallBack(
     return VK_FALSE;
 }
 
-static PFN_vkGetDeviceFaultInfoEXT pfn_vkGetDeviceFaultInfoEXT = 0;
+// static PFN_vkGetDeviceFaultInfoEXT pfn_vkGetDeviceFaultInfoEXT = 0;

@@ -12,13 +12,13 @@ class Device : public Component<vk::Device, Device> {
 public:
     Device();
     ~Device();
-    const std::vector<const char*> device_extension{
+    const std::vector<const char*> device_extension {
         "VK_KHR_swapchain",
         //        "VK_KHR_shader_non_semantic_info"
         //"VK_KHR_maintenance4"
 
     };
-    const std::vector<const char*> rt_device_extension{
+    const std::vector<const char*> rt_device_extension {
         "VK_KHR_swapchain",
 
         "VK_KHR_ray_query",
@@ -45,6 +45,10 @@ public:
     {
         return graphic_queue;
     }
+    [[nodiscard("Missing graphic_queue")]] auto Get_Compute_queue()
+    {
+        return compute_queue;
+    }
 
     [[nodiscard("Missing present_queue")]] auto Get_present_queue()
     {
@@ -67,10 +71,11 @@ public:
     struct QueueFamilyIndices final {
         std::optional<uint32_t> graphic_queue;
         std::optional<uint32_t> present_queue;
+        std::optional<uint32_t> compute_queue;
 
         bool Complete()
         {
-            return graphic_queue.has_value() && present_queue.has_value();
+            return graphic_queue.has_value() && present_queue.has_value() && compute_queue.has_value();
         }
     } queue_family_indices;
 
@@ -84,6 +89,7 @@ private:
     vk::PhysicalDevice physical_device;
     vk::Queue graphic_queue;
     vk::Queue present_queue;
+    vk::Queue compute_queue;
     vk::SampleCountFlagBits sampler_count;
     vk::FormatProperties supported_formats;
     uint8_t m_deviceUUID[VK_UUID_SIZE];

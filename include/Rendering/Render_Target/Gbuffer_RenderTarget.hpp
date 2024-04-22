@@ -11,6 +11,10 @@ public:
     void Make_Subpass(uint32_t attachment_index, std::shared_ptr<RenderPass> renderPass) override;
 
 private:
+    // vk::ClearColorValue cur_clear_color
+    // {
+    //     0.0f, 0.0f, 0.0f, 0.0f
+    // };
 };
 
 }

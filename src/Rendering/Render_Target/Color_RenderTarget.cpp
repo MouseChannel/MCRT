@@ -12,7 +12,8 @@ Color_RenderTarget::Color_RenderTarget(std::shared_ptr<Image> image,
     : RenderTarget(image, RenderTarget::COLOR, des)
 {
 
-    clear_color.setColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+    // clear_color.setColor(cur_clear_color);
+    clear_color.color.setFloat32({ 0.1f, 0.1f, 0.1f, 1.0f });
 }
 std::shared_ptr<Color_RenderTarget> Color_RenderTarget::Create(std::shared_ptr<Image> swapchain_image)
 {
@@ -35,7 +36,7 @@ void Color_RenderTarget::Make_Subpass(uint32_t attachment_index, std::shared_ptr
     attach_reference.setAttachment(attachment_index)
         .setLayout(image->Get_image_layout());
 
-//    attach_references.push_back(attach_reference);
+    //    attach_references.push_back(attach_reference);
 
     renderPass->get_attach_references().push_back(attach_reference);
 }

@@ -1,4 +1,5 @@
-file(GLOB_RECURSE IMGUILIB ${PROJECT_SOURCE_DIR}/lib/imgui/*.cpp)
-list(REMOVE_ITEM IMGUILIB ${PROJECT_SOURCE_DIR}/lib/imgui/imgui_impl_android.cpp)
-set(IMGUIDIR ${PROJECT_SOURCE_DIR}/lib/imgui)
+file(GLOB_RECURSE IMGUILIB ${CMAKE_CURRENT_LIST_DIR}/../lib/imgui/*.cpp)
+# message(STATUS mom${CMAKE_CURRENT_LIST_DIR})
+list(REMOVE_ITEM IMGUILIB ${CMAKE_CURRENT_LIST_DIR}/../lib/imgui/imgui_impl_android.cpp)
+set(IMGUIDIR ${CMAKE_CURRENT_LIST_DIR}/../lib/imgui)
 add_library(imgui ${IMGUILIB})

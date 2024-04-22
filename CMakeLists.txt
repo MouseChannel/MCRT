@@ -1,15 +1,16 @@
-cmake_minimum_required(VERSION 3.27.0)
+cmake_minimum_required(VERSION 3.22.0)
 #if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
  
 
-set(CMAKE_CUDA_ARCHITECTURES 75)
-set(CMAKE_CUDA_COMPILER /usr/local/cuda/bin/nvcc)
+#set(CMAKE_CUDA_ARCHITECTURES 75)
+#set(CMAKE_CUDA_COMPILER /usr/local/cuda/bin/nvcc)
 #set(CMAKE_CUDA_COMPILER nvcc)
 
 #endif()
 #include(CheckLanguage)
 #check_language(CUDA)
-project(MCRT LANGUAGES CXX CUDA)
+#project(MCRT LANGUAGES CXX CUDA)
+project(MCRT)
 set(CMAKE_CXX_STANDARD 20)
 
 # add_compile_options("< <<<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
@@ -17,7 +18,7 @@ include(cmake/FindVulkan.cmake)
 include(cmake/FindGLFW.cmake)
 include(cmake/FindIMGUI.cmake)
 IF (WIN32)
-    target_link_libraries(imgui glfw Vulkan)
+    target_link_libraries(imgui PUBLIC glfw Vulkan::Vulkan glm)
 ELSEIF (UNIX)
     # in linux link Vulkan::Vulkan
     target_link_libraries(imgui glfw Vulkan::Vulkan)
@@ -48,26 +49,28 @@ message("---------------------------------")
 # message(${USER_LIBS_PATH})
 
 # execute_process(COMMAND ${GLSLANGV} -V ${CMAKE_SOURCE_DIR}/Shader/frag.frag -o ${CMAKE_SOURCE_DIR}/Shader/frag.spv)
-message(STATUS "compile shader OK")
+# message(STATUS "compile shader OK")
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/Tool)
 
 # include(cmake/FindSrc.cmake)
-file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/src/*.cu)
-message(STATUS ${SRC})
+file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src/*.cpp  )
+# message(STATUS ${SRC})
 
 # set(IMGUIDIR ${PROJECT_SOURCE_DIR}/lib/imgui)
 add_library(src ${SRC})
 
 
-target_link_libraries(src imgui)
-find_package(CUDAToolkit REQUIRED)
-if(CUDAToolkit_FOUND)
-    include_directories(${CUDAToolkit_INCLUDE_DIRS})
-    link_directories(${CUDAToolkit_LIBRARY_DIR})
-#    message("CUDA 库文件目录: ${CUDAToolkit_INCLUDE_DIRS} ${CUDAToolkit_LIBRARY_DIR}")
-    target_link_libraries(src cuda cudart)
+# find_package(TBB REQUIRED COMPONENTS tbb)
+# target_link_libraries(src imgui TBB::tbb)
+target_link_libraries(src imgui )
 
-endif()
-#include_directories(/usr/local/cuda/include)
-#target_link_directories(src PUBLIC /usr/local/cuda/lib64/)
+
+# find_package(CUDAToolkit REQUIRED)
+# if(CUDAToolkit_FOUND)
+#     include_directories(${CUDAToolkit_INCLUDE_DIRS})
+#     link_directories(${CUDAToolkit_LIBRARY_DIR})
+# #    message("CUDA 库文件目录: ${CUDAToolkit_INCLUDE_DIRS} ${CUDAToolkit_LIBRARY_DIR}")
+#     target_link_libraries(src cuda cudart cublas )
+
+# endif()
 add_subdirectory(example)

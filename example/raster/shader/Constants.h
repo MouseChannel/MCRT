@@ -16,13 +16,13 @@ struct PC_Raster {
     int color_texture_index;
     int metallicness_roughness_texture_index;
     int normal_texture_index;
-    int rr;
+    int flag;
     vec4 light_pos;
 
     int use_normal_map;
     int use_r_m_map;
-    int uu;
-    int ee;
+    int use_AO;
+    float gamma;
 };
 struct PushContant_Compute {
     int frame;

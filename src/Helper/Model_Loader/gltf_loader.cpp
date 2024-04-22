@@ -11,21 +11,23 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #endif
 // #include "Helper/ThreadPool.hpp"
-#include <glm/gtc/type_ptr.hpp>
 #include "Rendering/Context.hpp"
-
+#include <glm/gtc/type_ptr.hpp>
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 #define TINYGLTF_ANDROID_LOAD_FROM_ASSETS
 #define TINYGLTF_IMPLEMENTATION
 #endif
-//#include "Tool/tiny_gltf.h"
+// #include "Tool/tiny_gltf.h"
 #include "Helper/Model_Loader/gltf_loader.hpp"
+
+#include <execution>
+#include <pstl/glue_execution_defs.h>
 
 #define using_threadpool1
 
 namespace MCRT {
-static std::mutex texture_lock;
+// static std::mutex texture_lock;
 
 int get_size(int componentType)
 {
@@ -62,7 +64,7 @@ glm::mat4 translation_to_matrix(const std::vector<double>& translation)
     // mat[0][3] = x;
     // mat[1][3] = y;
     // mat[2][3] = z;
-    mat = glm::translate(mat, glm::vec3{ x, y, z });
+    mat = glm::translate(mat, glm::vec3 { x, y, z });
 
     return mat;
 }
@@ -160,10 +162,10 @@ int handle_texture(tinygltf::Model model, tinygltf::TextureInfo texture_info)
     // texture
     if (image.image.size() < 0)
         return -1;
-    texture_lock.lock();
+    // texture_lock.lock();
     Texture::textures.emplace_back(new Texture(image.image.data(), image.width, image.height, image.image.size()));
     int index = Texture::textures.size() - 1;
-    texture_lock.unlock();
+    // texture_lock.unlock();
     return index;
 }
 
@@ -180,10 +182,10 @@ int handle_texture(tinygltf::Model model, tinygltf::NormalTextureInfo texture_in
     // texture
     if (image.image.size() < 0)
         return -1;
-    texture_lock.lock();
+    // texture_lock.lock();
     Texture::textures.emplace_back(new Texture(image.image.data(), image.width, image.height, image.image.size()));
     int index = Texture::textures.size() - 1;
-    texture_lock.unlock();
+    // texture_lock.unlock();
     return index;
 }
 
@@ -234,7 +236,7 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
 
     glm::mat4 local_matrix = translation_matrix * rotate_matrix * scale_matrix;
     local_matrix = father_matrix * local_matrix;
-    std::array<std::array<float, 4>, 3> transform{};
+    std::array<std::array<float, 4>, 3> transform {};
     {
         transform[0] = {
             local_matrix[0][0],
@@ -279,6 +281,20 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
             throw std::runtime_error("position format is not vec3");
         }
         copy_data(positions, model.buffers[buffer_view.buffer].data, buffer_view, accessor_position.count);
+        std::for_each(
+            positions.begin(),
+            positions.end(),
+            [](glm::vec3& i) {
+                i.y = -i.y;
+            });
+        // std::for_each(std::execution::par,
+        //               positions.begin(),
+        //               positions.end(),
+        //               [](glm::vec3& i) {
+        //                   i.y = -i.y;
+        //               });
+
+        // copy_data(positions, model.buffers[buffer_view.buffer].data, buffer_view, accessor_position.count);
     }
     {
         // normal
@@ -305,7 +321,6 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
 
             if (accessor_texcoord.type != TINYGLTF_TYPE_VEC2) {
                 throw std::runtime_error("texcoord format is not vec2");
-
             }
             copy_data(texcoord, model.buffers[buffer_view.buffer].data, buffer_view, accessor_texcoord.count);
         }
@@ -313,14 +328,14 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
     vertexs.clear();
     indices.clear();
     triangles.clear();
-    std::array<glm::vec3, 3> triangle_pos{};
+    std::array<glm::vec3, 3> triangle_pos {};
     for (int i = 0; i < indexs.size(); i += 3) {
 
         for (int j = 0; j < 3; j++) {
-            vertexs.emplace_back(Vertex{
+            vertexs.emplace_back(Vertex {
                 .pos = positions[indexs[i + j]],
                 .nrm = normals[indexs[i + j]],
-                .texCoord = texcoord.empty() ? glm::vec2{ 0 } : texcoord[indexs[i + j]] });
+                .texCoord = texcoord.empty() ? glm::vec2 { 0 } : texcoord[indexs[i + j]] });
             indices.push_back(indices.size());
             triangle_pos[j] = positions[indexs[i + j]];
         }
@@ -331,13 +346,13 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
     Material cur_material;
     {
         tinygltf::Material material;
-        material.emissiveFactor = std::vector<double>{ 0, 0, 0 };
+        material.emissiveFactor = std::vector<double> { 0, 0, 0 };
         if (primitive.material >= 0) {
             material = model.materials[primitive.material];
         }
 
-        cur_material = Material{
-            .color{
+        cur_material = Material {
+            .color {
                 material.pbrMetallicRoughness.baseColorFactor[0],
                 material.pbrMetallicRoughness.baseColorFactor[1],
                 material.pbrMetallicRoughness.baseColorFactor[2],
@@ -358,20 +373,20 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
             cur_material.emit *= emissiveStrength;
         }
     }
-    texture_lock.lock();
+    // texture_lock.lock();
     Mesh::meshs.emplace_back(new Mesh(node.name,
                                       vertexs,
                                       indices,
                                       triangles,
                                       cur_material,
                                       transform));
-    texture_lock.unlock();
+    // texture_lock.unlock();
     return local_matrix;
 }
 
 void GLTF_Loader::load_mesh(glm::mat4 local_matrix, const tinygltf::Model& model, const tinygltf::Node& node)
 {
-    glm::mat4 cur_marix{ 1 };
+    glm::mat4 cur_marix { 1 };
     if (node.mesh >= 0) {
 
         auto mesh = model.meshes[node.mesh];
@@ -394,7 +409,7 @@ void GLTF_Loader::load_model(std::string_view path)
     std::string warn;
     bool ret = false;
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
-    tinygltf::asset_manager =  Context::Get_Singleton()->Get_app()->activity->assetManager;
+    tinygltf::asset_manager = Context::Get_Singleton()->Get_app()->activity->assetManager;
 #endif
     auto file_extension = GetFilePathExtension(std::string(path));
     if (file_extension == "glb")
@@ -444,10 +459,8 @@ void GLTF_Loader::load_model(std::string_view path)
 #else
         std::cout << ++node_number << "/" << model.scenes[model.defaultScene].nodes.size() << "    loading: " << node.name << std::endl;
 #endif
-        if (node.name == "teacherDesk") {
-            int r = 0;
-        }
-        load_mesh(glm::mat4{ 1 }, model, node);
+
+        load_mesh(glm::mat4 { 1 }, model, node);
     }
 #endif
     // loader.WriteGltfSceneToFile(&model, "test.gltf", true, true, true);

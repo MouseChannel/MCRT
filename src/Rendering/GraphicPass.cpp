@@ -39,7 +39,6 @@ GraphicPass::GraphicPass(std::shared_ptr<Device> device)
     for (int i = 0; i < render_frame_count; i++) {
         fences.emplace_back(new Fence);
     }
-
 }
 
 GraphicPass::GraphicPass()
@@ -63,12 +62,12 @@ std::shared_ptr<Pipeline_base> GraphicPass::get_pipeline()
 // }
 void GraphicPass::fill_render_targets()
 {
-    auto count{ enable_swapchain ? render_frame_count : 1 };
+    auto count { enable_swapchain ? render_frame_count : 1 };
     all_rendertargets.clear();
     all_rendertargets.resize(count);
-    for (auto i{ 0 }; i < count; i++) {
+    for (auto i { 0 }; i < count; i++) {
         auto swapchain_image_handle = m_swapchain->Get_Swapchain_Images()[i];
-        std::shared_ptr<Image> swapchain_image{
+        std::shared_ptr<Image> swapchain_image {
             new Image(swapchain_image_handle,
                       vk::ImageLayout::eColorAttachmentOptimal,
                       m_swapchain->Get_Format(),
@@ -87,9 +86,9 @@ void GraphicPass::fill_render_targets()
 
 void GraphicPass::Prepare_Framebuffer()
 {
-    auto count{ enable_swapchain ? render_frame_count : 1 };
+    auto count { enable_swapchain ? render_frame_count : 1 };
     render_frames.resize(count);
-    for (auto i{ 0 }; i < count; i++) {
+    for (auto i { 0 }; i < count; i++) {
         render_frames[i].reset(new RenderFrame(m_renderpass, all_rendertargets[i]));
     }
 }
@@ -193,14 +192,13 @@ void GraphicPass::post_prepare()
 //
 // }
 
-
 std::shared_ptr<CommandBuffer> GraphicPass::BeginFrame()
 {
     auto cur_semaphone = Get_cur_render_semaphore()->get_handle();
     // Context::Get_Singleton()->get_debugger()->set_handle_name(cur_semaphone, "semaphone" + std::to_string(current_index));
     if (has_inited) {
         cur_semaphone = Get_RenderFrame((current_index + 1) % render_frame_count)->Get_render_semaphore()->get_handle();
-    
+
     } else {
         cur_semaphone = Get_cur_render_semaphore()->get_handle();
     }
@@ -242,14 +240,14 @@ std::shared_ptr<CommandBuffer> GraphicPass::Begin_Record_Command_Buffer()
     }
 
     render_pass_begin_info.setRenderPass(render_pass->get_handle())
-                          .setRenderArea(vk::Rect2D()
-                                         .setOffset({ 0, 0 })
-                                         .setExtent(Context::Get_Singleton()
-                                             ->get_extent2d()))
-                          .setFramebuffer(Get_RenderFrame(current_index)
-                                          ->Get_Framebuffer()
-                                          ->get_handle())
-                          .setClearValues(clear_values);
+        .setRenderArea(vk::Rect2D()
+                           .setOffset({ 0, 0 })
+                           .setExtent(Context::Get_Singleton()
+                                          ->get_extent2d()))
+        .setFramebuffer(Get_RenderFrame(current_index)
+                            ->Get_Framebuffer()
+                            ->get_handle())
+        .setClearValues(clear_values);
     // std::cout << render_pass_begin_info.renderArea.extent.width << render_pass_begin_info.renderArea.extent.height << std::endl;
     cmd->Begin(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 
@@ -265,18 +263,18 @@ void GraphicPass::record_command(std::shared_ptr<CommandBuffer> cmd)
 
     cmd->get_handle().setViewport(0,
                                   vk::Viewport()
-                                  .setHeight(extent2d.height)
-                                  .setWidth(extent2d.width)
-                                  .setMinDepth(0)
-                                  .setMaxDepth(1)
-                                  .setX(0)
-                                  .setY(0));
+                                      .setHeight(extent2d.height)
+                                      .setWidth(extent2d.width)
+                                      .setMinDepth(0)
+                                      .setMaxDepth(1)
+                                      .setX(0)
+                                      .setY(0));
     cmd->get_handle().setScissor(0,
                                  vk::Rect2D()
-                                 .setExtent(extent2d)
-                                 .setOffset(vk::Offset2D()
-                                            .setX(0)
-                                            .setY(0)));
+                                     .setExtent(extent2d)
+                                     .setOffset(vk::Offset2D()
+                                                    .setX(0)
+                                                    .setY(0)));
 
     Context::Get_Singleton()->get_debugger()->set_name(cmd, "render command_buffer");
 #endif
@@ -296,11 +294,11 @@ void GraphicPass::Submit()
     auto graphic_queue = m_device->Get_Graphic_queue();
     auto cur = current_index;
     vk::SubmitInfo submit_info;
-    const vk::PipelineStageFlags wait_mask{ vk::PipelineStageFlagBits::eColorAttachmentOutput };
+    const vk::PipelineStageFlags wait_mask { vk::PipelineStageFlagBits::eColorAttachmentOutput };
     submit_info.setCommandBuffers(command_buffer->get_handle())
-               .setWaitSemaphores(Get_cur_render_semaphore()->get_handle())
-               .setWaitDstStageMask(wait_mask)
-               .setSignalSemaphores(Get_cur_present_semaphore()->get_handle());
+        .setWaitSemaphores(Get_cur_render_semaphore()->get_handle())
+        .setWaitDstStageMask(wait_mask)
+        .setSignalSemaphores(Get_cur_present_semaphore()->get_handle());
     try {
 
         //        VkSubmitInfo sub {};
@@ -330,7 +328,7 @@ void GraphicPass::Submit()
         //            int tt = 0;
         //        }
     } catch (std::exception e) {
-        auto r = m_device->get_handle().getFaultInfoEXT();
+        // auto r = m_device->get_handle().getFaultInfoEXT();
         int rr = 9;
     }
     //    graphic_queue.waitIdle();
@@ -363,8 +361,8 @@ void GraphicPass::EndFrame()
 
     vk::PresentInfoKHR present_info;
     present_info.setImageIndices(current_index)
-                .setSwapchains(m_swapchain->get_handle())
-                .setWaitSemaphores(Get_cur_present_semaphore()->get_handle());
+        .setSwapchains(m_swapchain->get_handle())
+        .setWaitSemaphores(Get_cur_present_semaphore()->get_handle());
 
     auto present_queue = m_device->Get_present_queue();
 

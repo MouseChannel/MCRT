@@ -10,6 +10,6 @@ layout(location = 0) out vec4 outFragColor;
 void main()
 {
 
-    outFragColor = pow(texture(samplerCubeMap, inUVW), vec4(1. / 2.2));
+    outFragColor = pow(texture(samplerCubeMap, inUVW), vec4(1. / 1));
     // debugPrintfEXT("message  %f %f %f  \n", inUVW.x, inUVW.y, inUVW.z);
 }

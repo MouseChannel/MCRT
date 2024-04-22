@@ -158,33 +158,33 @@ VKAPI_ATTR void VKAPI_CALL vkGetQueueCheckpointDataNV(
     }
 }
 
-VKAPI_ATTR void VKAPI_CALL vkCmdSetCheckpointNV(
-    VkCommandBuffer commandBuffer,
-    const void* pCheckpointMarker)
-{
-    auto func = (PFN_vkCmdSetCheckpointNV)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkCmdSetCheckpointNV");
+// VKAPI_ATTR void VKAPI_CALL vkCmdSetCheckpointNV(
+//     VkCommandBuffer commandBuffer,
+//     const void* pCheckpointMarker)
+// {
+//     auto func = (PFN_vkCmdSetCheckpointNV)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkCmdSetCheckpointNV");
 
-    if (func != nullptr) {
-        func(commandBuffer, pCheckpointMarker);
-    } else {
-        throw std::runtime_error("fail set point");
-    }
-}
+//     if (func != nullptr) {
+//         func(commandBuffer, pCheckpointMarker);
+//     } else {
+//         throw std::runtime_error("fail set point");
+//     }
+// }
 
-VKAPI_ATTR VkResult VKAPI_CALL vkGetDeviceFaultInfoEXT(
-    VkDevice device,
-    VkDeviceFaultCountsEXT* pFaultCounts,
-    VkDeviceFaultInfoEXT* pFaultInfo)
-{
-    auto func = (PFN_vkGetDeviceFaultInfoEXT)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkGetDeviceFaultInfoEXT");
-    func = pfn_vkGetDeviceFaultInfoEXT;
-    if (func != nullptr) {
-        std::cout << "in" << std::endl;
-        func(device, pFaultCounts, pFaultInfo);
-    } else {
-        throw std::runtime_error("fail set point");
-    }
-}
+// VKAPI_ATTR VkResult VKAPI_CALL vkGetDeviceFaultInfoEXT(
+//     VkDevice device,
+//     VkDeviceFaultCountsEXT* pFaultCounts,
+//     VkDeviceFaultInfoEXT* pFaultInfo)
+// {
+//     auto func = (PFN_vkGetDeviceFaultInfoEXT)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()->get_device()->get_handle(), "vkGetDeviceFaultInfoEXT");
+//     func = pfn_vkGetDeviceFaultInfoEXT;
+//     if (func != nullptr) {
+//         std::cout << "in" << std::endl;
+//         func(device, pFaultCounts, pFaultInfo);
+//     } else {
+//         throw std::runtime_error("fail set point");
+//     }
+// }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetSemaphoreFdKHR(
     VkDevice device,

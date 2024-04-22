@@ -16,12 +16,12 @@ ninja
 - ✅ **Windows** 💻
 - ✅ **Linux** 💻
 - ✅ **Android** 📱 (Not all features are supported)
-- :x: **Mac** 💻 todo
+- ❌ **Mac** 💻 todo 
 
 ### 🫱 work flows
 
-- **RayTracing Pipeline**:  :pray: has not support in Mobile
-- **Graphic pipeline**:  :muscle: support all platform
+- **RayTracing Pipeline**:  🙏 has not support in Mobile
+- **Graphic pipeline**:  💪 support all platform
 
 ### 🫱 some showcase
 
@@ -36,7 +36,6 @@ IBL-PBR raytracing
 IBL-PBR workflow in RedMI📱 12
 <br>
 </div>
-
 
 <div align=center >
     <img src="assets/showcase/ao_showcase.png" width="75%" >
@@ -63,9 +62,10 @@ IBL-PBR workflow in RedMI📱 12
 - pbr in RayTracing Pipeline using IBL_Gbuffer,with single bounce to make it real-time
 
 ### 🫱 Vulkan CUDA interOP
-compute-heavy task can be handled by **Computer-Shader** or **CUDA**
-- Vulkan-CUDA Memory share and Image_data share,sync by Semaphore
 
+compute-heavy task can be handled by **Computer-Shader** or **CUDA**
+
+- Vulkan-CUDA Memory share and Image_data share,sync by Semaphore
 
 ### 🫱 Model Format
 

@@ -10,6 +10,7 @@
 #include "shaders/sampling.glsl"
 
 #include "shaders/PBR/common.h"
+
 layout(location = e_pos) in vec3 in_pos;
 layout(location = e_nrm) in vec3 in_nrm;
 layout(location = e_depth) in float in_depth;
@@ -31,13 +32,14 @@ layout(push_constant) uniform _PushContant
 layout(set = e_graphic, binding = e_irradiance_image) uniform samplerCube irradiance_cubemap;
 layout(set = e_graphic, binding = e_LUT_image) uniform sampler2D LUT_image;
 
+
 void main()
 {
 
     vec3 modify_uv = vec3(in_skybox_uv.xy, -in_skybox_uv.z);
     vec4 color = texture(skybox, normalize(modify_uv));
     color = texture(skybox, modify_uv);
-
+    //    debugPrintfEXT("messagein test");
     // blinn phong
     // {
     //     vec4 ambient = 0.5f * color;
@@ -53,55 +55,63 @@ void main()
     {
         float roughness = 1;
         float metallicness = 1;
+        float ambient_occlusion= 1;
         if (pc_raster.metallicness_roughness_texture_index > -1 && bool(pc_raster.use_r_m_map)) {
-            vec2 r_m = texture(textures[nonuniformEXT(pc_raster.metallicness_roughness_texture_index)], in_texCoord).yz;
-            roughness = r_m[0];
-            metallicness = r_m[1];
-            // debugPrintfEXT("message m_r \n");
+            vec3 r_m = texture(textures[nonuniformEXT(pc_raster.metallicness_roughness_texture_index)], in_texCoord).xyz;
+            
+            ambient_occlusion = r_m.x;
+            roughness = r_m.y;
+            metallicness = r_m.z;
+
+            metallicness = 0;
         }
 
         vec3 iinormal = in_nrm;
         if (pc_raster.normal_texture_index > -1 && bool(pc_raster.use_normal_map)) {
             iinormal = getNormalSpace(in_nrm) * texture(textures[nonuniformEXT(pc_raster.normal_texture_index)], in_texCoord).xyz;
-        }
-        // }
 
+
+        }
+        // } 
         vec3 albedo = vec3(1, 1, 1);
         if (pc_raster.color_texture_index > -1) {
             albedo = texture(textures[nonuniformEXT(pc_raster.color_texture_index)], in_texCoord).xyz;
+
         }
 
-        vec3 color = Get_IBLColor(vec3(pc_raster.camera_pos),
-                                  vec3(0, 0, 10),
-                                  in_pos,
-                                  iinormal,
-                                  metallicness,
-                                  roughness,
-                                  albedo,
-                                  skybox,
-                                  irradiance_cubemap,
-                                  LUT_image);
-        // outColor = 2 * vec4(color, 1);
-        if (bool(pc_raster.use_normal_map)) {
+        vec3 color = Get_IBLColor(
+                        vec3(pc_raster.camera_pos),
+                        vec3(0, 0, 1000),
+                        in_pos,
+                        iinormal,
+                        metallicness,
+                        roughness,
+                        albedo,
+                        skybox,
+                        irradiance_cubemap,
+                        LUT_image);
 
-            outColor = pow(vec4(color, 1), vec4(1. / 2.2));
-        } else {
-            outColor = vec4(color, 1);
+        if (bool(pc_raster.use_AO)){
+
+            color *=ambient_occlusion;
         }
+
+        outColor = pow(vec4(color, 1), vec4(1. / pc_raster.gamma));
+
     }
     gbuffer_color = outColor;
-    gbuffer_position = vec4(in_pos,1);
+    gbuffer_position = vec4(in_pos, 1);
     gbuffer_depth = vec4(in_depth);
-    debugPrintfEXT("message %f\n",gbuffer_depth );
 
-//    if(bool(pc_raster.use_r_m_map)){
-//    gbuffer_color = vec4(1,0,0,1);
-//    gbuffer_color2 = vec4(0,1,0,1);
-//
-//    }else{
-//     gbuffer_color = vec4(0,1,0,1);
-//         gbuffer_color2 = vec4(0,0,1,1);
-//
-//    }
+
+    //    if(bool(pc_raster.use_r_m_map)){
+    //    gbuffer_color = vec4(1,0,0,1);
+    //    gbuffer_color2 = vec4(0,1,0,1);
+    //
+    //    }else{
+    //     gbuffer_color = vec4(0,1,0,1);
+    //         gbuffer_color2 = vec4(0,0,1,1);
+    //
+    //    }
     // outColor = color;
 }

@@ -1,4 +1,5 @@
 #include "Wrapper/Skybox.hpp"
+#include "Helper/Model_Loader/HDRI2PNG.hpp"
 #include "Helper/Model_Loader/gltf_loader.hpp"
 #include "Tool/stb_image.h"
 #include "Wrapper/Device.hpp"
@@ -6,7 +7,6 @@
 #include "Wrapper/Texture.hpp"
 #include "vulkan/vulkan.hpp"
 #include <cmath>
-#include "Helper/Model_Loader/HDRI2PNG.hpp"
 
 #include <filesystem>
 
@@ -16,7 +16,7 @@ Skybox::Skybox(std::string hdr_path, int cubemap_size)
 {
     // Init(hdr_path);
     // return;
-    
+
     namespace fs = std::filesystem;
     auto get_filename = [&]() {
         auto file_name = fs::path(hdr_path).filename();
@@ -30,8 +30,7 @@ Skybox::Skybox(std::string hdr_path, int cubemap_size)
     if (!fs::exists(fs::path(dir_path))) {
         HDRI_Helper::HDR2Cubemap(hdr_path);
     }
-    Init(dir_path);
-
+    Init(dir_path.string());
 }
 
 void Skybox::Init(std::string face_dir)
@@ -47,7 +46,8 @@ void Skybox::Init(std::string face_dir)
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
         auto m_app = Context::Get_Singleton()->Get_app();
         AAsset* file = AAssetManager_open(m_app->activity->assetManager,
-                                          ((std::string)name.data()).c_str(), AASSET_MODE_BUFFER);
+                                          ((std::string)name.data()).c_str(),
+                                          AASSET_MODE_BUFFER);
 
         size_t fileLength = AAsset_getLength(file);
 

@@ -9,11 +9,9 @@
 // #endif
 // #include "stb_image.h"
 #include "stb_image_write.h"
-// #include 
-
+// #include
 
 namespace MCRT {
-
 
 std::vector<stbi_uc> HDRI_Helper::copyPixelBilinear(std::vector<stbi_uc> source_data, int source_width, int source_height, FACE face)
 {
@@ -37,13 +35,13 @@ std::vector<stbi_uc> HDRI_Helper::copyPixelBilinear(std::vector<stbi_uc> source_
             auto lon = glm::mod(glm::atan(cube.y, cube.x) + 3.1415f, 2 * PI);
             auto lat = glm::acos(cube.z / r);
 
-            //start copy
+            // start copy
             auto xFrom = source_width * lon / PI / 2 - .5;
             auto yFrom = source_height * lat / PI - .5;
 
             auto dst_index = channels * (y * max_width + x);
-            //set alpha
-            // dst_data[dst_index + 3] = 255;
+            // set alpha
+            //  dst_data[dst_index + 3] = 255;
             auto xl = glm::clamp(glm::floor(xFrom), 0., double(source_width - 1));
             auto xr = glm::clamp(glm::ceil(xFrom), 0., double(source_width - 1));
             auto xf = xFrom - xl;
@@ -63,7 +61,6 @@ std::vector<stbi_uc> HDRI_Helper::copyPixelBilinear(std::vector<stbi_uc> source_
         }
     }
     return dst_data;
-
 }
 
 void HDRI_Helper::HDR2Cubemap(std::string path, int cubemap_size)
@@ -84,15 +81,13 @@ void HDRI_Helper::HDR2Cubemap(std::string path, int cubemap_size)
         auto temp = copyPixelBilinear(data, width, height, static_cast<FACE>(face));
         auto out_file_name = dir_path / (get_face_name((FACE)face) + ".png");
         stbi_write_png(
-            out_file_name.c_str(),
+            out_file_name.string().c_str(),
             cubemap_size,
             cubemap_size,
             STBI_rgb,
             temp.data(),
-            cubemap_size * STBI_rgb
-            );
+            cubemap_size * STBI_rgb);
     }
-
 }
 
 };

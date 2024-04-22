@@ -33,6 +33,9 @@ void App::run()
                           ImGui::SliderFloat("light_pos_z", &raster_context_pbr::light_pos_z, 0.f, 20.0f);
                           ImGui::Checkbox("use_normal_map", &raster_context_pbr::use_normal_map);
                           ImGui::Checkbox("rm", &raster_context_pbr::use_r_rm_map);
+                          ImGui::Checkbox("AO", &raster_context_pbr::use_ao);
+
+                          ImGui::SliderFloat("gamma", &raster_context_pbr::gamma, 1.0f, 4.4f);
                       });
         context->EndFrame();
     }

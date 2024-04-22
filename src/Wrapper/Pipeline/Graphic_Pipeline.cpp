@@ -183,8 +183,10 @@ void Graphic_Pipeline::Add_Shader_Modules(vk::ShaderModule
 void Graphic_Pipeline::Make_Resterization(vk::CullModeFlags cull_mode)
 {
     rasterization_info.setCullMode(cull_mode)
-        .setFrontFace(vk::FrontFace::eClockwise)
-        .setLineWidth(1)
+        .setFrontFace(vk::FrontFace::eCounterClockwise)
+    // .setFrontFace(vk::FrontFace::eClockwise)
+
+    .setLineWidth(1)
         .setPolygonMode(vk::PolygonMode::eFill)
         .setRasterizerDiscardEnable(false);
 }

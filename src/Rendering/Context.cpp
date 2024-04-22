@@ -22,7 +22,7 @@
 #include "Wrapper/Sampler.hpp"
 #include "Wrapper/SwapChain.hpp"
 #include "Wrapper/Window_Surface.hpp"
-#include "vulkan/vulkan_to_string.hpp"
+// #include "vulkan/vulkan_to_string.hpp"
 
 namespace MCRT {
 

@@ -42,12 +42,12 @@ namespace MCRT {
 
     void cloud_context::prepare(std::shared_ptr<Window> window) {
         ray_tracing_context::prepare(window);
-        m_skybox.reset(new Skybox("/home/mocheng/project/MCRT/assets/Cubemap/snowy_cemetery_8k.hdr"));
+        m_skybox.reset(new Skybox("/home/mocheng/project/MCRT/assets/Cubemap/moonless_golf_8k.hdr"));
         skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
         // GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/cardbox.gltf");
 
         // GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/elephant.gltf");
-        GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/cat.gltf");
+        GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/delete.glb");
         // GLTF_Loader::load_model("/home/mocheng/Desktop/untitled.gltf");
 
         // IBLManager::Get_Singleton()->Init(m_skybox);

@@ -91,7 +91,7 @@ Instance::Instance()
         .setMessageSeverity(
             severity_bit::eError | severity_bit::eWarning | severity_bit::eInfo)
         .setMessageType(message_bit::eGeneral | message_bit::ePerformance |
-                        message_bit::eValidation | message_bit::eDeviceAddressBinding)
+                        message_bit::eValidation)
         .setPfnUserCallback(&debugCallBack);
 
     // m_handle.createDebugUtilsMessengerEXT()

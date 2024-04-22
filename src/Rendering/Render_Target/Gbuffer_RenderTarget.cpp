@@ -6,7 +6,8 @@ namespace MCRT {
 MCRT::GBuffer_RenderTarget::GBuffer_RenderTarget(std::shared_ptr<Image> image, vk::AttachmentDescription des)
     : RenderTarget(image, RenderTarget::COLOR, des)
 {
-    clear_color.setColor({ 0.0f, 0.0f, 0.0f, 0.0f });
+    // clear_color.setColor(cur_clear_color);
+    clear_color.color.setFloat32({ 0.0f, 0.0f, 0.0f, 0.0f });
 }
 std::shared_ptr<GBuffer_RenderTarget> MCRT::GBuffer_RenderTarget::Create(vk::ImageUsageFlags usage, vk::Format format)
 {

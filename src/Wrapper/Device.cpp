@@ -41,6 +41,7 @@ Device::Device()
     assert(physical_device);
     QueryQueueFamilyIndices();
 
+    std::vector<vk::DeviceQueueCreateInfo> queue_create_infos;
     vk::DeviceQueueCreateInfo queue_create_info;
 
     float priorities = 1.0f;
@@ -50,8 +51,9 @@ Device::Device()
     }
 
     queue_create_info.setPQueuePriorities(&priorities)
-                     .setQueueCount(1)
-                     .setQueueFamilyIndex(queue_family_indices.graphic_queue.value());
+        .setQueueCount(1)
+        .setQueueFamilyIndex(queue_family_indices.graphic_queue.value());
+    queue_create_infos.push_back(queue_create_info);
 
     get_feature();
     vk::DeviceCreateInfo new_create_info;
@@ -83,13 +85,13 @@ Device::Device()
         .setPEnabledExtensionNames(device_extension);
 #else
     {
-        //get deviceuuid
+        // get deviceuuid
         vk::PhysicalDeviceIDPropertiesKHR deviceID;
         vk::PhysicalDeviceProperties2 properties2;
         properties2.pNext = &deviceID;
 
         physical_device.getProperties2(&properties2);
-        memcpy(m_deviceUUID, deviceID.deviceUUID,VK_UUID_SIZE);
+        memcpy(m_deviceUUID, deviceID.deviceUUID, VK_UUID_SIZE);
     }
 
     auto feature = physical_device.getFeatures2<vk::PhysicalDeviceFeatures2,
@@ -99,12 +101,11 @@ Device::Device()
                                                 vk::PhysicalDeviceRayTracingPipelineFeaturesKHR,
                                                 vk::PhysicalDeviceAccelerationStructureFeaturesKHR,
                                                 vk::PhysicalDeviceRayQueryFeaturesKHR,
-                                                vk::PhysicalDeviceShaderClockFeaturesKHR,
-                                                vk::PhysicalDeviceFaultFeaturesEXT>();
+                                                vk::PhysicalDeviceShaderClockFeaturesKHR>();
 
     new_create_info
         .setPNext(&feature.get())
-        .setQueueCreateInfos(queue_create_info)
+        .setQueueCreateInfos(queue_create_infos)
         .setPEnabledExtensionNames(rt_device_extension);
 
     //                    uint32_t major = VK_VERSION_MAJOR(api_v);
@@ -119,6 +120,7 @@ Device::Device()
     std::cout << "success create device" << std::endl;
     graphic_queue = m_handle.getQueue(queue_family_indices.graphic_queue.value(), 0);
     present_queue = m_handle.getQueue(queue_family_indices.present_queue.value(), 0);
+    compute_queue = m_handle.getQueue(queue_family_indices.compute_queue.value(), 0);
 }
 
 void Device::get_feature()
@@ -155,6 +157,9 @@ void Device::QueryQueueFamilyIndices()
                                                  surface->get_handle())) {
             queue_family_indices.present_queue = i;
         }
+        if (property.queueFlags | vk::QueueFlagBits::eCompute) {
+            queue_family_indices.compute_queue = i;
+        }
         if (queue_family_indices.Complete()) {
             break;
         }
@@ -168,7 +173,7 @@ vk::SampleCountFlagBits Device::Get_sampler_count()
     auto count = std::min(res.limits.framebufferColorSampleCounts,
                           res.limits.framebufferDepthSampleCounts);
 
-    for (auto i{ VkSampleCountFlags(vk::SampleCountFlagBits::e64) };
+    for (auto i { VkSampleCountFlags(vk::SampleCountFlagBits::e64) };
          i != VkSampleCountFlags(vk::SampleCountFlagBits::e1);
          i >>= 1) {
         auto cur = vk::SampleCountFlagBits(i);

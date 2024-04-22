@@ -10,6 +10,10 @@ public:
     static std::vector<vk::AttachmentReference> attach_references;
 
 private:
+    // vk::ClearColorValue cur_clear_color
+    // {
+    //     0.1f, 0.1f, 0.1f, 1.0f
+    // };
 };
 
 }

@@ -19,15 +19,15 @@ public:
     ~raster_context_pbr();
     std::shared_ptr<CommandBuffer> Begin_Frame() override;
     void EndFrame() override;
-    std::shared_ptr<RT_Context> get_rt_context() override
+    std::shared_ptr<RaytracingPass> get_rt_context() override
     {
         auto base = PASS[Pass_index::Ray_tracing];
-        if (auto context = std::dynamic_pointer_cast<RT_Context>(base); context != nullptr) {
+        if (auto context = std::dynamic_pointer_cast<RaytracingPass>(base); context != nullptr) {
             return context;
         }
         throw std::runtime_error("it is not Ray_Tracing context");
     }
-    std::shared_ptr<Compute_Context> get_compute_context() override
+    std::shared_ptr<ComputePass> get_compute_context() override
     {
         // auto base = PASS[Pass_index::Compute];
         // if (auto context = std::reinterpret_pointer_cast<Compute_Context>(base); context != nullptr) {
@@ -36,10 +36,10 @@ public:
         throw std::runtime_error("it is not compute context");
     }
 
-    std::shared_ptr<RenderContext> get_graphic_context() override
+    std::shared_ptr<GraphicPass> get_graphic_context() override
     {
         auto base = PASS[Pass_index::Graphic];
-        if (auto context = std::dynamic_pointer_cast<RenderContext>(base); context != nullptr) {
+        if (auto context = std::dynamic_pointer_cast<GraphicPass>(base); context != nullptr) {
             return context;
         }
         throw std::runtime_error("it is not Ray_Tracing context");

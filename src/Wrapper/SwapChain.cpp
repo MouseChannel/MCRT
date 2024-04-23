@@ -25,7 +25,7 @@ SwapChain::SwapChain()
         ? vk::SharingMode::eExclusive
         : vk::SharingMode::eConcurrent;
 
-    std::set<uint32_t> queue_family_index{ graphic_queue_index, present_queue_index };
+    std::set<uint32_t> queue_family_index { graphic_queue_index, present_queue_index };
 
     std::vector<uint32_t> queue_family_index_v;
     queue_family_index_v.assign(queue_family_index.begin(), queue_family_index.end());
@@ -33,14 +33,16 @@ SwapChain::SwapChain()
 
     createInfo.setClipped(true)
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
-                .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eInherit)
+        .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eInherit)
+        .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
 #else
         .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
+        .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eStorage)
 #endif
         .setImageExtent(surfaceInfo.extent)
         .setImageColorSpace(surfaceInfo.format.colorSpace)
         .setImageFormat(surfaceInfo.format.format)
-        .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment|vk::ImageUsageFlagBits::eStorage)
+
         .setMinImageCount(surfaceInfo.count)
         .setImageArrayLayers(1)
         .setPresentMode(vk::PresentModeKHR::eFifo)
@@ -51,9 +53,9 @@ SwapChain::SwapChain()
         .setOldSwapchain(old_swapchian);
 
     m_handle = Get_Context_Singleton()
-               ->get_device()
-               ->get_handle()
-               .createSwapchainKHR(createInfo);
+                   ->get_device()
+                   ->get_handle()
+                   .createSwapchainKHR(createInfo);
     old_swapchian = m_handle;
 }
 
@@ -71,9 +73,9 @@ void SwapChain::Query_info()
     surfaceInfo.format = Query_surface_Format();
     auto surface = Get_Context_Singleton()->get_surface();
     auto capability = Get_Context_Singleton()
-                      ->get_device()
-                      ->Get_Physical_device()
-                      .getSurfaceCapabilitiesKHR(surface->get_handle());
+                          ->get_device()
+                          ->Get_Physical_device()
+                          .getSurfaceCapabilitiesKHR(surface->get_handle());
 
     surfaceInfo.count =
 
@@ -86,7 +88,7 @@ void SwapChain::Query_info()
     surfaceInfo.transform = capability.currentTransform;
     int width = 0, height = 0;
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
-        surfaceInfo.extent = capability.currentExtent;
+    surfaceInfo.extent = capability.currentExtent;
 #else
 
     glfwGetFramebufferSize(
@@ -107,8 +109,8 @@ SwapChain::Query_surface_Extent(const vk::SurfaceCapabilitiesKHR& capability,
     if (capability.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         return capability.currentExtent;
     } else {
-        auto extent = vk::Extent2D{ static_cast<uint32_t>(windowWidth),
-                                    static_cast<uint32_t>(windowHeight) };
+        auto extent = vk::Extent2D { static_cast<uint32_t>(windowWidth),
+                                     static_cast<uint32_t>(windowHeight) };
 
         extent.width = std::clamp(extent.width,
                                   capability.minImageExtent.width,

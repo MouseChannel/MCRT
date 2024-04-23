@@ -9,7 +9,7 @@ using mat4 = glm::mat4;
 #define BEGIN_ENUM(a) const uint
 #define END_ENUM()
 #endif
-//#include "example/base/shaders/raster/Data_struct.h"
+#include "base/Data_struct.h"
 
 BEGIN_ENUM(Graphic_Set)
 e_graphic = 0,
@@ -28,5 +28,5 @@ e_camera_matrix = 0,
 
     END_ENUM();
 
-const int e_skybox_uv = 4;
+const int e_skybox_uv = 5;
 // const int e_out_uv = 5;

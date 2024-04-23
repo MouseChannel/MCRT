@@ -4,7 +4,7 @@
 #include "Wrapper/Command_Pool.hpp"
 #include "Wrapper/Device.hpp"
 
-#include <ranges>
+//#include <ranges>
 // #define VK_USE_CUDA
 
 namespace MCRT {

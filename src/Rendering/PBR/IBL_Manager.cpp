@@ -89,11 +89,23 @@ void IBLManager::Init(std::shared_ptr<Skybox> skybox)
 
 void IBLManager::pre_compute_LUT()
 {
+
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    std::shared_ptr<ShaderModule>
+            compute_shader {
+            new ShaderModule("shaders/IBL/lookup_table.comp.spv")
+    };
+#else
     std::shared_ptr<ShaderModule>
         compute_shader {
             new ShaderModule("/home/mocheng/project/MCRT/shaders/PBR/IBL/lookup_table.comp.spv")
         };
 
+#endif
+    
+    
+    
+    
     context->prepare_pipeline({ compute_shader },
                               { context->get_descriptor_manager()
                                     ->get_DescriptorSet(DescriptorManager::Compute) },
@@ -118,12 +130,17 @@ void IBLManager::pre_compute_LUT()
 
 void IBLManager::pre_compute_irradiance()
 {
-
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    std::shared_ptr<ShaderModule>
+            compute_shader {
+            new ShaderModule("shaders/IBL/irradiance.comp.spv")
+    };
+#else    
     std::shared_ptr<ShaderModule>
         compute_shader {
             new ShaderModule("/home/mocheng/project/MCRT/shaders/PBR/IBL/irradiance.comp.spv")
         };
-
+#endif
     context->prepare_pipeline({ compute_shader },
                               { context->get_descriptor_manager()
                                     ->get_DescriptorSet(DescriptorManager::Compute) },

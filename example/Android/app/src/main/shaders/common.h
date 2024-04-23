@@ -22,6 +22,11 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
+vec3 F_SchlickR(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
 //[Walter 2007]
 float D_GGX(float NoH, float roughness)
 {
@@ -125,17 +130,23 @@ vec3 Get_IBLColor(vec3 camera_pos,
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallicness);
-    vec3 F = fresnelSchlick(max(dot(V, H), 0.0), F0);
+    // vec3 F = fresnelSchlick(max(dot(V, H), 0.0), F0);
+    vec3 F = F_SchlickR(max(dot(fragment_world_nrm, V), 0.0), F0, roughness);
     vec3 KS = F;
     vec3 KD = vec3(1.0) - KS;
 
     vec3 irradiance = texture(irradiance_cubemap, fragment_world_nrm).rgb;
     vec3 diffuse = albedo * irradiance;
+ 
 
     vec3 dir = reflect(-V, fragment_world_nrm);
     vec3 prefilteredColor = textureLod(skybox, dir, roughness * 10).rgb;
+   
     // prefilteredColor = texture(skybox, dir).rgb;
     vec3 brdf = texture(LUT_image, vec2(max(dot(fragment_world_nrm, V), 0.0), roughness)).rgb;
+     
     vec3 specular = prefilteredColor * (F0 * brdf.r + brdf.g);
-    return KD * diffuse + specular;
+return  diffuse + specular *0.1; 
+    return KD * diffuse + specular ; 
+return specular;
 }

@@ -19,7 +19,7 @@
 #include "iostream"
 
 #include "shaders/PBR/IBL/binding.h"
-
+#include "Rendering/PBR/IBL_Manager.hpp"
 #include "example/raster/shader/Binding.h"
 #include "shaders/PBR/IBL/push_constants.h"
 
@@ -43,33 +43,34 @@ namespace MCRT {
         sky_box.reset(new Skybox("Cubemap/farm"));
         skybox_mesh = GLTF_Loader::load_skybox("cube.gltf");
 
-        GLTF_Loader::load_model("box.gltf");
+        GLTF_Loader::load_model("cat.gltf");
 //        GLTF_Loader::load_model("box.gltf");
 
-        LUT.reset(new Image(1024,
-                            1024,
-                            vk::Format::eR32G32B32A32Sfloat,
-                            vk::ImageType::e2D,
-                            vk::ImageTiling::eOptimal,
-                            vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled,
-                            vk::ImageAspectFlagBits::eColor,
-                            vk::SampleCountFlagBits::e1));
-        LUT->SetImageLayout(vk::ImageLayout::eGeneral,
-                            vk::AccessFlagBits::eNone,
-                            vk::AccessFlagBits::eNone,
-                            vk::PipelineStageFlagBits::eTopOfPipe,
-                            vk::PipelineStageFlagBits::eBottomOfPipe);
-        irradiance.reset(new Skybox(irradiance_size, irradiance_size));
+//        LUT.reset(new Image(1024,
+//                            1024,
+//                            vk::Format::eR32G32B32A32Sfloat,
+//                            vk::ImageType::e2D,
+//                            vk::ImageTiling::eOptimal,
+//                            vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled,
+//                            vk::ImageAspectFlagBits::eColor,
+//                            vk::SampleCountFlagBits::e1));
+//        LUT->SetImageLayout(vk::ImageLayout::eGeneral,
+//                            vk::AccessFlagBits::eNone,
+//                            vk::AccessFlagBits::eNone,
+//                            vk::PipelineStageFlagBits::eTopOfPipe,
+//                            vk::PipelineStageFlagBits::eBottomOfPipe);
+//        irradiance.reset(new Skybox(irradiance_size, irradiance_size));
+        IBLManager::Get_Singleton()->Init(sky_box);
 
         PASS.resize(2);
 
         {
-            PASS[Pass_index::Graphic] = std::shared_ptr<RenderContext>{
-                    new RenderContext(m_device)};
+            PASS[Pass_index::Graphic] = std::shared_ptr<GraphicPass>{
+                    new GraphicPass(m_device)};
             Context::Get_Singleton()
                     ->get_graphic_context()
                     ->set_constants_size(sizeof(PC_Raster));
-            auto graphic_context = std::dynamic_pointer_cast<RenderContext>(PASS[Graphic]);
+            auto graphic_context = std::dynamic_pointer_cast<GraphicPass>(PASS[Graphic]);
             if (graphic_context == nullptr) {
                 throw std::runtime_error("not graphic context");
             }
@@ -85,180 +86,184 @@ namespace MCRT {
                     new ShaderModule("shaders/skybox.frag.spv"));
             graphic_context->prepare();
             graphic_context->prepare_descriptorset([&]() {
-                Descriptor_Manager::Get_Singleton()
-                        ->Make_DescriptorSet(
-                                camera_matrix,
-                                (int) Graphic_Binding::e_camera_matrix,
-                                Descriptor_Manager::Graphic);
+                auto descriptor_manager = graphic_context->get_descriptor_manager();
+                descriptor_manager->Make_DescriptorSet(
+                        camera_matrix,
+                        (int)Graphic_Binding::e_camera_matrix,
+                        DescriptorManager::Graphic);
 
-                Descriptor_Manager::Get_Singleton()
+                descriptor_manager
                         ->Make_DescriptorSet(
                                 sky_box->get_handle(),
-                                Descriptor_Manager::Graphic,
-                                (int) Graphic_Binding::e_skybox,
+                                DescriptorManager::Graphic,
+                                (int)Graphic_Binding::e_skybox,
                                 vk::DescriptorType::eCombinedImageSampler,
                                 vk::ShaderStageFlagBits::eFragment);
-// textures
-//            Descriptor_Manager::Get_Singleton()
-//                ->Make_DescriptorSet(
-//                    Texture::get_image_handles(),
-//                    Descriptor_Manager::Graphic,
-//                    (int)Graphic_Binding::e_textures,
-//                    vk::DescriptorType ::eCombinedImageSampler,
-//                    vk::ShaderStageFlagBits::eFragment);
+
+//                descriptor_manager
+//                        ->Make_DescriptorSet(
+//                                Texture::get_image_handles(),
+//                                DescriptorManager::Graphic,
+//                                (int)Graphic_Binding::e_textures,
+//                                vk::DescriptorType::eCombinedImageSampler,
+//                                vk::ShaderStageFlagBits::eFragment);
+
+
+//
+
                 if (Mesh::meshs[0]->m_material.color_texture_index >= 0) {
 
-                    Descriptor_Manager::Get_Singleton()
+                    descriptor_manager
                             ->Make_DescriptorSet(
                                     Texture::get_image_handles()[Mesh::meshs[0]->m_material.color_texture_index],
-                                    Descriptor_Manager::Graphic,
-                                    (int) Graphic_Binding::e_albedo_image,
+                                    DescriptorManager::Graphic,
+                                    (int)Graphic_Binding::e_albedo_image,
                                     vk::DescriptorType::eCombinedImageSampler,
                                     vk::ShaderStageFlagBits::eFragment);
                 }
                 if (Mesh::meshs[0]->m_material.normal_texture_index >= 0) {
-                    Descriptor_Manager::Get_Singleton()
+                    descriptor_manager
                             ->Make_DescriptorSet(
                                     Texture::get_image_handles()[Mesh::meshs[0]->m_material.normal_texture_index],
-                                    Descriptor_Manager::Graphic,
-                                    (int) Graphic_Binding::e_normal_image,
+                                    DescriptorManager::Graphic,
+                                    (int)Graphic_Binding::e_normal_image,
                                     vk::DescriptorType::eCombinedImageSampler,
                                     vk::ShaderStageFlagBits::eFragment);
                 }
                 if (Mesh::meshs[0]->m_material.metallicness_roughness_texture_index >= 0) {
-                    Descriptor_Manager::Get_Singleton()
+                    descriptor_manager
                             ->Make_DescriptorSet(
                                     Texture::get_image_handles()[Mesh::meshs[0]->m_material.metallicness_roughness_texture_index],
-                                    Descriptor_Manager::Graphic,
-                                    (int) Graphic_Binding::e_m_r_image,
+                                    DescriptorManager::Graphic,
+                                    (int)Graphic_Binding::e_m_r_image,
                                     vk::DescriptorType::eCombinedImageSampler,
                                     vk::ShaderStageFlagBits::eFragment);
-                }
-                //--
-                Descriptor_Manager::Get_Singleton()
+                } 
+//
+                descriptor_manager
                         ->Make_DescriptorSet(
-                                std::vector{LUT},
-                                Descriptor_Manager::Graphic,
-                                (int) Graphic_Binding::e_LUT_image,
+                                std::vector { IBLManager::Get_Singleton()->get_LUT() },
+                                DescriptorManager::Graphic,
+                                (int)Graphic_Binding::e_LUT_image,
                                 vk::DescriptorType::eCombinedImageSampler,
                                 vk::ShaderStageFlagBits::eFragment);
-                Descriptor_Manager::Get_Singleton()
+
+                descriptor_manager
                         ->Make_DescriptorSet(
-                                std::vector{irradiance->get_handle()},
-                                Descriptor_Manager::Graphic,
-                                (int) Graphic_Binding::e_irradiance_image,
+                                std::vector { IBLManager::Get_Singleton()->get_irradiance()->get_handle() },
+                                DescriptorManager::Graphic,
+                                (int)Graphic_Binding::e_irradiance_image,
                                 vk::DescriptorType::eCombinedImageSampler,
                                 vk::ShaderStageFlagBits::eFragment);
             });
-            graphic_context->prepare_pipeline(graphic_shader_modules,
-                                              {Descriptor_Manager::Get_Singleton()->get_DescriptorSet(
-                                                      Descriptor_Manager::Graphic)},
-                                              sizeof(PC_Raster));
+            graphic_context->prepare_pipeline(graphic_shader_modules, { graphic_context->get_descriptor_manager()->get_DescriptorSet(DescriptorManager::Graphic) }, sizeof(PC_Raster));
+                                            
 
             graphic_context->post_prepare();
         }
+            IBLManager::Get_Singleton()->pre_compute_irradiance();
+            IBLManager::Get_Singleton()->pre_compute_LUT();
 
-        { // compute_precompute
-
-            PASS[Compute].reset(new Compute_Context);
-            PASS[Compute]->set_constants_size(sizeof(PushContant_IBL));
-
-            PASS[Compute]->prepare();
-            PASS[Compute]->prepare_descriptorset([&]() {
-                Descriptor_Manager::Get_Singleton()
-                        ->Make_DescriptorSet(
-                                std::vector{irradiance->get_handle()},
-                                Descriptor_Manager::Compute,
-                                IBL_Binding::e_irradiance_image,
-                                vk::DescriptorType::eStorageImage,
-                                vk::ShaderStageFlagBits::eCompute);
-                Descriptor_Manager::Get_Singleton()
-                        ->Make_DescriptorSet(
-                                std::vector{LUT},
-                                Descriptor_Manager::Compute,
-                                IBL_Binding::e_LUT_image,
-                                vk::DescriptorType::eStorageImage,
-                                vk::ShaderStageFlagBits::eCompute);
-                Descriptor_Manager::Get_Singleton()
-                        ->Make_DescriptorSet(
-                                std::vector{sky_box->get_handle()},
-                                Descriptor_Manager::Compute,
-                                IBL_Binding::e_skybox,
-                                vk::DescriptorType::eCombinedImageSampler,
-                                vk::ShaderStageFlagBits::eCompute);
-            });
-
-            { // pre_compute_irradiance
-                std::shared_ptr<ShaderModule>
-                        compute_shader{
-                        new ShaderModule("shaders/irradiance.comp.spv")
-                };
-
-                {
-//                    VkValidationFeaturesEXT validationFeatures = {};
-//                    validationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
-//                    validationFeatures.enabledValidationFeatureCount = 1;
-//                    std::vector<VkValidationFeatureDisableEXT> disables { VK_VALIDATION_FEATURE_DISABLE_SHADERS_EXT };
-//                    VkValidationFeatureDisableEXT dis {VK_VALIDATION_FEATURE_DISABLE_SHADERS_EXT};
-//                    validationFeatures.pDisabledValidationFeatures = disables.data();
-//                    cmd.
-//                    vkCmdSetValidationFeaturesEXT(commandBuffer, 1, &validationFeatures); // 添加
-                }
-
-                PASS[Compute]->prepare_pipeline({compute_shader},
-                                                    {Descriptor_Manager::Get_Singleton()->get_DescriptorSet(
-                                                            Descriptor_Manager::Compute)},
-                                                    sizeof(PushContant_Compute));
-
-                PASS[Compute]->post_prepare();
-                // doing the actually work
-                auto &compute_context = PASS[Compute];
-                // std::shared_ptr<CommandBuffer> cmd = compute_context->BeginFrame();
-                CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(),
-                                           [&](vk::CommandBuffer &cmd) {
-                                               cmd.bindDescriptorSets(
-                                                       vk::PipelineBindPoint::eCompute,
-                                                       compute_context->get_pipeline()->get_layout(),
-                                                       0,
-                                                       compute_context->get_pipeline()->get_descriptor_sets(),
-                                                       {});
-                                               cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
-                                                                compute_context->get_pipeline()->get_handle());
-
-                                               cmd.dispatch(irradiance_size, irradiance_size, 6);
-                                           });
-            }
-            { // pre_compute_lut
-
-                std::shared_ptr<ShaderModule>
-                        compute_shader{
-                        new ShaderModule("shaders/lookup_table.comp.spv")
-                };
-
-                PASS[Compute]->prepare_pipeline({compute_shader},
-                                                    {Descriptor_Manager::Get_Singleton()->get_DescriptorSet(
-                                                            Descriptor_Manager::Compute)},
-                                                    sizeof(PushContant_Compute));
-
-                PASS[Compute]->post_prepare();
-                // doing the actually work
-                auto &compute_context = PASS[Compute];
-
-                CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(),
-                                           [&](vk::CommandBuffer &cmd) {
-                                               cmd.bindDescriptorSets(
-                                                       vk::PipelineBindPoint::eCompute,
-                                                       compute_context->get_pipeline()->get_layout(),
-                                                       0,
-                                                       compute_context->get_pipeline()->get_descriptor_sets(),
-                                                       {});
-                                               cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
-                                                                compute_context->get_pipeline()->get_handle());
-
-                                               cmd.dispatch(1024, 1024, 1);
-                                           });
-            }
-        }
+//        { // compute_precompute
+//            PASS[Compute].reset(new Compute_Context);
+//            PASS[Compute]->set_constants_size(sizeof(PushContant_IBL));
+//
+//            PASS[Compute]->prepare();
+//            PASS[Compute]->prepare_descriptorset([&]() {
+//                Descriptor_Manager::Get_Singleton()
+//                        ->Make_DescriptorSet(
+//                                std::vector{irradiance->get_handle()},
+//                                Descriptor_Manager::Compute,
+//                                IBL_Binding::e_irradiance_image,
+//                                vk::DescriptorType::eStorageImage,
+//                                vk::ShaderStageFlagBits::eCompute);
+//                Descriptor_Manager::Get_Singleton()
+//                        ->Make_DescriptorSet(
+//                                std::vector{LUT},
+//                                Descriptor_Manager::Compute,
+//                                IBL_Binding::e_LUT_image,
+//                                vk::DescriptorType::eStorageImage,
+//                                vk::ShaderStageFlagBits::eCompute);
+//                Descriptor_Manager::Get_Singleton()
+//                        ->Make_DescriptorSet(
+//                                std::vector{sky_box->get_handle()},
+//                                Descriptor_Manager::Compute,
+//                                IBL_Binding::e_skybox,
+//                                vk::DescriptorType::eCombinedImageSampler,
+//                                vk::ShaderStageFlagBits::eCompute);
+//            });
+//
+//            { // pre_compute_irradiance
+//                std::shared_ptr<ShaderModule>
+//                        compute_shader{
+//                        new ShaderModule("shaders/irradiance.comp.spv")
+//                };
+//
+//                {
+////                    VkValidationFeaturesEXT validationFeatures = {};
+////                    validationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+////                    validationFeatures.enabledValidationFeatureCount = 1;
+////                    std::vector<VkValidationFeatureDisableEXT> disables { VK_VALIDATION_FEATURE_DISABLE_SHADERS_EXT };
+////                    VkValidationFeatureDisableEXT dis {VK_VALIDATION_FEATURE_DISABLE_SHADERS_EXT};
+////                    validationFeatures.pDisabledValidationFeatures = disables.data();
+////                    cmd.
+////                    vkCmdSetValidationFeaturesEXT(commandBuffer, 1, &validationFeatures); // 添加
+//                }
+//
+//                PASS[Compute]->prepare_pipeline({compute_shader},
+//                                                    {Descriptor_Manager::Get_Singleton()->get_DescriptorSet(
+//                                                            Descriptor_Manager::Compute)},
+//                                                    sizeof(PushContant_Compute));
+//
+//                PASS[Compute]->post_prepare();
+//                // doing the actually work
+//                auto &compute_context = PASS[Compute];
+//                // std::shared_ptr<CommandBuffer> cmd = compute_context->BeginFrame();
+//                CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(),
+//                                           [&](vk::CommandBuffer &cmd) {
+//                                               cmd.bindDescriptorSets(
+//                                                       vk::PipelineBindPoint::eCompute,
+//                                                       compute_context->get_pipeline()->get_layout(),
+//                                                       0,
+//                                                       compute_context->get_pipeline()->get_descriptor_sets(),
+//                                                       {});
+//                                               cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
+//                                                                compute_context->get_pipeline()->get_handle());
+//
+//                                               cmd.dispatch(irradiance_size, irradiance_size, 6);
+//                                           });
+//            }
+//            { // pre_compute_lut
+//
+//                std::shared_ptr<ShaderModule>
+//                        compute_shader{
+//                        new ShaderModule("shaders/lookup_table.comp.spv")
+//                };
+//
+//                PASS[Compute]->prepare_pipeline({compute_shader},
+//                                                    {Descriptor_Manager::Get_Singleton()->get_DescriptorSet(
+//                                                            Descriptor_Manager::Compute)},
+//                                                    sizeof(PushContant_Compute));
+//
+//                PASS[Compute]->post_prepare();
+//                // doing the actually work
+//                auto &compute_context = PASS[Compute];
+//
+//                CommandManager::ExecuteCmd(m_device->Get_Graphic_queue(),
+//                                           [&](vk::CommandBuffer &cmd) {
+//                                               cmd.bindDescriptorSets(
+//                                                       vk::PipelineBindPoint::eCompute,
+//                                                       compute_context->get_pipeline()->get_layout(),
+//                                                       0,
+//                                                       compute_context->get_pipeline()->get_descriptor_sets(),
+//                                                       {});
+//                                               cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
+//                                                                compute_context->get_pipeline()->get_handle());
+//
+//                                               cmd.dispatch(1024, 1024, 1);
+//                                           });
+//            }
+//        }
     }
 
     std::shared_ptr<CommandBuffer> raster_context_pbr::Begin_Frame() {
@@ -291,7 +296,7 @@ namespace MCRT {
 
     std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame() {
         // get_device()->get_handle().waitIdle();
-        auto render_context = std::dynamic_pointer_cast<RenderContext>(PASS[Graphic]);
+        auto render_context = std::dynamic_pointer_cast<GraphicPass>(PASS[Graphic]);
 
         std::shared_ptr<CommandBuffer> cmd = render_context->BeginFrame();
         {
@@ -353,9 +358,11 @@ namespace MCRT {
                     ->get_camera()
                     ->Get_v_matrix();
             res[3] = {0, 0, 0, 1};
-            SkyboxPass(cmd, [&](std::shared_ptr<CommandBuffer> cmd) {
-                render_context->record_command(cmd);
-            });
+            SkyboxPass(cmd,
+                       render_context,
+                       [&](std::shared_ptr<CommandBuffer> cmd) {
+                           render_context->record_command(cmd);
+                       });
 
             {
                 cmd->get_handle()
@@ -367,10 +374,7 @@ namespace MCRT {
                     cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                                          render_context->get_pipeline()->get_layout(),
                                                          0,
-                                                         {Descriptor_Manager::Get_Singleton()
-                                                                  ->get_DescriptorSet(
-                                                                          Descriptor_Manager::Graphic)
-                                                                  ->get_handle()},
+                                                         { get_graphic_context()->get_descriptor_manager()->get_DescriptorSet(DescriptorManager::Graphic)->get_handle() },
                                                          {});
 
                     cmd->get_handle().bindIndexBuffer(mesh->get_indices_buffer()->get_handle(),

@@ -38,7 +38,7 @@ Graphic_Pipeline::Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> sh
                                             .setSize(push_constants_size)
                                             .setStageFlags(vk::ShaderStageFlagBits::eVertex |
                                                 vk::ShaderStageFlagBits::eFragment);
-    layout_create_info.setSetLayouts(m_descriptor_layouts)
+     layout_create_info.setSetLayouts(m_descriptor_layouts)
                       .setPushConstantRanges(push_range);
     
     

@@ -146,7 +146,7 @@ vec3 Get_IBLColor(vec3 camera_pos,
     vec3 brdf = texture(LUT_image, vec2(max(dot(fragment_world_nrm, V), 0.0), roughness)).rgb;
      
     vec3 specular = prefilteredColor * (F0 * brdf.r + brdf.g);
-return  diffuse + specular *0.1; 
+ 
     return KD * diffuse + specular ; 
-return specular;
+ 
 }

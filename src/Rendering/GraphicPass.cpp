@@ -76,11 +76,14 @@ void GraphicPass::fill_render_targets()
         all_rendertargets[i].emplace_back(Color_RenderTarget::Create(swapchain_image));
         all_rendertargets[i].emplace_back(Depth_RenderTarget::Create());
 
+#ifndef VK_USE_PLATFORM_ANDROID_KHR
+
         all_rendertargets[i].emplace_back(GBuffer_RenderTarget::Create(vk::ImageUsageFlagBits::eColorAttachment, vk::Format::eR32G32B32A32Sfloat));
         all_rendertargets[i].emplace_back(GBuffer_RenderTarget::Create(vk::ImageUsageFlagBits::eColorAttachment, vk::Format::eR32G32B32A32Sfloat));
         // depth
         all_rendertargets[i].emplace_back(GBuffer_RenderTarget::Create(vk::ImageUsageFlagBits::eColorAttachment, vk::Format::eR32Sfloat));
         all_rendertargets[i].emplace_back(GBuffer_RenderTarget::Create(vk::ImageUsageFlagBits::eColorAttachment, vk::Format::eR32G32B32A32Sfloat));
+#endif
     }
 }
 

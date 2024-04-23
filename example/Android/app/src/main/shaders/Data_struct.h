@@ -40,7 +40,8 @@ BEGIN_ENUM(Vertex_Binding)
 e_pos = 0,
     e_nrm = 1,
     e_color = 2,
-    e_texCoord = 3 END_ENUM();
+    e_texCoord = 3,
+    e_depth = 4 END_ENUM();
 struct Camera_data {
 
     mat4 viewInverse; // Camera inverse view matrix

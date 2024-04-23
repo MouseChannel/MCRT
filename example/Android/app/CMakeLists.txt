@@ -11,7 +11,8 @@ find_library(log-lib
 
 
 
-set(PROJECT_ROOT_PATH  /home/mocheng/project/MCRT)
+set(PROJECT_ROOT_PATH  ${PROJECT_SOURCE_DIR}/../../../ )
+#message(STATUS ${PROJECT_SOURCE_DIR}/../../)
 
 file(GLOB_RECURSE IMGUILIB ${PROJECT_ROOT_PATH}/lib/imgui/imgui.cpp
         ${PROJECT_ROOT_PATH}/lib/imgui/imgui_draw.cpp

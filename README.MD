@@ -3,6 +3,7 @@
 # 🔨Setup
 [![ Window ](https://github.com/MouseChannel/MCRT/actions/workflows/windows.yaml/badge.svg)](https://github.com/MouseChannel/MCRT/actions/workflows/windows.yaml?query=branch%3Amocheng)
 [![ Linux ](https://github.com/MouseChannel/MCRT/actions/workflows/linux.yaml/badge.svg)](https://github.com/MouseChannel/MCRT/actions/workflows/linux.yaml?query=branch%3Amocheng)
+[![ Android ](https://github.com/MouseChannel/MCRT/actions/workflows/android.yaml/badge.svg)](https://github.com/MouseChannel/MCRT/actions/workflows/android.yaml?query=branch%3Amocheng)
 
 
 has tested by MSVC,Clang,GCC

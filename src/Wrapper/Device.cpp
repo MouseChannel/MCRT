@@ -86,27 +86,27 @@ Device::Device()
 #else
     {
         // get deviceuuid
-        vk::PhysicalDeviceIDPropertiesKHR deviceID;
-        vk::PhysicalDeviceProperties2 properties2;
-        properties2.pNext = &deviceID;
-
-        physical_device.getProperties2(&properties2);
-        memcpy(m_deviceUUID, deviceID.deviceUUID, VK_UUID_SIZE);
+//        vk::PhysicalDeviceIDPropertiesKHR deviceID;
+//        vk::PhysicalDeviceProperties2 properties2;
+//        properties2.pNext = &deviceID;
+//
+//        physical_device.getProperties2(&properties2);
+//        memcpy(m_deviceUUID, deviceID.deviceUUID, VK_UUID_SIZE);
     }
 
     auto feature = physical_device.getFeatures2<vk::PhysicalDeviceFeatures2,
                                                 vk::PhysicalDeviceVulkan13Features,
                                                 vk::PhysicalDeviceVulkan12Features,
                                                 vk::PhysicalDeviceVulkan11Features,
-                                                vk::PhysicalDeviceRayTracingPipelineFeaturesKHR,
-                                                vk::PhysicalDeviceAccelerationStructureFeaturesKHR,
-                                                vk::PhysicalDeviceRayQueryFeaturesKHR,
+                                                 vk::PhysicalDeviceRayTracingPipelineFeaturesKHR,
+                                                 vk::PhysicalDeviceAccelerationStructureFeaturesKHR,
+                                                 vk::PhysicalDeviceRayQueryFeaturesKHR,
                                                 vk::PhysicalDeviceShaderClockFeaturesKHR>();
 
     new_create_info
         .setPNext(&feature.get())
         .setQueueCreateInfos(queue_create_infos)
-        .setPEnabledExtensionNames(rt_device_extension);
+        .setPEnabledExtensionNames(device_extension);
 
     //                    uint32_t major = VK_VERSION_MAJOR(api_v);
     //                    uint32_t minor = VK_VERSION_MINOR(api_v);

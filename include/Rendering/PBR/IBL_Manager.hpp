@@ -26,7 +26,7 @@ public:
     }
 
 private:
-    int irradiance_size = 1024;
+    int irradiance_size = 512;
     std::shared_ptr<Skybox> m_sky_box;
     std::shared_ptr<Image> LUT;
     std::shared_ptr<Skybox> irradiance;

@@ -116,7 +116,7 @@ void ImageWriter::WriteCubemap(std::shared_ptr<Image> cubemap)
     //     }
     // }
 
-    std::filesystem::path out_dir { "/home/mocheng/project/MCRT/assets/Cubemap/out" };
+    std::filesystem::path out_dir { "assets/Cubemap/out" };
 
     if (!std::filesystem::exists(out_dir)) {
         std::filesystem::create_directory(out_dir);

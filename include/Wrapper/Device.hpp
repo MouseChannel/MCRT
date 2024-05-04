@@ -16,6 +16,7 @@ public:
         "VK_KHR_swapchain",
 //                "VK_EXT_scalar_block_layout"
         //"VK_KHR_maintenance4"
+        "VK_KHR_shader_non_semantic_info",
 
     };
     const std::vector<const char*> rt_device_extension {

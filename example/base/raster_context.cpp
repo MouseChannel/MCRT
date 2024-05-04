@@ -22,7 +22,7 @@ void raster_context::prepare(std::shared_ptr<Window> window)
         .project = m_camera->Get_p_matrix()
     };
     camera_matrix = UniformManager::make_uniform({ _camera_data },
-                                                 vk::ShaderStageFlagBits::eVertex,
+                                                 vk::ShaderStageFlagBits::eVertex|vk::ShaderStageFlagBits::eFragment,
                                                  vk::DescriptorType ::eUniformBuffer);
 }
 std::shared_ptr<CommandBuffer> raster_context::Begin_Frame()
@@ -73,9 +73,9 @@ void raster_context::SkyboxPass(std::shared_ptr<CommandBuffer> cmd, std::shared_
             0,
             PC_Raster {
 
-                .view_matrix { Context::Get_Singleton()
-                                   ->get_camera()
-                                   ->Get_v_matrix() },
+//                .view_matrix { Context::Get_Singleton()
+//                                   ->get_camera()
+//                                   ->Get_v_matrix() },
                 .color_texture_index = get_skybox_mesh()->m_material.color_texture_index,
                 .light_pos { 0, 0, 5, 1 },
             });

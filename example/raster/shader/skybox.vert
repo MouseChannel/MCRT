@@ -15,10 +15,10 @@ layout(location = e_color) in vec3 in_color;
 layout(location = e_texCoord) in vec2 in_texCoord;
 
 
-layout(push_constant) uniform _PushContant
-{
-    PC_Raster pc_raster;
-};
+//layout(push_constant) uniform _PushContant
+//{
+//    PC_Raster pc_raster;
+//};
 layout(set = e_graphic, binding = e_camera_matrix) uniform _Camera_matrix
 {
     Camera_matrix camera_matrix;
@@ -30,7 +30,7 @@ void main()
 {
     outUVW = inPos;
     mat4 model_matrix = mat4(1);
-    mat4 view_matrix = pc_raster.view_matrix;
+    mat4 view_matrix = camera_matrix.view;
     view_matrix[3] = vec4(0, 0, 0, 1);
     mat4 project_matrix = camera_matrix.project;
 

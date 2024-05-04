@@ -10,8 +10,8 @@ using vec4 = glm::vec4;
 struct PC_Raster {
     mat4 model_matrix;
 
-    mat4 view_matrix;
-    vec4 camera_pos;
+//    mat4 view_matrix;
+//    vec4 camera_pos;
 
     int color_texture_index;
     int metallicness_roughness_texture_index;

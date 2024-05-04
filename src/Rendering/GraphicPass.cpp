@@ -225,8 +225,7 @@ std::shared_ptr<CommandBuffer> GraphicPass::Begin_Record_Command_Buffer()
     auto& cmd = command_buffer;
 
     // cmd->Reset();
-    auto render_pass = Get_render_pass();
-    vk::RenderPassBeginInfo render_pass_begin_info;
+  
     // vk::Rect2D rect;
 
     // auto extent1 = Context::Get_Singleton()->get_extent2d();
@@ -236,8 +235,17 @@ std::shared_ptr<CommandBuffer> GraphicPass::Begin_Record_Command_Buffer()
     // rect.setOffset({ 0, 0 })
     //     .setExtent(Context::Get_Singleton()->get_extent2d());
 
-    std::vector<vk::ClearValue> clear_values;
+   
+    cmd->Begin(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 
+   
+    return cmd;
+}
+void GraphicPass::Begin_RenderPass( std::shared_ptr<CommandBuffer> cmd) {
+    auto render_pass = Get_render_pass();
+    vk::RenderPassBeginInfo render_pass_begin_info;
+    std::vector<vk::ClearValue> clear_values;
+    
     for (auto& i : Get_render_targets()) {
         clear_values.push_back(i->Get_clearcolor());
     }
@@ -251,13 +259,8 @@ std::shared_ptr<CommandBuffer> GraphicPass::Begin_Record_Command_Buffer()
                             ->Get_Framebuffer()
                             ->get_handle())
         .setClearValues(clear_values);
-    // std::cout << render_pass_begin_info.renderArea.extent.width << render_pass_begin_info.renderArea.extent.height << std::endl;
-    cmd->Begin(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-
     cmd->BeginRenderPass(render_pass_begin_info, vk::SubpassContents::eInline);
-    return cmd;
 }
-
 void GraphicPass::record_command(std::shared_ptr<CommandBuffer> cmd)
 {
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)

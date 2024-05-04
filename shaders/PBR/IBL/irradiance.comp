@@ -16,7 +16,7 @@ layout(set = 0, binding = e_irradiance_image, rgba8_snorm) uniform imageCube irr
 //     PushContant_IBL pc;
 // };
 int image_size = 512;
-int batch = 128;
+int batch = 64;
 vec3 transfer(vec3 texcoord)
 {
     float m_x = abs(texcoord.x);

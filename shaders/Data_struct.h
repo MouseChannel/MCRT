@@ -54,6 +54,7 @@ struct Camera_matrix {
 
     mat4 view;
     mat4 project;
+    vec3 camera_pos;
 };
 
 // struct PushContant {

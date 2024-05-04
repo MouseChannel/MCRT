@@ -54,12 +54,13 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
 {
     raster_context::prepare(window);
     m_camera->m_position.z = 3;
-    sky_box.reset(new Skybox("/home/mocheng/project/MCRT/assets/Cubemap/kart_club_4k.hdr"));
-    skybox_mesh = GLTF_Loader::load_skybox("/home/mocheng/project/MCRT/assets/cube.gltf");
+    sky_box.reset(new Skybox("assets/Cubemap/rainforest_trail_4k.hdr"));
+    skybox_mesh = GLTF_Loader::load_skybox("assets/cube.gltf");
 
-    GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/Drill_01_4k.gltf/Drill_01_4k.gltf");
-    // GLTF_Loader::load_model("/home/mocheng/project/MCRT/assets/pbr/temp/untitl1.gltf");
-    // Obj_loader::load_model("/home/mocheng/project/MCRT/assets/untitled.obj");
+    GLTF_Loader::load_model("assets\\pbr\\cat.gltf");
+//    GLTF_Loader::load_model("C:\\Users\\moche\\Downloads\\pipe_wrench_1k.gltf\\pipe_wrench_1k.gltf");
+    // GLTF_Loader::load_model("assets/pbr/temp/untitl1.gltf");
+    // Obj_loader::load_model("assets/untitled.obj");
     IBLManager::Get_Singleton()->Init(sky_box);
     // NoiseManager::Get_Singleton()->InitPerlinNoise();
 
@@ -77,10 +78,10 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
         }
 
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
-        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("/home/mocheng/project/MCRT/example/raster/shader/raster.vert.spv"));
-        graphic_shader_modules[Graphic_Pipeline::Main_FRAG].reset(new ShaderModule("/home/mocheng/project/MCRT/example/raster/shader/raster.frag.spv"));
-        graphic_shader_modules[Graphic_Pipeline::Skybox_VERT].reset(new ShaderModule("/home/mocheng/project/MCRT/example/raster/shader/skybox.vert.spv"));
-        graphic_shader_modules[Graphic_Pipeline::Skybox_FRAG].reset(new ShaderModule("/home/mocheng/project/MCRT/example/raster/shader/skybox.frag.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("example/raster/shader/raster.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_FRAG].reset(new ShaderModule("example/raster/shader/raster.frag.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Skybox_VERT].reset(new ShaderModule("example/raster/shader/skybox.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Skybox_FRAG].reset(new ShaderModule("example/raster/shader/skybox.frag.spv"));
         graphic_context->prepare();
         graphic_context->prepare_descriptorset([&]() {
             auto descriptor_manager = graphic_context->get_descriptor_manager();
@@ -148,16 +149,27 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::Begin_Frame()
     //                                           get_graphic_context()->get_depth_render_target()->Get_Image(),
     //                                           get_graphic_context()->get_gbuffer_target()->Get_Image());
 
-    CommandManager::ExecuteCmd(Context::Get_Singleton()
-                                   ->get_device()
-                                   ->Get_Graphic_queue(),
-                               [&](vk::CommandBuffer& cmd) {
-                                   cmd.updateBuffer<Camera_matrix>(camera_matrix->buffer->get_handle(),
-                                                                   0,
-                                                                   Camera_matrix {
-                                                                       .view { m_camera->Get_v_matrix() },
-                                                                       .project { m_camera->Get_p_matrix() } });
-                               });
+//    CommandManager::ExecuteCmd(Context::Get_Singleton()
+//                                   ->get_device()
+//                                   ->Get_Graphic_queue(),
+//                               [&](vk::CommandBuffer& cmd) {
+//                                   cmd.updateBuffer<Camera_matrix>(camera_matrix->buffer->get_handle(),
+//                                                                   0,
+//                                                                   Camera_matrix {
+//                                                                       .view { m_camera->Get_v_matrix() },
+//                                                                       .project { m_camera->Get_p_matrix() },
+//                                                                       .camera_pos { m_camera->get_pos() } });
+//                               });
+
+    {
+//        cmd->get_handle().updateBuffer<Camera_matrix>(camera_matrix->buffer->get_handle(),
+//                                                      0,
+//                                                      Camera_matrix {
+//                                                          .view { m_camera->Get_v_matrix() },
+//                                                          .project { m_camera->Get_p_matrix() },
+//                                                          .camera_pos { m_camera->get_pos() } });
+    }
+
     return raster_context::Begin_Frame();
 }
 
@@ -172,6 +184,15 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
     auto render_context = std::reinterpret_pointer_cast<GraphicPass>(PASS[Graphic]);
 
     std::shared_ptr<CommandBuffer> cmd = render_context->BeginFrame();
+    {
+        cmd->get_handle().updateBuffer<Camera_matrix>(camera_matrix->buffer->get_handle(),
+                                                      0,
+                                                      Camera_matrix {
+                                                          .view { m_camera->Get_v_matrix() },
+                                                          .project { m_camera->Get_p_matrix() },
+                                                          .camera_pos { m_camera->get_pos() } });
+    }
+    render_context->Begin_RenderPass(cmd);
     {
 
         auto res = Context::Get_Singleton()
@@ -214,12 +235,12 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                 // use_r_rm_map = !use_r_rm_map;
                 pc = PC_Raster {
                     .model_matrix { m },
-
-                    .view_matrix { Context::Get_Singleton()
-                                       ->get_camera()
-                                       ->Get_v_matrix() },
-
-                    .camera_pos = glm::vec4(m_camera->get_pos(), 1),
+                    //
+                    //                    .view_matrix { Context::Get_Singleton()
+                    //                                       ->get_camera()
+                    //                                       ->Get_v_matrix() },
+                    //
+                    //                    .camera_pos = glm::vec4(m_camera->get_pos(), 1),
                     .color_texture_index = mesh->m_material.color_texture_index,
                     .metallicness_roughness_texture_index = mesh->m_material.metallicness_roughness_texture_index,
                     .normal_texture_index = mesh->m_material.normal_texture_index,

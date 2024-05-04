@@ -45,7 +45,7 @@ Texture::Texture(std::string_view path)
     image.reset(new Image(
         width,
         height,
-        vk::Format::eR8G8B8A8Srgb,
+        vk::Format::eR8G8B8A8Unorm,
         vk::ImageType::e2D,
         vk::ImageTiling::eOptimal,
         vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
@@ -70,7 +70,7 @@ Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t size)
     image.reset(new Image(
         width,
         height,
-        vk::Format::eR8G8B8A8Srgb,
+        vk::Format::eR8G8B8A8Unorm,
         vk::ImageType::e2D,
         vk::ImageTiling::eOptimal,
         vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
@@ -109,7 +109,7 @@ std::vector<std::shared_ptr<Image>> Texture::get_image_handles()
     std::shared_ptr<Image> white_image{
         new Image(1,
                   1,
-                  vk::Format::eR8G8B8A8Srgb,
+                  vk::Format::eR8G8B8A8Unorm,
                   vk::ImageType::e2D,
                   vk::ImageTiling::eOptimal,
                   vk::ImageUsageFlagBits::eSampled,

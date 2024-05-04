@@ -25,6 +25,11 @@ layout(location  = 1)out vec4 gbuffer_color;
 layout(location  = 2)out vec4 gbuffer_position;
 layout(location  = 3)out vec4 gbuffer_depth;
 
+layout(set = e_graphic, binding = e_camera_matrix) uniform _Camera_matrix
+{
+    Camera_matrix camera_matrix;
+};
+
 layout(push_constant) uniform _PushContant
 {
     PC_Raster pc_raster;
@@ -60,17 +65,25 @@ void main()
             vec3 r_m = texture(textures[nonuniformEXT(pc_raster.metallicness_roughness_texture_index)], in_texCoord).xyz;
             
             ambient_occlusion = r_m.x;
-            roughness = r_m.y;
+            // roughness = r_m.y;
+            // metallicness = r_m.z;
+            roughness  =r_m.y;
             metallicness = r_m.z;
+            // metallicness = 0.25;
+            // roughness = 0.25;
+            // roughness = 0;
+            // metallicness = 1;
 
-            metallicness = 0;
+            // metallicness = 0;
+            // debugPrintfEXT("message  %f %f\n",metallicness, roughness );
         }
 
-        vec3 iinormal = in_nrm;
+        vec3 iinormal =  normalize( in_nrm);
         if (pc_raster.normal_texture_index > -1 && bool(pc_raster.use_normal_map)) {
             iinormal = getNormalSpace(in_nrm) * texture(textures[nonuniformEXT(pc_raster.normal_texture_index)], in_texCoord).xyz;
+            iinormal = normalize(iinormal);
 
-
+        // debugPrintfEXT("messagelength%f \n",length(normalize( in_nrm)) );
         }
         // } 
         vec3 albedo = vec3(1, 1, 1);
@@ -80,8 +93,7 @@ void main()
         }
 
         vec3 color = Get_IBLColor(
-                        vec3(pc_raster.camera_pos),
-                        vec3(0, 0, 1000),
+                        vec3(camera_matrix.camera_pos),
                         in_pos,
                         iinormal,
                         metallicness,
@@ -91,17 +103,19 @@ void main()
                         irradiance_cubemap,
                         LUT_image);
 
-        if (bool(pc_raster.use_AO)){
+        // if (bool(pc_raster.use_AO)){
 
-            color *=ambient_occlusion;
-        }
+        //     color *=ambient_occlusion;
+        // }
 
         outColor = pow(vec4(color, 1), vec4(1. / pc_raster.gamma));
+        // outColor = vec4(iinormal,1 );
 
     }
-    gbuffer_color = outColor;
-    gbuffer_position = vec4(in_pos, 1);
-    gbuffer_depth = vec4(in_depth);
+    // debugPrintfEXT("message %f %f %f \n",color.x,color.y,color.z );
+    // gbuffer_color = outColor;
+    // gbuffer_position = vec4(in_pos, 1);
+    // gbuffer_depth = vec4(in_depth);
 
 
     //    if(bool(pc_raster.use_r_m_map)){

@@ -92,6 +92,7 @@ public:
     void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size) override;
     // void prepare_pipeline2(std::vector<std::shared_ptr<ShaderModule>> shader_modules);
     std::shared_ptr<CommandBuffer> BeginFrame() override;
+    void Begin_RenderPass(std::shared_ptr<CommandBuffer> cmd);
     void Submit() override;
     void EndFrame() override;
     void record_command(std::shared_ptr<CommandBuffer> cmd) override;

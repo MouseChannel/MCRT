@@ -17,8 +17,8 @@ void IBLManager::Init(std::shared_ptr<Skybox> skybox)
 {
     m_sky_box = skybox;
 
-    LUT.reset(new Image(1024,
-                        1024,
+    LUT.reset(new Image(LUT_SIZE,
+                        LUT_SIZE,
                         // vk::Format::eR32G32B32A32Sfloat,
                         vk::Format::eR8G8B8A8Unorm,
                         vk::ImageType::e2D,
@@ -98,7 +98,7 @@ void IBLManager::pre_compute_LUT()
 #else
     std::shared_ptr<ShaderModule>
         compute_shader {
-            new ShaderModule("/home/mocheng/project/MCRT/shaders/PBR/IBL/lookup_table.comp.spv")
+            new ShaderModule("shaders/PBR/IBL/lookup_table.comp.spv")
         };
 
 #endif
@@ -124,7 +124,7 @@ void IBLManager::pre_compute_LUT()
                                    cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
                                                     context->get_pipeline()->get_handle());
 
-                                   cmd.dispatch(1024, 1024, 1);
+                                   cmd.dispatch(LUT_SIZE, LUT_SIZE, 1);
                                });
 }
 
@@ -138,7 +138,7 @@ void IBLManager::pre_compute_irradiance()
 #else    
     std::shared_ptr<ShaderModule>
         compute_shader {
-            new ShaderModule("/home/mocheng/project/MCRT/shaders/PBR/IBL/irradiance.comp.spv")
+            new ShaderModule("shaders/PBR/IBL/irradiance.comp.spv")
         };
 #endif
     context->prepare_pipeline({ compute_shader },

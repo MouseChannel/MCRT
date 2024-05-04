@@ -128,7 +128,7 @@ vk::SurfaceFormatKHR SwapChain::Query_surface_Format()
     auto surface = Get_Context_Singleton()->get_surface();
     auto available_format = physical_device.getSurfaceFormatsKHR(surface->get_handle());
     for (auto& format : available_format) {
-        if (format.format == vk::Format::eR8G8B8A8Srgb &&
+        if (format.format == vk::Format::eR8G8B8A8Unorm &&
             format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
             return format;
         }

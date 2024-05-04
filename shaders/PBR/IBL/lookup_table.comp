@@ -46,11 +46,12 @@ vec2 calculateLUT(float NoV, float roughness, float size)
 
 void main()
 {
-    float size = 1024;
+    float size = LUT_SIZE;
     float NoV = (gl_GlobalInvocationID.x + 1) / size;
     float roughness = (gl_GlobalInvocationID.y + 1) / size;
 
     vec2 LUT_value = calculateLUT(NoV, roughness, size);
+    // debugPrintfEXT("message %f %f  \n", LUT_value.x,LUT_value.y);
 
     imageStore(LUT, ivec2(gl_GlobalInvocationID), vec4(LUT_value, 0., 1));
 }

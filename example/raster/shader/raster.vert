@@ -35,7 +35,7 @@ layout(set = e_graphic, binding = e_camera_matrix) uniform _Camera_matrix
 void main()
 {
     mat4 model_matrix = pc_raster.model_matrix;
-    mat4 view_matrix = pc_raster.view_matrix;
+    mat4 view_matrix = camera_matrix.view;
     mat4 project_matrix = camera_matrix.project;
  
   
@@ -58,7 +58,7 @@ void main()
     
     vec4 world_pos = model_matrix * vec4(in_pos, 1.);
     vec4 world_nrm = model_matrix * vec4(in_nrm, 1.);
-    vec3 carmera_dir = vec3    (pc_raster.camera_pos) - vec3(world_pos);
+    vec3 carmera_dir = vec3    (camera_matrix.camera_pos) - vec3(world_pos);
 
     vec3 new_uv = vec3(model_matrix * vec4(reflect(carmera_dir, vec3(world_nrm)), 1));
     // vec3 new_uv = vec3(model_matrix * vec4(reflect(carmera_dir, vec3(model_matrix * vec4(in_nrm, 1))), 1));

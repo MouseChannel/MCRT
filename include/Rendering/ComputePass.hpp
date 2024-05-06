@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Helper/Uniform_Manager.hpp"
-#include "Rendering/BasePass.hpp"
+#include "Rendering/BaseContext.hpp"
 #include "shaders/Data_struct.h"
 namespace MCRT {
 struct test_Compute {
@@ -9,7 +9,7 @@ struct test_Compute {
 };
 class CommandBuffer;
 class Compute_Pipeline;
-class ComputePass : public BasePass {
+class ComputePass : public BaseContext {
 public:
     std::shared_ptr<Image> get_out_image();
     void prepare() override;

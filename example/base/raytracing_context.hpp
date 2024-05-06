@@ -33,10 +33,10 @@ public:
         throw std::runtime_error("it is not compute context");
     }
 
-    std::shared_ptr<GraphicPass> get_graphic_context() override
+    std::shared_ptr<GraphicContext> get_graphic_context() override
     {
         auto base = PASS[Pass_index::Graphic];
-        if (auto context = std::reinterpret_pointer_cast<GraphicPass>(base); context != nullptr) {
+        if (auto context = std::reinterpret_pointer_cast<GraphicContext>(base); context != nullptr) {
             return context;
         }
         throw std::runtime_error("it is not Ray_Tracing context");

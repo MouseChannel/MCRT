@@ -37,7 +37,7 @@ namespace MCRT {
 
 
 
-
+        void LoadIcon();
         void PollEvents();
 
         std::vector<int> WindowUpdate();

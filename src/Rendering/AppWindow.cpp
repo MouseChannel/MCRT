@@ -7,12 +7,14 @@
 #include <cstddef>
 #include <vulkan/vulkan.hpp>
 
+
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 
 #include "android_native_app_glue.h"
 
 #else
 #include <GLFW/glfw3.h>
+#include "stb_image.h"
 #endif
 namespace MCRT {
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -37,9 +39,11 @@ namespace MCRT {
         // glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
         // std::cout << Context::Get_Singleton()->get_device()->gpu_name << std::endl;
         // auto rr = Context::Get_Singleton()->get_device()->gpu_name;
-        m_window = glfwCreateWindow(width, height, "MOCHENG", nullptr, nullptr);
+        m_window = glfwCreateWindow(width, height, "MCRT", nullptr, nullptr);
 //        glfwSwapInterval(0);
-        glfwSetWindowTitle(m_window, "new title");
+//        glfwSetWindowTitle(m_window, "new title");
+        LoadIcon();
+
         //   window.reset(glfwCreateWindow(width, height, "MoChengRT", nullptr, nullptr));
         //   glfwMakeContextCurrent(window);
 //        glfwSwapInterval(0);
@@ -110,6 +114,13 @@ namespace MCRT {
         //                      (VkSurfaceKHR*)(&surface)),
         // "Error: failed to create
         // surface");
+    }
+    void Window::LoadIcon()
+    {
+        int width,height,channels;
+        uint8_t* icon = stbi_load("assets/icon.png",&width,&height,&channels,STBI_rgb_alpha);        
+        std::shared_ptr<GLFWimage>icon_p { new GLFWimage(width,height,icon)};
+        glfwSetWindowIcon(m_window,1,icon_p.get());
     }
 #endif
 } // namespace MCRT

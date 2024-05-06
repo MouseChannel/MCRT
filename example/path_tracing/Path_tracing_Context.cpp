@@ -5,7 +5,7 @@
 #include "Helper/Model_Loader/Obj_Loader.hpp"
 #include "Helper/Model_Loader/gltf_loader.hpp"
 #include "Rendering/ComputePass.hpp"
-#include "Rendering/GraphicPass.hpp"
+#include "Rendering/GraphicContext.hpp"
 #include "Rendering/Model.hpp"
 #include "Rendering/RaytracingPass.hpp"
 #include "Wrapper/DescriptorSet.hpp"

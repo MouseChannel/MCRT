@@ -38,6 +38,8 @@ void Color_RenderTarget::Make_Subpass(uint32_t attachment_index, std::shared_ptr
 
     //    attach_references.push_back(attach_reference);
 
-    renderPass->get_attach_references().push_back(attach_reference);
+//    renderPass->get_attach_references().push_back(attach_reference);
+    renderPass->add_attach_reference(attach_reference);
+
 }
 }

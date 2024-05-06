@@ -1,9 +1,9 @@
 #pragma once
 #include "example/base/raster_context.hpp"
 // #include "shaders/Data_struct.h"
-#include "Rendering/GraphicPass.hpp"
-#include "example/raster/shader/Constants.h"
+#include "Rendering/GraphicContext.hpp"
 #include "Rendering/Noise/NoiseManager.hpp"
+#include "example/raster/shader/Constants.h"
 
 namespace MCRT {
 class Buffer;
@@ -35,10 +35,10 @@ public:
         throw std::runtime_error("it is not compute context");
     }
 
-    std::shared_ptr<GraphicPass> get_graphic_context() override
+    std::shared_ptr<GraphicContext> get_graphic_context() override
     {
         auto base = PASS[Pass_index::Graphic];
-        if (auto context = std::reinterpret_pointer_cast<GraphicPass>(base); context != nullptr) {
+        if (auto context = std::reinterpret_pointer_cast<GraphicContext>(base); context != nullptr) {
             return context;
         }
         throw std::runtime_error("it is not Ray_Tracing context");

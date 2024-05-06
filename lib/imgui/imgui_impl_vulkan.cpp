@@ -71,7 +71,7 @@
 #include "imgui_impl_vulkan.h"
 #include <stdio.h>
 // #include "Rendering/Context.hpp"
-#include "Rendering/GraphicPass.hpp"
+#include "Rendering/GraphicContext.hpp"
 // Visual Studio warnings
 #ifdef _MSC_VER
 #pragma warning(disable : 4127) // condition expression is constant

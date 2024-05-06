@@ -87,8 +87,11 @@ void main()
         }
         // } 
         vec3 albedo = vec3(1, 1, 1);
+        float alpha = 1.f;
         if (pc_raster.color_texture_index > -1) {
-            albedo = texture(textures[nonuniformEXT(pc_raster.color_texture_index)], in_texCoord).xyz;
+            vec4 color = texture(textures[nonuniformEXT(pc_raster.color_texture_index)], in_texCoord);
+            albedo = color.xyz;
+            alpha = color.w;
 
         }
 
@@ -108,7 +111,7 @@ void main()
         //     color *=ambient_occlusion;
         // }
 
-        outColor = pow(vec4(color, 1), vec4(1. / pc_raster.gamma));
+        outColor = pow(vec4(color, alpha), vec4(1. / pc_raster.gamma));
         // outColor = vec4(iinormal,1 );
 
     }

@@ -28,7 +28,7 @@ namespace MCRT {
 
     class CommandBuffer;
 
-    class GraphicPass;
+    class GraphicContext;
 
     class Sampler;
 
@@ -44,7 +44,7 @@ namespace MCRT {
 
     class Camera;
 
-    class BasePass;
+    class BaseContext;
 
     class RenderPass;
 
@@ -115,7 +115,7 @@ namespace MCRT {
 
         virtual std::shared_ptr <ComputePass> get_compute_context() = 0;
 
-        virtual std::shared_ptr <GraphicPass> get_graphic_context() = 0;
+        virtual std::shared_ptr <GraphicContext> get_graphic_context() = 0;
 
         [[nodiscard("missing camera")]] auto &get_camera() {
             return m_camera;
@@ -185,7 +185,7 @@ namespace MCRT {
         std::shared_ptr <CommandPool> m_command_pool;
         std::shared_ptr <Debugger> m_debugger;
         std::shared_ptr <Sampler> m_sampler;
-        std::vector <std::shared_ptr<BasePass>> PASS;
+        std::vector <std::shared_ptr<BaseContext>> PASS;
         std::shared_ptr <Camera> m_camera;
         bool enable_filter = false;
         int frame_id = 0;

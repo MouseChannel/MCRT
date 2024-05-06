@@ -1,6 +1,7 @@
 #include "Wrapper/SwapChain.hpp"
 #include "Rendering/AppWindow.hpp"
 #include "Rendering/Context.hpp"
+#include "Wrapper/Image.hpp"
 #include "Wrapper/Window_Surface.hpp"
 #include <array>
 #include <cstdint>
@@ -57,6 +58,7 @@ SwapChain::SwapChain()
                    ->get_handle()
                    .createSwapchainKHR(createInfo);
     old_swapchian = m_handle;
+    setImages();
 }
 
 SwapChain::~SwapChain()
@@ -134,6 +136,23 @@ vk::SurfaceFormatKHR SwapChain::Query_surface_Format()
         }
     }
     return available_format[0];
+}
+void SwapChain::setImages()
+{
+    auto& image_handles = Get_Swapchain_ImagesHandle();
+    images.resize(image_handles.size());
+
+    std::transform(image_handles.begin(),
+                   image_handles.end(),
+                   images.begin(),
+                   [&](auto& handle) { return std::shared_ptr<Image> {
+                                           new Image(handle,
+                                                     vk::ImageLayout::eColorAttachmentOptimal,
+                                                     Get_Format(),
+                                                     vk::ImageAspectFlagBits::eColor)
+                                       }; }
+
+    );
 }
 
 } // namespace MoCheng3D

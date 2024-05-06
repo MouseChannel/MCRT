@@ -1,6 +1,6 @@
 #include "Wrapper/Pipeline/Graphic_Pipeline.hpp"
 #include "Helper/DescriptorManager.hpp"
-#include "Rendering/GraphicPass.hpp"
+#include "Rendering/GraphicContext.hpp"
 
 #include "Rendering/Render_Target/Depth_Render_Target.hpp"
 #include "Wrapper/Device.hpp"
@@ -201,8 +201,8 @@ void Graphic_Pipeline::Make_DepthTest(bool enable_test)
 {
     depth_test.setDepthTestEnable(enable_test)
         .setDepthWriteEnable(enable_test);
-    //    if (enable_test)
-    depth_test.setDepthCompareOp(vk::CompareOp::eLessOrEqual);
+    if (enable_test)
+        depth_test.setDepthCompareOp(vk::CompareOp::eLessOrEqual);
 }
 
 void Graphic_Pipeline::Make_attach()
@@ -215,10 +215,10 @@ void Graphic_Pipeline::Make_attach()
             vk::ColorComponentFlagBits::eG |
             vk::ColorComponentFlagBits::eR)
         .setSrcColorBlendFactor(vk::BlendFactor::eSrcAlpha)
-        .setDstAlphaBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha)
+        .setDstColorBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha)
         .setColorBlendOp(vk::BlendOp::eAdd)
-        .setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
-        .setDstAlphaBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha)
+        .setSrcAlphaBlendFactor(vk::BlendFactor::eSrcAlpha)
+        .setDstAlphaBlendFactor(vk::BlendFactor::eDstAlpha)
         .setAlphaBlendOp(vk::BlendOp::eAdd);
     auto graphic_context = Context::Get_Singleton()->get_graphic_context();
     for (auto i : graphic_context->Get_render_targets()) {
@@ -231,6 +231,50 @@ void Graphic_Pipeline::Make_attach()
 void Graphic_Pipeline::Make_Blend()
 {
     blend.setAttachments(attachs).setLogicOpEnable(false);
+}
+void Graphic_Pipeline::Make_OpacityAttach()
+{
+    vk::PipelineColorBlendAttachmentState attach;
+    attach.setBlendEnable(true)
+        .setColorWriteMask(
+            vk::ColorComponentFlagBits::eA |
+            vk::ColorComponentFlagBits::eB |
+            vk::ColorComponentFlagBits::eG |
+            vk::ColorComponentFlagBits::eR)
+        .setSrcColorBlendFactor(vk::BlendFactor::eSrcAlpha)
+        .setDstColorBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha)
+        .setColorBlendOp(vk::BlendOp::eAdd)
+        .setSrcAlphaBlendFactor(vk::BlendFactor::eSrcAlpha)
+        .setDstAlphaBlendFactor(vk::BlendFactor::eDstAlpha)
+        .setAlphaBlendOp(vk::BlendOp::eAdd);
+    auto graphic_context = Context::Get_Singleton()->get_graphic_context();
+    for (auto i : graphic_context->Get_render_targets()) {
+        if (i->type == RenderTarget::COLOR) {
+            attachs.push_back(attach);
+        }
+    }
+}
+void Graphic_Pipeline::Make_AlphaAttach()
+{
+    vk::PipelineColorBlendAttachmentState attach;
+    attach.setBlendEnable(true)
+        .setColorWriteMask(
+            vk::ColorComponentFlagBits::eA |
+            vk::ColorComponentFlagBits::eB |
+            vk::ColorComponentFlagBits::eG |
+            vk::ColorComponentFlagBits::eR)
+        .setSrcColorBlendFactor(vk::BlendFactor::eSrcAlpha)
+        .setDstColorBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha)
+        .setColorBlendOp(vk::BlendOp::eAdd)
+        .setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
+        .setDstAlphaBlendFactor(vk::BlendFactor::eZero)
+        .setAlphaBlendOp(vk::BlendOp::eAdd);
+    auto graphic_context = Context::Get_Singleton()->get_graphic_context();
+    for (auto i : graphic_context->Get_render_targets()) {
+        if (i->type == RenderTarget::COLOR) {
+            attachs.push_back(attach);
+        }
+    }
 }
 
 } // namespace MoCheng3D

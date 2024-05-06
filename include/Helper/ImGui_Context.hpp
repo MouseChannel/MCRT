@@ -27,7 +27,7 @@ public:
 private:
     vk::DescriptorPool descriptor_pool;
     void create_descriptor_pool();
-    ImGuiIO io;
+    
    
     std::shared_ptr<RenderPass> imgui_renderpass;
 };

@@ -1,8 +1,8 @@
-#include "Rendering/GraphicPass.hpp"
 #include "Helper/CommandManager.hpp"
 #include "Helper/DescriptorManager.hpp"
 #include "Rendering/AppWindow.hpp"
 #include "Rendering/ComputePass.hpp"
+#include "Rendering/GraphicContext.hpp"
 #include "Rendering/Model.hpp"
 #include "Rendering/RaytracingPass.hpp"
 #include "Rendering/Render_Frame.hpp"
@@ -24,7 +24,7 @@
 
 namespace MCRT {
 
-GraphicPass::GraphicPass(std::shared_ptr<Device> device)
+GraphicContext::GraphicContext(std::shared_ptr<Device> device)
     : m_device(device)
 {
 
@@ -41,7 +41,7 @@ GraphicPass::GraphicPass(std::shared_ptr<Device> device)
     }
 }
 
-GraphicPass::GraphicPass()
+GraphicContext::GraphicContext()
 {
     command_buffer.reset();
     fences.clear();
@@ -51,7 +51,7 @@ GraphicPass::GraphicPass()
     m_device.reset();
 }
 
-std::shared_ptr<Pipeline_base> GraphicPass::get_pipeline()
+std::shared_ptr<Pipeline_base> GraphicContext::get_pipeline()
 {
     return m_graphic_pipeline;
 }
@@ -60,19 +60,21 @@ std::shared_ptr<Pipeline_base> GraphicPass::get_pipeline()
 //{
 //     return m_skybox_pipeline;
 // }
-void GraphicPass::fill_render_targets()
+void GraphicContext::fill_render_targets()
 {
     auto count { enable_swapchain ? render_frame_count : 1 };
     all_rendertargets.clear();
     all_rendertargets.resize(count);
     for (auto i { 0 }; i < count; i++) {
-        auto swapchain_image_handle = m_swapchain->Get_Swapchain_Images()[i];
-        std::shared_ptr<Image> swapchain_image {
-            new Image(swapchain_image_handle,
-                      vk::ImageLayout::eColorAttachmentOptimal,
-                      m_swapchain->Get_Format(),
-                      vk::ImageAspectFlagBits::eColor)
-        };
+//        auto swapchain_image_handle = m_swapchain->Get_Swapchain_ImagesHandle()[i];
+//        std::shared_ptr<Image> swapchain_image {
+//            new Image(swapchain_image_handle,
+//                      vk::ImageLayout::eColorAttachmentOptimal,
+//                      m_swapchain->Get_Format(),
+//                      vk::ImageAspectFlagBits::eColor)
+//        };
+        
+        auto swapchain_image = m_swapchain->Get_Images()[i];
         all_rendertargets[i].emplace_back(Color_RenderTarget::Create(swapchain_image));
         all_rendertargets[i].emplace_back(Depth_RenderTarget::Create());
 
@@ -87,7 +89,7 @@ void GraphicPass::fill_render_targets()
     }
 }
 
-void GraphicPass::Prepare_Framebuffer()
+void GraphicContext::Prepare_Framebuffer()
 {
     auto count { enable_swapchain ? render_frame_count : 1 };
     render_frames.resize(count);
@@ -95,8 +97,12 @@ void GraphicPass::Prepare_Framebuffer()
         render_frames[i].reset(new RenderFrame(m_renderpass, all_rendertargets[i]));
     }
 }
+//void GraphicPass::SetSubPass(std::vector<std::shared_ptr<BasePass>> subpasses, std::vector<vk::SubpassDependency> dependencies)
+//{
+//    m_renderpass->Build(subpasses, dependencies);
+//}
 
-void GraphicPass::Prepare_RenderPass()
+void GraphicContext::Prepare_RenderPass()
 {
     Get_render_pass().reset(new RenderPass);
     auto render_pass = Get_render_pass();
@@ -110,7 +116,7 @@ void GraphicPass::Prepare_RenderPass()
     //    Context::Get_Singleton()->get_debugger()->set_name(render_pass, "main renderpass");
 }
 
-void GraphicPass::prepare_descriptorset(std::function<void()> prepare)
+void GraphicContext::prepare_descriptorset(std::function<void()> prepare)
 {
     prepare();
     get_descriptor_manager()->CreateDescriptorPool(DescriptorManager::Graphic);
@@ -122,7 +128,7 @@ void GraphicPass::prepare_descriptorset(std::function<void()> prepare)
     //        ->update_descriptor_set(Descriptor_Manager::Graphic);
 }
 
-void GraphicPass::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size)
+void GraphicContext::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size)
 {
 
     {
@@ -174,7 +180,7 @@ void GraphicPass::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> sh
     }
 }
 
-void GraphicPass::prepare()
+void GraphicContext::prepare()
 {
     fill_render_targets();
     Prepare_RenderPass();
@@ -184,7 +190,7 @@ void GraphicPass::prepare()
     command_buffer.reset(new CommandBuffer);
 }
 
-void GraphicPass::post_prepare()
+void GraphicContext::post_prepare()
 {
 }
 
@@ -195,7 +201,7 @@ void GraphicPass::post_prepare()
 //
 // }
 
-std::shared_ptr<CommandBuffer> GraphicPass::BeginFrame()
+std::shared_ptr<CommandBuffer> GraphicContext::BeginFrame()
 {
     auto cur_semaphone = Get_cur_render_semaphore()->get_handle();
     // Context::Get_Singleton()->get_debugger()->set_handle_name(cur_semaphone, "semaphone" + std::to_string(current_index));
@@ -218,14 +224,14 @@ std::shared_ptr<CommandBuffer> GraphicPass::BeginFrame()
     return Begin_Record_Command_Buffer();
 }
 
-std::shared_ptr<CommandBuffer> GraphicPass::Begin_Record_Command_Buffer()
+std::shared_ptr<CommandBuffer> GraphicContext::Begin_Record_Command_Buffer()
 {
 
     // command_buffer = Context::Get_Singleton()->get_compute_context()->get_commandbuffer();
     auto& cmd = command_buffer;
 
     // cmd->Reset();
-  
+
     // vk::Rect2D rect;
 
     // auto extent1 = Context::Get_Singleton()->get_extent2d();
@@ -235,17 +241,16 @@ std::shared_ptr<CommandBuffer> GraphicPass::Begin_Record_Command_Buffer()
     // rect.setOffset({ 0, 0 })
     //     .setExtent(Context::Get_Singleton()->get_extent2d());
 
-   
     cmd->Begin(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 
-   
     return cmd;
 }
-void GraphicPass::Begin_RenderPass( std::shared_ptr<CommandBuffer> cmd) {
+void GraphicContext::Begin_RenderPass(std::shared_ptr<CommandBuffer> cmd)
+{
     auto render_pass = Get_render_pass();
     vk::RenderPassBeginInfo render_pass_begin_info;
     std::vector<vk::ClearValue> clear_values;
-    
+
     for (auto& i : Get_render_targets()) {
         clear_values.push_back(i->Get_clearcolor());
     }
@@ -261,7 +266,7 @@ void GraphicPass::Begin_RenderPass( std::shared_ptr<CommandBuffer> cmd) {
         .setClearValues(clear_values);
     cmd->BeginRenderPass(render_pass_begin_info, vk::SubpassContents::eInline);
 }
-void GraphicPass::record_command(std::shared_ptr<CommandBuffer> cmd)
+void GraphicContext::record_command(std::shared_ptr<CommandBuffer> cmd)
 {
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 #else
@@ -287,14 +292,14 @@ void GraphicPass::record_command(std::shared_ptr<CommandBuffer> cmd)
 }
 
 //---
-void GraphicPass::End_Record_Command_Buffer()
+void GraphicContext::End_Record_Command_Buffer()
 {
 
     command_buffer->EndRenderPass();
     command_buffer->End();
 }
 
-void GraphicPass::Submit()
+void GraphicContext::Submit()
 {
     End_Record_Command_Buffer();
     auto graphic_queue = m_device->Get_Graphic_queue();
@@ -340,7 +345,7 @@ void GraphicPass::Submit()
     //    graphic_queue.waitIdle();
 }
 
-void GraphicPass::EndFrame()
+void GraphicContext::EndFrame()
 {
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     auto fence_res = m_device->get_handle().waitForFences(
@@ -387,7 +392,7 @@ void GraphicPass::EndFrame()
     // current_frame %= render_frame_count;
 }
 
-void GraphicPass::re_create()
+void GraphicContext::re_create()
 {
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     m_device->get_handle().waitIdle();
@@ -431,7 +436,15 @@ void GraphicPass::re_create()
 #endif
 }
 
-void GraphicPass::re_create_swapchain()
+void GraphicContext::re_create_swapchain()
 {
+}
+void GraphicContext::AddSubPass(std::shared_ptr<BaseSubPass> subpass)
+{
+    m_subpasses.push_back(subpass);
+}
+void GraphicContext::AddSubPassDependency(vk::SubpassDependency dependency)
+{
+    m_subpass_dependencies.push_back(dependency);
 }
 } // namespace MoCheng3D

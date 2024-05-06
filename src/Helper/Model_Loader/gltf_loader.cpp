@@ -256,6 +256,24 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
             local_matrix[2][2],
             local_matrix[3][2]
         };
+        transform[0] = {
+            local_matrix[0][0],
+            local_matrix[0][1],
+            local_matrix[0][2],
+            local_matrix[0][3]
+        };
+        transform[1] = {
+            local_matrix[1][0],
+            local_matrix[1][1],
+            local_matrix[1][2],
+            local_matrix[1][3]
+        };
+        transform[2] = {
+            local_matrix[2][0],
+            local_matrix[2][1],
+            local_matrix[2][2],
+            local_matrix[2][3]
+        };
     }
     if (primitive.mode != 4) {
         throw std::runtime_error("not triangle");
@@ -461,6 +479,7 @@ void GLTF_Loader::load_model(std::string_view path)
 #endif
 
         load_mesh(glm::mat4 { 1 }, model, node);
+        int  y=0;
     }
 #endif
     // loader.WriteGltfSceneToFile(&model, "test.gltf", true, true, true);

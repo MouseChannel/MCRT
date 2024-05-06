@@ -37,7 +37,7 @@ void Camera::init()
     glfwGetFramebufferSize(window->get_handle(), &w, &h);
 #endif
     //        auto extent = Context::Get_Singleton()->get_swapchain()->Get_Extent2D();
-    setPerpective(m_fov_angel, (float)w / (float)h, 1e-1f, 10);
+    setPerpective(m_fov_angel, (float)w / (float)h, 1e-2f, 1000);
 
     m_vMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
 }

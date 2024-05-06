@@ -4,9 +4,7 @@ IBL用作环境光光照
 
 根据渲染方程
 
-$$
-L_o(p,w_o) = \int_\Omega (k_d\frac{c}{\pi}+k_s \frac{DFG}{4(w_o \cdot n)(w_i \cdot n )} L_i(p,w_i)(n\cdot w_i) dw_i\\ \\w_o = V = 观测方向 \\ w_i = L = 入射方向\\n = 法线方向
-$$
+$$ L_o(p,w_o) = \int_\Omega (k_d\frac{c}{\pi}+k_s \frac{DFG}{4(w_o \cdot n)(w_i \cdot n )} L_i(p,w_i)(n\cdot w_i) dw_i\\ \\w_o = V = 观测方向 \\ w_i = L = 入射方向\\n = 法线方向 $$
 
 $$
 L_o(p,w_o) = \int_\Omega L_i(p,w_i)dw_i  f_r(p,w_i,w_o)(n\cdot w_i)dw_i

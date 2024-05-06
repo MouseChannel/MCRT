@@ -1,7 +1,7 @@
 #include "example/base/raster_context.hpp"
 #include "Helper/Camera.hpp"
 #include "Helper/DescriptorManager.hpp"
-#include "Rendering/GraphicPass.hpp"
+#include "Rendering/GraphicContext.hpp"
 #include "Rendering/Model.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Pipeline/Graphic_Pipeline.hpp"
@@ -40,7 +40,7 @@ void raster_context::re_create_context()
 {
 }
 
-void raster_context::SkyboxPass(std::shared_ptr<CommandBuffer> cmd, std::shared_ptr<GraphicPass> graphic_context, std::function<void(std::shared_ptr<CommandBuffer> cmd)> func)
+void raster_context::SkyboxPass(std::shared_ptr<CommandBuffer> cmd, std::shared_ptr<GraphicContext> graphic_context, std::function<void(std::shared_ptr<CommandBuffer> cmd)> func)
 {
     cmd->get_handle()
         .bindPipeline(vk::PipelineBindPoint::eGraphics,

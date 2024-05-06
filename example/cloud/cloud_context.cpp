@@ -5,7 +5,8 @@
 #include "Helper/Model_Loader/Obj_Loader.hpp"
 #include "Helper/Model_Loader/gltf_loader.hpp"
 #include "Rendering/ComputePass.hpp"
-#include "Rendering/GraphicPass.hpp"
+#include "Rendering/GraphicContext.hpp"
+#include "Rendering/Noise/NoiseManager.hpp"
 #include "Rendering/PBR/IBL_Manager.hpp"
 #include "Rendering/RaytracingPass.hpp"
 #include "Tool/stb_image.h"
@@ -21,7 +22,6 @@
 #include "example/cloud/shader/Push_Constants.h"
 #include "iostream"
 #include "shaders/PBR/IBL/binding.h"
-#include "Rendering/Noise/NoiseManager.hpp"
 // #include ""
 
 namespace MCRT {
@@ -149,7 +149,7 @@ namespace MCRT {
 
         {
             // graphic
-            PASS[Graphic] = std::shared_ptr<GraphicPass>{new GraphicPass(m_device)};
+            PASS[Graphic] = std::shared_ptr<GraphicContext>{new GraphicContext(m_device)};
             PASS[Graphic]->set_constants_size(sizeof(PushContant));
 
             std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);

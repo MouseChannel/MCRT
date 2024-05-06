@@ -7,7 +7,7 @@
 #include "Helper/DescriptorManager.hpp"
 #include "Helper/Uniform_Manager.hpp"
 #include "Helper/math.hpp"
-#include "Rendering/BasePass.hpp"
+#include "Rendering/BaseContext.hpp"
 #include "Rendering/Context.hpp"
 #include "Rendering/Model.hpp"
 #include "Rendering/Render_Target/Color_Render_Target.hpp"

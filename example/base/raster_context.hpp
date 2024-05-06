@@ -20,7 +20,7 @@ public:
     virtual void EndFrame() override;
     virtual void prepare(std::shared_ptr<Window> window) override;
     //TODO make a skybox context
-    void SkyboxPass(std::shared_ptr<CommandBuffer> cmd,std::shared_ptr<GraphicPass> graphic_context, std::function<void(std::shared_ptr<CommandBuffer> cmd)> func);
+    void SkyboxPass(std::shared_ptr<CommandBuffer> cmd,std::shared_ptr<GraphicContext> graphic_context, std::function<void(std::shared_ptr<CommandBuffer> cmd)> func);
     virtual void re_create_context() override;
 
 protected:

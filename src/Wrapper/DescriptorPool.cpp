@@ -20,7 +20,7 @@ DescriptorPool::DescriptorPool(std::vector<std::tuple<vk::DescriptorType, uint32
 
     vk::DescriptorPoolCreateInfo create_info;
     create_info.setPoolSizes(pool_size)
-        .setMaxSets(10);
+        .setMaxSets(100);
     m_handle = Get_Context_Singleton()
                    ->get_device()
                    ->get_handle()

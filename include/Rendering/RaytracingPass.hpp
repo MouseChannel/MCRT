@@ -1,5 +1,5 @@
 #pragma once
-#include "Rendering/BasePass.hpp"
+#include "Rendering/BaseContext.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 // #include "Wrapper/Pipeline/Pipeline_base.hpp"
 // #include "Wrapper/Pipeline/RT_pipeline.hpp"
@@ -21,7 +21,7 @@ class RT_Pipeline;
 class Image;
 // struct V_P_Matrix;
 // class RenderTarget;
-class RaytracingPass : public BasePass {
+class RaytracingPass : public BaseContext {
 public:
     RaytracingPass(std::shared_ptr<Device> device);
     RaytracingPass();

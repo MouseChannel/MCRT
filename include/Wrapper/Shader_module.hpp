@@ -5,6 +5,7 @@
 namespace MCRT {
 class ShaderModule : public Component<vk::ShaderModule, ShaderModule> {
 public:
+//    ShaderModule() = default;
     ShaderModule(std::string path);
     ~ShaderModule();
 

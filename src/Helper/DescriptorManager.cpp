@@ -33,7 +33,7 @@ void DescriptorManager::CreateDescriptorPool(Which_Set which_set)
     }
     std::vector<std::tuple<vk::DescriptorType, uint32_t>> type_arr;
     for (auto& i : type_map) {
-        type_arr.emplace_back(std::tuple<vk::DescriptorType, uint32_t> { i.first, 10 });
+        type_arr.emplace_back(std::tuple<vk::DescriptorType, uint32_t> { i.first, 100 });
     }
     descriptorPools[which_set].reset(new DescriptorPool(type_arr));
 }

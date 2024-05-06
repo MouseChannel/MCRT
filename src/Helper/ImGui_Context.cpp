@@ -18,20 +18,20 @@ ImGuiContext::ImGuiContext()
 void ImGuiContext::create_descriptor_pool()
 {
     using type = vk::DescriptorType;
-    std::vector<vk::DescriptorPoolSize> pool_sizes { { type::eSampler, 1000 },
-                                                     { type::eCombinedImageSampler, 1000 },
-                                                     { type::eStorageImage, 1000 },
-                                                     { type::eUniformTexelBuffer, 1000 },
-                                                     { type::eStorageTexelBuffer, 1000 },
-                                                     { type::eUniformBuffer, 1000 },
-                                                     { type::eStorageBuffer, 1000 },
-                                                     { type::eUniformBufferDynamic, 1000 },
-                                                     { type::eStorageBufferDynamic, 1000 },
-                                                     { type::eInputAttachment, 1000 } };
+    std::vector<vk::DescriptorPoolSize> pool_sizes { { type::eSampler, 100 },
+                                                     { type::eCombinedImageSampler, 100 },
+                                                     { type::eStorageImage, 100 },
+                                                     { type::eUniformTexelBuffer, 100 },
+                                                     { type::eStorageTexelBuffer, 100 },
+                                                     { type::eUniformBuffer, 100 },
+                                                     { type::eStorageBuffer, 100 },
+                                                     { type::eUniformBufferDynamic, 100 },
+                                                     { type::eStorageBufferDynamic, 100 },
+                                                     { type::eInputAttachment, 100 } };
     vk::DescriptorPoolCreateInfo create_info;
     create_info.setPoolSizes(pool_sizes)
         // .setPoolSizeCount(IM_ARRAYSIZE(pool_sizes))
-        .setMaxSets(1000 * pool_sizes.size())
+        .setMaxSets(100 * pool_sizes.size())
         .setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
 
     descriptor_pool = Context::Get_Singleton()->get_device()->get_handle().createDescriptorPool(
@@ -43,9 +43,11 @@ void ImGuiContext::Init(std::shared_ptr<Window> window)
     create_descriptor_pool();
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    io = ImGui::GetIO();
+    auto& io { ImGui::GetIO()};
+    io.IniFilename = NULL;
+    io.LogFilename = NULL;
 
-    (void)io;
+//    (void)io;
 
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls }
@@ -102,7 +104,8 @@ void ImGuiContext::Update(std::shared_ptr<CommandBuffer> cmd, std::function<void
     {
 
         ImGui::Begin(
-            "its imgui window"); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+            "setting"); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        ImGui::SetWindowPos(ImVec2(0, 0), ImGuiCond_Once);
         func();
 
         ImGui::End();

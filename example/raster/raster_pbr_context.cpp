@@ -5,7 +5,7 @@
 #include "Helper/Model_Loader/Obj_Loader.hpp"
 #include "Helper/Model_Loader/gltf_loader.hpp"
 #include "Rendering/ComputePass.hpp"
-#include "Rendering/GraphicPass.hpp"
+#include "Rendering/GraphicContext.hpp"
 #include "Rendering/Model.hpp"
 #include "Rendering/RaytracingPass.hpp"
 #include "Wrapper/DescriptorSet.hpp"
@@ -26,6 +26,8 @@
 
 #include "Rendering/AntiAliasing/TAA/TAA_Manager.hpp"
 #include "Rendering/PBR/IBL_Manager.hpp"
+#include "Wrapper/SubPass/OpacitySubPass.hpp"
+#include "Wrapper/SubPass/SkyboxSubPass.hpp"
 #include <Helper/Model_Loader/ImageWriter.hpp>
 #include <execution>
 namespace MCRT {
@@ -57,8 +59,11 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     sky_box.reset(new Skybox("assets/Cubemap/rainforest_trail_4k.hdr"));
     skybox_mesh = GLTF_Loader::load_skybox("assets/cube.gltf");
 
-    GLTF_Loader::load_model("assets\\pbr\\cat.gltf");
-//    GLTF_Loader::load_model("C:\\Users\\moche\\Downloads\\pipe_wrench_1k.gltf\\pipe_wrench_1k.gltf");
+    //    GLTF_Loader::load_model("assets\\pbr\\cat.gltf");
+
+    GLTF_Loader::load_model("C:\\Users\\moche\\Documents\\sponza.glb");
+
+    //    GLTF_Loader::load_model("C:\\Users\\moche\\Downloads\\pipe_wrench_1k.gltf\\pipe_wrench_1k.gltf");
     // GLTF_Loader::load_model("assets/pbr/temp/untitl1.gltf");
     // Obj_loader::load_model("assets/untitled.obj");
     IBLManager::Get_Singleton()->Init(sky_box);
@@ -68,11 +73,11 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
 
     {
 
-        PASS[Pass_index::Graphic] = std::shared_ptr<GraphicPass> { new GraphicPass(m_device) };
+        PASS[Pass_index::Graphic] = std::shared_ptr<GraphicContext> { new GraphicContext(m_device) };
         Context::Get_Singleton()
             ->get_graphic_context()
             ->set_constants_size(sizeof(PC_Raster));
-        auto graphic_context = std::reinterpret_pointer_cast<GraphicPass>(PASS[Graphic]);
+        auto graphic_context = std::reinterpret_pointer_cast<GraphicContext>(PASS[Graphic]);
         if (graphic_context == nullptr) {
             throw std::runtime_error("not graphic context");
         }
@@ -83,6 +88,10 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
         graphic_shader_modules[Graphic_Pipeline::Skybox_VERT].reset(new ShaderModule("example/raster/shader/skybox.vert.spv"));
         graphic_shader_modules[Graphic_Pipeline::Skybox_FRAG].reset(new ShaderModule("example/raster/shader/skybox.frag.spv"));
         graphic_context->prepare();
+        
+//        graphic_context->AddSubPass(std::make_shared<OpacitySubPass> ());
+//        graphic_context->AddSubPass(std::make_shared<SkyboxSubPass>());
+        
         graphic_context->prepare_descriptorset([&]() {
             auto descriptor_manager = graphic_context->get_descriptor_manager();
 
@@ -149,25 +158,25 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::Begin_Frame()
     //                                           get_graphic_context()->get_depth_render_target()->Get_Image(),
     //                                           get_graphic_context()->get_gbuffer_target()->Get_Image());
 
-//    CommandManager::ExecuteCmd(Context::Get_Singleton()
-//                                   ->get_device()
-//                                   ->Get_Graphic_queue(),
-//                               [&](vk::CommandBuffer& cmd) {
-//                                   cmd.updateBuffer<Camera_matrix>(camera_matrix->buffer->get_handle(),
-//                                                                   0,
-//                                                                   Camera_matrix {
-//                                                                       .view { m_camera->Get_v_matrix() },
-//                                                                       .project { m_camera->Get_p_matrix() },
-//                                                                       .camera_pos { m_camera->get_pos() } });
-//                               });
+    //    CommandManager::ExecuteCmd(Context::Get_Singleton()
+    //                                   ->get_device()
+    //                                   ->Get_Graphic_queue(),
+    //                               [&](vk::CommandBuffer& cmd) {
+    //                                   cmd.updateBuffer<Camera_matrix>(camera_matrix->buffer->get_handle(),
+    //                                                                   0,
+    //                                                                   Camera_matrix {
+    //                                                                       .view { m_camera->Get_v_matrix() },
+    //                                                                       .project { m_camera->Get_p_matrix() },
+    //                                                                       .camera_pos { m_camera->get_pos() } });
+    //                               });
 
     {
-//        cmd->get_handle().updateBuffer<Camera_matrix>(camera_matrix->buffer->get_handle(),
-//                                                      0,
-//                                                      Camera_matrix {
-//                                                          .view { m_camera->Get_v_matrix() },
-//                                                          .project { m_camera->Get_p_matrix() },
-//                                                          .camera_pos { m_camera->get_pos() } });
+        //        cmd->get_handle().updateBuffer<Camera_matrix>(camera_matrix->buffer->get_handle(),
+        //                                                      0,
+        //                                                      Camera_matrix {
+        //                                                          .view { m_camera->Get_v_matrix() },
+        //                                                          .project { m_camera->Get_p_matrix() },
+        //                                                          .camera_pos { m_camera->get_pos() } });
     }
 
     return raster_context::Begin_Frame();
@@ -181,7 +190,7 @@ void raster_context_pbr::EndFrame()
 std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
 {
     // get_device()->get_handle().waitIdle();
-    auto render_context = std::reinterpret_pointer_cast<GraphicPass>(PASS[Graphic]);
+    auto render_context = std::reinterpret_pointer_cast<GraphicContext>(PASS[Graphic]);
 
     std::shared_ptr<CommandBuffer> cmd = render_context->BeginFrame();
     {
@@ -231,7 +240,7 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                 m[3][3] = 1;
                 auto pos = mesh->get_pos();
                 m[3] = glm::vec4(pos, 1);
-
+                m = mesh->get_model_matrix();
                 // use_r_rm_map = !use_r_rm_map;
                 pc = PC_Raster {
                     .model_matrix { m },
@@ -266,6 +275,9 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                                  0,
                                  0,
                                  0);
+                //                vk::SubpassBeginInfo info;
+                //                info.setContents(vk::SubpassContents().set)
+                //                cmd->get_handle().nextSubpass2()
             }
         }
     }

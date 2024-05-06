@@ -6,7 +6,7 @@
 // #include "Helper/Ray_Tracing/RT_Manager.hpp"
 #include "Rendering/AppWindow.hpp"
 #include "Rendering/ComputePass.hpp"
-#include "Rendering/GraphicPass.hpp"
+#include "Rendering/GraphicContext.hpp"
 #include "Rendering/Model.hpp"
 #include "Rendering/RaytracingPass.hpp"
 #include "Wrapper/CommandBuffer.hpp"

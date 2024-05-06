@@ -18,7 +18,7 @@ public:
         shader_stage_count
     };
     enum class Shader_Stage {
-        VERT,
+        VERT ,
         FRAG
     };
     Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shaders,
@@ -37,6 +37,8 @@ public:
     void Make_MultiSample();
     void Make_Blend();
     void Make_attach();
+    void Make_OpacityAttach();
+    void Make_AlphaAttach();
     auto& get_colorblend_state()
     {
         return blend;

@@ -7,7 +7,8 @@ class RenderTarget {
 public:
     enum {
         COLOR,
-        DEPTH
+        DEPTH,
+        GBUFFER
     };
     RenderTarget(std::shared_ptr<Image>,int type, vk::AttachmentDescription);
     ~RenderTarget();

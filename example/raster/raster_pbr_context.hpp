@@ -48,10 +48,10 @@ public:
     static float gamma ;
 
     void prepare(std::shared_ptr<Window> window) override;
-    std::shared_ptr<Graphic_Pipeline> get_skybox_pipeline() override
-    {
-        return get_graphic_context()->get_skybox_pipeline();
-    }
+//    std::shared_ptr<Graphic_Pipeline> get_skybox_pipeline() override
+//    {
+//        return get_graphic_context()->get_skybox_pipeline();
+//    }
     std::shared_ptr<Mesh> get_skybox_mesh() override
     {
         return skybox_mesh;

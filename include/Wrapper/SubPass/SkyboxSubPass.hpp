@@ -4,18 +4,21 @@
 #include "include/Wrapper/SubPass/BaseSubPass.hpp"
 #include "memory"
 #include <functional>
-namespace MCRT{
+namespace MCRT {
 
-
-class SkyboxSubPass :public BaseSubPass {
+class SkyboxSubPass : public BaseSubPass {
 public:
-    SkyboxSubPass(std::shared_ptr<DescriptorManager> descriptorManager);
-    void set_description() override;
-//    void prepare_renderTarget()override;
-    void run_subpass() override;
+    SkyboxSubPass(std::weak_ptr<GraphicContext> graphicContext);
+//    void set_description() override;
+    ~SkyboxSubPass() = default;
+    //    void prepare_renderTarget()override;
+//    void run_subpass() override;
     void prepare_vert_shader_module(std::string vert_shader) override;
     void prepare_frag_shader_module(std::string frag_shader) override;
-//    void  prepare_descriptorset(std::function<void()> prepare)override;
-    void  prepare_pipeline() override;
-private:};
+    //    void  prepare_descriptorset(std::function<void()> prepare)override;
+    void prepare_pipeline(int pc_size) override;
+    void post_prepare() override;
+    //      void set_subpassDependency(vk::SubpassDependency dependency) override;
+private:
+};
 }

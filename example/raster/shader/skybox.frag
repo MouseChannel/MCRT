@@ -11,5 +11,5 @@ void main()
 {
 
     outFragColor = pow(texture(samplerCubeMap, inUVW), vec4(1. / 1));
-    // debugPrintfEXT("message  %f %f %f  \n", inUVW.x, inUVW.y, inUVW.z);
+    //  debugPrintfEXT("message  %f %f %f  \n", outFragColor.x,outFragColor.y,outFragColor.z);
 }

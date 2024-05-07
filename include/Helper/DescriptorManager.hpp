@@ -20,6 +20,7 @@ public:
         Ray_Tracing,
         Compute,
         Global,
+        Graphic2,
         
         e_type_count
     };

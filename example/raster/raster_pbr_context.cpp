@@ -30,6 +30,7 @@
 #include "Wrapper/SubPass/SkyboxSubPass.hpp"
 #include <Helper/Model_Loader/ImageWriter.hpp>
 #include <execution>
+
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance { new MCRT::raster_context_pbr };
 float raster_context_pbr::light_pos_x = 0, raster_context_pbr::light_pos_y = 0, raster_context_pbr::light_pos_z = 5, raster_context_pbr::gamma = 2.2f;
@@ -59,9 +60,9 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     sky_box.reset(new Skybox("assets/Cubemap/rainforest_trail_4k.hdr"));
     skybox_mesh = GLTF_Loader::load_skybox("assets/cube.gltf");
 
-    //    GLTF_Loader::load_model("assets\\pbr\\cat.gltf");
+    GLTF_Loader::load_model("assets/pbr/cat.glb");
 
-    GLTF_Loader::load_model("C:\\Users\\moche\\Documents\\sponza.glb");
+    // GLTF_Loader::load_model("C:\\Users\\moche\\Documents\\sponza.glb");
 
     //    GLTF_Loader::load_model("C:\\Users\\moche\\Downloads\\pipe_wrench_1k.gltf\\pipe_wrench_1k.gltf");
     // GLTF_Loader::load_model("assets/pbr/temp/untitl1.gltf");
@@ -83,18 +84,18 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
         }
 
         std::vector<std::shared_ptr<ShaderModule>> graphic_shader_modules(Graphic_Pipeline::shader_stage_count);
-        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(new ShaderModule("example/raster/shader/raster.vert.spv"));
-        graphic_shader_modules[Graphic_Pipeline::Main_FRAG].reset(new ShaderModule("example/raster/shader/raster.frag.spv"));
-        graphic_shader_modules[Graphic_Pipeline::Skybox_VERT].reset(new ShaderModule("example/raster/shader/skybox.vert.spv"));
-        graphic_shader_modules[Graphic_Pipeline::Skybox_FRAG].reset(new ShaderModule("example/raster/shader/skybox.frag.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_VERT].reset(
+            new ShaderModule("example/raster/shader/raster.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Main_FRAG].reset(
+            new ShaderModule("example/raster/shader/raster.frag.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Skybox_VERT].reset(
+            new ShaderModule("example/raster/shader/skybox.vert.spv"));
+        graphic_shader_modules[Graphic_Pipeline::Skybox_FRAG].reset(
+            new ShaderModule("example/raster/shader/skybox.frag.spv"));
         graphic_context->prepare();
-        
-//        graphic_context->AddSubPass(std::make_shared<OpacitySubPass> ());
-//        graphic_context->AddSubPass(std::make_shared<SkyboxSubPass>());
-        
         graphic_context->prepare_descriptorset([&]() {
             auto descriptor_manager = graphic_context->get_descriptor_manager();
-
+            
             descriptor_manager->Make_DescriptorSet(
                 camera_matrix,
                 (int)Graphic_Binding::e_camera_matrix,
@@ -132,9 +133,62 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                     vk::DescriptorType::eCombinedImageSampler,
                     vk::ShaderStageFlagBits::eFragment);
         });
-        graphic_context->prepare_pipeline(graphic_shader_modules, { graphic_context->get_descriptor_manager()->get_DescriptorSet(DescriptorManager::Graphic) }, sizeof(PC_Raster));
+ 
 
-        graphic_context->post_prepare();
+
+        {
+            auto swapchain_renderTarget = graphic_context->AddSwapchainRenderTarget();
+            auto depth_renderTarget = graphic_context->AddDepthRenderTarget();
+            //            int skyboxSubpass_index = -1;
+            //            int opacitySubpass_index = -1;
+            //            graphic_context->AddSubPass()
+            {
+                std::shared_ptr<SkyboxSubPass> skyboxSubpass { new SkyboxSubPass(graphic_context) };
+                graphic_context->AddSubPass(skyboxSubpass);
+
+                skyboxSubpass->prepare_vert_shader_module("example/raster/shader/skybox.vert.spv");
+                skyboxSubpass->prepare_frag_shader_module("example/raster/shader/skybox.frag.spv");
+                skyboxSubpass->prepare_pipeline(sizeof(PC_Raster));
+                skyboxSubpass->link_renderTarget({ swapchain_renderTarget },
+                                                 {},
+                                                 {});
+                //            skyboxSubpass->set_subpassDescription(vk::SubpassDescription().setColorAttachments());
+//                skyboxSubpass->set_subpassDependency(vk::SubpassDependency()
+//                                                         .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+//                                                         .setDstSubpass(skyboxSubpass->index)
+//                                                         .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+//                                                         .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eColorAttachmentOutput)
+//                                                         .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite | vk::AccessFlagBits::eColorAttachmentWrite));
+                graphic_context->AddSubPassDependency(vk::SubpassDependency()
+                                                          .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+                                                          .setDstSubpass(skyboxSubpass->subpass_index)
+                                                          .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                                                          .setSrcAccessMask(vk::AccessFlagBits::eNone)
+                                                          .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                                                          .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite | vk::AccessFlagBits::eColorAttachmentWrite));
+
+                // opacity pass
+                std::shared_ptr<OpacitySubPass> opacitySubPass { new OpacitySubPass(graphic_context) };
+                graphic_context->AddSubPass(opacitySubPass);
+                opacitySubPass->prepare_vert_shader_module("example/raster/shader/raster.vert.spv");
+                opacitySubPass->prepare_frag_shader_module("example/raster/shader/raster.frag.spv");
+                opacitySubPass->prepare_pipeline(sizeof(PC_Raster));
+                opacitySubPass->link_renderTarget({ swapchain_renderTarget },
+                                                  { depth_renderTarget },
+                                                  {});
+           
+                graphic_context->AddSubPassDependency(vk::SubpassDependency()
+                                                          .setSrcSubpass(skyboxSubpass->subpass_index)
+                                                          .setDstSubpass(opacitySubPass->subpass_index)
+                                                          .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput )
+                                                          .setSrcAccessMask(vk::AccessFlagBits::eNone)
+                                                          .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                                                          .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite | vk::AccessFlagBits::eColorAttachmentWrite));
+                
+            }
+        }
+
+              graphic_context->post_prepare();
     }
 
     {
@@ -204,102 +258,133 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
     render_context->Begin_RenderPass(cmd);
     {
 
-        auto res = Context::Get_Singleton()
-                       ->get_camera()
-                       ->Get_v_matrix();
-        res[3] = { 0, 0, 0, 1 };
-        SkyboxPass(cmd,
-                   render_context,
-                   [&](std::shared_ptr<CommandBuffer> cmd) {
-                       render_context->record_command(cmd);
-                   });
-
         {
-            cmd->get_handle()
-                .bindPipeline(vk::PipelineBindPoint::eGraphics,
-                              render_context->get_pipeline()->get_handle());
-            render_context->record_command(cmd);
-
-            for (auto& mesh : Mesh::meshs) {
+            {
+                auto& skyboxSubpass = render_context->get_subpasses()[0];
+                cmd->get_handle().bindPipeline(vk::PipelineBindPoint::eGraphics,
+                                               skyboxSubpass->get_pipeline()->get_handle());
+                render_context->record_command(cmd);
+                //            for (auto& mesh : Mesh::meshs) {
                 cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                                     render_context->get_pipeline()->get_layout(),
+                                                     skyboxSubpass->get_pipeline()->get_layout(),
                                                      0,
-                                                     { get_graphic_context()->get_descriptor_manager()->get_DescriptorSet(DescriptorManager::Graphic)->get_handle() },
+                                                     { get_graphic_context()
+                                                           ->get_descriptor_manager()
+                                                           ->get_DescriptorSet(
+                                                               DescriptorManager::Graphic)
+                                                           ->get_handle() },
                                                      {});
 
-                cmd->get_handle().bindIndexBuffer(mesh->get_indices_buffer()->get_handle(),
+                cmd->get_handle().bindIndexBuffer(get_skybox_mesh()
+                                                      ->get_indices_buffer()
+                                                      ->get_handle(),
                                                   0,
                                                   vk::IndexType::eUint32);
+
                 cmd->get_handle().bindVertexBuffers(0,
                                                     {
-                                                        mesh->get_vertex_buffer()->get_handle(),
+                                                        get_skybox_mesh()->get_vertex_buffer()->get_handle(),
                                                     },
                                                     { 0 });
-                // std::cout << mesh->get_vertex_buffer()->get_handle() << std::endl;
-                auto m = glm::mat4(5);
-                m[3][3] = 1;
-                auto pos = mesh->get_pos();
-                m[3] = glm::vec4(pos, 1);
-                m = mesh->get_model_matrix();
-                // use_r_rm_map = !use_r_rm_map;
-                pc = PC_Raster {
-                    .model_matrix { m },
-                    //
-                    //                    .view_matrix { Context::Get_Singleton()
-                    //                                       ->get_camera()
-                    //                                       ->Get_v_matrix() },
-                    //
-                    //                    .camera_pos = glm::vec4(m_camera->get_pos(), 1),
-                    .color_texture_index = mesh->m_material.color_texture_index,
-                    .metallicness_roughness_texture_index = mesh->m_material.metallicness_roughness_texture_index,
-                    .normal_texture_index = mesh->m_material.normal_texture_index,
-                    .light_pos = { light_pos_x, light_pos_y, light_pos_z, 1 },
-                    .use_normal_map = use_normal_map,
-                    .use_r_m_map = use_r_rm_map,
-                    .use_AO = use_ao,
-                    .gamma = gamma
-                };
-                // angle++;
-
                 cmd->get_handle()
                     .pushConstants<PC_Raster>(
-                        render_context
-                            ->get_pipeline()
-                            ->get_layout(),
+                        skyboxSubpass->get_pipeline()->get_layout(),
                         vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
                         0,
-                        pc);
+                        PC_Raster {
+                            //                .view_matrix { Context::Get_Singleton()
+                            //                                   ->get_camera()
+                            //                                   ->Get_v_matrix() },
+                            .color_texture_index = get_skybox_mesh()->m_material.color_texture_index,
+                            .light_pos { 0, 0, 5, 1 },
+                        });
+                auto rr = get_skybox_mesh()->m_material.color_texture_index;
+                //            render_context->record_command(cmd);
                 cmd->get_handle()
-                    .drawIndexed(mesh->get_vertex_count(),
+                    .drawIndexed(get_skybox_mesh()->get_vertex_count(),
                                  1,
                                  0,
                                  0,
                                  0);
-                //                vk::SubpassBeginInfo info;
-                //                info.setContents(vk::SubpassContents().set)
-                //                cmd->get_handle().nextSubpass2()
             }
+
+            {
+                cmd->get_handle().nextSubpass(vk::SubpassContents::eInline);
+                for (auto& mesh : Mesh::meshs) {
+                    auto& opacitySubpass = render_context->get_subpasses()[1];
+                    cmd->get_handle().bindPipeline(vk::PipelineBindPoint::eGraphics,
+                                                   opacitySubpass->get_pipeline()->get_handle());
+                    render_context->record_command(cmd);
+                    //            for (auto& mesh : Mesh::meshs) {
+                    cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                                         opacitySubpass->get_pipeline()->get_layout(),
+                                                         0,
+                                                         { get_graphic_context()
+                                                               ->get_descriptor_manager()
+                                                               ->get_DescriptorSet(
+                                                                   DescriptorManager::Graphic)
+                                                               ->get_handle() },
+                                                         {});
+
+                    cmd->get_handle().bindIndexBuffer(mesh
+                                                          ->get_indices_buffer()
+                                                          ->get_handle(),
+                                                      0,
+                                                      vk::IndexType::eUint32);
+
+                    cmd->get_handle().bindVertexBuffers(0,
+                                                        {
+                                                            mesh->get_vertex_buffer()->get_handle(),
+                                                        },
+                                                        { 0 });
+                    auto m = glm::mat4(1);
+//                    m[3][3] = 1;
+//                    auto pos = mesh->get_pos();
+//                    m[3] = glm::vec4(pos, 1);
+
+                    // use_r_rm_map = !use_r_rm_map;
+                    pc = PC_Raster {
+                        .model_matrix { m },
+                        //
+                        //                    .view_matrix { Context::Get_Singleton()
+                        //                                       ->get_camera()
+                        //                                       ->Get_v_matrix() },
+                        //
+                        //                    .camera_pos = glm::vec4(m_camera->get_pos(), 1),
+                        .color_texture_index = mesh->m_material.color_texture_index,
+                        .metallicness_roughness_texture_index = mesh->m_material.metallicness_roughness_texture_index,
+                        .normal_texture_index = mesh->m_material.normal_texture_index,
+                        .light_pos = { light_pos_x, light_pos_y, light_pos_z, 1 },
+                        .use_normal_map = use_normal_map,
+                        .use_r_m_map = use_r_rm_map,
+                        .use_AO = use_ao,
+                        .gamma = gamma
+                    };
+                    cmd->get_handle()
+                        .pushConstants<PC_Raster>(
+                            opacitySubpass->get_pipeline()->get_layout(),
+                            vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+                            0,
+                            pc);
+                    //            render_context->record_command(cmd);
+                    cmd->get_handle()
+                        .drawIndexed(mesh->get_vertex_count(),
+                                     1,
+                                     0,
+                                     0,
+                                     0);
+                }
+            }
+
+
+            return cmd;
         }
     }
-
-    //    TAA_Manager::Get_Singleton()->TAA_Pass(get_graphic_context()
-    //                                               ->get_present_render_target()
-    //                                               ->Get_Image(),
-    //                                           get_graphic_context()
-    //                                               ->get_depth_render_target()
-    //                                               ->Get_Image(),
-    //                                           get_graphic_context()
-    //                                               ->get_gbuffer_target()
-    //                                               ->Get_Image());
-
-    return cmd;
 }
-
 void raster_context_pbr::EndGraphicFrame()
 {
     auto& m_render_context = PASS[Graphic];
     m_render_context->Submit();
     m_render_context->EndFrame();
 }
-
 }

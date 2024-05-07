@@ -1,22 +1,52 @@
 #include "Wrapper/SubPass/OpacitySubPass.hpp"
+#include "Rendering/GraphicContext.hpp"
+#include "Wrapper/Shader_module.hpp"
+#include "shaders/Data_struct.h"
 namespace MCRT {
+using Shader_Stage = Graphic_Pipeline::Shader_Stage;
+OpacitySubPass::OpacitySubPass(std::weak_ptr<GraphicContext> graphicContext)
+    : BaseSubPass(graphicContext)
+{
+}
+void OpacitySubPass::prepare_vert_shader_module(std::string _vert_shader)
+{
+    shaders[(int)Shader_Stage::VERT].reset(new ShaderModule(_vert_shader));
+}
+void OpacitySubPass::prepare_frag_shader_module(std::string _frag_shader)
+{
+    shaders[(int)Shader_Stage::FRAG].reset(new ShaderModule(_frag_shader));
+}
+void OpacitySubPass::prepare_pipeline(int pc_size)
+{
+    auto m_graphicContextp = m_graphicContext.lock();
+    if (m_graphicContextp) {
+        m_pipeline.reset(new Graphic_Pipeline(shaders,
+                                              { m_graphicContextp
+                                                    ->get_descriptor_manager()
+                                                    ->get_DescriptorSet(DescriptorManager::Graphic) },
+                                              pc_size));
 
-OpacitySubPass::OpacitySubPass()
-    : BaseSubPass(nullptr)
-{
+        auto binds = Vertex::make_bind();
+        auto attrs = Vertex::make_attr();
+
+        m_pipeline->Make_VertexInput(binds, attrs);
+        m_pipeline->Make_VertexAssembly();
+        m_pipeline->Make_viewPort();
+        m_pipeline->Make_MultiSample();
+        m_pipeline->Make_Resterization();
+        m_pipeline->Make_Subpass_index(subpass_index);
+
+        m_pipeline->Make_OpacityAttach();
+        m_pipeline->Make_DepthTest();
+        m_pipeline->Make_Blend();
+    }
 }
-//void OpacitySubPass::prepare_renderTarget()
-//{
-//    swapChainTarget.reset(new SwapChainTarget);
-//}
-void OpacitySubPass::set_description()
+void OpacitySubPass::post_prepare()
 {
-    vk::AttachmentReference color_reference;
-    //    color_reference.se
-    //
-    //    description.set
+    m_pipeline->Build_Pipeline(
+        Context::Get_Singleton()
+            ->get_graphic_context()
+            ->Get_render_pass() );
 }
-void OpacitySubPass::run_subpass()
-{}
 
 }

@@ -8,10 +8,12 @@ namespace MCRT{
 
 class OpacitySubPass :public BaseSubPass {
 public:
-    OpacitySubPass();
-    void run_subpass() override;
-    void set_description() override;
-//    void prepare_renderTarget()override;
+    OpacitySubPass(std::weak_ptr<GraphicContext> graphicContext);
+    void prepare_vert_shader_module(std::string vert_shader) override;
+    void prepare_frag_shader_module(std::string frag_shader) override;
+    //    void  prepare_descriptorset(std::function<void()> prepare)override;
+    void prepare_pipeline(int pc_size) override;
+    void post_prepare() override;
 private:
 };
 }

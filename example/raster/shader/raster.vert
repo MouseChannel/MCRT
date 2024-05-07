@@ -34,12 +34,15 @@ layout(set = e_graphic, binding = e_camera_matrix) uniform _Camera_matrix
 
 void main()
 {
+    // debugPrintfEXT("message1 \n");
     mat4 model_matrix = pc_raster.model_matrix;
     mat4 view_matrix = camera_matrix.view;
     mat4 project_matrix = camera_matrix.project;
  
   
     gl_Position = project_matrix * view_matrix * model_matrix * vec4(in_pos, 1.);
+
+    // debugPrintfEXT("message1 %f %f %f \n",model_matrix[0][0],model_matrix[0][1],model_matrix[0][2]);
  
 //    gl_Position = project_matrix * view_matrix * model_matrix * vec4(in_pos.x, in_pos.y,in_pos.z, 1.);
 

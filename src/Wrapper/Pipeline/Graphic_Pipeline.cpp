@@ -35,13 +35,12 @@ Graphic_Pipeline::Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> sh
     //     descriptor_sets.push_back(set->get_handle()[0]);
     // }
     auto push_range = vk::PushConstantRange()
-                                            .setSize(push_constants_size)
-                                            .setStageFlags(vk::ShaderStageFlagBits::eVertex |
-                                                vk::ShaderStageFlagBits::eFragment);
-     layout_create_info.setSetLayouts(m_descriptor_layouts)
-                      .setPushConstantRanges(push_range);
-    
-    
+                          .setSize(push_constants_size)
+                          .setStageFlags(vk::ShaderStageFlagBits::eVertex |
+                                         vk::ShaderStageFlagBits::eFragment);
+    layout_create_info.setSetLayouts(m_descriptor_layouts)
+        .setPushConstantRanges(push_range);
+
     layout = Context::Get_Singleton()
                  ->get_device()
                  ->get_handle()
@@ -64,7 +63,7 @@ Graphic_Pipeline::~Graphic_Pipeline()
     Get_Context_Singleton()->get_device()->get_handle().destroyPipeline(m_handle);
 }
 
-void Graphic_Pipeline::Build_Pipeline(std::shared_ptr<RenderPass> render_pass)
+void Graphic_Pipeline::Build_Pipeline(std::shared_ptr<RenderPass> render_pass )
 {
     std::vector<vk::DynamicState> dynamic_state = { vk::DynamicState::eViewport,
                                                     vk::DynamicState::eScissor };
@@ -79,6 +78,7 @@ void Graphic_Pipeline::Build_Pipeline(std::shared_ptr<RenderPass> render_pass)
         .setPViewportState(&viewportInfo)
         // shader
         .setStages(shader_stage)
+        .setSubpass(subpass_index)
         // rasterization
         .setPRasterizationState(&rasterization_info)
         .setPMultisampleState(&multi_sample)
@@ -119,6 +119,11 @@ void Graphic_Pipeline::Build_Pipeline(std::shared_ptr<RenderPass> render_pass)
     m_handle = res.value;
 }
 
+void Graphic_Pipeline::Make_Subpass_index(int _subpass_index)
+{
+    subpass_index = _subpass_index;
+}
+
 void Graphic_Pipeline::Make_Layout(vk::DescriptorSetLayout descriptor_layout,
                                    uint32_t push_constants_size,
                                    vk::ShaderStageFlags push_constants_stage)
@@ -134,12 +139,23 @@ void Graphic_Pipeline::Make_Layout(vk::DescriptorSetLayout descriptor_layout,
     // layout = pipeline_layout;
 }
 
+// void Graphic_Pipeline::Make_VertexInput(
+//     vk::ArrayProxyNoTemporaries<const vk::VertexInputBindingDescription>   bind,
+//     vk::ArrayProxyNoTemporaries<const vk::VertexInputAttributeDescription> const attr)
+// {
+//     input_state.setVertexAttributeDescriptions(attr)
+//         .setVertexBindingDescriptions(bind);
+// }
+
 void Graphic_Pipeline::Make_VertexInput(
-    vk::ArrayProxyNoTemporaries<const vk::VertexInputBindingDescription> const bind,
-    vk::ArrayProxyNoTemporaries<const vk::VertexInputAttributeDescription> const attr)
+    vk::VertexInputBindingDescription bind,
+    std::vector<vk::VertexInputAttributeDescription> attr)
 {
-    input_state.setVertexAttributeDescriptions(attr)
-        .setVertexBindingDescriptions(bind);
+    m_binds = bind;
+    m_attrs = attr;
+    input_state.setVertexAttributeDescriptions(m_attrs)
+        .setVertexBindingDescriptions(m_binds);
+    int r = 0;
 }
 
 void Graphic_Pipeline::Make_VertexAssembly()
@@ -183,12 +199,11 @@ void Graphic_Pipeline::Add_Shader_Modules(vk::ShaderModule
 void Graphic_Pipeline::Make_Resterization(vk::CullModeFlags cull_mode)
 {
     rasterization_info.setCullMode(cull_mode)
-        .setFrontFace(vk::FrontFace::eCounterClockwise)
-    // .setFrontFace(vk::FrontFace::eClockwise)
-
-    .setLineWidth(1)
-        .setPolygonMode(vk::PolygonMode::eFill)
-        .setRasterizerDiscardEnable(false);
+        //        .setFrontFace(vk::FrontFace::eCounterClockwise)
+        .setFrontFace(vk::FrontFace::eClockwise)
+        .setLineWidth(1)
+        .setPolygonMode(vk::PolygonMode::eFill);
+    //        .setRasterizerDiscardEnable(false);
 }
 
 void Graphic_Pipeline::Make_MultiSample()

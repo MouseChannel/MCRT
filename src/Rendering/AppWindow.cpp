@@ -7,120 +7,126 @@
 #include <cstddef>
 #include <vulkan/vulkan.hpp>
 
-
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 
 #include "android_native_app_glue.h"
 
 #else
-#include <GLFW/glfw3.h>
 #include "stb_image.h"
+#include <GLFW/glfw3.h>
 #endif
 namespace MCRT {
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 
-    Window::Window(ANativeWindow *android_window) {
-        m_window = android_window;
-        auto h = ANativeWindow_getHeight(m_window);
-        auto w = ANativeWindow_getWidth(m_window);
-        Context::Get_Singleton()->set_extent2d(ANativeWindow_getWidth(m_window),
-                                               ANativeWindow_getHeight(m_window));
-    }
+Window::Window(ANativeWindow* android_window)
+{
+    m_window = android_window;
+    auto h = ANativeWindow_getHeight(m_window);
+    auto w = ANativeWindow_getWidth(m_window);
+    Context::Get_Singleton()->set_extent2d(ANativeWindow_getWidth(m_window),
+                                           ANativeWindow_getHeight(m_window));
+}
 
 #else
-    Window::Window(int width, int height)
-    {
+Window::Window(int width, int height)
+{
 
-        glfwInit();
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        // glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+    glfwInit();
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    // glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+    // glfwWindowHint(GLFW_X11_CLASS_NAME, GLFW_TRUE);
+    //   glfwWindowHint( GLFW_X11_INSTANCE_NAME , GLFW_TRUE);
 
-        // glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
-        // std::cout << Context::Get_Singleton()->get_device()->gpu_name << std::endl;
-        // auto rr = Context::Get_Singleton()->get_device()->gpu_name;
-        m_window = glfwCreateWindow(width, height, "MCRT", nullptr, nullptr);
-//        glfwSwapInterval(0);
-//        glfwSetWindowTitle(m_window, "new title");
-        LoadIcon();
+    // glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
+    // std::cout << Context::Get_Singleton()->get_device()->gpu_name << std::endl;
+    // auto rr = Context::Get_Singleton()->get_device()->gpu_name;
+    m_window = glfwCreateWindow(width, height, "MCRT", nullptr, nullptr);
+    //        glfwSwapInterval(0);
+    //        glfwSetWindowTitle(m_window, "new title");
+    LoadIcon();
 
-        //   window.reset(glfwCreateWindow(width, height, "MoChengRT", nullptr, nullptr));
-        //   glfwMakeContextCurrent(window);
-//        glfwSwapInterval(0);
+    //   window.reset(glfwCreateWindow(width, height, "MoChengRT", nullptr, nullptr));
+    //   glfwMakeContextCurrent(window);
+    //        glfwSwapInterval(0);
 
-        assert(m_window);
-        int w = 0, h = 0;
-        glfwGetFramebufferSize(m_window,
-                               &w,
-                               &h);
-        Context::Get_Singleton()->set_extent2d(w, h);
-    }
+    assert(m_window);
+    int w = 0, h = 0;
+    glfwGetFramebufferSize(m_window,
+                           &w,
+                           &h);
+    Context::Get_Singleton()->set_extent2d(w, h);
+}
 
 #endif
 
-    Window::~Window() {
+Window::~Window()
+{
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 #else
-        glfwDestroyWindow(m_window);
+    glfwDestroyWindow(m_window);
 
-        glfwTerminate();
+    glfwTerminate();
 #endif
-    }
+}
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 #else
-    void Window::PollEvents() {
+void Window::PollEvents()
+{
 
-        glfwPollEvents();
+    glfwPollEvents();
 
-        WindowUpdate();
+    WindowUpdate();
+}
+
+bool Window::Should_Close()
+{
+
+    return glfwWindowShouldClose(m_window);
+}
+
+std::vector<int> Window::WindowUpdate()
+{
+    std::vector<int> res(4);
+    int stride = 1;
+    int weight = 2;
+    if (glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS) {
+        res[0] = stride * weight * -1;
     }
 
-    bool Window::Should_Close() {
-
-        return glfwWindowShouldClose(m_window);
-
+    if (glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        res[1] = stride * weight;
     }
 
-    std::vector<int> Window::WindowUpdate() {
-        std::vector<int> res(4);
-        int stride = 1;
-        int weight = 2;
-        if (glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS) {
-            res[0] = stride * weight * -1;
-        }
-
-        if (glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-            res[1] = stride * weight;
-        }
-
-        if (glfwGetKey(m_window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-            res[2] = stride * weight * -1;
-        }
-
-        if (glfwGetKey(m_window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-            res[3] = stride * weight;
-        }
-        return res;
+    if (glfwGetKey(m_window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        res[2] = stride * weight * -1;
     }
 
-    void Window::CreateWindowSurface() {
-        // auto& instance =
-        // Context::Get_Singleton()->Get_Instance();
+    if (glfwGetKey(m_window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        res[3] = stride * weight;
+    }
+    return res;
+}
 
-        // VK_CHECK_SUCCESS(glfwCreateWindowSurface(instance->Get_handle(),
-        // window,
-        //                      nullptr,
-        //                      (VkSurfaceKHR*)(&surface)),
-        // "Error: failed to create
-        // surface");
-    }
-    void Window::LoadIcon()
-    {
-        int width,height,channels;
-        uint8_t* icon = stbi_load("assets/icon.png",&width,&height,&channels,STBI_rgb_alpha);        
-        std::shared_ptr<GLFWimage>icon_p { new GLFWimage(width,height,icon)};
-        glfwSetWindowIcon(m_window,1,icon_p.get());
-    }
+void Window::CreateWindowSurface()
+{
+    // auto& instance =
+    // Context::Get_Singleton()->Get_Instance();
+
+    // VK_CHECK_SUCCESS(glfwCreateWindowSurface(instance->Get_handle(),
+    // window,
+    //                      nullptr,
+    //                      (VkSurfaceKHR*)(&surface)),
+    // "Error: failed to create
+    // surface");
+}
+void Window::LoadIcon()
+{
+    int width, height, channels;
+    uint8_t* icon = stbi_load("assets/icon.png", &width, &height, &channels, STBI_rgb_alpha);
+    std::shared_ptr<GLFWimage> icon_p { new GLFWimage(width, height, icon) };
+    glfwSetWindowIcon(m_window, 1, icon_p.get());
+}
 #endif
 } // namespace MCRT

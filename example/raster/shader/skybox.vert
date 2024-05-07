@@ -1,6 +1,6 @@
 
 #version 460
-// #extension GL_EXT_debug_printf : enable
+#extension GL_EXT_debug_printf : enable
 // #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 #extension GL_GOOGLE_include_directive : enable
 
@@ -36,4 +36,5 @@ void main()
 
     gl_Position = project_matrix * view_matrix * model_matrix * vec4(inPos, 1.);
     outUVW.xy *= -1.0;
+    // debugPrintfEXT("message %f %f %f   \n",gl_Position.x,gl_Position.y,gl_Position.z);
 }

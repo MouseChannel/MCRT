@@ -31,13 +31,11 @@ public:
     {
         // return Get_RenderFrame(current_frame)->Get_render_semaphore();
         return Get_RenderFrame(current_index)->Get_render_semaphore();
-
     }
     [[nodiscard("Missing semaphore")]] auto& Get_cur_present_semaphore()
     {
         // return Get_RenderFrame(current_frame)->Get_present_semaphore();
         return Get_RenderFrame(current_index)->Get_present_semaphore();
-
     }
     // [[nodiscard]] auto Get_cur_index()
     // {
@@ -47,31 +45,30 @@ public:
     {
         // return fences[current_frame];
         return fences[current_index];
-
     }
-    [[nodiscard]] auto get_skybox_pipeline()
-    {
-        return m_skybox_pipeline;
-    } 
-    auto get_present_render_target(){
-        return Get_render_targets(current_index)[2];
-    }
-    auto get_gbuffer_target(){
-        return Get_render_targets(current_index)[3];
-    }
-    auto get_depth_render_target()
-    {
-        return Get_render_targets(current_index)[4];
-    }
+    //    [[nodiscard]] auto get_skybox_pipeline()
+    //    {
+    //        return m_skybox_pipeline;
+    //    }
+    // auto get_present_render_target(){
+    //     return Get_render_targets(current_index)[2];
+    // }
+    // auto get_gbuffer_target(){
+    //     return Get_render_targets(current_index)[3];
+    // }
+    // auto get_depth_render_target()
+    // {
+    //     return Get_render_targets(current_index)[4];
+    // }
 
     std::vector<std::shared_ptr<RenderTarget>>& Get_render_targets(int swapchain_frame = 0)
     {
         return all_rendertargets[swapchain_frame];
     }
-    
+
     void re_create() override;
     std::shared_ptr<Pipeline_base> get_pipeline() override;
-//    std::shared_ptr<Pipeline_base> get_pipeline2();
+    //    std::shared_ptr<Pipeline_base> get_pipeline2();
 
     std::shared_ptr<RenderPass>& Get_render_pass()
     {
@@ -84,47 +81,55 @@ public:
 
     // std::shared_ptr<Framebuffer>& get_framebuffer();
     void Prepare_RenderPass();
-//    void SetSubPass(std::vector<std::shared_ptr<BasePass>> subpasses,std::vector<vk::SubpassDependency> dependencies);
+    //    void SetSubPass(std::vector<std::shared_ptr<BasePass>> subpasses,std::vector<vk::SubpassDependency> dependencies);
     void AddSubPass(std::shared_ptr<BaseSubPass> subpass);
     void AddSubPassDependency(vk::SubpassDependency dependency);
     void prepare() override;
     void post_prepare() override;
     void fill_render_targets();
     void Prepare_Framebuffer();
-    void AddRenderTarget(std::shared_ptr<RenderTarget> renderTarget);
+    int AddSwapchainRenderTarget();
+    int AddDepthRenderTarget();
+    int AddGbufferRenderTarget(vk::Format format);
     void re_create_swapchain();
     void prepare_descriptorset(std::function<void()> prepare_func) override;
     void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size) override;
+ 
     // void prepare_pipeline2(std::vector<std::shared_ptr<ShaderModule>> shader_modules);
     std::shared_ptr<CommandBuffer> BeginFrame() override;
     void Begin_RenderPass(std::shared_ptr<CommandBuffer> cmd);
     void Submit() override;
     void EndFrame() override;
     void record_command(std::shared_ptr<CommandBuffer> cmd) override;
+    auto& get_subpasses()
+    {
+        return m_subpasses;
+    }
 
 private:
-    bool has_inited{false};
+    bool has_inited { false };
     bool enable_swapchain { true };
+    // swapchain count
     int render_frame_count { 1 };
     std::shared_ptr<Device> m_device;
     std::shared_ptr<SwapChain> m_swapchain;
     std::vector<std::vector<std::shared_ptr<RenderTarget>>> all_rendertargets;
     std::vector<std::unique_ptr<RenderFrame>> render_frames;
     std::shared_ptr<RenderPass> m_renderpass;
-    std::shared_ptr<Graphic_Pipeline> m_graphic_pipeline;
-    std::shared_ptr<Graphic_Pipeline> m_skybox_pipeline;
-    std::shared_ptr<ShaderModule> vert_shader, frag_shader;
+    //    std::shared_ptr<Graphic_Pipeline> m_graphic_pipeline;
+    //    std::shared_ptr<Graphic_Pipeline> m_skybox_pipeline;
+    //    std::shared_ptr<ShaderModule> vert_shader, frag_shader;
     std::vector<std::shared_ptr<Fence>> fences;
     // uint32_t current_frame { 0 };
     uint32_t current_index { 0 };
-    std::shared_ptr<Buffer> index_buffer, vertex_buffer, uv_buffer;
+    //    std::shared_ptr<Buffer> index_buffer, vertex_buffer, uv_buffer;
     std::shared_ptr<CommandBuffer> command_buffer;
     std::vector<std::shared_ptr<BaseSubPass>> m_subpasses;
     std::vector<vk::SubpassDependency> m_subpass_dependencies;
-    
 
     std::shared_ptr<CommandBuffer> Begin_Record_Command_Buffer();
     void End_Record_Command_Buffer();
+    // void AddRenderTarget(std::shared_ptr<RenderTarget> renderTarget);
 };
 
 }

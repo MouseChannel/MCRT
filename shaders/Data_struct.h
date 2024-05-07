@@ -88,10 +88,11 @@ struct Vertex // See ObjLoader, copy of VertexObj, could be compressed for devic
 
     static vk::VertexInputBindingDescription make_bind()
     {
-        return vk::VertexInputBindingDescription()
-            .setInputRate(vk::VertexInputRate ::eVertex)
-            .setBinding(0)
-            .setStride(sizeof(Vertex));
+        auto res = vk::VertexInputBindingDescription()
+                       .setInputRate(vk::VertexInputRate ::eVertex)
+                       .setBinding(0)
+                       .setStride(sizeof(Vertex));
+        return res;
     }
     static std::vector<vk::VertexInputAttributeDescription> make_attr()
     {

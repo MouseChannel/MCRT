@@ -69,7 +69,7 @@ void ImGuiContext::Init(std::shared_ptr<Window> window)
     init_info.Queue = context->get_device()->Get_Graphic_queue();
     init_info.PipelineCache = VK_NULL_HANDLE;
     init_info.DescriptorPool = VkDescriptorPool(descriptor_pool);
-    init_info.Subpass = 0;
+    init_info.Subpass = 1;
     init_info.MinImageCount = 2;
     init_info.ImageCount = context->get_swapchain()->Get_Swapchain_Image_size();
     init_info.MSAASamples = (VkSampleCountFlagBits)vk::SampleCountFlagBits::e1;

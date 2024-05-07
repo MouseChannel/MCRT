@@ -27,8 +27,11 @@ public:
     ~Graphic_Pipeline();
     void Make_Layout(vk::DescriptorSetLayout descriptor_layout, uint32_t push_constants_size, vk::ShaderStageFlags push_constants_stage);
 
-    void Make_VertexInput(vk::ArrayProxyNoTemporaries<const vk::VertexInputBindingDescription> const bind,
-                          vk::ArrayProxyNoTemporaries<const vk::VertexInputAttributeDescription> const attr);
+    // void Make_VertexInput(vk::ArrayProxyNoTemporaries<const vk::VertexInputBindingDescription> const bind,
+    //                       vk::ArrayProxyNoTemporaries<const vk::VertexInputAttributeDescription> const attr);
+
+    void Make_VertexInput(vk::VertexInputBindingDescription bind,
+                          std::vector<vk::VertexInputAttributeDescription> attr);
     void Make_VertexAssembly();
     void Make_viewPort();
     void Add_Shader_Modules(vk::ShaderModule shader_module, vk::ShaderStageFlagBits stage);
@@ -38,6 +41,7 @@ public:
     void Make_Blend();
     void Make_attach();
     void Make_OpacityAttach();
+    void Make_Subpass_index(int subpass_index);
     void Make_AlphaAttach();
     auto& get_colorblend_state()
     {
@@ -66,5 +70,8 @@ private:
 
     vk::Viewport viewport;
     vk::Rect2D scissor;
+    vk::VertexInputBindingDescription m_binds;
+    std::vector<vk::VertexInputAttributeDescription> m_attrs;
+    int subpass_index ;
 };
 } // namespace MoCheng3D

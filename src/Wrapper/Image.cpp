@@ -20,6 +20,7 @@ Image::Image(uint32_t width,
     , height(height)
     , m_aspect(aspect)
     , image_type(type)
+    , m_format(format)
     , need_delete(true)
 {
 
@@ -61,6 +62,7 @@ Image::Image(uint32_t width,
     , height(height)
     , m_aspect(aspect)
     , image_type(type)
+    , m_format(format)
     , need_delete(true)
 {
     auto& device = Get_Context_Singleton()->get_device();
@@ -102,6 +104,7 @@ Image::Image(uint32_t width,
     : width(width)
     , height(height)
     , m_aspect(aspect)
+    , m_format(format)
     , layer_count(layer_count)
     , mipmap_level_count(mipmap_level_count)
     , need_delete(true)
@@ -138,6 +141,7 @@ Image::Image(vk::Image other_image,
              vk::ImageAspectFlags aspect)
     : image_layout(image_layout)
     , m_aspect(aspect)
+    , m_format(format)
     , need_delete(false)
 {
 
@@ -402,33 +406,33 @@ void Image::generate_mipmap()
                                                            image_barrier);
 
 #else
-                cmd.pipelineBarrier2(
-                    vk::DependencyInfo()
-                        .setImageMemoryBarriers(
-                            vk::ImageMemoryBarrier2()
-                                .setImage(m_handle)
-                                .setOldLayout(vk::ImageLayout::eUndefined)
-                                .setNewLayout(
-                                    vk::ImageLayout::eTransferDstOptimal)
-                                .setSrcQueueFamilyIndex(
-                                    VK_QUEUE_FAMILY_IGNORED)
-                                .setDstQueueFamilyIndex(
-                                    VK_QUEUE_FAMILY_IGNORED)
-                                .setSrcStageMask(
-                                    vk::PipelineStageFlagBits2::eTransfer)
-                                .setSrcAccessMask(vk::AccessFlagBits2::eNone)
-                                .setDstStageMask(
-                                    vk::PipelineStageFlagBits2::eTransfer)
-                                .setDstAccessMask(
-                                    vk::AccessFlagBits2::eTransferWrite)
-                                .setSubresourceRange(
-                                    vk::ImageSubresourceRange()
-                                        .setAspectMask(
-                                            vk::ImageAspectFlagBits::eColor)
-                                        .setLayerCount(layer_count)
-                                        .setBaseArrayLayer(0)
-                                        .setLevelCount(1)
-                                        .setBaseMipLevel(i))));
+            cmd.pipelineBarrier2(
+                vk::DependencyInfo()
+                    .setImageMemoryBarriers(
+                        vk::ImageMemoryBarrier2()
+                            .setImage(m_handle)
+                            .setOldLayout(vk::ImageLayout::eUndefined)
+                            .setNewLayout(
+                                vk::ImageLayout::eTransferDstOptimal)
+                            .setSrcQueueFamilyIndex(
+                                VK_QUEUE_FAMILY_IGNORED)
+                            .setDstQueueFamilyIndex(
+                                VK_QUEUE_FAMILY_IGNORED)
+                            .setSrcStageMask(
+                                vk::PipelineStageFlagBits2::eTransfer)
+                            .setSrcAccessMask(vk::AccessFlagBits2::eNone)
+                            .setDstStageMask(
+                                vk::PipelineStageFlagBits2::eTransfer)
+                            .setDstAccessMask(
+                                vk::AccessFlagBits2::eTransferWrite)
+                            .setSubresourceRange(
+                                vk::ImageSubresourceRange()
+                                    .setAspectMask(
+                                        vk::ImageAspectFlagBits::eColor)
+                                    .setLayerCount(layer_count)
+                                    .setBaseArrayLayer(0)
+                                    .setLevelCount(1)
+                                    .setBaseMipLevel(i))));
 #endif
                                    });
 
@@ -462,55 +466,55 @@ void Image::generate_mipmap()
                                                                      i)),
                                                      vk::Filter::eLinear);
 #else
-                cmd.blitImage2(vk::BlitImageInfo2()
-                                   .setSrcImage(m_handle)
-                                   .setSrcImageLayout(
-                                       vk::ImageLayout::eTransferSrcOptimal)
-                                   .setDstImage(m_handle)
-                                   .setDstImageLayout(
-                                       vk::ImageLayout::eTransferDstOptimal)
-                                   .setRegions(
-                                       vk::ImageBlit2()
-                                           .setSrcOffsets(
-                                               { vk::Offset3D {
-                                                     0,
-                                                     0,
-                                                     0 },
-                                                 vk::Offset3D {
-                                                     (int)width >> (i - 1),
-                                                     (int)height >> (i - 1),
-                                                     1 } })
-                                           .setDstOffsets(
-                                               { vk::Offset3D {
-                                                     0,
-                                                     0,
-                                                     0 },
-                                                 vk::Offset3D {
-                                                     (int)width >> i,
-                                                     (int)height >> i,
-                                                     1 } })
-                                           .setSrcSubresource(
-                                               vk::ImageSubresourceLayers()
-                                                   .setAspectMask(
-                                                       vk::ImageAspectFlagBits::eColor)
-                                                   .setBaseArrayLayer(
-                                                       0)
-                                                   .setLayerCount(
-                                                       layer_count)
-                                                   .setMipLevel(
-                                                       i -
-                                                       1))
-                                           .setDstSubresource(
-                                               vk::ImageSubresourceLayers()
-                                                   .setAspectMask(
-                                                       vk::ImageAspectFlagBits::eColor)
-                                                   .setBaseArrayLayer(
-                                                       0)
-                                                   .setLayerCount(
-                                                       layer_count)
-                                                   .setMipLevel(
-                                                       i)))
-                                   .setFilter(vk::Filter::eLinear));
+            cmd.blitImage2(vk::BlitImageInfo2()
+                               .setSrcImage(m_handle)
+                               .setSrcImageLayout(
+                                   vk::ImageLayout::eTransferSrcOptimal)
+                               .setDstImage(m_handle)
+                               .setDstImageLayout(
+                                   vk::ImageLayout::eTransferDstOptimal)
+                               .setRegions(
+                                   vk::ImageBlit2()
+                                       .setSrcOffsets(
+                                           { vk::Offset3D {
+                                                 0,
+                                                 0,
+                                                 0 },
+                                             vk::Offset3D {
+                                                 (int)width >> (i - 1),
+                                                 (int)height >> (i - 1),
+                                                 1 } })
+                                       .setDstOffsets(
+                                           { vk::Offset3D {
+                                                 0,
+                                                 0,
+                                                 0 },
+                                             vk::Offset3D {
+                                                 (int)width >> i,
+                                                 (int)height >> i,
+                                                 1 } })
+                                       .setSrcSubresource(
+                                           vk::ImageSubresourceLayers()
+                                               .setAspectMask(
+                                                   vk::ImageAspectFlagBits::eColor)
+                                               .setBaseArrayLayer(
+                                                   0)
+                                               .setLayerCount(
+                                                   layer_count)
+                                               .setMipLevel(
+                                                   i -
+                                                   1))
+                                       .setDstSubresource(
+                                           vk::ImageSubresourceLayers()
+                                               .setAspectMask(
+                                                   vk::ImageAspectFlagBits::eColor)
+                                               .setBaseArrayLayer(
+                                                   0)
+                                               .setLayerCount(
+                                                   layer_count)
+                                               .setMipLevel(
+                                                   i)))
+                               .setFilter(vk::Filter::eLinear));
 
 #endif
                                    });
@@ -544,39 +548,39 @@ void Image::generate_mipmap()
                                                            {},
                                                            image_barrier);
 #else
-                cmd.pipelineBarrier2(
-                    vk::DependencyInfo()
-                        .setImageMemoryBarriers(
-                            vk::ImageMemoryBarrier2()
-                                .setImage(m_handle)
-                                .setOldLayout(
-                                    vk::ImageLayout::eTransferDstOptimal)
-                                .setNewLayout(
-                                    vk::ImageLayout::eTransferSrcOptimal)
-                                .setSrcQueueFamilyIndex(
-                                    VK_QUEUE_FAMILY_IGNORED)
-                                .setDstQueueFamilyIndex(
-                                    VK_QUEUE_FAMILY_IGNORED)
-                                .setSrcStageMask(
-                                    vk::PipelineStageFlagBits2::eTransfer)
-                                .setSrcAccessMask(
-                                    vk::AccessFlagBits2::eTransferWrite)
-                                .setDstStageMask(
-                                    vk::PipelineStageFlagBits2::eTransfer)
-                                .setDstAccessMask(
-                                    vk::AccessFlagBits2::eTransferRead)
-                                .setSubresourceRange(
-                                    vk::ImageSubresourceRange()
-                                        .setAspectMask(
-                                            vk::ImageAspectFlagBits::eColor)
-                                        .setLayerCount(
-                                            layer_count)
-                                        .setBaseArrayLayer(
-                                            0)
-                                        .setLevelCount(
-                                            1)
-                                        .setBaseMipLevel(
-                                            i))));
+            cmd.pipelineBarrier2(
+                vk::DependencyInfo()
+                    .setImageMemoryBarriers(
+                        vk::ImageMemoryBarrier2()
+                            .setImage(m_handle)
+                            .setOldLayout(
+                                vk::ImageLayout::eTransferDstOptimal)
+                            .setNewLayout(
+                                vk::ImageLayout::eTransferSrcOptimal)
+                            .setSrcQueueFamilyIndex(
+                                VK_QUEUE_FAMILY_IGNORED)
+                            .setDstQueueFamilyIndex(
+                                VK_QUEUE_FAMILY_IGNORED)
+                            .setSrcStageMask(
+                                vk::PipelineStageFlagBits2::eTransfer)
+                            .setSrcAccessMask(
+                                vk::AccessFlagBits2::eTransferWrite)
+                            .setDstStageMask(
+                                vk::PipelineStageFlagBits2::eTransfer)
+                            .setDstAccessMask(
+                                vk::AccessFlagBits2::eTransferRead)
+                            .setSubresourceRange(
+                                vk::ImageSubresourceRange()
+                                    .setAspectMask(
+                                        vk::ImageAspectFlagBits::eColor)
+                                    .setLayerCount(
+                                        layer_count)
+                                    .setBaseArrayLayer(
+                                        0)
+                                    .setLevelCount(
+                                        1)
+                                    .setBaseMipLevel(
+                                        i))));
 #endif
                                    });
         int a = 0;

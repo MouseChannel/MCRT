@@ -19,8 +19,8 @@ public:
           vk::ImageAspectFlags aspect,
           vk::SampleCountFlagBits sample);
     /*
-    * for Noise image
-    */
+     * for Noise image
+     */
     Image(uint32_t width,
           uint32_t height,
           uint32_t depth,
@@ -48,7 +48,7 @@ public:
           vk::ImageLayout image_layout,
           vk::Format format,
           vk::ImageAspectFlags aspect);
- 
+
     ~Image();
     void Create_ImageView(vk::Format format);
 
@@ -59,7 +59,7 @@ public:
                         vk::PipelineStageFlags dst_stage_mask);
     void FillImageData(size_t size, void* data);
     void FillImageData(std::vector<size_t> size, std::vector<void*> data);
-    void generate_mipmap( );
+    void generate_mipmap();
     [[nodiscard("Missing ImageView")]] auto& Get_Image_View()
     {
         return image_view;
@@ -68,15 +68,21 @@ public:
     {
         return image_layout;
     }
+    auto& Get_image_format()
+    {
+        return m_format;
+    }
 
-    uint32_t width, height,depth;
-    vk::ImageView image_view;
+    uint32_t width, height, depth;
+
 private:
     uint32_t layer_count = 1, mipmap_level_count = 1;
     vk::DeviceMemory memory;
+    vk::ImageView image_view;
     vk::ImageLayout image_layout { vk::ImageLayout::eUndefined };
     vk::ImageAspectFlags m_aspect;
-    vk::ImageType image_type{vk::ImageType::e2D};
+    vk::ImageType image_type { vk::ImageType::e2D };
+    vk::Format m_format;
     bool need_delete;
     void AllocateMemory();
     uint32_t FindMemoryTypeIndex(uint32_t requirement_type,

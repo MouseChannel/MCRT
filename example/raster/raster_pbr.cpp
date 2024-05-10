@@ -1,5 +1,6 @@
 #include "example/raster/App.hpp"
 #include <iostream>
+#include <vulkan/vulkan_core.h>
 
 int main(int, char**)
 {

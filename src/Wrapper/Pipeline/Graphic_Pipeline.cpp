@@ -45,6 +45,7 @@ Graphic_Pipeline::Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> sh
                  ->get_device()
                  ->get_handle()
                  .createPipelineLayout(layout_create_info);
+    m_push_constants_size = push_constants_size;
 
     shader_stage.resize(2);
     shader_stage[(int)Shader_Stage::VERT]
@@ -199,8 +200,8 @@ void Graphic_Pipeline::Add_Shader_Modules(vk::ShaderModule
 void Graphic_Pipeline::Make_Resterization(vk::CullModeFlags cull_mode)
 {
     rasterization_info.setCullMode(cull_mode)
-        //        .setFrontFace(vk::FrontFace::eCounterClockwise)
-        .setFrontFace(vk::FrontFace::eClockwise)
+                .setFrontFace(vk::FrontFace::eCounterClockwise)
+//        .setFrontFace(vk::FrontFace::eClockwise)
         .setLineWidth(1)
         .setPolygonMode(vk::PolygonMode::eFill);
     //        .setRasterizerDiscardEnable(false);

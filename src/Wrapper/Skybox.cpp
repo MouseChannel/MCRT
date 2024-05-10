@@ -116,8 +116,9 @@ void Skybox::Init(std::string face_dir)
         vk::AccessFlagBits::eShaderRead,
         vk::PipelineStageFlagBits::eTransfer,
         vk::PipelineStageFlagBits::eFragmentShader |
-            vk::PipelineStageFlagBits::eComputeShader |
-            vk::PipelineStageFlagBits::eRayTracingShaderKHR);
+            vk::PipelineStageFlagBits::eComputeShader );
+            // |
+            // vk::PipelineStageFlagBits::eRayTracingShaderKHR);
 }
 
 // Skybox::Skybox(std::string file_dir)
@@ -149,8 +150,9 @@ Skybox::Skybox(int height, int width)
         vk::AccessFlagBits::eShaderRead,
         vk::PipelineStageFlagBits::eTransfer,
         vk::PipelineStageFlagBits::eFragmentShader |
-            vk::PipelineStageFlagBits::eComputeShader |
-            vk::PipelineStageFlagBits::eRayTracingShaderKHR);
+            vk::PipelineStageFlagBits::eComputeShader);
+            //  |
+            // vk::PipelineStageFlagBits::eRayTracingShaderKHR);
 }
 
 Skybox::~Skybox()

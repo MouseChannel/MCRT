@@ -1,5 +1,5 @@
 #pragma once
-#include "Helper/ImGui_Context.hpp"
+// #include "Helper/ImGui_Context.hpp"
 #include <memory>
 
 namespace MCRT {
@@ -15,6 +15,6 @@ public:
 private:
     std::shared_ptr<Window> window;
 
-    std::unique_ptr<ImGuiContext> imgui;
+    // std::unique_ptr<ImGuiContext> imgui;
 };
 } // namespace MCRT

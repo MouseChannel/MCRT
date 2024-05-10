@@ -165,9 +165,9 @@ void GraphicContext::Prepare_RenderPass()
         //        render_target->Make_Subpass(i, render_pass);
         render_pass->Add_Attachment_description(render_target->Get_attachment_description());
     }
-    for (auto& subpass : m_subpasses) {
+    for (auto& subpass : subpasses) {
     }
-    render_pass->Build({ m_subpasses }, m_subpass_dependencies);
+    render_pass->Build({ subpasses }, m_subpass_dependencies);
     //    render_pass->Build();
     //    Context::Get_Singleton()->get_debugger()->set_name(render_pass, "main renderpass");
 }
@@ -255,7 +255,7 @@ void GraphicContext::post_prepare()
 {
     Prepare_RenderPass();
     Prepare_Framebuffer();
-    for (auto& subpass : m_subpasses) {
+    for (auto& subpass : subpasses) {
         subpass->post_prepare();
     }
     //    m_graphic_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
@@ -493,8 +493,8 @@ void GraphicContext::re_create_swapchain()
 }
 void GraphicContext::AddSubPass(std::shared_ptr<BaseSubPass> subpass)
 {
-    subpass->subpass_index = m_subpasses.size();
-    m_subpasses.push_back(subpass);
+    // subpass->subpass_index = m_subpasses.size();
+    subpasses.push_back(subpass);
 }
 void GraphicContext::AddSubPassDependency(vk::SubpassDependency dependency)
 {

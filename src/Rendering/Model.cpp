@@ -26,10 +26,11 @@ Mesh::Mesh(std::string name,
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     auto extra_flag = (vk::BufferUsageFlagBits)0;
 #else
-    auto extra_flag =
-        vk::BufferUsageFlagBits::eShaderDeviceAddress |
-        vk::BufferUsageFlagBits::eStorageBuffer |
-        vk::BufferUsageFlagBits::eAccelerationStructureBuildInputReadOnlyKHR;
+    auto extra_flag = (vk::BufferUsageFlags)0;
+    
+//        vk::BufferUsageFlagBits::eShaderDeviceAddress |
+//        vk::BufferUsageFlagBits::eStorageBuffer |
+//        vk::BufferUsageFlagBits::eAccelerationStructureBuildInputReadOnlyKHR;
 #endif
     vertexs_buffer = Buffer::CreateDeviceBuffer(
         m_vertexs.data(),

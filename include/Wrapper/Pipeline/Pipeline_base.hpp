@@ -15,10 +15,14 @@ public:
     {
         descriptor_sets = sets;
     }
+    [[nodiscard]] auto get_pushconstants_size(){
+        return m_push_constants_size;
+    }
 virtual ~Pipeline_base() = default;
 protected:
     std::vector<vk::DescriptorSet> descriptor_sets;
     std::vector<vk::DescriptorSetLayout> m_descriptor_layouts;
+    int m_push_constants_size;
 };
 
 }

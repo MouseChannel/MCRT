@@ -103,8 +103,9 @@ public:
     void record_command(std::shared_ptr<CommandBuffer> cmd) override;
     auto& get_subpasses()
     {
-        return m_subpasses;
+        return subpasses;
     }
+    std::vector<std::shared_ptr<BaseSubPass>> subpasses;
 
 private:
     bool has_inited { false };
@@ -124,7 +125,6 @@ private:
     uint32_t current_index { 0 };
     //    std::shared_ptr<Buffer> index_buffer, vertex_buffer, uv_buffer;
     std::shared_ptr<CommandBuffer> command_buffer;
-    std::vector<std::shared_ptr<BaseSubPass>> m_subpasses;
     std::vector<vk::SubpassDependency> m_subpass_dependencies;
 
     std::shared_ptr<CommandBuffer> Begin_Record_Command_Buffer();

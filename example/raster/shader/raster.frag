@@ -30,7 +30,7 @@ layout(set = e_graphic, binding = e_camera_matrix) uniform _Camera_matrix
     Camera_matrix camera_matrix;
 };
 
-layout(push_constant) uniform _PushContant
+layout(std430, push_constant) uniform _PushContant
 {
     PC_Raster pc_raster;
 };
@@ -40,9 +40,9 @@ layout(set = e_graphic, binding = e_LUT_image) uniform sampler2D LUT_image;
 void main()
 {
     // debugPrintfEXT("message \n");
-    vec3 modify_uv = vec3(in_skybox_uv.xy, -in_skybox_uv.z);
-    vec4 color = texture(skybox, normalize(modify_uv));
-    color = texture(skybox, modify_uv);
+    // vec3 modify_uv = vec3(in_skybox_uv.xy, -in_skybox_uv.z);
+    // vec4 color = texture(skybox, normalize(modify_uv));
+    // color = texture(skybox, modify_uv);
     //    debugPrintfEXT("messagein test");
     // blinn phong
     // {
@@ -58,23 +58,24 @@ void main()
 
     {
         float roughness = 1;
-        float metallicness = 1;
+        float metallicness = 1.;
         float ambient_occlusion = 1;
         if (pc_raster.metallicness_roughness_texture_index > -1 && bool(pc_raster.use_r_m_map)) {
             vec3 r_m = texture(textures[nonuniformEXT(pc_raster.metallicness_roughness_texture_index)], in_texCoord).xyz;
 
             ambient_occlusion = r_m.x;
-            // roughness = r_m.y;
-            // metallicness = r_m.z;
             roughness = r_m.y;
             metallicness = r_m.z;
-            // metallicness = 0.25;
-            // roughness = 0.25;
             // roughness = 0;
-            // metallicness = 1;
-
             // metallicness = 0;
-            // debugPrintfEXT("message  %f %f\n",metallicness, roughness );
+            // debugPrintfEXT("%f %f \n", roughness,metallicness);
+
+            // if (gl_FragCoord.x > 599 && gl_FragCoord.x < 601 && gl_FragCoord.y > 399 && gl_FragCoord.y < 401)
+            //     debugPrintfEXT("message metallicness %f %f\n", metallicness, roughness);
+            // debugPrintfEXT("%f %f \n", gl_FragCoord.x, gl_FragCoord.y);
+            // if(metallicness>0.8){
+            //    debugPrintfEXT("%f %f \n", gl_FragCoord.x, gl_FragCoord.y);
+            // }
         }
 
         vec3 iinormal = normalize(in_nrm);
@@ -92,6 +93,7 @@ void main()
             albedo = color.xyz;
             alpha = color.w;
         }
+        // debugPrintfEXT("message  %f %f\n",metallicness, roughness );
 
         vec3 color = Get_IBLColor(
             vec3(camera_matrix.camera_pos),
@@ -104,12 +106,12 @@ void main()
             irradiance_cubemap,
             LUT_image);
 
-        // if (bool(pc_raster.use_AO)){
+        if (bool(pc_raster.use_AO)) {
+            // debugPrintfEXT("messag/home/mousechannel/project/MCRT/assets/chair.glbe ao %f\n", ambient_occlusion);
+            color *= ambient_occlusion;
+        }
 
-        //     color *=ambient_occlusion;
-        // }
-
-        outColor = pow(vec4(color, alpha), vec4(1. / pc_raster.gamma));
+        outColor = pow(vec4(color, 1), vec4(1. / pc_raster.gamma));
         // outColor = vec4(iinormal,1 );
     }
     // debugPrintfEXT("message %f %f %f \n",color.x,color.y,color.z );

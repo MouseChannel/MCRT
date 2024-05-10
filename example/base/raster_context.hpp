@@ -13,19 +13,24 @@ class raster_context : public Context {
 public:
     enum Pass_index { Graphic,
 
-                         Compute };
+                      Compute };
+    enum SubPass_index { 
+                         SkyboxSubPassIndex,
+        OpacitySubPassIndex,
+                         IMGUISubPassIndex,
+                         SubPassCount };
     raster_context();
     ~raster_context();
     virtual std::shared_ptr<CommandBuffer> Begin_Frame() override;
     virtual void EndFrame() override;
     virtual void prepare(std::shared_ptr<Window> window) override;
-    //TODO make a skybox context
-//    void SkyboxPass(std::shared_ptr<CommandBuffer> cmd,std::shared_ptr<GraphicContext> graphic_context, std::function<void(std::shared_ptr<CommandBuffer> cmd)> func);
+    // TODO make a skybox context
+    //    void SkyboxPass(std::shared_ptr<CommandBuffer> cmd,std::shared_ptr<GraphicContext> graphic_context, std::function<void(std::shared_ptr<CommandBuffer> cmd)> func);
     virtual void re_create_context() override;
 
 protected:
-//    virtual std::shared_ptr<Graphic_Pipeline> get_skybox_pipeline() = 0;
-    virtual std::shared_ptr<Mesh> get_skybox_mesh() = 0;
+    //    virtual std::shared_ptr<Graphic_Pipeline> get_skybox_pipeline() = 0;
+    // virtual std::shared_ptr<Mesh> get_skybox_mesh() = 0;
     virtual std::shared_ptr<CommandBuffer> BeginGraphicFrame() = 0;
     virtual void EndGraphicFrame() = 0;
     std::shared_ptr<Uniform_Stuff<Camera_matrix>> camera_matrix;

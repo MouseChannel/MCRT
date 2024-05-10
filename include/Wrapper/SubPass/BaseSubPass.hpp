@@ -16,11 +16,14 @@ public:
     //    virtual void set_description();
     //    virtual void prepare_renderTarget();
 
-//    virtual void prepare_descriptorset(std::function<void()> prepare);
+    //    virtual void prepare_descriptorset(std::function<void()> prepare);
     virtual void prepare_pipeline(int pc_size) = 0;
+    // virtual void draw(vk::CommandBuffer& cmd, std::vector<std::shared_ptr<Mesh>>& meshs, void* push_constant) = 0;
+    // virtual void draw1(vk::CommandBuffer& cmd) = 0;
+
     virtual void prepare_vert_shader_module(std::string vert_shader) = 0;
     virtual void prepare_frag_shader_module(std::string frag_shader) = 0;
-    void link_renderTarget(std::vector<int> color_renderTargets,std::vector<int> depth_renderTargets,std::vector<int> input_renderTargets);
+    void link_renderTarget(std::vector<int> color_renderTargets, std::vector<int> depth_renderTargets, std::vector<int> input_renderTargets);
     void set_subpassDependency(vk::SubpassDependency dependency);
     void set_subpassDescription(vk::SubpassDescription des);
     virtual void post_prepare() = 0;
@@ -29,10 +32,10 @@ public:
         return m_pipeline;
     }
     vk::SubpassDescription description;
-//    int get_index(){
-//        return index;
-//    }
-    int subpass_index = -1;
+    //    int get_index(){
+    //        return index;
+    //    }
+    // int subpass_index = -1;
 
 protected:
     std::weak_ptr<GraphicContext> m_graphicContext;
@@ -41,7 +44,7 @@ protected:
     //    std::shared_ptr<DescriptorManager> m_descriptorManager;
     //    std::shared_ptr<ShaderModule> vert_shader;
     //    std::shared_ptr<ShaderModule> frag_shader;
-//    std::vector<vk::AttachmentReference> references;
+    //    std::vector<vk::AttachmentReference> references;
     std::vector<vk::AttachmentReference> color_references;
     std::vector<vk::AttachmentReference> depth_references;
     std::vector<vk::AttachmentReference> input_references;

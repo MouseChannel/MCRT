@@ -22,7 +22,7 @@
 #include "Helper/Model_Loader/gltf_loader.hpp"
 
 #include <execution>
-//#include <pstl/glue_execution_defs.h>
+// #include <pstl/glue_execution_defs.h>
 
 #define using_threadpool1
 
@@ -149,7 +149,7 @@ void copy_data(std::vector<T>& data, const std::vector<unsigned char>& src, tiny
     std::memcpy(data.data(), src.data() + buffer_view.byteOffset, count * sizeof(T));
 }
 
-int handle_texture(tinygltf::Model model, tinygltf::TextureInfo texture_info)
+int handle_texture(tinygltf::Model model, tinygltf::TextureInfo texture_info, bool linear = false)
 {
 
     if (texture_info.index < 0)
@@ -163,13 +163,13 @@ int handle_texture(tinygltf::Model model, tinygltf::TextureInfo texture_info)
     if (image.image.size() < 0)
         return -1;
     // texture_lock.lock();
-    Texture::textures.emplace_back(new Texture(image.image.data(), image.width, image.height, image.image.size()));
+    Texture::textures.emplace_back(new Texture(image.image.data(), image.width, image.height, image.image.size(), linear));
     int index = Texture::textures.size() - 1;
     // texture_lock.unlock();
     return index;
 }
 
-int handle_texture(tinygltf::Model model, tinygltf::NormalTextureInfo texture_info)
+int handle_texture(tinygltf::Model model, tinygltf::NormalTextureInfo texture_info, bool linear = false)
 {
 
     if (texture_info.index < 0)
@@ -183,7 +183,7 @@ int handle_texture(tinygltf::Model model, tinygltf::NormalTextureInfo texture_in
     if (image.image.size() < 0)
         return -1;
     // texture_lock.lock();
-    Texture::textures.emplace_back(new Texture(image.image.data(), image.width, image.height, image.image.size()));
+    Texture::textures.emplace_back(new Texture(image.image.data(), image.width, image.height, image.image.size(), linear));
     int index = Texture::textures.size() - 1;
     // texture_lock.unlock();
     return index;
@@ -380,9 +380,9 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
                 material.emissiveFactor[1],
                 material.emissiveFactor[2],
                 1 },
-            .color_texture_index = handle_texture(model, material.pbrMetallicRoughness.baseColorTexture),
-            .normal_texture_index = handle_texture(model, material.normalTexture),
-            .metallicness_roughness_texture_index = handle_texture(model, material.pbrMetallicRoughness.metallicRoughnessTexture)
+            .color_texture_index = handle_texture(model, material.pbrMetallicRoughness.baseColorTexture, false),
+            .normal_texture_index = handle_texture(model, material.normalTexture, true),
+            .metallicness_roughness_texture_index = handle_texture(model, material.pbrMetallicRoughness.metallicRoughnessTexture, true)
         };
 
         // std::cout << material.emissiveFactor[0] << std::endl;
@@ -479,7 +479,7 @@ void GLTF_Loader::load_model(std::string_view path)
 #endif
 
         load_mesh(glm::mat4 { 1 }, model, node);
-        int  y=0;
+        int y = 0;
     }
 #endif
     // loader.WriteGltfSceneToFile(&model, "test.gltf", true, true, true);

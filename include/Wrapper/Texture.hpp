@@ -7,7 +7,7 @@ class Image;
 class Texture {
 public:
     Texture(std::string_view path);
-    Texture(void* data, uint32_t width, uint32_t height, uint32_t size);
+    Texture(void* data, uint32_t width, uint32_t height, uint32_t size,bool linear = false);
     ~Texture();
     [[nodiscard]] auto get_image()
     {

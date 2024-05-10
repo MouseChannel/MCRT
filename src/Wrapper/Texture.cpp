@@ -5,6 +5,7 @@
 // #define STB_IMAGE_IMPLEMENTATION
 // #endif
 #include "Tool/stb_image.h"
+#include "stb_image_write.h"
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 #include <android/asset_manager.h>
@@ -21,8 +22,9 @@ Texture::Texture(std::string_view path)
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     auto m_app = Context::Get_Singleton()->Get_app();
     AAsset* file = AAssetManager_open(m_app->activity->assetManager,
-                                      ((std::string)path).c_str(), AASSET_MODE_BUFFER);
-    
+                                      ((std::string)path).c_str(),
+                                      AASSET_MODE_BUFFER);
+
     size_t fileLength = AAsset_getLength(file);
 
     std::vector<stbi_uc> source;
@@ -38,6 +40,8 @@ Texture::Texture(std::string_view path)
     //        = stbi_load(file_name.data(), &w, &h, &channel, STBI_rgb_alpha);
     void* pixels = stbi_load(path.data(), &width, &height, &channel, STBI_rgb_alpha);
 #endif
+    stbi_write_png("testout.png", width, height, channel, pixels, width * channel);
+
     size_t size = width * height * 4;
     if (!pixels) {
         throw std::runtime_error("image load failed");
@@ -45,7 +49,7 @@ Texture::Texture(std::string_view path)
     image.reset(new Image(
         width,
         height,
-        vk::Format::eR8G8B8A8Unorm,
+        vk::Format::eR8G8B8A8Srgb,
         vk::ImageType::e2D,
         vk::ImageTiling::eOptimal,
         vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
@@ -62,15 +66,18 @@ Texture::Texture(std::string_view path)
         vk::AccessFlagBits::eTransferWrite,
         vk::AccessFlagBits::eShaderRead,
         vk::PipelineStageFlagBits::eTransfer,
-        vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
+        vk::PipelineStageFlagBits::eFragmentShader);
+    //  | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
 }
 
-Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t size)
+Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t size, bool linear)
 {
+
+    //    stbi_write_png("testout.png", width,height, 4, data, width * 4);
     image.reset(new Image(
         width,
         height,
-        vk::Format::eR8G8B8A8Unorm,
+        linear ? vk::Format::eR8G8B8A8Unorm : vk::Format::eR8G8B8A8Srgb,
         vk::ImageType::e2D,
         vk::ImageTiling::eOptimal,
         vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
@@ -87,7 +94,8 @@ Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t size)
         vk::AccessFlagBits::eTransferWrite,
         vk::AccessFlagBits::eShaderRead,
         vk::PipelineStageFlagBits::eTransfer,
-        vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
+        vk::PipelineStageFlagBits::eFragmentShader);
+    //  | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
 }
 
 Texture::~Texture()
@@ -106,7 +114,7 @@ std::vector<std::shared_ptr<Image>> Texture::get_image_handles()
     }
 
     // add white textures
-    std::shared_ptr<Image> white_image{
+    std::shared_ptr<Image> white_image {
         new Image(1,
                   1,
                   vk::Format::eR8G8B8A8Unorm,
@@ -121,7 +129,8 @@ std::vector<std::shared_ptr<Image>> Texture::get_image_handles()
         vk::AccessFlagBits::eNone,
         vk::AccessFlagBits::eShaderRead,
         vk::PipelineStageFlagBits::eTopOfPipe,
-        vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
+        vk::PipelineStageFlagBits::eFragmentShader);
+    // | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
     image_handles.push_back(white_image);
     return image_handles;
 }

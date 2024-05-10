@@ -133,9 +133,10 @@ vec3 Get_IBLColor(vec3 camera_pos,
     vec3 F = F_SchlickR(max(dot(fragment_world_nrm, V), 0.0), F0, roughness);
     vec3 KS = F;
     vec3 KD = vec3(1.0) - KS;
-    float lengt = length(dot(fragment_world_nrm,V));
-    lengt = length(fragment_world_nrm);
+    // float lengt = length(dot(fragment_world_nrm,V));
+    // lengt = length(fragment_world_nrm);
     // debugPrintfEXT("message %f %f %f\n",F.x,lengt,roughness);
+    //   debugPrintfEXT("message %f %f \n", roughness, metallicness);
     vec3 irradiance = texture(irradiance_cubemap, fragment_world_nrm).rgb;
     vec3 diffuse = albedo * irradiance;
 

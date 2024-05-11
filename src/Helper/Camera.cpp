@@ -37,7 +37,7 @@ void Camera::init()
     glfwGetFramebufferSize(window->get_handle(), &w, &h);
 #endif
     //        auto extent = Context::Get_Singleton()->get_swapchain()->Get_Extent2D();
-    setPerpective(m_fov_angel, (float)w / (float)h, 1e-2f, 1000);
+    setPerpective(m_fov_angel, (float)w / (float)h, 1e-2f, 1e6);
 
     m_vMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
 }
@@ -54,7 +54,7 @@ void Camera::lookAt(glm::vec3 _pos, glm::vec3 _front, glm::vec3 _up)
 void Camera::update()
 {
     m_vMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
-
+    // std::cout << "update" << std::endl;
     Context::Get_Singleton()->reset();
 }
 
@@ -64,6 +64,7 @@ void Camera::move_update()
 #else
     if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_W) == GLFW_PRESS) {
         move(CAMERA_MOVE::MOVE_FRONT);
+        // std::cout<<"front"<<std::endl;
     }
 
     if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_S) == GLFW_PRESS) {
@@ -243,7 +244,7 @@ int32_t Camera::handleAppInput(struct android_app* app, AInputEvent* event)
 
 void Camera::onMouseMove(double _xpos, double _ypos)
 {
-    if(ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureMouse)
+    if (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureMouse)
         return;
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -274,7 +275,6 @@ void Camera::onMouseMove(double _xpos, double _ypos)
 
     float _xOffset = m_xpos - _xpos;
     float _yOffset = m_ypos - _ypos;
-    // std::cout << m_xpos << ' ' << m_ypos << std::endl;
 
     m_xpos = _xpos;
     m_ypos = _ypos;
@@ -297,11 +297,11 @@ void Camera::onMouseMove(double _xpos, double _ypos)
             auto m_top = glm::cross(m_right, m_front);
             auto m_down = -m_top;
 
-            m_position += m_right * _xOffset * 1e-3f + m_top * _yOffset * 1e-3f;;
+            m_position += m_right * _xOffset * 1e-3f + m_top * _yOffset * 1e-3f;
+            ;
             update();
         }
         break;
-
     }
 
 #endif
@@ -319,33 +319,34 @@ void Camera::onMouseScroll(double _xpos, double _ypos)
     update();
 }
 
-
 void Camera::orbit(float x_offset, float y_offset)
 {
     auto origin_pos = m_position;
+    glm::vec3 look_point = m_position + m_front;
     vec4 cur_pos = { m_position, 1 };
-    m_front = glm::normalize(m_position);
+
+  
     vec3 m_right = glm::cross(m_front, m_up);
 
     auto m_top = glm::cross(m_right, m_front);
 
     auto m_matrix = mat4(1);
-    //rotate axe_y
+   
+    // rotate axe_y
     m_matrix = glm::rotate(m_matrix, glm::radians(x_offset), m_top);
-    //rotate axe_x
-    cur_pos = m_matrix * cur_pos;
+    // rotate axe_x
+    cur_pos = m_matrix * glm::vec4(-m_front, 1);
     m_front = glm::normalize(glm::vec3(cur_pos));
-    if (glm::abs(m_front.y) < 0.99) {
+    if (glm::abs(m_front.y) < 0.95 || glm::sign(m_front.y)* y_offset < 0) {
         m_right = glm::cross(m_front, m_up);
         m_matrix = glm::rotate(m_matrix, glm::radians(y_offset), m_right);
         cur_pos = m_matrix * cur_pos;
+        
     }
-    auto fixed_pos = glm::vec3(cur_pos);
+    cur_pos += glm::vec4(look_point, 1);
+    m_front = look_point - glm::vec3(cur_pos);
 
-    m_front = origin_pos - fixed_pos + (-origin_pos);
-    m_position = fixed_pos;
-
+    m_position = cur_pos;
     update();
-
 }
 }

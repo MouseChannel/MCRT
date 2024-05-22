@@ -739,6 +739,7 @@ static void ImGui_ImplVulkan_CreatePipeline(VkDevice device, const VkAllocationC
 
     auto graphic_context = MCRT::Context::Get_Singleton()->get_graphic_context();
     int attach_count = std::max(1, (int)graphic_context->Get_render_targets().size()-1);
+    attach_count = 1;
     VkPipelineColorBlendAttachmentState color_attachment[attach_count];
     for (int i = 0; i < attach_count; ++i) {
         

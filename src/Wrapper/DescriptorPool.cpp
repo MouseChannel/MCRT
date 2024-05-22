@@ -26,6 +26,17 @@ DescriptorPool::DescriptorPool(std::vector<std::tuple<vk::DescriptorType, uint32
                    ->get_handle()
                    .createDescriptorPool(create_info);
 }
+DescriptorPool::DescriptorPool(std::vector<vk::DescriptorPoolSize> ci)
+{
+
+    vk::DescriptorPoolCreateInfo create_info;
+    create_info.setMaxSets(16)
+        .setPoolSizes(ci);
+    m_handle = Get_Context_Singleton()
+                   ->get_device()
+                   ->get_handle()
+                   .createDescriptorPool(create_info);
+}
 
 DescriptorPool::~DescriptorPool()
 {

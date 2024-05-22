@@ -54,7 +54,7 @@ Texture::Texture(std::string_view path)
         vk::ImageTiling::eOptimal,
         vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
         vk::ImageAspectFlagBits::eColor,
-        vk::SampleCountFlagBits::e1));
+        vk::SampleCountFlagBits::e8));
     image->SetImageLayout(vk::ImageLayout::eTransferDstOptimal,
                           vk::AccessFlagBits::eNone,
                           vk::AccessFlagBits::eTransferWrite,
@@ -70,25 +70,124 @@ Texture::Texture(std::string_view path)
     //  | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
 }
 
-Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t size, bool linear)
-{
+// Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t size, bool linear, vk::Format format)
+// {
 
+//     //    stbi_write_png("testout.png", width,height, 4, data, width * 4);
+//     image.reset(new Image(
+//         width,
+//         height,
+//         linear ? vk::Format::eR8G8B8A8Unorm : format,
+//         vk::ImageType::e2D,
+//         vk::ImageTiling::eOptimal,
+//         vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc,
+//         vk::ImageAspectFlagBits::eColor,
+//         vk::SampleCountFlagBits::e1));
+//     image->SetImageLayout(vk::ImageLayout::eTransferDstOptimal,
+//                           vk::AccessFlagBits::eNone,
+//                           vk::AccessFlagBits::eTransferWrite,
+//                           vk::PipelineStageFlagBits::eTopOfPipe,
+//                           vk::PipelineStageFlagBits::eTransfer);
+//     image->FillImageData(size, data);
+
+//     image->SetImageLayout(
+//         vk::ImageLayout::eTransferSrcOptimal,
+//         vk::AccessFlagBits::eTransferWrite,
+//         vk::AccessFlagBits::eShaderRead,
+//         vk::PipelineStageFlagBits::eTransfer,
+//         vk::PipelineStageFlagBits::eFragmentShader |
+//             vk::PipelineStageFlagBits::eComputeShader);
+//     image->generate_mipmap();
+//     // image->SetImageLayout(
+//     //     vk::ImageLayout::eGeneral,
+//     //     vk::AccessFlagBits::eTransferWrite,
+//     //     vk::AccessFlagBits::eShaderRead,
+//     //     vk::PipelineStageFlagBits::eTransfer,
+//     //     vk::PipelineStageFlagBits::eFragmentShader |
+//     //         vk::PipelineStageFlagBits::eComputeShader );
+//     image->SetImageLayout(
+//         vk::ImageLayout::eShaderReadOnlyOptimal,
+//         vk::AccessFlagBits::eTransferWrite,
+//         vk::AccessFlagBits::eShaderRead,
+//         vk::PipelineStageFlagBits::eTransfer,
+//         vk::PipelineStageFlagBits::eFragmentShader);
+//     //  | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
+// }
+
+// Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t size, bool linear, vk::Format format, bool mipmap)
+// {
+//     //    stbi_write_png("testout.png", width,height, 4, data, width * 4);
+//     image.reset(new Image(
+//         width,
+//         height,
+//         linear ? vk::Format::eR8G8B8A8Unorm : format,
+//         vk::ImageType::e2D,
+//         vk::ImageTiling::eOptimal,
+//         vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc,
+//         vk::ImageAspectFlagBits::eColor,
+//         vk::SampleCountFlagBits::e1));
+//     image->SetImageLayout(vk::ImageLayout::eTransferDstOptimal,
+//                           vk::AccessFlagBits::eNone,
+//                           vk::AccessFlagBits::eTransferWrite,
+//                           vk::PipelineStageFlagBits::eTopOfPipe,
+//                           vk::PipelineStageFlagBits::eTransfer);
+//     image->FillImageData(size, data);
+
+//     image->SetImageLayout(
+//         vk::ImageLayout::eTransferSrcOptimal,
+//         vk::AccessFlagBits::eTransferWrite,
+//         vk::AccessFlagBits::eShaderRead,
+//         vk::PipelineStageFlagBits::eTransfer,
+//         vk::PipelineStageFlagBits::eFragmentShader |
+//             vk::PipelineStageFlagBits::eComputeShader);
+//     image->generate_mipmap();
+//     // image->SetImageLayout(
+//     //     vk::ImageLayout::eGeneral,
+//     //     vk::AccessFlagBits::eTransferWrite,
+//     //     vk::AccessFlagBits::eShaderRead,
+//     //     vk::PipelineStageFlagBits::eTransfer,
+//     //     vk::PipelineStageFlagBits::eFragmentShader |
+//     //         vk::PipelineStageFlagBits::eComputeShader );
+//     image->SetImageLayout(
+//         vk::ImageLayout::eShaderReadOnlyOptimal,
+//         vk::AccessFlagBits::eTransferWrite,
+//         vk::AccessFlagBits::eShaderRead,
+//         vk::PipelineStageFlagBits::eTransfer,
+//         vk::PipelineStageFlagBits::eFragmentShader);
+//     //  | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
+// }
+
+Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t size, vk::Format format, int mipmap_level_count)
+{
     //    stbi_write_png("testout.png", width,height, 4, data, width * 4);
     image.reset(new Image(
         width,
         height,
-        linear ? vk::Format::eR8G8B8A8Unorm : vk::Format::eR8G8B8A8Srgb,
+        format,
         vk::ImageType::e2D,
         vk::ImageTiling::eOptimal,
-        vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
+        vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc,
         vk::ImageAspectFlagBits::eColor,
-        vk::SampleCountFlagBits::e1));
+        vk::SampleCountFlagBits::e1,
+        mipmap_level_count));
     image->SetImageLayout(vk::ImageLayout::eTransferDstOptimal,
                           vk::AccessFlagBits::eNone,
                           vk::AccessFlagBits::eTransferWrite,
                           vk::PipelineStageFlagBits::eTopOfPipe,
                           vk::PipelineStageFlagBits::eTransfer);
     image->FillImageData(size, data);
+    if (mipmap_level_count > 1) {
+
+        image->SetImageLayout(
+            vk::ImageLayout::eTransferSrcOptimal,
+            vk::AccessFlagBits::eTransferWrite,
+            vk::AccessFlagBits::eShaderRead,
+            vk::PipelineStageFlagBits::eTransfer,
+            vk::PipelineStageFlagBits::eFragmentShader |
+                vk::PipelineStageFlagBits::eComputeShader);
+        image->generate_mipmap();
+    }
+
     image->SetImageLayout(
         vk::ImageLayout::eShaderReadOnlyOptimal,
         vk::AccessFlagBits::eTransferWrite,
@@ -113,25 +212,25 @@ std::vector<std::shared_ptr<Image>> Texture::get_image_handles()
         image_handles.emplace_back(i->image);
     }
 
-    // add white textures
-    std::shared_ptr<Image> white_image {
-        new Image(1,
-                  1,
-                  vk::Format::eR8G8B8A8Unorm,
-                  vk::ImageType::e2D,
-                  vk::ImageTiling::eOptimal,
-                  vk::ImageUsageFlagBits::eSampled,
-                  vk::ImageAspectFlagBits::eColor,
-                  vk::SampleCountFlagBits::e1)
-    };
-    white_image->SetImageLayout(
-        vk::ImageLayout::eShaderReadOnlyOptimal,
-        vk::AccessFlagBits::eNone,
-        vk::AccessFlagBits::eShaderRead,
-        vk::PipelineStageFlagBits::eTopOfPipe,
-        vk::PipelineStageFlagBits::eFragmentShader);
-    // | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
-    image_handles.push_back(white_image);
+    // // add white textures
+    // std::shared_ptr<Image> white_image {
+    //     new Image(1,
+    //               1,
+    //               vk::Format::eR8G8B8A8Unorm,
+    //               vk::ImageType::e2D,
+    //               vk::ImageTiling::eOptimal,
+    //               vk::ImageUsageFlagBits::eSampled,
+    //               vk::ImageAspectFlagBits::eColor,
+    //               vk::SampleCountFlagBits::e8)
+    // };
+    // white_image->SetImageLayout(
+    //     vk::ImageLayout::eShaderReadOnlyOptimal,
+    //     vk::AccessFlagBits::eNone,
+    //     vk::AccessFlagBits::eShaderRead,
+    //     vk::PipelineStageFlagBits::eTopOfPipe,
+    //     vk::PipelineStageFlagBits::eFragmentShader);
+    // // | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
+    // image_handles.push_back(white_image);
     return image_handles;
 }
 }

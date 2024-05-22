@@ -6,11 +6,11 @@
 #include "Wrapper/Instance.hpp"
 
 #include "Helper/CommandManager.hpp"
+#include "Rendering/AppWindow.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/RenderPass.hpp"
 #include "Wrapper/SwapChain.hpp"
-#include "Rendering/AppWindow.hpp"
 #include "example/base/raster_context.hpp"
 
 namespace MCRT {
@@ -18,6 +18,13 @@ namespace MCRT {
 IMGUISubPass::IMGUISubPass(std::weak_ptr<GraphicContext> graphicContext)
     : BaseSubPass(graphicContext)
 {
+}
+IMGUISubPass::~IMGUISubPass(){
+    ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+     ImGui::DestroyContext();
+     std::cout<<"here"<<std::endl;
+     Context::Get_Singleton()->get_device()->get_handle().destroy(descriptor_pool);
 }
 void IMGUISubPass::prepare_vert_shader_module(std::string vert_shader)
 {
@@ -114,7 +121,7 @@ void IMGUISubPass::drawUI(std::shared_ptr<CommandBuffer> cmd, std::function<void
     {
 
         ImGui::Begin(
-            "setting"); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+            "setting",NULL, ImGuiWindowFlags_NoScrollbar); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
         ImGui::SetWindowPos(ImVec2(0, 0), ImGuiCond_Once);
         func();
 

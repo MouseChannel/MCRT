@@ -81,7 +81,12 @@ public:
     } queue_family_indices;
 
     //   QueueFamilyIndices queue_family_indices;
-    char* gpu_name;
+    char* gpu_name; 
+
+
+    auto get_properties(){
+        return properties;;
+    }
 
 private:
     void QueryQueueFamilyIndices();
@@ -93,6 +98,7 @@ private:
     vk::Queue compute_queue;
     vk::SampleCountFlagBits sampler_count;
     vk::FormatProperties supported_formats;
+    vk::PhysicalDeviceProperties properties;
     uint8_t m_deviceUUID[VK_UUID_SIZE];
 };
 } // namespace MoCheng3D

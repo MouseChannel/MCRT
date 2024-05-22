@@ -11,7 +11,7 @@ template <typename T, typename K>
 class Component {
 
 protected:
-    T m_handle  ;
+    T m_handle;
 
     [[nodiscard]] auto& Get_Context_Singleton()
     {
@@ -19,7 +19,7 @@ protected:
     }
 
 public:
-    [[nodiscard]]virtual T& get_handle()
+    [[nodiscard]] virtual T& get_handle()
     {
         // assert(m_handle);
         return m_handle;
@@ -30,7 +30,7 @@ public:
     }
     ~Component()
     {
-        // std::cout << typeid(K).name() << std::endl;
+        // std::cout << typeid(K).name()  << std::endl;
     }
 };
 } // namespace MCRT

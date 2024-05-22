@@ -9,6 +9,7 @@ namespace MCRT {
 class IMGUISubPass : public BaseSubPass {
 public:
     IMGUISubPass(std::weak_ptr<GraphicContext> graphicContext);
+    ~IMGUISubPass();
     void prepare_vert_shader_module(std::string vert_shader) override;
     void prepare_frag_shader_module(std::string frag_shader) override;
     //    void  prepare_descriptorset(std::function<void()> prepare)override;

@@ -9,15 +9,16 @@ using vec4 = glm::vec4;
 #define raster_push_constants
 struct PC_Raster {
     mat4 model_matrix;
-
-//    mat4 view_matrix;
-//    vec4 camera_pos;
-
+    vec4 light_pos;
     int color_texture_index;
     int metallicness_roughness_texture_index;
     int normal_texture_index;
-    int flag;
-    vec4 light_pos;
+   
+
+
+    // bool use_normal_map;
+    // bool use_r_m_map;
+    // bool use_AO;
 
     int use_normal_map;
     int use_r_m_map;

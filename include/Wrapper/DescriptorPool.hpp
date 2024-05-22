@@ -7,6 +7,7 @@ class DescriptorSet;
 class DescriptorPool : public Component<vk::DescriptorPool, DescriptorPool> {
 public:
     DescriptorPool(std::vector<std::tuple<vk::DescriptorType, uint32_t>> type_size);
+    DescriptorPool(std::vector<vk::DescriptorPoolSize> ci);
 
     ~DescriptorPool();
     // std::shared_ptr<DescriptorSet> CreateDescriptorSet();

@@ -7,9 +7,9 @@
 
 #include "Tool/stb_image_write.h"
 
-#include <Wrapper/Skybox.hpp>
+// #include <Wrapper/Skybox.hpp>
 #include <filesystem>
-
+#include "Helper/Debugger.hpp"
 
 namespace MCRT {
 void ImageWriter::WriteImage(std::shared_ptr<Image> image)
@@ -28,6 +28,7 @@ void ImageWriter::WriteImage(std::shared_ptr<Image> image)
             image_size,
             vk::BufferUsageFlagBits::eTransferDst,
             vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible));
+Context::Get_Singleton()->get_debugger()->set_name(dst_buffer,"Image write buffer");
 
     CommandManager::ExecuteCmd(Context::Get_Singleton()
                                    ->get_device()

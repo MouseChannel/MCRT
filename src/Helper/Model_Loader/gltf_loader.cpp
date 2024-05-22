@@ -163,7 +163,7 @@ int handle_texture(tinygltf::Model model, tinygltf::TextureInfo texture_info, bo
     if (image.image.size() < 0)
         return -1;
     // texture_lock.lock();
-    Texture::textures.emplace_back(new Texture(image.image.data(), image.width, image.height, image.image.size(), linear));
+    Texture::textures.emplace_back(new Texture(image.image.data(), image.width, image.height, image.image.size(), vk::Format::eR8G8B8A8Unorm));
     int index = Texture::textures.size() - 1;
     // texture_lock.unlock();
     return index;
@@ -183,7 +183,7 @@ int handle_texture(tinygltf::Model model, tinygltf::NormalTextureInfo texture_in
     if (image.image.size() < 0)
         return -1;
     // texture_lock.lock();
-    Texture::textures.emplace_back(new Texture(image.image.data(), image.width, image.height, image.image.size(), linear));
+    Texture::textures.emplace_back(new Texture(image.image.data(), image.width, image.height, image.image.size(), vk::Format::eR8G8B8A8Unorm));
     int index = Texture::textures.size() - 1;
     // texture_lock.unlock();
     return index;
@@ -192,9 +192,9 @@ int handle_texture(tinygltf::Model model, tinygltf::NormalTextureInfo texture_in
 std::shared_ptr<Mesh> GLTF_Loader::load_skybox(std::string_view path)
 {
     load_model(path);
-    auto sky_box = Mesh::meshs[Mesh::meshs.size() - 1];
-    Mesh::meshs.pop_back();
-    std::cout << "mesh :" << Mesh::meshs.size() << std::endl;
+    auto sky_box = Mesh::all_meshs[Mesh::all_meshs.size() - 1];
+    Mesh::all_meshs.pop_back();
+    std::cout << "mesh :" << Mesh::all_meshs.size() << std::endl;
     return sky_box;
 }
 
@@ -216,6 +216,9 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> texcoord;
+    std::vector<glm::vec4> tangents;
+
+    std::vector<glm::vec3> bitangents;
     std::vector<Triangle> triangles;
     std::vector<unsigned short> indexs;
     // node_number += node.children.size() + 1;
@@ -256,24 +259,24 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
             local_matrix[2][2],
             local_matrix[3][2]
         };
-        transform[0] = {
-            local_matrix[0][0],
-            local_matrix[0][1],
-            local_matrix[0][2],
-            local_matrix[0][3]
-        };
-        transform[1] = {
-            local_matrix[1][0],
-            local_matrix[1][1],
-            local_matrix[1][2],
-            local_matrix[1][3]
-        };
-        transform[2] = {
-            local_matrix[2][0],
-            local_matrix[2][1],
-            local_matrix[2][2],
-            local_matrix[2][3]
-        };
+        // transform[0] = {
+        //     local_matrix[0][0],
+        //     local_matrix[0][1],
+        //     local_matrix[0][2],
+        //     local_matrix[0][3]
+        // };
+        // transform[1] = {
+        //     local_matrix[1][0],
+        //     local_matrix[1][1],
+        //     local_matrix[1][2],
+        //     local_matrix[1][3]
+        // };
+        // transform[2] = {
+        //     local_matrix[2][0],
+        //     local_matrix[2][1],
+        //     local_matrix[2][2],
+        //     local_matrix[2][3]
+        // };
     }
     if (primitive.mode != 4) {
         throw std::runtime_error("not triangle");
@@ -343,6 +346,22 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
             copy_data(texcoord, model.buffers[buffer_view.buffer].data, buffer_view, accessor_texcoord.count);
         }
     }
+
+    { // TANGENT
+        tangents.clear();
+        if (primitive.attributes.contains("TANGENT")) {
+
+            auto texcoord_index = primitive.attributes["TANGENT"];
+            auto accessor_texcoord = get_accessor(texcoord_index);
+
+            auto buffer_view = get_buffer_view(texcoord_index);
+
+            if (accessor_texcoord.type != TINYGLTF_TYPE_VEC4) {
+                throw std::runtime_error("tangent format is not vec4");
+            }
+            copy_data(tangents, model.buffers[buffer_view.buffer].data, buffer_view, accessor_texcoord.count);
+        }
+    }
     vertexs.clear();
     indices.clear();
     triangles.clear();
@@ -353,7 +372,12 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
             vertexs.emplace_back(Vertex {
                 .pos = positions[indexs[i + j]],
                 .nrm = normals[indexs[i + j]],
-                .texCoord = texcoord.empty() ? glm::vec2 { 0 } : texcoord[indexs[i + j]] });
+                .texCoord = texcoord.empty() ? glm::vec2 { 0 } : texcoord[indexs[i + j]],
+                .tangent = tangents.empty() ? glm::vec3 { 0 } : tangents[indexs[i + j]],
+                .bitangent = tangents.empty() ? glm::vec4 { 0 } : glm::cross(normals[indexs[i + j]], glm::vec3(tangents[indexs[i + j]]) * tangents[indexs[i + j]].w)
+
+            });
+
             indices.push_back(indices.size());
             triangle_pos[j] = positions[indexs[i + j]];
         }
@@ -364,6 +388,7 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
     Material cur_material;
     {
         tinygltf::Material material;
+
         material.emissiveFactor = std::vector<double> { 0, 0, 0 };
         if (primitive.material >= 0) {
             material = model.materials[primitive.material];
@@ -392,12 +417,12 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
         }
     }
     // texture_lock.lock();
-    Mesh::meshs.emplace_back(new Mesh(node.name,
-                                      vertexs,
-                                      indices,
-                                      triangles,
-                                      cur_material,
-                                      transform));
+    Mesh::all_meshs.emplace_back(new Mesh(node.name,
+                                          vertexs,
+                                          indices,
+                                        //   triangles,
+                                          cur_material,
+                                          transform));
     // texture_lock.unlock();
     return local_matrix;
 }

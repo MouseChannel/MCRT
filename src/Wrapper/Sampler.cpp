@@ -1,5 +1,7 @@
 #include "Wrapper/Sampler.hpp"
 #include "Wrapper/Device.hpp"
+ 
+#include <cfloat>
 namespace MCRT {
 
 Sampler::Sampler()
@@ -7,20 +9,20 @@ Sampler::Sampler()
     vk::SamplerCreateInfo create_info;
     create_info.setMagFilter(vk::Filter::eLinear)
         .setMinFilter(vk::Filter::eLinear)
-        .setAddressModeU(vk::SamplerAddressMode::eMirroredRepeat)
-        .setAddressModeV(vk::SamplerAddressMode::eMirroredRepeat)
-        .setAddressModeW(vk::SamplerAddressMode::eMirroredRepeat)
-        .setAnisotropyEnable(false)
-        .setBorderColor(vk::BorderColor::eIntOpaqueBlack)
-        .setUnnormalizedCoordinates(false)
-        .setCompareEnable(false)
-        .setMipmapMode(vk::SamplerMipmapMode::eLinear)
-        .setCompareOp(vk::CompareOp::eNever)
-        .setMaxAnisotropy(1)
-        .setMipLodBias(0)
-        .setAnisotropyEnable(false)
+        .setBorderColor(vk::BorderColor::eFloatTransparentBlack)
+        .setAnisotropyEnable(true)
+        .setMaxAnisotropy(Context::Get_Singleton()->get_device()->get_properties().limits.maxSamplerAnisotropy)
         .setMinLod(0)
-        .setMaxLod(10);
+        .setMaxLod(FLT_MAX)
+        .setMipmapMode(vk::SamplerMipmapMode::eLinear)
+        // .setAddressModeU(vk::SamplerAddressMode::eRepeat)
+        // .setAddressModeV(vk::SamplerAddressMode::eRepeat)
+        // .setAddressModeW(vk::SamplerAddressMode::eRepeat)
+        // .setUnnormalizedCoordinates(false)
+        // .setCompareEnable(false)
+        // .setCompareOp(vk::CompareOp::eNever)
+        // .setMipLodBias(0)
+         ;
     m_handle = Get_Context_Singleton()
                    ->get_device()
                    ->get_handle()

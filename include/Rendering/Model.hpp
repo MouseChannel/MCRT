@@ -2,6 +2,7 @@
 #include "Rendering/Material.hpp"
 #include "glm/glm.hpp"
 #include "shaders/Data_struct.h"
+#include <assimp/mesh.h>
 #include <memory>
 #include <string_view>
 #include <vulkan/vulkan.hpp>
@@ -31,7 +32,7 @@ public:
     Mesh(std::string name,
          std::vector<Vertex>& vertexs,
          std::vector<uint32_t>& indexs,
-         std::vector<Triangle>& triangles,
+        //  std::vector<Triangle>& triangles,
          Material material,
          std::array<std::array<float, 4>, 3> transform = std::array<std::array<float, 4>, 3> {
              { 1,
@@ -46,6 +47,8 @@ public:
                0,
                1,
                0 } });
+
+    Mesh(aiMesh* mesh);
     [[nodiscard]] auto get_vertex_buffer()
     {
         return vertexs_buffer;
@@ -63,7 +66,13 @@ public:
         return m_index.size();
     }
     static std::vector<ObjInstance> obj_instances;
-    static std::vector<std::shared_ptr<Mesh>> meshs;
+    static std::vector<std::shared_ptr<Mesh>> all_meshs;
+
+    static std::vector<std::shared_ptr<Mesh>> opacity_meshs;
+    static std::vector<std::shared_ptr<Mesh>> transparency_meshs;
+    static std::vector<Material> materials;
+    static std::shared_ptr<Mesh> LoadFromFile(std::string path);
+
 
     static void update_accelerate_structure_data();
     void set_index(int index)
@@ -128,7 +137,7 @@ private:
             1,
             0
         };
-    std::vector<Triangle> triangles;
+    // std::vector<Triangle> triangles;
 };
 
 } // namespace MCRT

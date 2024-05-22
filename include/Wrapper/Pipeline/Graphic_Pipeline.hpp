@@ -18,14 +18,14 @@ public:
         shader_stage_count
     };
     enum class Shader_Stage {
-        VERT ,
+        VERT,
         FRAG
     };
     Graphic_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shaders,
                      std::vector<std::shared_ptr<DescriptorSet>> sets,
                      int push_constants_size);
     ~Graphic_Pipeline();
-    void Make_Layout(vk::DescriptorSetLayout descriptor_layout, uint32_t push_constants_size, vk::ShaderStageFlags push_constants_stage);
+    // void    Make_Layout(vk::DescriptorSetLayout descriptor_layout, uint32_t push_constants_size, vk::ShaderStageFlags push_constants_stage);
 
     // void Make_VertexInput(vk::ArrayProxyNoTemporaries<const vk::VertexInputBindingDescription> const bind,
     //                       vk::ArrayProxyNoTemporaries<const vk::VertexInputAttributeDescription> const attr);
@@ -36,23 +36,23 @@ public:
     void Make_viewPort();
     void Add_Shader_Modules(vk::ShaderModule shader_module, vk::ShaderStageFlagBits stage);
     void Make_Resterization(vk::CullModeFlags cull_mode = vk::CullModeFlagBits::eBack);
-    void Make_DepthTest(bool inable_test = true);
-    void Make_MultiSample();
+    void Make_DepthTest(bool enable_test = true, bool enable_write = true);
+    void Make_MultiSample(vk::SampleCountFlagBits sample_count = vk::SampleCountFlagBits::e1);
     void Make_Blend();
-    void Make_attach();
-    void Make_OpacityAttach();
+    // void Make_attach();
+    void Make_OpacityAttach(int attach_count);
     void Make_Subpass_index(int subpass_index);
-    void Make_AlphaAttach();
+    void Make_AlphaAttach(int attach_count);
     auto& get_colorblend_state()
     {
         return blend;
     }
 
     void Build_Pipeline(std::shared_ptr<RenderPass> render_pass);
-    vk::PipelineLayout get_layout() override
-    {
-        return layout;
-    }
+    // vk::PipelineLayout get_layout() override
+    // {
+    //     return layout;
+    // }
 
 private:
     vk::PipelineVertexInputStateCreateInfo input_state;
@@ -66,12 +66,12 @@ private:
     vk::PipelineDepthStencilStateCreateInfo depth_test;
     vk::PipelineColorBlendStateCreateInfo blend;
     std::vector<vk::PipelineColorBlendAttachmentState> attachs;
-    vk::PipelineLayout layout;
+    // vk::PipelineLayout layout;
 
     vk::Viewport viewport;
     vk::Rect2D scissor;
     vk::VertexInputBindingDescription m_binds;
     std::vector<vk::VertexInputAttributeDescription> m_attrs;
-    int subpass_index ;
+    int subpass_index;
 };
 } // namespace MoCheng3D

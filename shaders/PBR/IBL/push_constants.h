@@ -1,3 +1,11 @@
 struct PushContant_IBL {
-    int doing_filter;
+    int level;
+
+    float roughness;
+};
+
+struct PushContant_SKYBOX {
+    int level;
+
+    float roughness;
 };

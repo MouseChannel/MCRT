@@ -26,6 +26,7 @@ Device::Device()
     }
     std::cout << "use :" << physical_device.getProperties().deviceName << std::endl;
     gpu_name = physical_device.getProperties().deviceName;
+    properties = physical_device.getProperties();
     std::string window_name = gpu_name;
     //    glfwSetWindowTitle(Context::Get_Singleton()->get_window()->get_handle(), window_name.c_str());
     //    glfwSetWindowTitle(Context::Get_Singleton()->get_window()->get_handle(), physical_device.getProperties().deviceName);
@@ -86,21 +87,21 @@ Device::Device()
 #else
     {
         // get deviceuuid
-//        vk::PhysicalDeviceIDPropertiesKHR deviceID;
-//        vk::PhysicalDeviceProperties2 properties2;
-//        properties2.pNext = &deviceID;
-//
-//        physical_device.getProperties2(&properties2);
-//        memcpy(m_deviceUUID, deviceID.deviceUUID, VK_UUID_SIZE);
+        //        vk::PhysicalDeviceIDPropertiesKHR deviceID;
+        //        vk::PhysicalDeviceProperties2 properties2;
+        //        properties2.pNext = &deviceID;
+        //
+        //        physical_device.getProperties2(&properties2);
+        //        memcpy(m_deviceUUID, deviceID.deviceUUID, VK_UUID_SIZE);
     }
 
     auto feature = physical_device.getFeatures2<vk::PhysicalDeviceFeatures2,
                                                 vk::PhysicalDeviceVulkan13Features,
                                                 vk::PhysicalDeviceVulkan12Features,
                                                 vk::PhysicalDeviceVulkan11Features,
-                                                 vk::PhysicalDeviceRayTracingPipelineFeaturesKHR,
-                                                 vk::PhysicalDeviceAccelerationStructureFeaturesKHR,
-                                                 vk::PhysicalDeviceRayQueryFeaturesKHR,
+                                                vk::PhysicalDeviceRayTracingPipelineFeaturesKHR,
+                                                vk::PhysicalDeviceAccelerationStructureFeaturesKHR,
+                                                vk::PhysicalDeviceRayQueryFeaturesKHR,
                                                 vk::PhysicalDeviceShaderClockFeaturesKHR>();
 
     new_create_info
@@ -117,7 +118,7 @@ Device::Device()
 #endif
     //    physical_device.createDevice(&new_create_info,nullptr, &m_handle);
     m_handle = physical_device.createDevice(new_create_info);
-    std::cout << "success create device" << std::endl;
+    std::cout << "success create device" << m_handle << std::endl;
     graphic_queue = m_handle.getQueue(queue_family_indices.graphic_queue.value(), 0);
     present_queue = m_handle.getQueue(queue_family_indices.present_queue.value(), 0);
     compute_queue = m_handle.getQueue(queue_family_indices.compute_queue.value(), 0);

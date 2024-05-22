@@ -20,7 +20,7 @@ void Obj_loader::load_model(std::string_view obj_path)
     auto attrib = reader.GetAttrib();
     auto shapes = reader.GetShapes();
     auto materials = reader.GetMaterials();
-    Mesh::meshs.clear();
+    Mesh::all_meshs.clear();
     std::vector<Vertex> vertexs;
     std::vector<uint32_t> indexs;
     std::vector<Triangle> triangles;
@@ -64,8 +64,12 @@ void Obj_loader::load_model(std::string_view obj_path)
         // if (shape.name == "mocheng.003_mocheng.003" || shape.name == "mocheng_mocheng") {
         //     cur_material.reflect = true;
         // }
-        // Texture a("D:/BaiduNetdiskDownload/�?爱卡通女孩儿模型/�?爱卡通女孩儿模型/scene/mat4_c.jpg");
-        Mesh::meshs.emplace_back(new Mesh(shape.name, vertexs, indexs, triangles, cur_material));
+        // Texture a("D:/BaiduNetdiskDownload/�?爱卡通女孩儿模型/�?爱卡通女孩儿模型/scene/mat4_c.jpg");
+        Mesh::all_meshs.emplace_back(new Mesh(shape.name,
+                                              vertexs,
+                                              indexs,
+                                            //   triangles,
+                                              cur_material));
     }
 }
 }

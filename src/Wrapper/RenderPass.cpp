@@ -15,7 +15,6 @@ void RenderPass::Add_Attachment_description(vk::AttachmentDescription attach_des
 void RenderPass::Build()
 {
     subpass.setColorAttachments(attach_references);
- 
 
     vk::SubpassDependency subpass_dependency {};
 

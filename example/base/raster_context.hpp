@@ -11,16 +11,20 @@ class Buffer;
 class Graphic_Pipeline;
 class raster_context : public Context {
 public:
-    enum Pass_index { Graphic,
+    // enum Pass_index { Graphic,
 
-                      Compute };
-    enum SubPass_index { 
-                         SkyboxSubPassIndex,
+    //                   Compute };
+    enum SubPass_index {
+        SkyboxSubPassIndex,
+        // GbufferSubPassIndex,
         OpacitySubPassIndex,
-                         IMGUISubPassIndex,
-                         SubPassCount };
+        // TransparencySubPassIndex,
+        ToneMapSubPassIndex,
+        IMGUISubPassIndex,
+        SubPassCount
+    };
     raster_context();
-    ~raster_context();
+    virtual ~raster_context();
     virtual std::shared_ptr<CommandBuffer> Begin_Frame() override;
     virtual void EndFrame() override;
     virtual void prepare(std::shared_ptr<Window> window) override;

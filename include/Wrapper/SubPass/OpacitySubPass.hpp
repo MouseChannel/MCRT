@@ -1,5 +1,5 @@
 #pragma once
-#include "Rendering/Render_Target/DepthTarget.hpp"
+// #include "Rendering/Render_Target/DepthTarget.hpp"
 #include "Rendering/Render_Target/SwapChainTarget.hpp"
 #include "include/Wrapper/SubPass/BaseSubPass.hpp"
 #include "memory"
@@ -13,6 +13,15 @@ public:
     //    void  prepare_descriptorset(std::function<void()> prepare)override;
     void prepare_pipeline(int pc_size) override;
     void post_prepare() override;
+     int get_DescriptorSetCount() override
+    {
+        return 1;
+    }
+    // vk::DescriptorSet get_DescriptorSet(int index = 0) override
+    // {
+    //     return m_descriptorSet->get_handle()[index];
+    // }
+    
     // void draw(vk::CommandBuffer& cmd,std::vector<std::shared_ptr<Mesh>>&  meshs,void* push_constant) override;
     // void draw1(vk::CommandBuffer& cmd) override;
 

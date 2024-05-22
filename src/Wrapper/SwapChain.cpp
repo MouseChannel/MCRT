@@ -38,7 +38,7 @@ SwapChain::SwapChain()
         .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
 #else
         .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
-        .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eStorage)
+        .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment )
 #endif
         .setImageExtent(surfaceInfo.extent)
         .setImageColorSpace(surfaceInfo.format.colorSpace)

@@ -1,14 +1,16 @@
 #include "Rendering/GraphicContext.hpp"
 #include "Helper/CommandManager.hpp"
-#include "Helper/DescriptorManager.hpp"
+// #include "Helper/DescriptorManager.hpp"
 #include "Rendering/AppWindow.hpp"
-#include "Rendering/ComputePass.hpp"
+#include "Rendering/ComputeContext.hpp"
 #include "Rendering/Model.hpp"
 #include "Rendering/RaytracingPass.hpp"
 #include "Rendering/Render_Frame.hpp"
 #include "Rendering/Render_Target/Color_Render_Target.hpp"
 #include "Rendering/Render_Target/Depth_Render_Target.hpp"
 #include "Rendering/Render_Target/Gbuffer_RenderTarget.hpp"
+#include "Rendering/Render_Target/Resover_Render_Target.hpp"
+#include "Rendering/Render_Target/SwapChainTarget.hpp"
 
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/DescriptorSet.hpp"
@@ -29,9 +31,8 @@ GraphicContext::GraphicContext(std::shared_ptr<Device> device)
 {
 
     if (enable_swapchain) {
-        // m_swapchain.reset(new SwapChain);
-        // Context::Get_Singleton()->set_swapchain(m_swapchain);
-        Context::Get_Singleton()->get_swapchain().reset(new SwapChain);
+
+        Context::Get_Singleton()->set_swapchain(std::make_shared<SwapChain>());
 
         m_swapchain = Context::Get_Singleton()->get_swapchain();
         render_frame_count = m_swapchain->Get_Swapchain_Image_size();
@@ -41,104 +42,77 @@ GraphicContext::GraphicContext(std::shared_ptr<Device> device)
     }
 }
 
-GraphicContext::GraphicContext()
+GraphicContext::~GraphicContext()
 {
-    command_buffer.reset();
-    fences.clear();
-    m_renderpass.reset();
-    render_frames.clear();
-    m_swapchain.reset();
-    m_device.reset();
 }
 
-std::shared_ptr<Pipeline_base> GraphicContext::get_pipeline()
-{
-    throw std::runtime_error("graphic context has no global Pipeline, only has subpass_Pipeline! ");
-    //    return m_graphic_pipeline;
-}
-
-// std::shared_ptr<Pipeline_base> GraphicPass::get_pipeline2()
-//{
-//     return m_skybox_pipeline;
-// }
 void GraphicContext::fill_render_targets()
 {
     auto count { enable_swapchain ? render_frame_count : 1 };
 
-    all_rendertargets.clear();
-    all_rendertargets.resize(count);
+    if (all_rendertargets.empty()) {
+
+        all_rendertargets.clear();
+        all_rendertargets.resize(count);
+    }
     { // recreate renderTarget
         for (int i = 0; i < all_rendertargets.size(); i++) {
             auto cur_swapchain_img = m_swapchain->Get_Images()[i];
             for (int j = 0; j < all_rendertargets[i].size(); j++) {
                 auto& cur = all_rendertargets[i][j];
-                switch (cur->type) {
-                case RenderTarget::COLOR:
-                    all_rendertargets[i][j] = Color_RenderTarget::Create(cur_swapchain_img);
-                    break;
-                case RenderTarget::DEPTH:
-                    all_rendertargets[i][j] = Depth_RenderTarget::Create();
-                    break;
-                case RenderTarget::GBUFFER:
-                    all_rendertargets[i][j] = GBuffer_RenderTarget::Create(cur->Get_Image()->Get_image_format());
-                    break;
-                }
+                cur->recreate(i);
             }
-            // std::for_each(all_rendertargets[i].begin(), all_rendertargets[i].end(), [&](auto& old_item) {
-            // });
         }
     }
-    //     for (auto i { 0 }; i < count; i++) {
-    //         //        auto swapchain_image_handle = m_swapchain->Get_Swapchain_ImagesHandle()[i];
-    //         //        std::shared_ptr<Image> swapchain_image {
-    //         //            new Image(swapchain_image_handle,
-    //         //                      vk::ImageLayout::eColorAttachmentOptimal,
-    //         //                      m_swapchain->Get_Format(),
-    //         //                      vk::ImageAspectFlagBits::eColor)
-    //         //        };
-
-    //         auto swapchain_image = m_swapchain->Get_Images()[i];
-    //         all_rendertargets[i].emplace_back(Color_RenderTarget::Create(swapchain_image));
-    //         all_rendertargets[i].emplace_back(Depth_RenderTarget::Create());
-
-    // #ifndef VK_USE_PLATFORM_ANDROID_KHR
-
-    //         all_rendertargets[i].emplace_back(GBuffer_RenderTarget::Create(vk::ImageUsageFlagBits::eColorAttachment, vk::Format::eR32G32B32A32Sfloat));
-    //         all_rendertargets[i].emplace_back(GBuffer_RenderTarget::Create(vk::ImageUsageFlagBits::eColorAttachment, vk::Format::eR32G32B32A32Sfloat));
-    //         // depth
-    //         all_rendertargets[i].emplace_back(GBuffer_RenderTarget::Create(vk::ImageUsageFlagBits::eColorAttachment, vk::Format::eR32Sfloat));
-    //         all_rendertargets[i].emplace_back(GBuffer_RenderTarget::Create(vk::ImageUsageFlagBits::eColorAttachment, vk::Format::eR32G32B32A32Sfloat));
-    // #endif
-    //     }
 }
-// void GraphicContext::AddRenderTarget(std::shared_ptr<RenderTarget> renderTarget)
-// {
-//     for (int i = 0; i < all_rendertargets.size(); i++) {
-//         all_rendertargets[i].push_back(renderTarget);
-//     }
-// }
+
+int GraphicContext::AddColorRenderTarget()
+{
+    for (int i = 0; i < all_rendertargets.size(); i++) {
+        // auto swapchain_image = m_swapchain->Get_Images()[i];
+        // AddRenderTarget(Color_RenderTarget::Create(swapchain_image));
+        // all_rendertargets[i].push_back(Color_RenderTarget::Create( ));
+        all_rendertargets[i].emplace_back(new Color_RenderTarget());
+    }
+    colorAttachmentIndex = all_rendertargets[0].size() - 1;
+    return all_rendertargets[0].size() - 1;
+}
+
 int GraphicContext::AddSwapchainRenderTarget()
 {
     for (int i = 0; i < all_rendertargets.size(); i++) {
         auto swapchain_image = m_swapchain->Get_Images()[i];
         // AddRenderTarget(Color_RenderTarget::Create(swapchain_image));
-        all_rendertargets[i].push_back(Color_RenderTarget::Create(swapchain_image));
+        // all_rendertargets[i].push_back(Color_RenderTarget::Create(swapchain_image));
+        all_rendertargets[i].emplace_back(new SwapChainTarget(swapchain_image));
     }
+    swapChainAttachmentindex = all_rendertargets[0].size() - 1;
     return all_rendertargets[0].size() - 1;
 }
 int GraphicContext::AddDepthRenderTarget()
 {
     for (int i = 0; i < all_rendertargets.size(); i++) {
-        auto swapchain_image = m_swapchain->Get_Images()[i];
-        all_rendertargets[i].push_back(Depth_RenderTarget::Create());
+        // all_rendertargets[i].push_back(Depth_RenderTarget::Create());
+        all_rendertargets[i].emplace_back(new Depth_RenderTarget);
     }
+    depthAttachmentIndex = all_rendertargets[0].size() - 1;
+    return all_rendertargets[0].size() - 1;
+}
+int GraphicContext::AddResolveRenderTarget()
+{
+    for (int i = 0; i < all_rendertargets.size(); i++) {
+        // all_rendertargets[i].push_back(Resolve_RenderTarget::Create());
+        all_rendertargets[i].emplace_back(new Resolve_RenderTarget);
+    }
+    resolveAttachmentindex = all_rendertargets[0].size() - 1;
     return all_rendertargets[0].size() - 1;
 }
 int GraphicContext::AddGbufferRenderTarget(vk::Format format)
 {
     for (int i = 0; i < all_rendertargets.size(); i++) {
-        auto swapchain_image = m_swapchain->Get_Images()[i];
-        all_rendertargets[i].push_back(GBuffer_RenderTarget::Create(format));
+        // auto swapchain_image = m_swapchain->Get_Images()[i];
+        // all_rendertargets[i].push_back(GBuffer_RenderTarget::Create(format));
+        all_rendertargets[i].emplace_back(new GBuffer_RenderTarget);
     }
     return all_rendertargets[0].size() - 1;
 }
@@ -172,83 +146,9 @@ void GraphicContext::Prepare_RenderPass()
     //    Context::Get_Singleton()->get_debugger()->set_name(render_pass, "main renderpass");
 }
 
-void GraphicContext::prepare_descriptorset(std::function<void()> prepare)
-{
-    //    for (int i = 0; i < m_subpasses.size(); ++i) {
-    //        m_subpasses[i]->prepare_descriptorset(prepare);
-    //    }
-    prepare();
-    get_descriptor_manager()->CreateDescriptorPool(DescriptorManager::Graphic);
-    get_descriptor_manager()
-        ->update_descriptor_set(DescriptorManager::Graphic);
-    //    Descriptor_Manager::Get_Singleton()
-    //        ->CreateDescriptorPool(Descriptor_Manager::Graphic);
-    //    Descriptor_Manager::Get_Singleton()
-    //        ->update_descriptor_set(Descriptor_Manager::Graphic);
-}
- 
-void GraphicContext::prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size)
-{
-
-    throw std::runtime_error("graphic context has no global Pipeline, only has subpass_Pipeline! ");
-    //    {
-    //        // main
-    //        m_graphic_pipeline.reset(new Graphic_Pipeline(
-    //            { shader_modules[Graphic_Pipeline::Main_VERT],
-    //              shader_modules[Graphic_Pipeline::Main_FRAG] },
-    //            sets,
-    //            push_constants_size));
-    //
-    //        auto binds = Vertex::make_bind();
-    //        auto attrs = Vertex::make_attr();
-    //
-    //        m_graphic_pipeline->Make_VertexInput(binds, attrs);
-    //        m_graphic_pipeline->Make_VertexAssembly();
-    //        m_graphic_pipeline->Make_viewPort();
-    //        m_graphic_pipeline->Make_MultiSample();
-    //        m_graphic_pipeline->Make_Resterization();
-    //        m_graphic_pipeline->Make_attach();
-    //        m_graphic_pipeline->Make_Blend();
-    //        m_graphic_pipeline->Make_DepthTest();
-    //
-    //        // m_graphic_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
-    //    }
-    //    {
-    //        // skybox
-    //        if (!shader_modules[Graphic_Pipeline::Skybox_VERT]) {
-    //            return;
-    //        }
-    //        m_skybox_pipeline.reset(new Graphic_Pipeline(
-    //            { shader_modules[Graphic_Pipeline::Skybox_VERT],
-    //              shader_modules[Graphic_Pipeline::Skybox_FRAG] },
-    //            sets,
-    //            push_constants_size));
-    //
-    //        auto binds = Vertex::make_bind();
-    //        auto attrs = Vertex::make_attr();
-    //
-    //        m_skybox_pipeline->Make_VertexInput(binds, attrs);
-    //        m_skybox_pipeline->Make_VertexAssembly();
-    //        m_skybox_pipeline->Make_viewPort();
-    //        m_skybox_pipeline->Make_MultiSample();
-    //        m_skybox_pipeline->Make_Resterization(vk::CullModeFlagBits::eNone);
-    //        m_skybox_pipeline->Make_attach();
-    //        m_skybox_pipeline->Make_Blend();
-    //        m_skybox_pipeline->Make_DepthTest(false);
-    //
-    //        // m_skybox_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
-    //    }
-}
- 
 void GraphicContext::prepare()
 {
     fill_render_targets();
-    // AddSwapchainRenderTarget();
-    // AddDepthRenderTarget();
-    // Prepare_RenderPass();
-    // Prepare_Framebuffer();
-
-    // command_buffer.reset(new CommandBuffer);
 }
 
 void GraphicContext::post_prepare()
@@ -258,10 +158,7 @@ void GraphicContext::post_prepare()
     for (auto& subpass : subpasses) {
         subpass->post_prepare();
     }
-    //    m_graphic_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
-    //    m_skybox_pipeline->Build_Pipeline(Context::Get_Singleton()->get_graphic_context()->Get_render_pass());
 
-    // command_buffer = Context::Get_Singleton()->get_compute_context()->get_commandbuffer();
     command_buffer.reset(new CommandBuffer);
 }
 
@@ -318,30 +215,6 @@ void GraphicContext::Begin_RenderPass(std::shared_ptr<CommandBuffer> cmd)
         .setClearValues(clear_values);
     cmd->BeginRenderPass(render_pass_begin_info, vk::SubpassContents::eInline);
 }
-void GraphicContext::record_command(std::shared_ptr<CommandBuffer> cmd)
-{
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-#else
-    auto extent2d = Context::Get_Singleton()->get_extent2d();
-
-    cmd->get_handle().setViewport(0,
-                                  vk::Viewport()
-                                      .setHeight(extent2d.height)
-                                      .setWidth(extent2d.width)
-                                      .setMinDepth(0)
-                                      .setMaxDepth(1)
-                                      .setX(0)
-                                      .setY(0));
-    cmd->get_handle().setScissor(0,
-                                 vk::Rect2D()
-                                     .setExtent(extent2d)
-                                     .setOffset(vk::Offset2D()
-                                                    .setX(0)
-                                                    .setY(0)));
-
-    Context::Get_Singleton()->get_debugger()->set_name(cmd, "render command_buffer");
-#endif
-}
 
 //---
 void GraphicContext::End_Record_Command_Buffer()
@@ -362,39 +235,10 @@ void GraphicContext::Submit()
         .setWaitSemaphores(Get_cur_render_semaphore()->get_handle())
         .setWaitDstStageMask(wait_mask)
         .setSignalSemaphores(Get_cur_present_semaphore()->get_handle());
-    try {
 
-        //        VkSubmitInfo sub {};
-        //        sub.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        //        sub.commandBufferCount = 1;
-        //        sub.pCommandBuffers = (VkCommandBuffer*)&command_buffer->get_handle();
-        //        sub.pWaitSemaphores = (VkSemaphore*)&Get_cur_render_semaphore()->get_handle();
-        //        sub.waitSemaphoreCount = 1;
-        //        sub.pWaitDstStageMask = (VkPipelineStageFlags*)&wait_mask;
-        //        sub.signalSemaphoreCount = 1;
-        //        sub.pSignalSemaphores = (VkSemaphore*)&Get_cur_present_semaphore()->get_handle();
+    auto fence = Get_cur_fence()->get_handle();
 
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-        auto fence = Get_cur_fence()->get_handle();
-#else
-        auto fence = Get_cur_fence()->get_handle();
-#endif
-        graphic_queue.submit(submit_info, fence);
-        //        auto res =  vkQueueSubmit((VkQueue)graphic_queue,
-        //                                 1,
-        //                                 &sub,
-        //                                  fence);
-
-        // auto res = graphic_queue.submit(1, &submit_info, Get_cur_fence()->get_handle(), m_device->get_handle());
-        //        if (res == VK_ERROR_DEVICE_LOST) {
-        //            auto r = m_device->get_handle().getFaultInfoEXT();
-        //            int tt = 0;
-        //        }
-    } catch (std::exception e) {
-        // auto r = m_device->get_handle().getFaultInfoEXT();
-        int rr = 9;
-    }
-    //    graphic_queue.waitIdle();
+    graphic_queue.submit(submit_info, fence);
 }
 
 void GraphicContext::EndFrame()
@@ -432,16 +276,9 @@ void GraphicContext::EndFrame()
     auto present_result = present_queue.presentKHR(&present_info);
 
     if (present_result == vk::Result::eErrorOutOfDateKHR || present_result == vk::Result::eSuboptimalKHR) {
-        std::cout << "present fail" << std::endl;
+
         re_create();
     }
-    //    re_create();
-
-    if (present_result != vk::Result::eSuccess) {
-        int r = 0;
-    }
-    // current_frame++;
-    // current_frame %= render_frame_count;
 }
 
 void GraphicContext::re_create()
@@ -474,7 +311,8 @@ void GraphicContext::re_create()
                                &cur_width,
                                &cur_height);
     }
-    std::cout << cur_width << cur_height << std::endl;
+    Context::Get_Singleton()->get_device()->get_handle().waitIdle();
+    std::cout << cur_width << ' ' << cur_height << std::endl;
     Context::Get_Singleton()->get_swapchain().reset(new SwapChain);
     m_swapchain = Context::Get_Singleton()->get_swapchain();
     Context::Get_Singleton()->set_extent2d(cur_width, cur_height);
@@ -482,22 +320,22 @@ void GraphicContext::re_create()
     Prepare_Framebuffer();
     Context::Get_Singleton()
         ->get_camera()
-        ->setPerpective(90, (float)cur_width / (float)cur_height, 0.1f, 10000);
+        ->setPerpectiveFOV(45.f, cur_width, cur_height, 0.001f, 10000.f);
+
     //---
     Context::Get_Singleton()->re_create_context();
+    for (auto& i : subpasses) {
+        i->recreate();
+    }
 #endif
 }
 
 void GraphicContext::re_create_swapchain()
 {
 }
-void GraphicContext::AddSubPass(std::shared_ptr<BaseSubPass> subpass)
-{
-    // subpass->subpass_index = m_subpasses.size();
-    subpasses.push_back(subpass);
-}
+
 void GraphicContext::AddSubPassDependency(vk::SubpassDependency dependency)
 {
     m_subpass_dependencies.push_back(dependency);
 }
-} // namespace MoCheng3D
+}

@@ -9,6 +9,7 @@ class Window;
 class App {
 public:
     App() = default;
+    ~App();
     void init();
     void run();
 

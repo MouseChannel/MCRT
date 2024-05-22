@@ -59,3 +59,33 @@ mat3 getNormalSpace(in vec3 normal)
     vec3 bitangent = cross(normal, tangent);
     return mat3(tangent, bitangent, normal);
 }
+
+
+
+// Compute Van der Corput radical inverse
+// See: http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
+float radicalInverse_VdC(uint bits)
+{
+	bits = (bits << 16u) | (bits >> 16u);
+	bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+	bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+	bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+	bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+	return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+}
+
+// Sample i-th point from Hammersley point set of NumSamples points total.
+vec2 sampleHammersley(uint i,float InvNumSamples)
+{
+	return vec2(i * InvNumSamples, radicalInverse_VdC(i));
+}
+
+// Uniformly sample point on a hemisphere.
+// Cosine-weighted sampling would be a better fit for Lambertian BRDF but since this
+// compute shader runs only once as a pre-processing step performance is not *that* important.
+// See: "Physically Based Rendering" 2nd ed., section 13.6.1.
+vec3 sampleHemisphere(float u1, float u2)
+{
+	const float u1p = sqrt(max(0.0, 1.0 - u1*u1));
+	return vec3(cos(2*PI*u2) * u1p, sin(2*PI*u2) * u1p, u1);
+}

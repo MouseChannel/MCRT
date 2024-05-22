@@ -3,19 +3,73 @@
 #include "Rendering/Model.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "example/base/raster_context.hpp"
+#include "example/raster/raster_pbr_context.hpp"
 #include "shaders/Data_struct.h"
 namespace MCRT {
 using Shader_Stage = Graphic_Pipeline::Shader_Stage;
 SkyboxSubPass::SkyboxSubPass(std::weak_ptr<GraphicContext> graphicContext)
     : BaseSubPass(graphicContext)
 {
+    Make_SkyboxMesh();
 }
+void SkyboxSubPass::Make_SkyboxMesh()
+{
+    std::vector<Vertex> vertexs {
+        { { -1, 1, 1 } },
+        { { -1, -1, 1 } },
+        { { -1, -1, -1 } },
+        { { -1, 1, 1 } },
+        { { -1, -1, -1 } },
+        { { -1, 1, -1 } },
+        { { -1, 1, -1 } },
+        { { -1, -1, -1 } },
+        { { 1, -1, -1 } },
+        { { -1, 1, -1 } },
+        { { 1, -1, -1 } },
+        { { 1, 1, -1 } },
+        { { 1, 1, -1 } },
+        { { 1, -1, -1 } },
+        { { 1, -1, 1 } },
+        { { 1, 1, -1 } },
+        { { 1, -1, 1 } },
+        { { 1, 1, 1 } },
+        { { 1, 1, 1 } },
+        { { 1, -1, 1 } },
+        { { -1, -1, 1 } },
+        { { 1, 1, 1 } },
+        { { -1, -1, 1 } },
+        { { -1, 1, 1 } },
 
+        { { -1, 1, -1 } },
+        { { 1, 1, -1 } },
+        { { 1, 1, 1 } },
+        { { -1, 1, -1 } },
+        { { 1, 1, 1 } },
+        { { -1, 1, 1 } },
+        { { 1, -1, -1 } },
+        { { -1, -1, -1 } },
+        { { -1, -1, 1 } },
+        { { 1, -1, -1 } },
+        { { -1, -1, 1 } },
+        { { 1, -1, 1 } }
+
+    };
+
+    std::vector<uint32_t> faces(vertexs.size());
+    for (int i = 0; i < vertexs.size(); i++) {
+        faces[i] = i;
+    }
+    // std::shared_ptr<Mesh> tar { new Mesh("SKYBOX", vertexs, faces, {}) };
+
+    m_meshs.emplace_back(new Mesh("SKYBOX", vertexs, faces, {}));
+}
 void SkyboxSubPass::prepare_pipeline(int pc_size)
 {
     auto m_graphicContextp = m_graphicContext.lock();
     if (m_graphicContextp) {
-        m_pipeline.reset(new Graphic_Pipeline(shaders, { m_graphicContextp->get_descriptor_manager()->get_DescriptorSet(DescriptorManager::Graphic) }, pc_size));
+        // m_pipeline.reset(new Graphic_Pipeline(shaders, { m_graphicContextp->get_descriptor_manager()->get_DescriptorSet(DescriptorManager::Graphic) }, pc_size));
+
+        m_pipeline.reset(new Graphic_Pipeline(shaders, { m_descriptorSet }, pc_size));
 
         auto binds = Vertex::make_bind();
         auto attrs = Vertex::make_attr();
@@ -23,12 +77,13 @@ void SkyboxSubPass::prepare_pipeline(int pc_size)
         m_pipeline->Make_VertexInput(binds, attrs);
         m_pipeline->Make_VertexAssembly();
         m_pipeline->Make_viewPort();
-        m_pipeline->Make_MultiSample();
+        m_pipeline->Make_MultiSample(vk::SampleCountFlagBits::e8);
         m_pipeline->Make_Resterization(vk::CullModeFlagBits::eNone);
         m_pipeline->Make_Subpass_index(raster_context::SkyboxSubPassIndex);
-        m_pipeline->Make_OpacityAttach();
+        m_pipeline->Make_OpacityAttach(color_references.size());
         m_pipeline->Make_DepthTest();
         m_pipeline->Make_Blend();
+        m_pipeline->Make_Layout(m_descriptorSet->get_layout(), pc_size, vk::ShaderStageFlagBits::eFragment|vk::ShaderStageFlagBits::eVertex);
     }
 }
 void SkyboxSubPass::prepare_vert_shader_module(std::string _vert_shader)
@@ -46,6 +101,14 @@ void SkyboxSubPass::post_prepare()
             ->get_graphic_context()
             ->Get_render_pass());
 }
+// void SkyboxSubPass::Prepare_DescriptorSet(std::function<void()> prepare)
+// {
+//     prepare();
+
+//     if (m_descriptorSet->check_dirty()) {
+//         for (auto i : m_descriptorSetTarget) { }
+//     }
+// }
 
 // void SkyboxSubPass::draw(vk::CommandBuffer& cmd, std::vector<std::shared_ptr<Mesh>>& meshs, void* push_constant)
 // {

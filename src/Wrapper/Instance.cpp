@@ -12,7 +12,9 @@
 namespace MCRT {
 
 auto Instance::get_required_extension()
-{
+{   
+    //  std::cout<<"delete device"<<std::endl;
+
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     std::vector<const char*> extensions {};
     extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
@@ -28,7 +30,7 @@ auto Instance::get_required_extension()
     std::vector<const char*> extensions(glfwExtensions,
                                         glfwExtensions + glfwExtensionCount);
 
-//    extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+   extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     // extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 
 //    extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
@@ -53,6 +55,7 @@ Instance::Instance()
 #endif
     std::vector<const char*> vaild_layer = {
         "VK_LAYER_KHRONOS_validation",
+        // "VK_EXT_debug_utils"
         // "VK_LAYER_LUNARG_monitor",
         //  "VK_LAYER_KHRONOS_synchronization2"
     };
@@ -81,7 +84,8 @@ Instance::Instance()
     create_info.setPApplicationInfo(&app_info)
         .setPEnabledLayerNames(vaild_layer)
         .setPEnabledExtensionNames(glfw_extension)
-        .setPNext(&features);
+        // .setPNext(&features)
+        ;
     m_handle = vk::createInstance(create_info);
     //
     using severity_bit = vk::DebugUtilsMessageSeverityFlagBitsEXT;
@@ -95,7 +99,7 @@ Instance::Instance()
         .setPfnUserCallback(&debugCallBack);
 
     // m_handle.createDebugUtilsMessengerEXT()
-    //    m_debugger = m_handle.createDebugUtilsMessengerEXT(debug_create_info);
+       m_debugger = m_handle.createDebugUtilsMessengerEXT(debug_create_info);
 }
 
 } // namespace MCRT

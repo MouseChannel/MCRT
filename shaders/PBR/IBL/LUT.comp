@@ -1,0 +1,53 @@
+#version 450 core
+
+// const uint NumSamples = 1024;
+
+#extension GL_EXT_debug_printf : enable
+#include "../common.glsl"
+#include "./binding.h"
+layout(constant_id = e_numsample_count) const int NumSamples = 1024;
+float InvNumSamples = 1.0 / float(NumSamples);
+
+layout(set = 0, binding = e_LUT_image, rgba8) uniform image2D LUT;
+
+layout(local_size_x = local_size, local_size_y = local_size, local_size_z = 1) in;
+void main(void)
+{
+    // Get integration parameters.
+    float cosLo = gl_GlobalInvocationID.x / float(imageSize(LUT).x);
+    float roughness = gl_GlobalInvocationID.y / float(imageSize(LUT).y);
+
+    // Make sure viewing angle is non-zero to avoid divisions by zero (and subsequently NaNs).
+    cosLo = max(cosLo, 0.001f);
+
+    // Derive tangent-space viewing vector from angle to normal (pointing towards +Z in this reference frame).
+    vec3 Lo = vec3(sqrt(1.0 - cosLo * cosLo), 0.0, cosLo);
+
+    float DFG1 = 0;
+    float DFG2 = 0;
+
+    for (uint i = 0; i < NumSamples; ++i) {
+        vec2 u = sampleHammersley(i, InvNumSamples);
+
+        vec3 Lh = sampleGGX(u.x, u.y, roughness);
+
+        vec3 Li = 2.0 * dot(Lo, Lh) * Lh - Lo;
+
+        float cosLi = Li.z;
+        float cosLh = Lh.z;
+        float cosLoLh = max(dot(Lo, Lh), 0.0);
+
+        if (cosLi > 0.0) {
+            float G = gaSchlickGGX_IBL(cosLi, cosLo, roughness);
+            float Gv = G * cosLoLh / (cosLh * cosLo);
+            float Fc = pow(1.0 - cosLoLh, 5);
+
+            DFG1 += (1 - Fc) * Gv;
+            DFG2 += Fc * Gv;
+        }
+    }
+  
+
+
+    imageStore(LUT, ivec2(gl_GlobalInvocationID), vec4(DFG1, DFG2, 0, 0) * InvNumSamples);
+}

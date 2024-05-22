@@ -8,7 +8,7 @@ namespace MCRT {
 
     class Image;
 
-    class ComputePass;
+    class ComputeContext;
 
     class NoiseManager : public Instance_base<NoiseManager> {
     public:
@@ -24,7 +24,7 @@ namespace MCRT {
     private:
         void make_permutations();
 
-        std::shared_ptr<ComputePass> context;
+        std::shared_ptr<ComputeContext> context;
         std::shared_ptr<Image> perlin_noise;
         int noise_size = 128;
         std::shared_ptr<Uniform_Stuff<int>> permutations;

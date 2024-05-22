@@ -11,7 +11,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallBack(
 {
     std::cout << pCallbackData->pMessage << std::endl;
 
-    return VK_FALSE;
+    return false;
 }
 
 // static PFN_vkGetDeviceFaultInfoEXT pfn_vkGetDeviceFaultInfoEXT = 0;

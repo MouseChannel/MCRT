@@ -26,7 +26,7 @@ public:
     RaytracingPass(std::shared_ptr<Device> device);
     RaytracingPass();
 
-    std::shared_ptr<Pipeline_base> get_pipeline() override;
+    // std::shared_ptr<Pipeline_base> get_pipeline() override;
 
     std::shared_ptr<CommandBuffer> get_commandbuffer() override
     {
@@ -44,13 +44,13 @@ public:
 
     void prepare() override;
     void post_prepare() override;
-    void prepare_descriptorset(std::function<void()> prepare_func) override;
-    void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size) override;
+    // void prepare_descriptorset(std::function<void()> prepare_func) override;
+    // void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size) override;
     std::shared_ptr<CommandBuffer> BeginFrame() override;
     void Submit() override;
     void EndFrame() override;
 
-    void record_command(std::shared_ptr<CommandBuffer>) override;
+    // void record_command(std::shared_ptr<CommandBuffer>) override;
     void re_create() override;
     // void re_create_descriptorset() override;
     void build_accelerate_structure();

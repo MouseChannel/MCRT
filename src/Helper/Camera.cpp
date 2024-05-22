@@ -54,7 +54,15 @@ void Camera::lookAt(glm::vec3 _pos, glm::vec3 _front, glm::vec3 _up)
 void Camera::update()
 {
     m_vMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
-    // std::cout << "update" << std::endl;
+    // printf("out %f %f %f |%f %f %f| %f %f %f \n",m_vMatrix[0][0], m_vMatrix[0][1], m_vMatrix[0][2],
+
+    //                m_vMatrix[1][0],
+    //                m_vMatrix[1][1],
+    //                m_vMatrix[1][2],
+    //                m_vMatrix[2][0],
+    //                m_vMatrix[2][1],
+    //                m_vMatrix[2][2]);
+    // std::cout << m_position.x<<m_position.y<<m_position.z << std::endl;
     Context::Get_Singleton()->reset();
 }
 
@@ -70,10 +78,10 @@ void Camera::move_update()
     if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_S) == GLFW_PRESS) {
         move(CAMERA_MOVE::MOVE_BACK);
     }
-    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_R) == GLFW_PRESS) {
+    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_E) == GLFW_PRESS) {
         move(CAMERA_MOVE::MOVE_TOP);
     }
-    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_F) == GLFW_PRESS) {
+    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_Q) == GLFW_PRESS) {
         move(CAMERA_MOVE::MOVE_DOWN);
     }
 
@@ -84,28 +92,28 @@ void Camera::move_update()
     if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_D) == GLFW_PRESS) {
         move(CAMERA_MOVE::MOVE_RIGHT);
     }
-    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_LEFT) == GLFW_PRESS) {
-        yaw(-1);
-        update();
-    }
-    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        yaw(1);
-        update();
-    }
-    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_DOWN) == GLFW_PRESS) {
-        pitch(-1);
-        update();
-    }
-    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_UP) == GLFW_PRESS) {
-        pitch(1);
-        update();
-    }
+    // if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_LEFT) == GLFW_PRESS) {
+    //     yaw(-1);
+    //     update();
+    // }
+    // if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_RIGHT) == GLFW_PRESS) {
+    //     yaw(1);
+    //     update();
+    // }
+    // if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_DOWN) == GLFW_PRESS) {
+    //     pitch(-1);
+    //     update();
+    // }
+    // if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_UP) == GLFW_PRESS) {
+    //     pitch(1);
+    //     update();
+    // }
 
-    if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        setSentitivity(1);
-    } else {
-        setSentitivity(0.1);
-    }
+    // if (glfwGetKey(Context::Get_Singleton()->get_window()->get_handle(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+    //     setSentitivity(1);
+    // } else {
+    //     setSentitivity(1e-2);
+    // }
 #endif
 }
 
@@ -123,16 +131,16 @@ void Camera::move(CAMERA_MOVE _mode)
         m_position += glm::normalize(glm::cross(m_front, m_up)) * m_speed * m_sensitivity;
         break;
     case CAMERA_MOVE::MOVE_TOP:
-        m_position += m_speed * m_top * m_sensitivity * 1e-1f;
+        m_position += m_speed * m_top * m_sensitivity  ;
         break;
     case CAMERA_MOVE::MOVE_DOWN:
-        m_position -= m_speed * m_top * m_sensitivity * 1e-1f;
+        m_position -= m_speed * m_top * m_sensitivity  ;
         break;
     case CAMERA_MOVE::MOVE_FRONT:
-        m_position += m_speed * m_front * m_sensitivity * 1e-1f;
+        m_position += m_speed * m_front * m_sensitivity  ;
         break;
     case CAMERA_MOVE::MOVE_BACK:
-        m_position -= m_speed * m_front * m_sensitivity * 1e-1f;
+        m_position -= m_speed * m_front * m_sensitivity  ;
         break;
     default:
         break;
@@ -182,6 +190,14 @@ void Camera::setSentitivity(float _s)
 void Camera::setPerpective(float angle, float ratio, float near, float far)
 {
     m_pMatrx = glm::perspective(glm::radians(angle), ratio, near, far);
+    m_pMatrx = glm::perspectiveFov(45.f, 1200.f, 800.f, near, far);
+    m_pMatrx[1][1] *= -1.0f;
+}
+
+void Camera::setPerpectiveFOV(float fov, float width, float height, float near, float far)
+{
+    m_pMatrx = glm::perspectiveFov(fov, width, height, near, far);
+    m_pMatrx[1][1] *= -1.0f;
 }
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -281,7 +297,7 @@ void Camera::onMouseMove(double _xpos, double _ypos)
     switch (move_mode) {
     case MOVE_MODE::ORBIT:
         if (glfwGetMouseButton(Context::Get_Singleton()->get_window()->get_handle(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-            orbit(_xOffset * m_sensitivity, _yOffset * m_sensitivity);
+            orbit(_xOffset * m_sensitivity*10, _yOffset * m_sensitivity*10);
         }
         break;
     case MOVE_MODE::FREE:
@@ -321,27 +337,26 @@ void Camera::onMouseScroll(double _xpos, double _ypos)
 
 void Camera::orbit(float x_offset, float y_offset)
 {
+    x_offset*=-1;
     auto origin_pos = m_position;
     glm::vec3 look_point = m_position + m_front;
     vec4 cur_pos = { m_position, 1 };
 
-  
     vec3 m_right = glm::cross(m_front, m_up);
 
     auto m_top = glm::cross(m_right, m_front);
 
     auto m_matrix = mat4(1);
-   
+
     // rotate axe_y
     m_matrix = glm::rotate(m_matrix, glm::radians(x_offset), m_top);
     // rotate axe_x
     cur_pos = m_matrix * glm::vec4(-m_front, 1);
     m_front = glm::normalize(glm::vec3(cur_pos));
-    if (glm::abs(m_front.y) < 0.95 || glm::sign(m_front.y)* y_offset < 0) {
+    if (glm::abs(m_front.y) < 0.95 || glm::sign(m_front.y) * y_offset < 0) {
         m_right = glm::cross(m_front, m_up);
         m_matrix = glm::rotate(m_matrix, glm::radians(y_offset), m_right);
         cur_pos = m_matrix * cur_pos;
-        
     }
     cur_pos += glm::vec4(look_point, 1);
     m_front = look_point - glm::vec3(cur_pos);

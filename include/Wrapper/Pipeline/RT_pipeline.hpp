@@ -21,10 +21,10 @@ public:
                 std::vector<std::shared_ptr<DescriptorSet>> sets,
                 int push_constants_size);
     ~RT_Pipeline();
-    vk::PipelineLayout get_layout() override
-    {
-        return layout;
-    }
+    // vk::PipelineLayout get_layout() override
+    // {
+    //     return layout;
+    // }
 
 private:
     std::vector<std::shared_ptr<ShaderModule>> shader_modules;

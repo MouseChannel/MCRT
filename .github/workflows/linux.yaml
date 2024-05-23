@@ -25,11 +25,16 @@ jobs:
 
     - name: Install cmake
       run: sudo apt update &&  sudo apt install -y cmake
-    - name: Install TBB
-      run: sudo apt-get install -y libtbb-dev
+    # - name: Install TBB
+    #   run: sudo apt-get install -y libtbb-dev
 
     - name: Install GLM
       run: sudo apt-get install -y libglm-dev
+    - name: Install assimp
+      run: sudo  apt install -y libassimp-dev
+
+     
+
 
         
 

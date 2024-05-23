@@ -30,7 +30,7 @@ add_library(src ${SRC})
 
 # find_package(TBB REQUIRED COMPONENTS tbb)
 # target_link_libraries(src imgui TBB::tbb)
-find_package(assimp REQUIRED)
+
 target_link_libraries(src imgui assimp)
 
  

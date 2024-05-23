@@ -795,7 +795,7 @@ Image::~Image()
                        ->get_handle();
     for (auto i : m_image_views)
         device.destroyImageView(i);
-    if (memory != VK_NULL_HANDLE) {
+    if (memory) {
 
         device.freeMemory(memory);
         device.destroyImage(m_handle);

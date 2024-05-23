@@ -10,7 +10,7 @@
 
 namespace MCRT {
 class DescriptorPool;
- 
+
 class Image;
 class AccelerationStructure_Top;
 // template <typename T>
@@ -119,7 +119,7 @@ private:
 
     std::vector<vk::DescriptorSetLayoutBinding> layout_bindings;
     std::map<int, vk::DescriptorSetLayoutBinding> m_layout_binding;
-    vk::DescriptorSetLayout layout;
+    vk::DescriptorSetLayout layout { VK_NULL_HANDLE };
     // std::shared_ptr<DescriptorPool> pool;
 
     // data

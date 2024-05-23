@@ -14,8 +14,8 @@ add_subdirectory(raster)
 # add_subdirectory(ray_tracing_AO)
 # add_subdirectory(path_tracing_light)
 # add_subdirectory(rt_skybox)
-add_subdirectory(rt_pbr)
-add_subdirectory(cloud)
+# add_subdirectory(rt_pbr)
+# add_subdirectory(cloud)
 
 # add_subdirectory(tiled_rendering)
 

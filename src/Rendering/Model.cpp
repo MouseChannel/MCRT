@@ -128,18 +128,18 @@ std::shared_ptr<Mesh> Mesh::LoadFromFile(std::string path)
             auto dir_name = std::filesystem::path(path).parent_path();
             if (diffName.length > 0) {
                 auto texture_name = dir_name / std::filesystem::path(diffName.C_Str());
-                auto diff_texture_index = HandleImage(texture_name,   vk::Format ::eR8G8B8A8Srgb);
+                auto diff_texture_index = HandleImage(texture_name.string(),   vk::Format ::eR8G8B8A8Srgb);
                 materials[i].color_texture_index = diff_texture_index;
             }
             if (armName.length > 0) {
                 auto texture_name = dir_name / std::filesystem::path(armName.C_Str());
-                auto arm_texture_index = HandleImage(texture_name,vk::Format ::eR8G8B8A8Unorm);
+                auto arm_texture_index = HandleImage(texture_name.string(),vk::Format ::eR8G8B8A8Unorm);
                 materials[i].metallicness_roughness_texture_index = arm_texture_index;
             }
             if (normalName.length > 0) {
 
                 auto texture_name = dir_name / std::filesystem::path(normalName.C_Str());
-                auto normal_texture_index = HandleImage(texture_name,vk::Format ::eR8G8B8A8Unorm);
+                auto normal_texture_index = HandleImage(texture_name.string(),vk::Format ::eR8G8B8A8Unorm);
                 materials[i].normal_texture_index = normal_texture_index;
             }
             // materials[i] = Material {

@@ -26,7 +26,7 @@ void AccelerationStructure_Top::add_as_bottom(std::shared_ptr<AccelerationStruct
     instance.setTransform(as_bottom->get_model_matrix())
         .setInstanceCustomIndex(as_bottom->get_obj_index())
         .setAccelerationStructureReference(as_bottom->get_address())
-        .setFlags(vk::GeometryInstanceFlagBitsKHR::eTriangleFrontCounterclockwiseKHR)
+        .setFlags(vk::GeometryInstanceFlagBitsKHR::eTriangleFrontCounterclockwise)
         .setMask(0xff)
         .setInstanceShaderBindingTableRecordOffset(0);
     instances.emplace_back(instance);

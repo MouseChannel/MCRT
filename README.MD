@@ -1,5 +1,5 @@
-<div align="center">
-<img width="200" src="./assets/showcase/logo.png"/>
+<!-- <div align="center">
+<img width="200" src="./assets/showcase/logo.png"/> -->
 
 # 🤷🏼‍♂️A RenderingEngine powered by Vulkan🤷🏼‍♂️
 

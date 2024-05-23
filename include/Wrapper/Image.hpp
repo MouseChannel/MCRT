@@ -75,7 +75,7 @@ public:
 
 private:
     uint32_t layer_count = 1, mipmap_level_count = 1;
-    vk::DeviceMemory memory;
+    vk::DeviceMemory memory { VK_NULL_HANDLE };
     // vk::ImageView image_view;
     uint32_t m_mipmap_level_index = 0;
 

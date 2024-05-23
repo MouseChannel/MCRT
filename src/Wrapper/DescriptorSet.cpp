@@ -63,7 +63,7 @@ vk::DescriptorSetLayout& DescriptorSet::get_layout()
                        [](auto& item) {
                            return item.second;
                        });
-        if (layout != VK_NULL_HANDLE) {
+        if (layout  ) {
             Context::Get_Singleton()
                 ->get_device()
                 ->get_handle()

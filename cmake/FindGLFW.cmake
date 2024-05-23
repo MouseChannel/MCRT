@@ -19,6 +19,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glm)
 
+FetchContent_Declare(
+    assimp
+    GIT_REPOSITORY     https://github.com/assimp/assimp
+  
+)
+FetchContent_MakeAvailable(assimp)
+ 
+
     # MESSAGE(STATUS "Find Windows glfw😊")
     # set(GLFW_DIR ${PROJECT_SOURCE_DIR}/glfw)
     # set(GLWF_INCLUDE_DIR "${GLFW_DIR}/include")

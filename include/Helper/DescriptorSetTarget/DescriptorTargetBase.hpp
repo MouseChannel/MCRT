@@ -12,15 +12,15 @@ enum Which_Set {
 
     e_type_count
 };
-class DescriptorSetTargetBase {
+class DescriptorTargetBase {
 public:
-    DescriptorSetTargetBase(
+    DescriptorTargetBase(
         int binding_index,
         vk::ShaderStageFlags shader_stage,
         vk::DescriptorType type,
         std::shared_ptr<DescriptorSet> descriptorSet,
         int descriptorSet_index)
-        : m_binding_index(binding_index + descriptorSet_index * DescriptorSetTargetBase::MAX_DESCRIPTORSET_COUNT)
+        : m_binding_index(binding_index + descriptorSet_index * MAX_DESCRIPTORSET_COUNT)
         , m_shader_stage(shader_stage)
         , m_type(type)
         , m_descriptorSet(descriptorSet)
@@ -41,11 +41,10 @@ public:
     {
         return m_shader_stage;
     }
-    virtual int get_descriptorSet_count() = 0;
+    virtual int get_descriptor_count() = 0;
     const static int MAX_DESCRIPTORSET_COUNT = 1000;
-
+     
 protected:
-    // Which_Set which_set;
     int m_binding_index;
     vk::ShaderStageFlags m_shader_stage;
     vk::DescriptorType m_type;

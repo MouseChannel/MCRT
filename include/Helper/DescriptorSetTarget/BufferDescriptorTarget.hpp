@@ -1,11 +1,11 @@
 
 #pragma once
-#include "Helper/DescriptorSetTarget/DescriptorSetTargetBase.hpp"
+#include "Helper/DescriptorSetTarget/DescriptorTargetBase.hpp"
 namespace MCRT {
 class Buffer;
-class BufferDescriptorSetTarget : public DescriptorSetTargetBase {
+class BufferDescriptorTarget : public DescriptorTargetBase {
 public:
-    BufferDescriptorSetTarget(std::shared_ptr<Buffer> buf,
+    BufferDescriptorTarget(std::shared_ptr<Buffer> buf,
                               int binding_index,
                               vk::ShaderStageFlags shader_stage,
                               vk::DescriptorType type,
@@ -13,7 +13,7 @@ public:
                               int descriptorSet_index = 0);
     // BufferDescriptorSetTarget();
     void Update() override;
-    int get_descriptorSet_count() override
+    int get_descriptor_count() override
     {
         return 1;
     }

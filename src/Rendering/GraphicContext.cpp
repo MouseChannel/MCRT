@@ -165,14 +165,14 @@ void GraphicContext::post_prepare()
 std::shared_ptr<CommandBuffer> GraphicContext::BeginFrame()
 {
     auto cur_semaphone = Get_cur_render_semaphore()->get_handle();
-    // Context::Get_Singleton()->get_debugger()->set_handle_name(cur_semaphone, "semaphone" + std::to_string(current_index));
-    if (has_inited) {
-        cur_semaphone = Get_RenderFrame((current_index + 1) % render_frame_count)->Get_render_semaphore()->get_handle();
 
-    } else {
-        cur_semaphone = Get_cur_render_semaphore()->get_handle();
-    }
-    has_inited = true;
+     if (has_inited) {
+         cur_semaphone = Get_RenderFrame((current_index + 1) % render_frame_count)->Get_render_semaphore()->get_handle();
+
+     } else {
+         cur_semaphone = Get_cur_render_semaphore()->get_handle();
+     }
+     has_inited = true;
     auto result = m_device->get_handle().acquireNextImageKHR(
         m_swapchain->get_handle(),
         std::numeric_limits<uint64_t>::max(),
@@ -239,6 +239,7 @@ void GraphicContext::Submit()
     auto fence = Get_cur_fence()->get_handle();
 
     graphic_queue.submit(submit_info, fence);
+    // graphic_queue.waitIdle();
 }
 
 void GraphicContext::EndFrame()

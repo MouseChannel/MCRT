@@ -27,8 +27,8 @@
 
 #include "example/raster/shader/Constants.h"
 
-#include "Helper/DescriptorSetTarget/BufferDescriptorSetTarget.hpp"
-#include "Helper/DescriptorSetTarget/ImageDescriptorSetTarget.hpp"
+#include "Helper/DescriptorSetTarget/BufferDescriptorTarget.hpp"
+#include "Helper/DescriptorSetTarget/ImageDescriptorTarget.hpp"
 
 #include "Rendering/AntiAliasing/TAA/TAA_Manager.hpp"
 #include "Rendering/PBR/IBL_Manager.hpp"
@@ -63,8 +63,11 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
 
     // Mesh::LoadFromFile("/home/mousechannel/Downloads/korean_fire_extinguisher_01_4k.gltf/korean_fire_extinguisher_01_4k.gltf");
 
-    Mesh::LoadFromFile("/home/mousechannel/project/MCRT/assets/pbr/korean_fire_extinguisher_01_4k/korean_fire_extinguisher_01_4k.gltf");
-    IBLManager::Get_Singleton()->Init("assets/Cubemap/hospital_room_2_8k.hdr");
+    // Mesh::LoadFromFile("assets/pbr/korean_fire_extinguisher_01_4k/korean_fire_extinguisher_01_4k.gltf");
+    // Mesh::LoadFromFile("C:\\Users\\moche\\Downloads\\plunger_1k.gltf\\plunger_1k.gltf");
+    Mesh::LoadFromFile("assets/pbr/plunger_1k/plunger_1k.gltf");
+    IBLManager::Get_Singleton()->Init("assets/Cubemap/victoria_sunset_1k.hdr");
+    // IBLManager::Get_Singleton()->Init("assets\\Cubemap\\victoria_sunset_1k.hdr");
 
     PASS.resize(1);
 
@@ -104,14 +107,14 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                     skyboxSubpass->prepare_frag_shader_module("example/raster/shader/skybox.frag.spv");
                     skyboxSubpass->Prepare_DescriptorSet(
                         [&]() {
-                            skyboxSubpass->AddDescriptorSetTarget(std::make_shared<BufferDescriptorSetTarget>(
+                            skyboxSubpass->AddDescriptorTarget(std::make_shared<BufferDescriptorTarget>(
                                 camera_matrix->buffer,
                                 (int)Graphic_Binding::e_camera_matrix,
                                 vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
                                 vk::DescriptorType::eUniformBuffer,
                                 skyboxSubpass->get_DescriptorSet()));
 
-                            skyboxSubpass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+                            skyboxSubpass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
                                 IBLManager::Get_Singleton()->get_skybox(),
                                 // Which_Set::Graphic,
                                 (int)Graphic_Binding::e_skybox,
@@ -143,33 +146,33 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                     opacitySubPass->prepare_frag_shader_module("example/raster/shader/pbrfs.frag.spv");
                     opacitySubPass->Prepare_DescriptorSet(
                         [&]() {
-                            opacitySubPass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+                            opacitySubPass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
                                 IBLManager::Get_Singleton()->get_skybox(),
                                 // Which_Set::Graphic,
                                 (int)Graphic_Binding::e_skybox,
                                 vk::ShaderStageFlagBits::eFragment,
                                 vk::DescriptorType::eCombinedImageSampler,
                                 opacitySubPass->get_DescriptorSet()));
-                            opacitySubPass->AddDescriptorSetTarget(std::make_shared<BufferDescriptorSetTarget>(
+                            opacitySubPass->AddDescriptorTarget(std::make_shared<BufferDescriptorTarget>(
                                 camera_matrix->buffer,
                                 (int)Graphic_Binding::e_camera_matrix,
                                 vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
                                 vk::DescriptorType::eUniformBuffer,
                                 opacitySubPass->get_DescriptorSet()));
-                            opacitySubPass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+                            opacitySubPass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
                                 Texture::get_image_handles(),
                                 (int)Graphic_Binding::e_textures,
                                 vk::ShaderStageFlagBits::eFragment,
                                 vk::DescriptorType::eCombinedImageSampler,
                                 opacitySubPass->get_DescriptorSet()));
 
-                            opacitySubPass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+                            opacitySubPass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
                                 IBLManager::Get_Singleton()->get_LUT(),
                                 (int)Graphic_Binding::e_LUT_image,
                                 vk::ShaderStageFlagBits::eFragment,
                                 vk::DescriptorType::eCombinedImageSampler,
                                 opacitySubPass->get_DescriptorSet()));
-                            opacitySubPass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+                            opacitySubPass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
                                 IBLManager::Get_Singleton()->get_irradiance(),
                                 (int)Graphic_Binding::e_irradiance_image,
                                 vk::ShaderStageFlagBits::eFragment,
@@ -217,11 +220,11 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                     tonemapSubPass->prepare_vert_shader_module("example/raster/shader/tonemap.vert.spv");
                     tonemapSubPass->prepare_frag_shader_module("example/raster/shader/tonemap.frag.spv");
                     tonemapSubPass->Prepare_DescriptorSet(
-                        [=]() {
+                        [&]() {
                             for (int i = 0; i < tonemapSubPass->get_DescriptorSetCount(); i++) {
-               
+
                                 auto input_renderTarget = graphic_context->Get_render_targets(i)[resolve_renderTarget];
-                                tonemapSubPass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+                                tonemapSubPass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
                                     // IBLManager::Get_Singleton()->get_skybox(),
                                     std::vector { input_renderTarget->Get_Image()->Get_Image_View() },
                                     std::vector { input_renderTarget->get_inputLayout() },
@@ -508,7 +511,7 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                 imguiSubpass->drawUI(cmd, []() {
                     // ImVec4 color = ImVec4(1, 1, 1, 1);
                     ImGui::Text("move:[W A S D Q E]");
-                     ImGui::Text("Hold left Mouse Button To Rotate!!");
+                    ImGui::Text("Hold left Mouse Button To Rotate!!");
 
                     ImGui::SliderFloat("move-sensitivity", &Context::Get_Singleton()->get_camera()->m_sensitivity, 1e-2f, 1e-1f);
                     // ImGui::SliderFloat("light_pos_y", &raster_context_pbr::light_pos_y, -2.0f, 2.0f);

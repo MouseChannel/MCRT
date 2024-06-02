@@ -7,7 +7,7 @@
 
 #include "stb_image.h"
 
-#include "Helper/DescriptorSetTarget/ImageDescriptorSetTarget.hpp"
+#include "Helper/DescriptorSetTarget/ImageDescriptorTarget.hpp"
 // #include "Wrapper/ComputePass/SkyboxPass.hpp"
 #include <Helper/CommandManager.hpp>
 #include <Wrapper/Pipeline/Pipeline_base.hpp>
@@ -19,14 +19,14 @@ void IBLManager::convert_skybox()
     m_skyboxPass.reset(new ComputePass);
     m_skyboxPass->SetShaderModule("shaders/PBR/IBL/hdr2cubemap.comp.spv");
     m_skyboxPass->Prepare_DescriptorSet([&]() {
-        m_skyboxPass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+        m_skyboxPass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
             m_hdr_img,
             (int)IBL_Binding::e_hdr_image,
             vk::ShaderStageFlagBits::eCompute,
             vk::DescriptorType::eCombinedImageSampler,
             m_skyboxPass->get_DescriptorSet()));
 
-        m_skyboxPass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+        m_skyboxPass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
             m_skybox_img,
             (int)IBL_Binding::e_skybox,
             vk::ShaderStageFlagBits::eCompute,
@@ -290,13 +290,13 @@ void IBLManager::filter_skybox_mipmap()
         img_layouts.push_back(m_skybox_img->Get_image_layout());
     }
     m_skyboxFilterPass->Prepare_DescriptorSet([&]() {
-        m_skyboxFilterPass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+        m_skyboxFilterPass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
             m_skybox_img,
             (int)IBL_Binding::e_skybox,
             vk::ShaderStageFlagBits::eCompute,
             vk::DescriptorType::eCombinedImageSampler,
             m_skyboxFilterPass->get_DescriptorSet()));
-        m_skyboxFilterPass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+        m_skyboxFilterPass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
             img_views,
             img_layouts,
             (int)IBL_Binding::e_skybox_mipmap,
@@ -383,13 +383,13 @@ void IBLManager::pre_compute_LUT()
                                                                   .setSize(sizeof(LUT_samplecount))));
     m_LUTPass->SetShaderModule(compute_shader);
     m_LUTPass->Prepare_DescriptorSet([&]() {
-        m_LUTPass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+        m_LUTPass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
             LUT,
             (int)IBL_Binding::e_LUT_image,
             vk::ShaderStageFlagBits::eCompute,
             vk::DescriptorType::eStorageImage,
             m_LUTPass->get_DescriptorSet()));
-        m_LUTPass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+        m_LUTPass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
             m_skybox_img,
             (int)IBL_Binding::e_skybox,
             vk::ShaderStageFlagBits::eCompute,
@@ -456,13 +456,13 @@ void IBLManager::pre_compute_irradiance()
                                                                   .setSize(sizeof(irradiance_samplecount))));
     m_irradiancePass->SetShaderModule(compute_shader);
     m_irradiancePass->Prepare_DescriptorSet([&]() {
-        m_irradiancePass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+        m_irradiancePass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
             m_skybox_img,
             (int)IBL_Binding::e_skybox,
             vk::ShaderStageFlagBits::eCompute,
             vk::DescriptorType::eCombinedImageSampler,
             m_irradiancePass->get_DescriptorSet()));
-        m_irradiancePass->AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+        m_irradiancePass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
             m_irradiance_img,
             (int)IBL_Binding::e_irradiance_image,
             vk::ShaderStageFlagBits::eCompute,

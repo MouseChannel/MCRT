@@ -1,5 +1,5 @@
 #include "Wrapper/SubPass/ToneMapSubpass.hpp"
-#include "Helper/DescriptorSetTarget/ImageDescriptorSetTarget.hpp"
+#include "Helper/DescriptorSetTarget/ImageDescriptorTarget.hpp"
 #include "Rendering/GraphicContext.hpp"
 #include "Rendering/Model.hpp"
 #include "Wrapper/Shader_module.hpp"
@@ -70,7 +70,7 @@ void ToneMapSubPass::recreate()
         Prepare_DescriptorSet([&]() {
             for (int i = 0; i < get_DescriptorSetCount(); i++) {
                 auto input_renderTarget = m_graphicContextp->Get_render_targets(i)[m_graphicContextp->resolveAttachmentindex];
-                AddDescriptorSetTarget(std::make_shared<ImageDescriptorSetTarget>(
+                AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
                     // IBLManager::Get_Singleton()->get_skybox(),
                     std::vector { input_renderTarget->Get_Image()->Get_Image_View() },
                     std::vector { input_renderTarget->get_inputLayout() },

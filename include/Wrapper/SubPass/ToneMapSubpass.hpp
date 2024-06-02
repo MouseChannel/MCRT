@@ -3,6 +3,7 @@
 #include "Rendering/Render_Target/SwapChainTarget.hpp"
 #include "include/Wrapper/SubPass/BaseSubPass.hpp"
 #include "memory"
+#include "Wrapper/SwapChain.hpp"
 namespace MCRT {
 
 class ToneMapSubPass : public BaseSubPass {
@@ -15,7 +16,8 @@ public:
     void make_offscreen_mesh();
     int get_DescriptorSetCount() override
     {
-        return 3;
+//        return 3;
+        return Context::Get_Singleton()->get_swapchain()->Get_Swapchain_Image_size();
     }
     void recreate()override;
 

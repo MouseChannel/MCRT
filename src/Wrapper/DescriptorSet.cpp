@@ -29,6 +29,7 @@ void DescriptorSet::build(std::shared_ptr<DescriptorPool> pool, int size)
                    ->get_device()
                    ->get_handle()
                    .allocateDescriptorSets(allocate_info);
+    int r = 0;
 }
 DescriptorSet::~DescriptorSet()
 {
@@ -39,12 +40,12 @@ DescriptorSet::~DescriptorSet()
         .destroyDescriptorSetLayout(layout);
 }
 
-void DescriptorSet::Add(std::shared_ptr<DescriptorSetTargetBase> descriptorSetTarget)
+void DescriptorSet::Add(std::shared_ptr<DescriptorTargetBase> descriptorSetTarget)
 {
     m_layout_binding[descriptorSetTarget->get_binding_index()] =
         vk::DescriptorSetLayoutBinding()
             .setBinding(descriptorSetTarget->get_binding_index())
-            .setDescriptorCount(descriptorSetTarget->get_descriptorSet_count())
+            .setDescriptorCount(descriptorSetTarget->get_descriptor_count())
             .setStageFlags(descriptorSetTarget->get_shader_stage())
             .setDescriptorType(descriptorSetTarget->get_type());
 }

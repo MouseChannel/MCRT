@@ -1,11 +1,11 @@
-#include "Helper/DescriptorSetTarget/BufferDescriptorSetTarget.hpp"
+#include "Helper/DescriptorSetTarget/BufferDescriptorTarget.hpp"
 #include "Wrapper/Buffer.hpp"
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Image.hpp"
 #include "Wrapper/Sampler.hpp"
 namespace MCRT {
-BufferDescriptorSetTarget::BufferDescriptorSetTarget(std::shared_ptr<Buffer> buf,
+BufferDescriptorTarget::BufferDescriptorTarget(std::shared_ptr<Buffer> buf,
                                                      //  Which_Set _which_set,
                                                      int binding_index,
                                                      vk::ShaderStageFlags shader_stage,
@@ -13,7 +13,7 @@ BufferDescriptorSetTarget::BufferDescriptorSetTarget(std::shared_ptr<Buffer> buf
                                                      std::shared_ptr<DescriptorSet> descriptorSet,
                                                      int descriptorSet_index)
     : m_buffer(buf)
-    , DescriptorSetTargetBase(
+    , DescriptorTargetBase(
           // _which_set,
           binding_index,
           shader_stage,
@@ -23,7 +23,7 @@ BufferDescriptorSetTarget::BufferDescriptorSetTarget(std::shared_ptr<Buffer> buf
 {
 }
 
-void BufferDescriptorSetTarget::Update()
+void BufferDescriptorTarget::Update()
 {
 
     std::vector<vk::DescriptorBufferInfo> buffer_infos;

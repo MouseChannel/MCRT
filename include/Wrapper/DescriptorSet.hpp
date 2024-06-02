@@ -1,7 +1,7 @@
 #pragma once
 // #include "Wrapper/Base.hpp"
 
-#include "Helper/DescriptorSetTarget/DescriptorSetTargetBase.hpp"
+#include "Helper/DescriptorSetTarget/DescriptorTargetBase.hpp"
 #include "Wrapper/Component.hpp"
 // #include "Wrapper/Ray_Tracing/AS_top.hpp"
 #include <map>
@@ -47,7 +47,7 @@ public:
     ~DescriptorSet();
     void build(std::shared_ptr<DescriptorPool> pool, int size);
 
-    void Add(std::shared_ptr<DescriptorSetTargetBase> descriptorSetTarget);
+    void Add(std::shared_ptr<DescriptorTargetBase> descriptorSetTarget);
     // void Add(std::vector<std::shared_ptr<DescriptorSetTargetBase>> descriptorSetTargets);
 
     /////////////////////////////////////////////////////////////

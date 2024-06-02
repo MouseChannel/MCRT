@@ -1,5 +1,5 @@
 #include "include/Wrapper/SubPass/BaseSubPass.hpp"
-#include "Helper/DescriptorSetTarget/DescriptorSetTargetBase.hpp"
+#include "Helper/DescriptorSetTarget/DescriptorTargetBase.hpp"
 #include "Rendering/GraphicContext.hpp"
 #include "Wrapper/DescriptorPool.hpp"
 namespace MCRT {

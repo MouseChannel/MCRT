@@ -8,7 +8,7 @@
 #include <functional>
 #include <memory>
 namespace MCRT {
-class DescriptorSetTargetBase;
+class DescriptorTargetBase;
 class DescriptorPool;
 class BaseSubPass :public BasePass {
 public:

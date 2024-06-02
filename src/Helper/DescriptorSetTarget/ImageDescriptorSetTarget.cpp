@@ -1,11 +1,11 @@
-#include "Helper/DescriptorSetTarget/ImageDescriptorSetTarget.hpp"
+#include "Helper/DescriptorSetTarget/ImageDescriptorTarget.hpp"
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Image.hpp"
 #include "Wrapper/Sampler.hpp"
 namespace MCRT {
 
-ImageDescriptorSetTarget::ImageDescriptorSetTarget(std::shared_ptr<Image> img,
+ImageDescriptorTarget::ImageDescriptorTarget(std::shared_ptr<Image> img,
                                                    //    Which_Set _which_set,
                                                    int binding_index,
                                                    vk::ShaderStageFlagBits shader_stage,
@@ -13,7 +13,7 @@ ImageDescriptorSetTarget::ImageDescriptorSetTarget(std::shared_ptr<Image> img,
                                                    std::shared_ptr<DescriptorSet> descriptorSet,
                                                    int descriptorSet_index)
 
-    : DescriptorSetTargetBase(
+    : DescriptorTargetBase(
           // _which_set,
           binding_index,
           shader_stage,
@@ -26,14 +26,14 @@ ImageDescriptorSetTarget::ImageDescriptorSetTarget(std::shared_ptr<Image> img,
     m_img_views.push_back(img->Get_Image_View());
 }
 
-ImageDescriptorSetTarget::ImageDescriptorSetTarget(std::vector<std::shared_ptr<Image>> imgs,
+ImageDescriptorTarget::ImageDescriptorTarget(std::vector<std::shared_ptr<Image>> imgs,
                                                    //  Which_Set which_set,
                                                    int binding_index,
                                                    vk::ShaderStageFlagBits shader_stage,
                                                    vk::DescriptorType type,
                                                    std::shared_ptr<DescriptorSet> descriptorSet,
                                                    int descriptorSet_index)
-    : DescriptorSetTargetBase(
+    : DescriptorTargetBase(
           // _which_set,
           binding_index,
           shader_stage,
@@ -46,7 +46,7 @@ ImageDescriptorSetTarget::ImageDescriptorSetTarget(std::vector<std::shared_ptr<I
         m_img_views.push_back(imgs[i]->Get_Image_View());
     }
 }
-ImageDescriptorSetTarget::ImageDescriptorSetTarget(std::vector<vk::ImageView> img_views,
+ImageDescriptorTarget::ImageDescriptorTarget(std::vector<vk::ImageView> img_views,
                                                    std::vector<vk::ImageLayout> img_layouts,
                                                    int binding_index,
                                                    vk::ShaderStageFlagBits shader_stage,
@@ -55,7 +55,7 @@ ImageDescriptorSetTarget::ImageDescriptorSetTarget(std::vector<vk::ImageView> im
                                                    int descriptorSet_index)
     : m_img_layouts(img_layouts)
     , m_img_views(img_views)
-    , DescriptorSetTargetBase(
+    , DescriptorTargetBase(
           // _which_set,
           binding_index,
           shader_stage,
@@ -65,7 +65,7 @@ ImageDescriptorSetTarget::ImageDescriptorSetTarget(std::vector<vk::ImageView> im
 {
 }
 
-void ImageDescriptorSetTarget::Update()
+void ImageDescriptorTarget::Update()
 {
     std::vector<vk::DescriptorImageInfo> image_infos(m_img_views.size());
     assert(m_img_views.size() == m_img_layouts.size());

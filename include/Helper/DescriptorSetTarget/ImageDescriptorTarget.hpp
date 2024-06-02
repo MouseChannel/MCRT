@@ -1,11 +1,11 @@
 
 
-#include "Helper/DescriptorSetTarget/DescriptorSetTargetBase.hpp"
+#include "Helper/DescriptorSetTarget/DescriptorTargetBase.hpp"
 namespace MCRT {
 class Image;
-class ImageDescriptorSetTarget : public DescriptorSetTargetBase {
+class ImageDescriptorTarget : public DescriptorTargetBase {
 public:
-    ImageDescriptorSetTarget(std::shared_ptr<Image> img,
+    ImageDescriptorTarget(std::shared_ptr<Image> img,
 
                              int binding_index,
                              vk::ShaderStageFlagBits shader_stage,
@@ -13,14 +13,14 @@ public:
                              std::shared_ptr<DescriptorSet> descriptorSet,
                              int descriptorSet_index = 0);
 
-    ImageDescriptorSetTarget(std::vector<std::shared_ptr<Image>> imgs,
+    ImageDescriptorTarget(std::vector<std::shared_ptr<Image>> imgs,
 
                              int binding_index,
                              vk::ShaderStageFlagBits shader_stage,
                              vk::DescriptorType type,
                              std::shared_ptr<DescriptorSet> descriptorSet,
                              int descriptorSet_index = 0);
-    ImageDescriptorSetTarget(std::vector<vk::ImageView> img_views,
+    ImageDescriptorTarget(std::vector<vk::ImageView> img_views,
                              std::vector<vk::ImageLayout> img_layouts,
                              int binding_index,
                              vk::ShaderStageFlagBits shader_stage,
@@ -29,7 +29,7 @@ public:
                              int descriptorSet_index = 0);
 
     void Update() override;
-    int get_descriptorSet_count() override
+    int get_descriptor_count() override
     {
         return m_img_views.size();
     }

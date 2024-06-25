@@ -61,10 +61,10 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     // Mesh::LoadFromFile("/home/mousechannel/Downloads/korean_fire_extinguisher_01_4k.gltf/korean_fire_extinguisher_01_4k.gltf");
 
     // Mesh::LoadFromFile("assets/pbr/korean_fire_extinguisher_01_4k/korean_fire_extinguisher_01_4k.gltf");
-    // Mesh::LoadFromFile("C:\\Users\\moche\\Downloads\\plunger_1k.gltf\\plunger_1k.gltf");
-    Mesh::LoadFromFile("assets/pbr/plunger_1k/plunger_1k.gltf");
-    IBLManager::Get_Singleton()->Init("assets/Cubemap/victoria_sunset_1k.hdr");
-    // IBLManager::Get_Singleton()->Init("assets\\Cubemap\\victoria_sunset_1k.hdr");
+    // Mesh::LoadFromFile("C://Users//moche//Downloads//plunger_1k.gltf//plunger_1k.gltf");
+    Mesh::LoadFromFile("assets/pbr/korean_fire_extinguisher_01_4k/korean_fire_extinguisher_01_4k.gltf");
+    IBLManager::Get_Singleton()->Init("assets/Cubemap/hospital_room_2_8k.hdr");
+    // IBLManager::Get_Singleton()->Init("assets//Cubemap//victoria_sunset_1k.hdr");
 
     PASS.resize(1);
 

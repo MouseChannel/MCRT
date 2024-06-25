@@ -1,7 +1,7 @@
 #include "Rendering/ComputeContext.hpp"
 // #include "Helper/DescriptorManager.hpp"
 #include "Helper/Uniform_Manager.hpp"
-#include "Rendering/RaytracingPass.hpp"
+// #include "Rendering/RaytracingPass.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/DescriptorSet.hpp"
 #include "Wrapper/Image.hpp"

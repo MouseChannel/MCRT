@@ -9,8 +9,8 @@
 #include "shaders/Data_struct.h"
 namespace MCRT {
 using Shader_Stage = Graphic_Pipeline::Shader_Stage;
-ToneMapSubPass::ToneMapSubPass(std::weak_ptr<GraphicContext> graphicContext)
-    : BaseSubPass(graphicContext)
+ToneMapSubPass::ToneMapSubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index)
+    : BaseSubPass(graphicContext,subpass_index)
 {
 }
 void ToneMapSubPass::make_offscreen_mesh()
@@ -46,7 +46,7 @@ void ToneMapSubPass::prepare_pipeline(int pc_size)
         m_pipeline->Make_viewPort();
         m_pipeline->Make_MultiSample(vk::SampleCountFlagBits::e1);
         m_pipeline->Make_Resterization();
-        m_pipeline->Make_Subpass_index(raster_context::ToneMapSubPassIndex);
+        m_pipeline->Make_Subpass_index(m_subpass_index);
 
         m_pipeline->Make_OpacityAttach(color_references.size());
         m_pipeline->Make_DepthTest();

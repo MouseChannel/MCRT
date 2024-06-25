@@ -7,7 +7,7 @@ namespace MCRT {
 
 class OpacitySubPass : public BaseSubPass {
 public:
-    OpacitySubPass(std::weak_ptr<GraphicContext> graphicContext);
+    OpacitySubPass(std::weak_ptr<GraphicContext> graphicContext,int subpass_index);
     void prepare_vert_shader_module(std::string vert_shader) override;
     void prepare_frag_shader_module(std::string frag_shader) override;
     //    void  prepare_descriptorset(std::function<void()> prepare)override;
@@ -17,13 +17,7 @@ public:
     {
         return 1;
     }
-    // vk::DescriptorSet get_DescriptorSet(int index = 0) override
-    // {
-    //     return m_descriptorSet->get_handle()[index];
-    // }
-    
-    // void draw(vk::CommandBuffer& cmd,std::vector<std::shared_ptr<Mesh>>&  meshs,void* push_constant) override;
-    // void draw1(vk::CommandBuffer& cmd) override;
+   
 
 private:
 };

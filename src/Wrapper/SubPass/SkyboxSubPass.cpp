@@ -7,8 +7,8 @@
 #include "shaders/Data_struct.h"
 namespace MCRT {
 using Shader_Stage = Graphic_Pipeline::Shader_Stage;
-SkyboxSubPass::SkyboxSubPass(std::weak_ptr<GraphicContext> graphicContext)
-    : BaseSubPass(graphicContext)
+SkyboxSubPass::SkyboxSubPass(std::weak_ptr<GraphicContext> graphicContext,int subpass_index)
+    : BaseSubPass(graphicContext,subpass_index)
 {
     Make_SkyboxMesh();
 }
@@ -79,7 +79,7 @@ void SkyboxSubPass::prepare_pipeline(int pc_size)
         m_pipeline->Make_viewPort();
         m_pipeline->Make_MultiSample(vk::SampleCountFlagBits::e8);
         m_pipeline->Make_Resterization(vk::CullModeFlagBits::eNone);
-        m_pipeline->Make_Subpass_index(raster_context::SkyboxSubPassIndex);
+        m_pipeline->Make_Subpass_index(m_subpass_index);
         m_pipeline->Make_OpacityAttach(color_references.size());
         m_pipeline->Make_DepthTest();
         m_pipeline->Make_Blend();

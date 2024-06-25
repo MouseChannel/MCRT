@@ -7,7 +7,7 @@
 #include "Rendering/ComputeContext.hpp"
 #include "Rendering/GraphicContext.hpp"
 #include "Rendering/Model.hpp"
-#include "Rendering/RaytracingPass.hpp"
+// #include "Rendering/RaytracingPass.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Command_Pool.hpp"
 #include "Wrapper/DescriptorSet.hpp"

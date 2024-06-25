@@ -3,8 +3,9 @@
 #include "Rendering/GraphicContext.hpp"
 #include "Wrapper/DescriptorPool.hpp"
 namespace MCRT {
-BaseSubPass::BaseSubPass(std::weak_ptr<GraphicContext> graphicContext)
-    : m_graphicContext(graphicContext)
+BaseSubPass::BaseSubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index)
+    : m_subpass_index(subpass_index)
+    , m_graphicContext(graphicContext)
 {
 }
 

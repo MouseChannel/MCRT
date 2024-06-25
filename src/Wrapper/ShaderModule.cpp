@@ -23,6 +23,24 @@ std::vector<char> ShaderModule::ReadBinary(const std::string& fileName)
 
     return buffer;
 }
+
+ShaderModule::ShaderModule(std::string path, vk::ShaderStageFlagBits stage)
+    : m_stage(stage)
+{
+    auto source = ReadBinary(path);
+    vk::ShaderModuleCreateInfo createInfo;
+
+    createInfo
+        .setCodeSize(source.size())
+
+        .setPCode((const uint32_t*)source.data());
+
+    m_handle = Get_Context_Singleton()
+                   ->get_device()
+                   ->get_handle()
+                   .createShaderModule(createInfo);
+}
+
 void ShaderModule::Set_SpecializationInfo(vk::SpecializationInfo info)
 {
     m_info = info;

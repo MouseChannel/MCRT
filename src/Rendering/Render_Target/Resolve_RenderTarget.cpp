@@ -55,7 +55,6 @@ Resolve_RenderTarget::Resolve_RenderTarget()
         vk::ImageAspectFlagBits::eColor,
         vk::SampleCountFlagBits::e1,
         1));
-    std::cout << "resolve11  " << m_image->Get_Image_View() << std::endl;
     Context::Get_Singleton()->get_debugger()->set_handle_name(m_image->Get_Image_View(), "old view");
     clear_color.color.setFloat32({ 0.1f, 0.1f, 0.1f, 1.0f });
 }

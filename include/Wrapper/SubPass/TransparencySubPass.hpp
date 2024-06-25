@@ -7,7 +7,7 @@ namespace MCRT {
 
 class TransparencySubPass : public BaseSubPass {
 public:
-    TransparencySubPass(std::weak_ptr<GraphicContext> graphicContext);
+    TransparencySubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index);
     //    void set_description() override;
     ~TransparencySubPass() = default;
     //    void prepare_renderTarget()override;

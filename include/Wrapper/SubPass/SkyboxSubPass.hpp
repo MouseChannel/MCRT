@@ -8,7 +8,7 @@ namespace MCRT {
 
 class SkyboxSubPass : public BaseSubPass {
 public:
-    SkyboxSubPass(std::weak_ptr<GraphicContext> graphicContext);
+    SkyboxSubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index);
     //    void set_description() override;
     ~SkyboxSubPass() = default;
     //    void prepare_renderTarget()override;

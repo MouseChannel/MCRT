@@ -15,8 +15,8 @@
 
 namespace MCRT {
 
-IMGUISubPass::IMGUISubPass(std::weak_ptr<GraphicContext> graphicContext)
-    : BaseSubPass(graphicContext)
+IMGUISubPass::IMGUISubPass(std::weak_ptr<GraphicContext> graphicContext,  int subpass_index)
+    : BaseSubPass(graphicContext,subpass_index)
 {
 }
 IMGUISubPass::~IMGUISubPass(){
@@ -66,7 +66,7 @@ void IMGUISubPass::post_prepare()
     init_info.Queue = context->get_device()->Get_Graphic_queue();
     init_info.PipelineCache = VK_NULL_HANDLE;
     init_info.DescriptorPool = VkDescriptorPool(descriptor_pool);
-    init_info.Subpass = raster_context::IMGUISubPassIndex;
+    init_info.Subpass = m_subpass_index;
     init_info.MinImageCount = 2;
     init_info.ImageCount = context->get_swapchain()->Get_Swapchain_Image_size();
     init_info.MSAASamples = (VkSampleCountFlagBits)vk::SampleCountFlagBits::e1;

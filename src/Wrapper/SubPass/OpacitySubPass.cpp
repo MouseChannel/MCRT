@@ -7,8 +7,8 @@
 #include "shaders/Data_struct.h"
 namespace MCRT {
 using Shader_Stage = Graphic_Pipeline::Shader_Stage;
-OpacitySubPass::OpacitySubPass(std::weak_ptr<GraphicContext> graphicContext)
-    : BaseSubPass(graphicContext)
+OpacitySubPass::OpacitySubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index)
+    : BaseSubPass(graphicContext,subpass_index)
 {
 }
 void OpacitySubPass::prepare_vert_shader_module(std::string _vert_shader)
@@ -37,7 +37,7 @@ void OpacitySubPass::prepare_pipeline(int pc_size)
         m_pipeline->Make_viewPort();
         m_pipeline->Make_MultiSample(vk::SampleCountFlagBits::e8);
         m_pipeline->Make_Resterization();
-        m_pipeline->Make_Subpass_index(raster_context::OpacitySubPassIndex);
+        m_pipeline->Make_Subpass_index(m_subpass_index);
 
         m_pipeline->Make_OpacityAttach(color_references.size());
         m_pipeline->Make_DepthTest();

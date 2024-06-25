@@ -10,18 +10,12 @@
 namespace MCRT {
 class DescriptorTargetBase;
 class DescriptorPool;
-class BaseSubPass :public BasePass {
+class BaseSubPass : public BasePass {
 public:
     BaseSubPass() = delete;
-    BaseSubPass(std::weak_ptr<GraphicContext> graphicContext);
-    // virtual ~BaseSubPass() {
-    //     std::cout<<"base subpass"<<std::endl;
-    // }
+    BaseSubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index);
 
-    virtual ~BaseSubPass()  = default;
-    // {
-    //     std::cout<<"delete subpass1"<<std::endl;
-    // }
+    virtual ~BaseSubPass() = default;
 
     virtual void prepare_vert_shader_module(std::string vert_shader) = 0;
     virtual void prepare_frag_shader_module(std::string frag_shader) = 0;
@@ -37,16 +31,12 @@ public:
     {
         return m_meshs;
     }
-    virtual void recreate(){
-        
+    virtual void recreate()
+    {
     }
-    // virtual void Prepare_DescriptorSet(std::function<void()>);
-    // void AddDescriptorSetTarget(std::shared_ptr<DescriptorSetTargetBase> target);
-    // void AddDescriptorSetTarget(std::vector<std::shared_ptr<DescriptorSetTargetBase> >targets);
 
     vk::SubpassDescription description;
     virtual int get_DescriptorSetCount();
-   
 
 protected:
     std::weak_ptr<GraphicContext> m_graphicContext;
@@ -60,10 +50,6 @@ protected:
     std::vector<vk::AttachmentReference> resolve_references;
 
     std::vector<vk::SubpassDependency> dependencies;
-
-    // std::shared_ptr<DescriptorSet> m_descriptorSet;
-    // std::shared_ptr<DescriptorPool> m_descriptorSetPool;
-
-    // std::vector<std::shared_ptr<DescriptorSetTargetBase>> m_descriptorSetTarget;
+    int m_subpass_index { -1 };
 };
 }

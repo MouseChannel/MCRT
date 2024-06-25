@@ -8,7 +8,7 @@ namespace MCRT {
 
 class ToneMapSubPass : public BaseSubPass {
 public:
-    ToneMapSubPass(std::weak_ptr<GraphicContext> graphicContext);
+    ToneMapSubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index);
     void prepare_vert_shader_module(std::string vert_shader) override;
     void prepare_frag_shader_module(std::string frag_shader) override;
     void prepare_pipeline(int pc_size) override;

@@ -6,8 +6,8 @@
 #include "shaders/Data_struct.h"
 namespace MCRT {
 using Shader_Stage = Graphic_Pipeline::Shader_Stage;
-TransparencySubPass::TransparencySubPass(std::weak_ptr<GraphicContext> graphicContext)
-    : BaseSubPass(graphicContext)
+TransparencySubPass::TransparencySubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index)
+    : BaseSubPass(graphicContext,subpass_index)
 {
 }
 

@@ -9,12 +9,9 @@
 #include "Rendering/ComputeContext.hpp"
 #include "Rendering/GraphicContext.hpp"
 #include "Rendering/Model.hpp"
-#include "Rendering/RaytracingPass.hpp"
-#include "Wrapper/DescriptorSet.hpp"
-#include "Wrapper/Pipeline/Graphic_Pipeline.hpp"
-#include "Wrapper/Pipeline/RT_pipeline.hpp"
+#include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Ray_Tracing/AS_Builder.hpp"
-#include "Wrapper/Shader_module.hpp"
+ 
 // #include "Wrapper/Skybox.hpp"
 #include "Wrapper/Texture.hpp"
 
@@ -96,7 +93,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
             {
 
                 {
-                    graphic_context->subpasses[SkyboxSubPassIndex].reset(new SkyboxSubPass(graphic_context));
+                    graphic_context->subpasses[SkyboxSubPassIndex].reset(new SkyboxSubPass(graphic_context,SkyboxSubPassIndex));
 
                     auto& skyboxSubpass = graphic_context->subpasses[SkyboxSubPassIndex];
                     skyboxSubpass->link_renderTarget({ color_renderTarget },
@@ -135,7 +132,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                 } // opacity pass
 
                 {
-                    graphic_context->subpasses[OpacitySubPassIndex].reset(new OpacitySubPass(graphic_context));
+                    graphic_context->subpasses[OpacitySubPassIndex].reset(new OpacitySubPass(graphic_context, OpacitySubPassIndex));
                     // graphic_context->AddSubPass(opacitySubPass);
                     auto& opacitySubPass = graphic_context->subpasses[OpacitySubPassIndex];
                     opacitySubPass->link_renderTarget({ color_renderTarget },
@@ -211,7 +208,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                     //                                           .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite | vk::AccessFlagBits::eColorAttachmentWrite));
                 }
                 {
-                    graphic_context->subpasses[ToneMapSubPassIndex].reset(new ToneMapSubPass(graphic_context));
+                    graphic_context->subpasses[ToneMapSubPassIndex].reset(new ToneMapSubPass(graphic_context, ToneMapSubPassIndex));
                     auto& tonemapSubPass = graphic_context->subpasses[ToneMapSubPassIndex];
                     tonemapSubPass->link_renderTarget({ swapchain_renderTarget },
                                                       {},
@@ -248,7 +245,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                                                               .setDstAccessMask(vk::AccessFlagBits::eShaderRead));
                 }
                 {
-                    graphic_context->subpasses[IMGUISubPassIndex].reset(new IMGUISubPass(graphic_context));
+                    graphic_context->subpasses[IMGUISubPassIndex].reset(new IMGUISubPass(graphic_context, IMGUISubPassIndex));
                     auto& imguiSubPass = graphic_context->subpasses[IMGUISubPassIndex];
                     // graphic_context->AddSubPass(imguiSubPass);
                     imguiSubPass->link_renderTarget({ swapchain_renderTarget }, {}, {}, {});

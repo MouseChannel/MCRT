@@ -8,14 +8,12 @@ include(cmake/FindVulkan.cmake)
 include(cmake/FindGLFW.cmake)
 include(cmake/FindIMGUI.cmake)
 IF (WIN32)
-    target_link_libraries(imgui PUBLIC glfw Vulkan::Vulkan glm)
+    target_link_libraries(imgui PUBLIC glfw3 Vulkan::Vulkan glmf32)
 ELSEIF (UNIX)
     # in linux link Vulkan::Vulkan
-    target_link_libraries(imgui glfw Vulkan::Vulkan)
+    target_link_libraries(imgui glfw3 Vulkan::Vulkan)
 ENDIF ()
  
-
-message("---------------------------------")
 
  
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/Tool)

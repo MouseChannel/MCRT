@@ -4,7 +4,7 @@
 #include "Rendering/AppWindow.hpp"
 #include "Rendering/ComputeContext.hpp"
 #include "Rendering/Model.hpp"
-#include "Rendering/RaytracingPass.hpp"
+// #include "Rendering/RaytracingPass.hpp"
 #include "Rendering/Render_Frame.hpp"
 #include "Rendering/Render_Target/Color_Render_Target.hpp"
 #include "Rendering/Render_Target/Depth_Render_Target.hpp"

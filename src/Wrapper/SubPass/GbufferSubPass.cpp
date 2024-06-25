@@ -5,9 +5,9 @@
 #include "shaders/Data_struct.h"
 namespace MCRT {
 using Shader_Stage = Graphic_Pipeline::Shader_Stage;
-GbufferSubPass::GbufferSubPass(std::weak_ptr<GraphicContext> graphicContext, std::vector<std::shared_ptr<GBuffer_RenderTarget>> render_Targets)
+GbufferSubPass::GbufferSubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index, std::vector<std::shared_ptr<GBuffer_RenderTarget>> render_Targets)
     : m_render_Targets(render_Targets)
-    , BaseSubPass(graphicContext)
+    , BaseSubPass(graphicContext, subpass_index)
 {
 }
 

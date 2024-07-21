@@ -1,7 +1,10 @@
 #include "Wrapper/SubPass/GbufferSubPass.hpp"
+#include "Helper/DescriptorSetTarget/ImageDescriptorTarget.hpp"
 #include "Rendering/GraphicContext.hpp"
 #include "Wrapper/Shader_module.hpp"
 #include "example/base/raster_context.hpp"
+#include "example/raster/shader/Binding.h"
+#include "example/raster/shader/Constants.h"
 #include "shaders/Data_struct.h"
 namespace MCRT {
 using Shader_Stage = Graphic_Pipeline::Shader_Stage;
@@ -10,12 +13,18 @@ GbufferSubPass::GbufferSubPass(std::weak_ptr<GraphicContext> graphicContext, int
     , BaseSubPass(graphicContext, subpass_index)
 {
 }
-
+GbufferSubPass::GbufferSubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index)
+    : BaseSubPass(graphicContext, subpass_index)
+{
+}
 void GbufferSubPass::prepare_pipeline(int pc_size)
 {
     auto m_graphicContextp = m_graphicContext.lock();
     if (m_graphicContextp) {
         // m_pipeline.reset(new Graphic_Pipeline(shaders, { m_graphicContextp->get_descriptor_manager()->get_DescriptorSet(DescriptorManager::Graphic) }, pc_size));
+        m_pipeline.reset(new Graphic_Pipeline(shaders,
+                                              { m_descriptorSet },
+                                              pc_size));
 
         auto binds = Vertex::make_bind();
         auto attrs = Vertex::make_attr();
@@ -23,12 +32,18 @@ void GbufferSubPass::prepare_pipeline(int pc_size)
         m_pipeline->Make_VertexInput(binds, attrs);
         m_pipeline->Make_VertexAssembly();
         m_pipeline->Make_viewPort();
-        m_pipeline->Make_MultiSample();
-        m_pipeline->Make_Resterization(vk::CullModeFlagBits::eNone);
-        // m_pipeline->Make_Subpass_index(raster_context::SkyboxSubPassIndex);
+        m_pipeline->Make_MultiSample(m_graphicContextp
+                                         ->Get_render_targets()[color_references[0].attachment]
+                                         ->Get_attachment_description()
+                                         .samples);
+        m_pipeline->Make_Resterization(vk::CullModeFlagBits::eBack);
+        m_pipeline->Make_Subpass_index(m_subpass_index);
         m_pipeline->Make_OpacityAttach(color_references.size());
-        m_pipeline->Make_DepthTest();
+        m_pipeline->Make_DepthTest(true,false);
         m_pipeline->Make_Blend();
+        m_pipeline->Make_Layout(m_descriptorSet->get_layout(),
+                                sizeof(PC_Raster),
+                                vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment);
     }
 }
 void GbufferSubPass::prepare_vert_shader_module(std::string _vert_shader)
@@ -46,49 +61,30 @@ void GbufferSubPass::post_prepare()
             ->get_graphic_context()
             ->Get_render_pass());
 }
+void GbufferSubPass::recreate()
+{
 
-// void GbufferSubPass::draw(vk::CommandBuffer& cmd, std::vector<std::shared_ptr<Mesh>>& meshs, void* push_constant)
-// {
-//     for (auto& mesh : meshs) {
-//         // auto& opacitySubpass = render_context->get_subpasses()[1];
-//         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
-//                          m_pipeline->get_handle());
-//         // render_context->record_command(cmd);
-//         //            for (auto& mesh : Mesh::meshs) {
-//         auto graphic_context = m_graphicContext.lock();
-//         if (graphic_context) {
-//             cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-//                                    m_pipeline->get_layout(),
-//                                    0,
-//                                    { graphic_context->get_descriptor_manager()
-//                                          ->get_DescriptorSet(
-//                                              DescriptorManager::Graphic)
-//                                          ->get_handle() },
-//                                    {});
-//         }
+    auto m_graphicContextp = m_graphicContext.lock();
+    if (m_graphicContextp) {
 
-//         cmd.bindIndexBuffer(mesh->get_indices_buffer()->get_handle(),
-//                             0,
-//                             vk::IndexType::eUint32);
+        Prepare_DescriptorSet([&]() {
+            for (int i = 0; i < get_DescriptorSetCount(); i++) {
+                auto input_renderTarget = m_graphicContextp->Get_render_targets(i)[m_graphicContextp->resolveAttachmentindex];
+                AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
+                    // IBLManager::Get_Singleton()->get_skybox(),
+                    std::vector { input_renderTarget->Get_Image()->Get_Image_View() },
+                    std::vector { input_renderTarget->get_inputLayout() },
+                    // Which_Set::Graphic,
+                    (int)Graphic_Binding::e_tonemap_input,
+                    vk::ShaderStageFlagBits::eFragment,
+                    vk::DescriptorType::eInputAttachment,
+                    get_DescriptorSet(),
+                    i));
+            }
+        });
+    }
+    prepare_pipeline(sizeof(PC_Raster));
+    post_prepare();
+}
 
-//         cmd.bindVertexBuffers(0,
-//                               {
-//                                   mesh->get_vertex_buffer()->get_handle(),
-//                               },
-//                               { 0 });
-//         auto m = glm::mat4(1);
-
-//         cmd.pushConstants(m_pipeline->get_layout(),
-//                           vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
-//                           0,
-//                           m_pipeline->get_pushconstants_size(),
-//                           push_constant);
-//         //            render_context->record_command(cmd);
-//         cmd.drawIndexed(mesh->get_vertex_count(),
-//                         1,
-//                         0,
-//                         0,
-//                         0);
-//     }
-// }
 }

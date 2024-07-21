@@ -4,7 +4,8 @@
 #ifndef PI
 #define PI 3.1415926
 #endif
-
+#ifndef SAMPLING
+#define SAMPLING
 vec3 pcg3d_random(uvec3 seed)
 {
     seed = seed * 1664525u + 1013904223u;
@@ -89,3 +90,4 @@ vec3 sampleHemisphere(float u1, float u2)
 	const float u1p = sqrt(max(0.0, 1.0 - u1*u1));
 	return vec3(cos(2*PI*u2) * u1p, sin(2*PI*u2) * u1p, u1);
 }
+#endif

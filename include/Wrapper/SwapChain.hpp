@@ -1,4 +1,4 @@
-
+#pragma once
 #include "Rendering/Context.hpp"
 // #include "Wrapper/Base.hpp"
 #include "Wrapper/Component.hpp"

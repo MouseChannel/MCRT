@@ -54,7 +54,7 @@ Texture::Texture(std::string_view path)
         vk::ImageTiling::eOptimal,
         vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
         vk::ImageAspectFlagBits::eColor,
-        vk::SampleCountFlagBits::e8));
+        vk::SampleCountFlagBits::e1));
     image->SetImageLayout(vk::ImageLayout::eTransferDstOptimal,
                           vk::AccessFlagBits::eNone,
                           vk::AccessFlagBits::eTransferWrite,

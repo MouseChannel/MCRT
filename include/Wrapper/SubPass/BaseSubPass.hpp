@@ -27,10 +27,10 @@ public:
     {
         return m_pipeline;
     }
-    auto& get_mesh()
-    {
-        return m_meshs;
-    }
+    // auto& get_mesh()
+    // {
+    //     return m_meshs;
+    // }
     virtual void recreate()
     {
     }
@@ -42,7 +42,7 @@ protected:
     std::weak_ptr<GraphicContext> m_graphicContext;
     std::shared_ptr<Graphic_Pipeline> m_pipeline;
     std::vector<std::shared_ptr<ShaderModule>> shaders { 2 };
-    std::vector<std::shared_ptr<Mesh>> m_meshs;
+    // std::vector<std::shared_ptr<Mesh>> m_meshs;
 
     std::vector<vk::AttachmentReference> color_references;
     std::vector<vk::AttachmentReference> depth_references;

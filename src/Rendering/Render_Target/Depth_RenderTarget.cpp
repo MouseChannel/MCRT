@@ -3,6 +3,7 @@
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Image.hpp"
 #include "Wrapper/RenderPass.hpp"
+#include "Helper/Debugger.hpp"
 #include "Wrapper/SwapChain.hpp"
 
 namespace MCRT {
@@ -61,7 +62,7 @@ Depth_RenderTarget::Depth_RenderTarget()
         vk::ImageUsageFlagBits::eDepthStencilAttachment,
         vk::ImageAspectFlagBits::eDepth,
         vk::SampleCountFlagBits::e8));
-
+    Context::Get_Singleton()->get_debugger()->set_name(m_image, "depth_rendertarget");
     clear_color.depthStencil.setDepth(1.f);
 }
 // std::shared_ptr<Depth_RenderTarget> Depth_RenderTarget::Create()

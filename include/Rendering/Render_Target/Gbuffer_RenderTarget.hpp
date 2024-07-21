@@ -15,7 +15,7 @@ public:
     void recreate(int index) override;
     vk::ImageLayout get_Baselayout() override
     {
-        return vk::ImageLayout::eGeneral;
+        return vk::ImageLayout::eColorAttachmentOptimal;
     }
     vk::ImageLayout get_inputLayout() override
     {

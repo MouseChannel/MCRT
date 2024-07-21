@@ -1,29 +1,30 @@
+#ifndef PI
+#define PI 3.141592f;
+#endif
+#define EPSILON 0.00001f;
 
+#include "shaders/sampling.glsl"
+// float radicalInverseVdC(uint bits)
+// {
+//     bits = (bits << 16u) | (bits >> 16u);
+//     bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+//     bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+//     bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+//     bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+//     return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+// }
 
-const float PI = 3.141592;
-const float Epsilon = 0.00001;
-float radicalInverse_VdC(uint bits)
-{
-    bits = (bits << 16u) | (bits >> 16u);
-    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
-    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
-    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
-    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
-    return float(bits) * 2.3283064365386963e-10; // / 0x100000000
-}
+// // Sample i-th point from Hammersley point set of NumSamples points total.
+// vec2 sampleHammersley(uint i, float InvNumSamples)
+// {
+//     return vec2(i * InvNumSamples, radicalInverseVdC(i));
+// }
 
-// Sample i-th point from Hammersley point set of NumSamples points total.
-vec2 sampleHammersley(uint i, float InvNumSamples)
-{
-    return vec2(i * InvNumSamples, radicalInverse_VdC(i));
-}
-
- 
-vec3 sampleHemisphere(float u1, float u2)
-{
-    const float u1p = sqrt(max(0.0, 1.0 - u1 * u1));
-    return vec3(cos(2 * PI * u2) * u1p, sin(2 * PI * u2) * u1p, u1);
-}
+// vec3 sampleHemisphere(float u1, float u2)
+// {
+//     const float u1p = sqrt(max(0.0, 1.0 - u1 * u1));
+//     return vec3(cos(2 * PI * u2) * u1p, sin(2 * PI * u2) * u1p, u1);
+// }
 
 vec3 sampleGGX(float u1, float u2, float roughness)
 {
@@ -58,7 +59,8 @@ void computeBasisVectors(const vec3 N, out vec3 S, out vec3 T)
 {
     // Branchless select non-degenerate T.
     T = cross(N, vec3(0.0, 1.0, 0.0));
-    T = mix(cross(N, vec3(1.0, 0.0, 0.0)), T, step(Epsilon, dot(T, T)));
+
+    T = mix(cross(N, vec3(1.0f, 0.0, 0.0)), T, step(0.00001f, dot(T, T)));
 
     T = normalize(T);
     S = normalize(cross(N, T));
@@ -97,7 +99,7 @@ vec3 Get_IBLColor(vec3 camera_pos,
     vec3 diffuse = KD * albedo * irradiance;
 
     vec3 dir = reflect(-V, fragment_world_nrm);
-   
+
     vec3 prefilteredColor = textureLod(skybox, dir, roughness * textureQueryLevels(skybox)).rgb;
 
     vec3 brdf = texture(LUT_image, vec2(cosine, roughness)).rgb;

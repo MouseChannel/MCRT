@@ -7,8 +7,8 @@
 #include "shaders/Data_struct.h"
 namespace MCRT {
 using Shader_Stage = Graphic_Pipeline::Shader_Stage;
-SkyboxSubPass::SkyboxSubPass(std::weak_ptr<GraphicContext> graphicContext,int subpass_index)
-    : BaseSubPass(graphicContext,subpass_index)
+SkyboxSubPass::SkyboxSubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index)
+    : BaseSubPass(graphicContext, subpass_index)
 {
     Make_SkyboxMesh();
 }
@@ -77,13 +77,17 @@ void SkyboxSubPass::prepare_pipeline(int pc_size)
         m_pipeline->Make_VertexInput(binds, attrs);
         m_pipeline->Make_VertexAssembly();
         m_pipeline->Make_viewPort();
-        m_pipeline->Make_MultiSample(vk::SampleCountFlagBits::e8);
+
+        m_pipeline->Make_MultiSample(m_graphicContextp
+                                         ->Get_render_targets()[color_references[0].attachment]
+                                         ->Get_attachment_description()
+                                         .samples);
         m_pipeline->Make_Resterization(vk::CullModeFlagBits::eNone);
         m_pipeline->Make_Subpass_index(m_subpass_index);
         m_pipeline->Make_OpacityAttach(color_references.size());
         m_pipeline->Make_DepthTest();
         m_pipeline->Make_Blend();
-        m_pipeline->Make_Layout(m_descriptorSet->get_layout(), pc_size, vk::ShaderStageFlagBits::eFragment|vk::ShaderStageFlagBits::eVertex);
+        m_pipeline->Make_Layout(m_descriptorSet->get_layout(), pc_size, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex);
     }
 }
 void SkyboxSubPass::prepare_vert_shader_module(std::string _vert_shader)

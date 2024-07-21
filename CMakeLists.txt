@@ -11,7 +11,7 @@ IF (WIN32)
     target_link_libraries(imgui PUBLIC glfw3 Vulkan::Vulkan glmf32)
 ELSEIF (UNIX)
     # in linux link Vulkan::Vulkan
-    target_link_libraries(imgui glfw3 Vulkan::Vulkan)
+    target_link_libraries(imgui glfw Vulkan::Vulkan)
 ENDIF ()
  
 

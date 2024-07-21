@@ -12,7 +12,15 @@ class Buffer;
 class raster_context_pbr : public raster_context {
 public:
     enum Pass_index { Graphic };
-
+    enum SubPass_index {
+        SkyboxSubPassIndex,
+        // GbufferSubPassIndex,
+        OpacitySubPassIndex,
+        // TransparencySubPassIndex,
+        ToneMapSubPassIndex,
+        IMGUISubPassIndex,
+        SubPassCount
+    };
     raster_context_pbr();
     ~raster_context_pbr();
     std::shared_ptr<CommandBuffer> Begin_Frame() override;

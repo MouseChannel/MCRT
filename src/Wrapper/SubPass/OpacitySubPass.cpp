@@ -35,7 +35,10 @@ void OpacitySubPass::prepare_pipeline(int pc_size)
         m_pipeline->Make_VertexInput(binds, attrs);
         m_pipeline->Make_VertexAssembly();
         m_pipeline->Make_viewPort();
-        m_pipeline->Make_MultiSample(vk::SampleCountFlagBits::e8);
+        m_pipeline->Make_MultiSample(m_graphicContextp
+                                         ->Get_render_targets()[color_references[0].attachment]
+                                         ->Get_attachment_description()
+                                         .samples);
         m_pipeline->Make_Resterization();
         m_pipeline->Make_Subpass_index(m_subpass_index);
 

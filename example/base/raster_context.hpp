@@ -14,15 +14,7 @@ public:
     // enum Pass_index { Graphic,
 
     //                   Compute };
-    enum SubPass_index {
-        SkyboxSubPassIndex,
-        // GbufferSubPassIndex,
-        OpacitySubPassIndex,
-        // TransparencySubPassIndex,
-        ToneMapSubPassIndex,
-        IMGUISubPassIndex,
-        SubPassCount
-    };
+    
     raster_context();
     virtual ~raster_context();
     virtual std::shared_ptr<CommandBuffer> Begin_Frame() override;

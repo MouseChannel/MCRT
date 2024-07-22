@@ -16,18 +16,18 @@ public:
     // void init(std::shared_ptr<Window>) override;
     virtual std::shared_ptr<CommandBuffer> Begin_Frame() override;
     virtual void EndFrame() override;
-    std::shared_ptr<RaytracingPass> get_rt_context() override
+    std::shared_ptr<RaytracingContext> get_rt_context() override
     {
         auto base = PASS[Pass_index::Ray_tracing];
-        if (auto context = std::reinterpret_pointer_cast<RaytracingPass>(base); context != nullptr) {
+        if (auto context = std::reinterpret_pointer_cast<RaytracingContext>(base); context != nullptr) {
             return context;
         }
         throw std::runtime_error("it is not Ray_Tracing context");
     }
-    std::shared_ptr<ComputePass> get_compute_context() override
+    std::shared_ptr<ComputeContext> get_compute_context() override
     {
         auto base = PASS[Pass_index::Compute];
-        if (auto context = std::reinterpret_pointer_cast<ComputePass>(base); context != nullptr) {
+        if (auto context = std::reinterpret_pointer_cast<ComputeContext>(base); context != nullptr) {
             return context;
         }
         throw std::runtime_error("it is not compute context");

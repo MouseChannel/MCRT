@@ -6,10 +6,9 @@
 #include "Helper/Uniform_Manager.hpp"
 #include "Helper/math.hpp"
 #include "Rendering/Host_Uniform.hpp"
+#include "example/base/shaders/ray_tracing/Data_struct.h"
 #include <memory>
 #include <vector>
-#include "example/base/shaders/ray_tracing/Data_struct.h"
-
 
 namespace MCRT {
 class Device;
@@ -19,12 +18,11 @@ class Framebuffer;
 class Mesh;
 class RT_Pipeline;
 class Image;
-// struct V_P_Matrix;
-// class RenderTarget;
-class RaytracingPass : public BaseContext {
+
+class RaytracingContext : public BaseContext {
 public:
-    RaytracingPass(std::shared_ptr<Device> device);
-    RaytracingPass();
+    RaytracingContext(std::shared_ptr<Device> device);
+    RaytracingContext();
 
     // std::shared_ptr<Pipeline_base> get_pipeline() override;
 
@@ -33,13 +31,6 @@ public:
         if (!m_command_buffer)
             m_command_buffer.reset(new CommandBuffer);
         return m_command_buffer;
-    }
-
-    std::shared_ptr<Image> get_out_image();
-
-    auto get_gbuffer()
-    {
-        return m_gbuffer;
     }
 
     void prepare() override;
@@ -53,6 +44,15 @@ public:
     // void record_command(std::shared_ptr<CommandBuffer>) override;
     void re_create() override;
     // void re_create_descriptorset() override;
+
+    void prepare_pipeline();
+
+    std::shared_ptr<Image> get_out_image();
+
+    auto get_gbuffer()
+    {
+        return m_gbuffer;
+    }
     void build_accelerate_structure();
 
     void set_hit_shader_count(int count)
@@ -101,6 +101,11 @@ public:
         return m_missRegion;
     }
 
+    struct RaytracingShaderStages {
+        int raygen;
+        int rclosestHit;
+        int rmiss;
+    } shaderEnum;
 private:
     void create_shader_bind_table();
     void create_uniform_buffer();
@@ -121,7 +126,7 @@ private:
     vk::StridedDeviceAddressRegionKHR m_missRegion;
     vk::StridedDeviceAddressRegionKHR m_hitRegion;
     vk::StridedDeviceAddressRegionKHR m_anyhitRegion;
-    
+
     vk::StridedDeviceAddressRegionKHR m_callRegion;
     std::shared_ptr<Buffer> m_SBT_buffer;
 
@@ -132,8 +137,8 @@ private:
     std::shared_ptr<Buffer> m_SBT_buffer_rhit;
     std::shared_ptr<Buffer> m_SBT_buffer_rahit;
 
-    int miss_shader_count{ 0 };
-    int hit_shader_count{ 0 };
-    int anyhit_shader_count{ 0 };
+    int miss_shader_count { 0 };
+    int hit_shader_count { 0 };
+    int anyhit_shader_count { 0 };
 };
 }

@@ -39,48 +39,7 @@ void IBLManager::convert_skybox()
                                    m_skyboxPass->Dispach(cmd, skybox_size, skybox_size, 6);
                                });
 
-    // context->prepare_descriptorset([&]() {
-    //     auto descriptor_manager = context->get_descriptor_manager();
-    //     descriptor_manager
-    //         ->Make_DescriptorSet(
-    //             std::vector {
-    //                 ImageDescriptorData::Create(m_hdr_img->Get_Image_View(),
-    //                                             m_hdr_img->Get_image_layout()) },
-    //             DescriptorManager::Compute,
-    //             IBL_Binding::e_hdr_image,
-    //             vk::DescriptorType::eCombinedImageSampler,
-    //             vk::ShaderStageFlagBits::eCompute);
-    //     descriptor_manager
-    //         ->Make_DescriptorSet(
-    //             std::vector {
-    //                 ImageDescriptorData::Create(m_skybox_img->Get_Image_View(),
-    //                                             m_skybox_img->Get_image_layout()) },
-    //             DescriptorManager::Compute,
-    //             IBL_Binding::e_skybox,
-    //             vk::DescriptorType::eStorageImage,
-    //             vk::ShaderStageFlagBits::eCompute);
-    // });
-    // std::shared_ptr<ShaderModule>
-    //     compute_shader {
-    //         new ShaderModule("shaders/PBR/IBL/hdr2cubemap.comp.spv")
-    //     };
-    // context->prepare_pipeline({ compute_shader },
-    //                           { context->get_descriptor_manager()
-    //                                 ->get_DescriptorSet(DescriptorManager::Compute) },
-    //                           sizeof(PushContant_IBL));
-    // context->post_prepare();
-    // CommandManager::ExecuteCmd(Context::Get_Singleton()->get_device()->Get_Graphic_queue(),
-    //                            [&](vk::CommandBuffer& cmd) {
-    //                                cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
-    //                                                       context->get_pipeline()->get_layout(),
-    //                                                       0,
-    //                                                       context->get_pipeline()->get_descriptor_sets(),
-    //                                                       {});
-    //                                cmd.bindPipeline(vk::PipelineBindPoint::eCompute,
-    //                                                 context->get_pipeline()->get_handle());
-
-    //                                cmd.dispatch(skybox_size, skybox_size, 6);
-    //                            });
+     
 
     m_skybox_img->generate_mipmap();
 }
@@ -106,7 +65,6 @@ void IBLManager::Init(std::string path)
                             vk::PipelineStageFlagBits::eTopOfPipe,
                             vk::PipelineStageFlagBits::eBottomOfPipe);
     }
-    // irradiance.reset(new Skybox(irradiance_size, irradiance_size));
 
     auto pixel = stbi_loadf(path.c_str(), &width, &height, &channel, STBI_rgb_alpha);
     auto sizes = width * height * 4 * 4;
@@ -188,38 +146,7 @@ void IBLManager::Init(std::string path)
 
     filter_skybox_mipmap();
 
-    // context->prepare_descriptorset([&]() {
-    //     auto descriptor_manager = context->get_descriptor_manager();
-
-    //     descriptor_manager
-    //         ->Make_DescriptorSet(
-    //             std::vector {
-    //                 ImageDescriptorData::Create(m_irradiance_img->Get_Image_View(),
-    //                                             m_irradiance_img->Get_image_layout()) },
-    //             DescriptorManager::Compute,
-    //             IBL_Binding::e_irradiance_image,
-    //             vk::DescriptorType::eStorageImage,
-    //             vk::ShaderStageFlagBits::eCompute);
-    //     descriptor_manager
-    //         ->Make_DescriptorSet(
-    //             std::vector {
-    //                 ImageDescriptorData::Create(LUT->Get_Image_View(),
-    //                                             LUT->Get_image_layout()) },
-    //             DescriptorManager::Compute,
-    //             IBL_Binding::e_LUT_image,
-    //             vk::DescriptorType::eStorageImage,
-    //             vk::ShaderStageFlagBits::eCompute);
-
-    //     descriptor_manager
-    //         ->Make_DescriptorSet(
-    //             std::vector {
-    //                 ImageDescriptorData::Create(m_skybox_img->Get_Image_View(),
-    //                                             m_skybox_img->Get_image_layout()) },
-    //             DescriptorManager::Compute,
-    //             IBL_Binding::e_skybox,
-    //             vk::DescriptorType::eCombinedImageSampler,
-    //             vk::ShaderStageFlagBits::eCompute);
-    // });
+   
     pre_compute_LUT();
     pre_compute_irradiance();
     Make_SkyboxMesh();

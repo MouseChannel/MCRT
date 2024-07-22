@@ -2,6 +2,7 @@
 
 // #include "Helper/Instance_base.hpp"
 // #include "Helper/Uniform_Manager.hpp"
+// #include "Rendering/RaytracingContext.hpp"
 #include "shaders/Data_struct.h"
 #include <exception>
 #include <memory>
@@ -52,7 +53,7 @@ class RenderPass;
 
 class ComputeContext;
 
-class RaytracingPass;
+class RaytracingContext;
 
 class Context {
 public:
@@ -128,7 +129,7 @@ public:
         return enable_filter;
     }
 
-    virtual std::shared_ptr<RaytracingPass> get_rt_context() = 0;
+    virtual std::shared_ptr<RaytracingContext> get_rt_context() = 0;
 
     virtual std::shared_ptr<ComputeContext> get_compute_context() = 0;
 

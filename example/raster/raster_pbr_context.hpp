@@ -25,7 +25,7 @@ public:
     ~raster_context_pbr();
     std::shared_ptr<CommandBuffer> Begin_Frame() override;
     void EndFrame() override;
-    std::shared_ptr<RaytracingPass> get_rt_context() override
+    std::shared_ptr<RaytracingContext> get_rt_context() override
     {
         throw std::runtime_error("it is not Ray_Tracing context");
     }

@@ -20,14 +20,18 @@ public:
     RT_Pipeline(std::vector<std::shared_ptr<ShaderModule>> shaders,
                 std::vector<std::shared_ptr<DescriptorSet>> sets,
                 int push_constants_size);
+    RT_Pipeline(std::vector<vk::PipelineShaderStageCreateInfo> shader_stages,
+                std::vector<vk::RayTracingShaderGroupCreateInfoKHR> groups);
     ~RT_Pipeline();
     // vk::PipelineLayout get_layout() override
     // {
     //     return layout;
     // }
+    void Build();
 
 private:
-    std::vector<std::shared_ptr<ShaderModule>> shader_modules;
+    // std::vector<std::shared_ptr<ShaderModule>> shader_modules;
+    std::vector<vk::PipelineShaderStageCreateInfo> shader_stages;
     std::vector<vk::RayTracingShaderGroupCreateInfoKHR> groups;
     vk::PipelineLayout layout;
 };

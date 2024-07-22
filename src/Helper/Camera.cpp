@@ -1,7 +1,7 @@
 #include "Helper/Camera.hpp"
 #include "Rendering/AppWindow.hpp"
 #include "Rendering/Context.hpp"
-#include "Rendering/RaytracingPass.hpp"
+#include "Rendering/RaytracingContext.hpp"
 #include "Wrapper/SwapChain.hpp"
 #include "iostream"
 #include "lib/imgui/imgui.h"

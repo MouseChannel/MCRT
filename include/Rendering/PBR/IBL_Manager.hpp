@@ -54,10 +54,10 @@ private:
 
     // std::shared_ptr<ComputeContext> context;
 
-    std::shared_ptr<ComputePass> m_skyboxPass;
-    std::shared_ptr<ComputePass> m_skyboxFilterPass;
-    std::shared_ptr<ComputePass> m_LUTPass;
-    std::shared_ptr<ComputePass> m_irradiancePass;
+    std::shared_ptr<ComputePass<>> m_skyboxPass;
+    std::shared_ptr<ComputePass<>> m_skyboxFilterPass;
+    std::shared_ptr<ComputePass<>> m_LUTPass;
+    std::shared_ptr<ComputePass<>> m_irradiancePass;
 };
 
 }

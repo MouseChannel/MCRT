@@ -64,10 +64,10 @@ void ImageWriter::WriteImage(std::shared_ptr<Image> image)
     stbi_write_png("testout.png", image->width, image->height, channel, mapped_data.data(), image->width * channel);
 }
 
-void ImageWriter::ReadImage(std::string path)
-{
-     
-}
+//void ImageWriter::ReadImage(std::string path)
+//{
+//     
+//}
 
 void ImageWriter::WriteCubemap(std::shared_ptr<Image> cubemap)
 {

@@ -190,7 +190,9 @@ void Camera::setSentitivity(float _s)
 void Camera::setPerpective(float angle, float ratio, float near, float far)
 {
     m_pMatrx = glm::perspective(glm::radians(angle), ratio, near, far);
-    m_pMatrx = glm::perspectiveFov(45.f, 1200.f, 800.f, near, far);
+    // m_pMatrx = glm::perspectiveFov(60.f, 1200.f, 800.f, near, far);
+
+
     m_pMatrx[1][1] *= -1.0f;
 }
 

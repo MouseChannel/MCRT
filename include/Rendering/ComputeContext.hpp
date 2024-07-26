@@ -32,7 +32,7 @@ public:
     // void prepare_pipeline(std::vector<std::shared_ptr<ShaderModule>> shader_modules, std::vector<std::shared_ptr<DescriptorSet>> sets, int push_constants_size) override;
     
 
-private:
+protected:
     // void Make_DescriptorSet();
 
     std::shared_ptr<CommandBuffer> m_command_buffer;

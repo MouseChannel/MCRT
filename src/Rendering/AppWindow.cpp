@@ -125,8 +125,11 @@ void Window::LoadIcon()
 {
     int width, height, channels;
     uint8_t* icon = stbi_load("assets/icon.png", &width, &height, &channels, STBI_rgb_alpha);
-    std::shared_ptr<GLFWimage> icon_p { new GLFWimage(width, height, icon) };
-    glfwSetWindowIcon(m_window, 1, icon_p.get());
+    if (icon) {
+
+        std::shared_ptr<GLFWimage> icon_p { new GLFWimage(width, height, icon) };
+        glfwSetWindowIcon(m_window, 1, icon_p.get());
+    }
 }
 #endif
 } // namespace MCRT

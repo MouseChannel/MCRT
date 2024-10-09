@@ -12,7 +12,7 @@
 namespace MCRT {
 
 auto Instance::get_required_extension()
-{   
+{
     //  std::cout<<"delete device"<<std::endl;
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -30,7 +30,7 @@ auto Instance::get_required_extension()
     std::vector<const char*> extensions(glfwExtensions,
                                         glfwExtensions + glfwExtensionCount);
 
-   extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    // extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     // extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 
 //    extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
@@ -99,7 +99,7 @@ Instance::Instance()
         .setPfnUserCallback(&debugCallBack);
 
     // m_handle.createDebugUtilsMessengerEXT()
-       m_debugger = m_handle.createDebugUtilsMessengerEXT(debug_create_info);
+    // m_debugger = m_handle.createDebugUtilsMessengerEXT(debug_create_info);
 }
 
 } // namespace MCRT

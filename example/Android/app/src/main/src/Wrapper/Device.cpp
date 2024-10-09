@@ -1,6 +1,6 @@
 #include "Wrapper/Device.hpp"
-#include "Rendering/Context.hpp"
-//#include "Rendering/GLFW_Window.hpp"
+#include "Context/Context.hpp"
+// #include "Rendering/GLFW_Window.hpp"
 #include "Wrapper/Instance.hpp"
 #include "Wrapper/Window_Surface.hpp"
 #include <cassert>
@@ -82,10 +82,11 @@ vk::SampleCountFlagBits Device::Get_sampler_count()
 
     auto res = Get_Physical_device().getProperties();
     auto count = std::min(res.limits.framebufferColorSampleCounts,
-        res.limits.framebufferDepthSampleCounts);
+                          res.limits.framebufferDepthSampleCounts);
 
     for (auto i { VkSampleCountFlags(vk::SampleCountFlagBits::e64) };
-         i != VkSampleCountFlags(vk::SampleCountFlagBits::e1); i >>= 1) {
+         i != VkSampleCountFlags(vk::SampleCountFlagBits::e1);
+         i >>= 1) {
         auto cur = vk::SampleCountFlagBits(i);
         if (count & cur) {
             return cur;
@@ -94,8 +95,8 @@ vk::SampleCountFlagBits Device::Get_sampler_count()
     throw std::runtime_error("no vk::sampler_count");
 }
 vk::Format Device::Get_supported_format(std::vector<vk::Format> candidates,
-    vk::ImageTiling tiling,
-    vk::FormatFeatureFlagBits feature)
+                                        vk::ImageTiling tiling,
+                                        vk::FormatFeatureFlagBits feature)
 {
     for (auto& format : candidates) {
 

@@ -1,10 +1,9 @@
 #include "Rendering/AppWindow.hpp"
-#include "Rendering/Context.hpp"
+#include "Context/Context.hpp"
 // #include "Wrapper/Base.hpp"
 // #include "Wrapper/Instance.hpp"
 #include "Wrapper/Device.hpp"
 
-#include <cstddef>
 #include <vulkan/vulkan.hpp>
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -12,7 +11,7 @@
 #include "android_native_app_glue.h"
 
 #else
-#include "stb_image.h"
+#include "Tool/stb_image.h"
 #include <GLFW/glfw3.h>
 #endif
 namespace MCRT {

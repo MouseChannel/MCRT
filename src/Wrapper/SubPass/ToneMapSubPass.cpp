@@ -1,16 +1,17 @@
 #include "Wrapper/SubPass/ToneMapSubpass.hpp"
+#include "Context/raster_context.hpp"
 #include "Helper/DescriptorSetTarget/ImageDescriptorTarget.hpp"
 #include "Rendering/GraphicContext.hpp"
 #include "Rendering/Model.hpp"
 #include "Wrapper/Shader_module.hpp"
-#include "example/base/raster_context.hpp"
-#include "example/raster/raster_pbr_context.hpp"
-#include "example/raster/shader/Binding.h"
-#include "shaders/Data_struct.h"
+// #include "example/raster/raster_pbr_context.hpp"
+// #include "example/raster/shader/Binding.h"
+// #include "shaders/Data_struct.h"
+
 namespace MCRT {
 using Shader_Stage = Graphic_Pipeline::Shader_Stage;
 ToneMapSubPass::ToneMapSubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index)
-    : BaseSubPass(graphicContext,subpass_index)
+    : BaseSubPass(graphicContext, subpass_index)
 {
 }
 void ToneMapSubPass::make_offscreen_mesh()
@@ -26,6 +27,7 @@ void ToneMapSubPass::prepare_frag_shader_module(std::string _frag_shader)
 }
 void ToneMapSubPass::prepare_pipeline(int pc_size)
 {
+    m_pc_size = pc_size;
     auto m_graphicContextp = m_graphicContext.lock();
     if (m_graphicContextp) {
         // m_pipeline.reset(new Graphic_Pipeline(shaders,
@@ -69,16 +71,22 @@ void ToneMapSubPass::recreate()
 
     auto m_graphicContextp = m_graphicContext.lock();
     if (m_graphicContextp) {
-
+        int input_attachment_index = -1;
+        for(auto i:m_descriptorSetTargetMap) {
+            if(i.second->m_type == vk::DescriptorType::eInputAttachment) {
+                input_attachment_index = i.first;
+                break;
+            }
+        }
+        assert(input_attachment_index>=0);
+        
         Prepare_DescriptorSet([&]() {
             for (int i = 0; i < get_DescriptorSetCount(); i++) {
                 auto input_renderTarget = m_graphicContextp->Get_render_targets(i)[m_graphicContextp->resolveAttachmentindex];
                 AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
-                    // IBLManager::Get_Singleton()->get_skybox(),
                     std::vector { input_renderTarget->Get_Image()->Get_Image_View() },
                     std::vector { input_renderTarget->get_inputLayout() },
-                    // Which_Set::Graphic,
-                    (int)Graphic_Binding::e_tonemap_input,
+                    input_attachment_index,
                     vk::ShaderStageFlagBits::eFragment,
                     vk::DescriptorType::eInputAttachment,
                     get_DescriptorSet(),
@@ -86,7 +94,7 @@ void ToneMapSubPass::recreate()
             }
         });
     }
-    prepare_pipeline(sizeof(PC_Raster));
+    prepare_pipeline(m_pc_size);
     post_prepare();
 }
 }

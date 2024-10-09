@@ -1,4 +1,4 @@
-#include "Rendering/Context.hpp"
+#include "Context/Context.hpp"
 #include "Helper/Camera.hpp"
 #include "Helper/Debugger.hpp"
 #include "Helper/Model_Loader/Obj_Loader.hpp"
@@ -8,6 +8,7 @@
 #include "Rendering/GraphicContext.hpp"
 #include "Rendering/Model.hpp"
 // #include "Rendering/RaytracingPass.hpp"
+#include "Rendering/PBR/IBL_Manager.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Command_Pool.hpp"
 #include "Wrapper/DescriptorSet.hpp"
@@ -22,7 +23,7 @@
 #include "Wrapper/SwapChain.hpp"
 #include "Wrapper/Texture.hpp"
 #include "Wrapper/Window_Surface.hpp"
-#include "Rendering/PBR/IBL_Manager.hpp"
+
 // #include "vulkan/vulkan_to_string.hpp"
 
 namespace MCRT {
@@ -65,14 +66,13 @@ void Context::Quit()
     m_sampler.reset();
     m_debugger.reset();
     m_command_pool.reset();
- 
+
     m_swapchain.reset();
     Mesh::all_meshs.clear();
     Texture::textures.clear();
- 
+
     // IBLManager::Get_Singleton()->Release();
     IBLManager::Get_Singleton().reset();
-
 }
 Context::~Context()
 {

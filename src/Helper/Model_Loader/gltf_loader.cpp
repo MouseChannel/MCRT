@@ -11,7 +11,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #endif
 // #include "Helper/ThreadPool.hpp"
-#include "Rendering/Context.hpp"
+#include "Context/Context.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -420,7 +420,7 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
     Mesh::all_meshs.emplace_back(new Mesh(node.name,
                                           vertexs,
                                           indices,
-                                        //   triangles,
+                                          //   triangles,
                                           cur_material,
                                           transform));
     // texture_lock.unlock();

@@ -2,10 +2,10 @@
 #include "Rendering/ComputeContext.hpp"
 #include "Wrapper/Image.hpp"
 // #include "Wrapper/Skybox.hpp"
-#include "shaders/PBR/IBL/binding.h"
-#include "shaders/PBR/IBL/push_constants.h"
+#include "Shader/PBR/IBL/binding.h"
+#include "Shader/PBR/IBL/push_constants.h"
 
-#include "stb_image.h"
+#include "Tool/stb_image.h"
 
 #include "Helper/DescriptorSetTarget/ImageDescriptorTarget.hpp"
 // #include "Wrapper/ComputePass/SkyboxPass.hpp"
@@ -17,7 +17,7 @@ void IBLManager::convert_skybox()
 {
 
     m_skyboxPass.reset(new ComputePass);
-    m_skyboxPass->SetShaderModule("shaders/PBR/IBL/hdr2cubemap.comp.spv");
+    m_skyboxPass->SetShaderModule("include/Shader/PBR/IBL/hdr2cubemap.comp.spv");
     m_skyboxPass->Prepare_DescriptorSet([&]() {
         m_skyboxPass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
             m_hdr_img,
@@ -62,7 +62,7 @@ void IBLManager::convert_skybox()
     // });
     // std::shared_ptr<ShaderModule>
     //     compute_shader {
-    //         new ShaderModule("shaders/PBR/IBL/hdr2cubemap.comp.spv")
+    //         new ShaderModule("include/Shader/PBR/IBL/hdr2cubemap.comp.spv")
     //     };
     // context->prepare_pipeline({ compute_shader },
     //                           { context->get_descriptor_manager()
@@ -276,7 +276,7 @@ void IBLManager::Make_SkyboxMesh()
 void IBLManager::filter_skybox_mipmap()
 {
     m_skyboxFilterPass.reset(new ComputePass);
-    m_skyboxFilterPass->SetShaderModule("shaders/PBR/IBL/skybox_mipmap.comp.spv");
+    m_skyboxFilterPass->SetShaderModule("include/Shader/PBR/IBL/skybox_mipmap.comp.spv");
     // std::vector<std::shared_ptr<ImageDescriptorData>> skybox_mipmap_views;
     // for (int i = 1; i < std::log2(skybox_size); i++) {
     //     skybox_mipmap_views.push_back(ImageDescriptorData::Create(m_skybox_img->Get_Image_View(i), m_skybox_img->Get_image_layout()));
@@ -337,7 +337,7 @@ void IBLManager::filter_skybox_mipmap()
     // });
     // std::shared_ptr<ShaderModule>
     //     compute_shader {
-    //         new ShaderModule("shaders/PBR/IBL/skybox_mipmap.comp.spv")
+    //         new ShaderModule("include/Shader/PBR/IBL/skybox_mipmap.comp.spv")
     //     };
     // context->prepare_pipeline({ compute_shader },
     //                           { context->get_descriptor_manager()
@@ -373,8 +373,8 @@ void IBLManager::pre_compute_LUT()
     m_LUTPass.reset(new ComputePass);
     std::shared_ptr<ShaderModule>
         compute_shader {
-            // new ShaderModule("shaders/PBR/IBL/lookup_table.comp.spv")
-            new ShaderModule("shaders/PBR/IBL/LUT.comp.spv")
+            // new ShaderModule("include/Shader/PBR/IBL/lookup_table.comp.spv")
+            new ShaderModule("include/Shader/PBR/IBL/LUT.comp.spv")
         };
     compute_shader->Set_SpecializationInfo(vk::SpecializationInfo()
                                                .setData<int>(LUT_samplecount)
@@ -404,13 +404,13 @@ void IBLManager::pre_compute_LUT()
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     std::shared_ptr<ShaderModule>
         compute_shader {
-            new ShaderModule("shaders/IBL/lookup_table.comp.spv")
+            new ShaderModule("include/Shader/IBL/lookup_table.comp.spv")
         };
 #else
     // std::shared_ptr<ShaderModule>
     //     compute_shader {
-    //         // new ShaderModule("shaders/PBR/IBL/lookup_table.comp.spv")
-    //         new ShaderModule("shaders/PBR/IBL/LUT.comp.spv")
+    //         // new ShaderModule("include/Shader/PBR/IBL/lookup_table.comp.spv")
+    //         new ShaderModule("include/Shader/PBR/IBL/LUT.comp.spv")
     //     };
     // compute_shader->Set_SpecializationInfo(vk::SpecializationInfo()
     //                                            .setData<int>(LUT_samplecount)
@@ -447,7 +447,7 @@ void IBLManager::pre_compute_irradiance()
     m_irradiancePass.reset(new ComputePass);
     std::shared_ptr<ShaderModule>
         compute_shader {
-            new ShaderModule("shaders/PBR/IBL/skybox_irradiance.comp.spv")
+            new ShaderModule("include/Shader/PBR/IBL/skybox_irradiance.comp.spv")
         };
     compute_shader->Set_SpecializationInfo(vk::SpecializationInfo()
                                                .setData<int>(irradiance_samplecount)
@@ -481,12 +481,12 @@ void IBLManager::pre_compute_irradiance()
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     std::shared_ptr<ShaderModule>
         compute_shader {
-            new ShaderModule("shaders/IBL/irradiance.comp.spv")
+            new ShaderModule("include/Shader/IBL/irradiance.comp.spv")
         };
 #else
     // std::shared_ptr<ShaderModule>
     //     compute_shader {
-    //         new ShaderModule("shaders/PBR/IBL/skybox_irradiance.comp.spv")
+    //         new ShaderModule("include/Shader/PBR/IBL/skybox_irradiance.comp.spv")
     //     };
     // compute_shader->Set_SpecializationInfo(vk::SpecializationInfo()
     //                                            .setData<int>(irradiance_samplecount)

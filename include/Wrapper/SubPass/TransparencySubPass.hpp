@@ -1,8 +1,8 @@
 #pragma once
- 
-#include "include/Wrapper/SubPass/BaseSubPass.hpp"
+
+#include "Wrapper/SubPass/BaseSubPass.hpp"
 #include "memory"
- 
+
 namespace MCRT {
 
 class TransparencySubPass : public BaseSubPass {

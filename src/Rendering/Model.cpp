@@ -9,7 +9,6 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-
 #include "Helper/Debugger.hpp"
 namespace MCRT {
 std::vector<ObjInstance> Mesh::obj_instances;
@@ -19,7 +18,7 @@ std::vector<Material> Mesh::materials;
 Mesh::Mesh(std::string name,
            std::vector<Vertex>& vertexs,
            std::vector<uint32_t>& indexs,
-        //    std::vector<Triangle>& triangles,
+           //    std::vector<Triangle>& triangles,
            Material material,
            std::array<std::array<float, 4>, 3> transform)
     : m_name(name)
@@ -50,7 +49,7 @@ Mesh::Mesh(std::string name,
         m_index.size() * sizeof(m_index[0]),
         vk::BufferUsageFlagBits::eIndexBuffer | extra_flag);
     material_buffer = Buffer::CreateDeviceBuffer(&m_material, sizeof(m_material), extra_flag);
-    std::cout<< "buffer:  " <<vertexs_buffer->get_handle()<<std::endl;
+    std::cout << "buffer:  " << vertexs_buffer->get_handle() << std::endl;
 }
 
 Mesh::Mesh(aiMesh* mesh)
@@ -85,7 +84,7 @@ Mesh::Mesh(aiMesh* mesh)
         vk::BufferUsageFlagBits::eIndexBuffer);
     m_material = materials[mesh->mMaterialIndex];
     // std::cout<< "buffer:  " <<vertexs_buffer->get_handle()<<std::endl;
-    Context::Get_Singleton()->get_debugger()->set_name(vertexs_buffer,"vertex buffer");
+    Context::Get_Singleton()->get_debugger()->set_name(vertexs_buffer, "vertex buffer");
 }
 
 int HandleImage(std::string path, vk::Format format)
@@ -103,6 +102,7 @@ int HandleImage(std::string path, vk::Format format)
 std::shared_ptr<Mesh> Mesh::LoadFromFile(std::string path)
 {
     std::shared_ptr<Mesh> mesh;
+    
     Assimp::Importer importer;
     const unsigned int ImportFlags =
         aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_SortByPType |
@@ -128,18 +128,18 @@ std::shared_ptr<Mesh> Mesh::LoadFromFile(std::string path)
             auto dir_name = std::filesystem::path(path).parent_path();
             if (diffName.length > 0) {
                 auto texture_name = dir_name / std::filesystem::path(diffName.C_Str());
-                auto diff_texture_index = HandleImage(texture_name.string(),   vk::Format ::eR8G8B8A8Srgb);
+                auto diff_texture_index = HandleImage(texture_name.string(), vk::Format ::eR8G8B8A8Srgb);
                 materials[i].color_texture_index = diff_texture_index;
             }
             if (armName.length > 0) {
                 auto texture_name = dir_name / std::filesystem::path(armName.C_Str());
-                auto arm_texture_index = HandleImage(texture_name.string(),vk::Format ::eR8G8B8A8Unorm);
+                auto arm_texture_index = HandleImage(texture_name.string(), vk::Format ::eR8G8B8A8Unorm);
                 materials[i].metallicness_roughness_texture_index = arm_texture_index;
             }
             if (normalName.length > 0) {
 
                 auto texture_name = dir_name / std::filesystem::path(normalName.C_Str());
-                auto normal_texture_index = HandleImage(texture_name.string(),vk::Format ::eR8G8B8A8Unorm);
+                auto normal_texture_index = HandleImage(texture_name.string(), vk::Format ::eR8G8B8A8Unorm);
                 materials[i].normal_texture_index = normal_texture_index;
             }
             // materials[i] = Material {
@@ -148,7 +148,7 @@ std::shared_ptr<Mesh> Mesh::LoadFromFile(std::string path)
             //     .metallicness_roughness_texture_index = arm_texture_index
             // };
         }
-        auto& rr =  Texture::textures;
+        auto& rr = Texture::textures;
         for (int i = 0; i < scene->mNumMeshes; i++) {
             Mesh::all_meshs.emplace_back(new Mesh { scene->mMeshes[0] });
         }

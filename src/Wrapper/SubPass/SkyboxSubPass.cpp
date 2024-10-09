@@ -1,10 +1,11 @@
 #include "Wrapper/SubPass/SkyboxSubPass.hpp"
+#include "Context/raster_context.hpp"
 #include "Rendering/GraphicContext.hpp"
 #include "Rendering/Model.hpp"
 #include "Wrapper/Shader_module.hpp"
-#include "example/base/raster_context.hpp"
-#include "example/raster/raster_pbr_context.hpp"
-#include "shaders/Data_struct.h"
+// #include "example/raster/raster_pbr_context.hpp"
+// #include "shaders/Data_struct.h"
+
 namespace MCRT {
 using Shader_Stage = Graphic_Pipeline::Shader_Stage;
 SkyboxSubPass::SkyboxSubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index)

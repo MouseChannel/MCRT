@@ -1,6 +1,6 @@
 
 #include "Wrapper/ShaderModule.hpp"
-#include "Rendering/Context.hpp"
+#include "Context/Context.hpp"
 #include "Wrapper/Device.hpp"
 #include "cstring"
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -19,7 +19,7 @@ namespace MoCheng3D {
 std::vector<char> ShaderModule::ReadBinary(const std::string& fileName)
 {
     std::ifstream file(fileName.c_str(),
-        std::ios::ate | std::ios::binary | std::ios::in);
+                       std::ios::ate | std::ios::binary | std::ios::in);
 
     if (!file) {
         throw std::runtime_error("Error: failed to open shader file");
@@ -39,7 +39,8 @@ ShaderModule::ShaderModule(const std::string path)
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     auto m_app = Context::Get_Singleton()->Get_app();
     AAsset* file = AAssetManager_open(m_app->activity->assetManager,
-        path.c_str(), AASSET_MODE_BUFFER);
+                                      path.c_str(),
+                                      AASSET_MODE_BUFFER);
 
     size_t fileLength = AAsset_getLength(file);
 

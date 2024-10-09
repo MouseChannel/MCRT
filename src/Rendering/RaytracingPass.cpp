@@ -8,7 +8,7 @@
 // #include "Helper/Uniform_Manager.hpp"
 // #include "Helper/math.hpp"
 // #include "Rendering/BaseContext.hpp"
-// #include "Rendering/Context.hpp"
+// #include "Context/Context.hpp"
 // #include "Rendering/Model.hpp"
 // #include "Rendering/Render_Target/Color_Render_Target.hpp"
 // #include "Rendering/Render_Target/Depth_Render_Target.hpp"
@@ -117,7 +117,6 @@
 //     m_SBT_buffer_rgen = Buffer::create_buffer(nullptr, m_rgenRegion.size, sbt_buffer_usge);
 //     m_SBT_buffer_rmiss = Buffer::create_buffer(nullptr, m_missRegion.size, sbt_buffer_usge);
 //     m_SBT_buffer_rhit = Buffer::create_buffer(nullptr, m_hitRegion.size, sbt_buffer_usge);
-     
 
 //     // assign all kinds of handle data
 

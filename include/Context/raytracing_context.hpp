@@ -1,5 +1,5 @@
 #pragma once
-#include "Rendering/Context.hpp"
+#include "Context/Context.hpp"
 #include "example/base/shaders/ray_tracing/Data_struct.h"
 #include "shaders/Data_struct.h"
 #include <iostream>
@@ -9,8 +9,8 @@ class Buffer;
 class ray_tracing_context : public Context {
 public:
     enum Pass_index { Graphic,
-                         Ray_tracing,
-                         Compute };
+                      Ray_tracing,
+                      Compute };
     ray_tracing_context();
     ~ray_tracing_context();
     // void init(std::shared_ptr<Window>) override;

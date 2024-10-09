@@ -1,9 +1,10 @@
 #include "example/path_tracing/App.hpp"
+#include "Context/Context.hpp"
 #include "Helper/ImGui_Context.hpp"
 #include "Helper/Uniform_Manager.hpp"
 #include "Rendering/AppWindow.hpp"
-#include "Rendering/Context.hpp"
 #include "example/path_tracing/Path_tracing_Context.hpp"
+
 
 namespace MCRT {
 void App::init()
@@ -12,7 +13,6 @@ void App::init()
     Path_tracing_context::Get_Singleton()->prepare(window);
     imgui.reset(new ImGuiContext);
 
-    
     imgui->Init(window);
 }
 void App::run()

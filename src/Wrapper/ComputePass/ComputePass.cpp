@@ -1,6 +1,5 @@
 #include "Wrapper/ComputePass/ComputePass.hpp"
-#include "Wrapper/DescriptorPool.hpp"
-#include "shaders/PBR/IBL/push_constants.h"
+#include "Shader/PBR/IBL/push_constants.h"
 namespace MCRT {
 ComputePass::ComputePass()
 {
@@ -9,7 +8,8 @@ void ComputePass::SetShaderModule(std::string shader_path)
 {
     m_shader_module.reset(new ShaderModule(shader_path));
 }
-void ComputePass::SetShaderModule(std::shared_ptr<ShaderModule> shader_module){
+void ComputePass::SetShaderModule(std::shared_ptr<ShaderModule> shader_module)
+{
     m_shader_module = shader_module;
 }
 void ComputePass::prepare_pipeline(int pc_size)

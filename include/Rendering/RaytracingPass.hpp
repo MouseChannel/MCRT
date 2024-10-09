@@ -1,15 +1,13 @@
 #pragma once
 #include "Rendering/BaseContext.hpp"
 #include "Wrapper/CommandBuffer.hpp"
+#include "Shader/Data_struct.h"
 // #include "Wrapper/Pipeline/Pipeline_base.hpp"
 // #include "Wrapper/Pipeline/RT_pipeline.hpp"
 #include "Helper/Uniform_Manager.hpp"
-#include "Helper/math.hpp"
 #include "Rendering/Host_Uniform.hpp"
 #include <memory>
 #include <vector>
-#include "example/base/shaders/ray_tracing/Data_struct.h"
-
 
 namespace MCRT {
 class Device;
@@ -105,10 +103,13 @@ private:
     void create_shader_bind_table();
     void create_uniform_buffer();
     void update_ubo(std::shared_ptr<CommandBuffer> cmd);
-
+    Address aa;
+    Address s;
+    Material a;
+        std::vector<Address>
+            m_objs_address;
     std::shared_ptr<Uniform_Stuff<Camera_data>> camera_data;
     std::shared_ptr<Uniform_Stuff<Address>> obj_data_address;
-    std::vector<Address> m_objs_address;
     vk::Extent2D extent2d;
     std::shared_ptr<CommandBuffer> m_command_buffer;
     std::shared_ptr<Image> m_out_image;
@@ -121,7 +122,7 @@ private:
     vk::StridedDeviceAddressRegionKHR m_missRegion;
     vk::StridedDeviceAddressRegionKHR m_hitRegion;
     vk::StridedDeviceAddressRegionKHR m_anyhitRegion;
-    
+
     vk::StridedDeviceAddressRegionKHR m_callRegion;
     std::shared_ptr<Buffer> m_SBT_buffer;
 
@@ -132,8 +133,8 @@ private:
     std::shared_ptr<Buffer> m_SBT_buffer_rhit;
     std::shared_ptr<Buffer> m_SBT_buffer_rahit;
 
-    int miss_shader_count{ 0 };
-    int hit_shader_count{ 0 };
-    int anyhit_shader_count{ 0 };
+    int miss_shader_count { 0 };
+    int hit_shader_count { 0 };
+    int anyhit_shader_count { 0 };
 };
 }

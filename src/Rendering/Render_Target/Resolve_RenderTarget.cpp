@@ -1,10 +1,11 @@
+#include "Context/Context.hpp"
 #include "Helper/Debugger.hpp"
-#include "Rendering/Context.hpp"
 #include "Rendering/Render_Target/Resover_Render_Target.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Image.hpp"
 #include "Wrapper/RenderPass.hpp"
 #include "Wrapper/SwapChain.hpp"
+
 
 namespace MCRT {
 // std::vector<vk::AttachmentReference> Resolve_RenderTarget::attach_references;
@@ -55,7 +56,9 @@ Resolve_RenderTarget::Resolve_RenderTarget()
         vk::ImageAspectFlagBits::eColor,
         vk::SampleCountFlagBits::e1,
         1));
-    Context::Get_Singleton()->get_debugger()->set_handle_name(m_image->Get_Image_View(), "old view");
+    static int ee = 0;
+    ee++;
+    Context::Get_Singleton()->get_debugger()->set_handle_name(m_image->Get_Image_View(), "old view"+std::to_string(ee));
     clear_color.color.setFloat32({ 0.1f, 0.1f, 0.1f, 1.0f });
 }
 // std::shared_ptr<Resolve_RenderTarget> Resolve_RenderTarget::Create()

@@ -135,4 +135,14 @@ struct Material {
     int normal_texture_index;
     int metallicness_roughness_texture_index;
 };
+
+struct Address {
+    // int txtOffset; // Texture index offset in the array of textures
+    uint64_t triangle_count;
+    uint64_t vertexAddress; // Address of the Vertex buffer
+    uint64_t indexAddress; // Address of the index buffer
+    uint64_t materialAddress; // Address of the material buffer
+    uint64_t materialIndexAddress; // Address of the triangle material
+};
+
 #endif

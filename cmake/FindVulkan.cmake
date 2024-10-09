@@ -1,5 +1,11 @@
-IF(WIN32)
+IF(Clang OR GNU)
     find_package(Vulkan REQUIRED)
+    ###
+# pacman -S mingw-w64-ucrt-x86_64-vulkan-devel
+    ##
+
+	# find_library(Vulkan_LIBRARY NAMES vulkan-1 vulkan PATHS ${CMAKE_SOURCE_DIR}/libs/vulkan)
+
     # MESSAGE(STATUS "Finding Windows Vulkan😊")
     # set(VULKAN_DIR "${PROJECT_SOURCE_DIR}/lib/vulkan"  )
 

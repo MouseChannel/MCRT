@@ -5,7 +5,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 
-#include "Rendering/Context.hpp"
+#include "Context/Context.hpp"
 #include "Rendering/Model.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -179,9 +179,9 @@ void copy_data(std::vector<T>& data, const std::vector<unsigned char>& src, tiny
 //     return sky_box;
 // }
 glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
-    const tinygltf::Model& model,
-    const tinygltf::Node& node,
-    tinygltf::Primitive& primitive)
+                                      const tinygltf::Model& model,
+                                      const tinygltf::Node& node,
+                                      tinygltf::Primitive& primitive)
 {
     auto get_accessor = [&](int index) {
         return model.accessors[index];

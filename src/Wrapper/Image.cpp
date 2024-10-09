@@ -1,11 +1,12 @@
 #include "Wrapper/Image.hpp"
+#include "Context/Context.hpp"
 #include "Helper/CommandManager.hpp"
 #include "Helper/Debugger.hpp"
-#include "Rendering/Context.hpp"
 #include "Wrapper/Buffer.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Device.hpp"
 #include <cmath>
+
 
 namespace MCRT {
 
@@ -40,7 +41,7 @@ Image::Image(uint32_t width,
         .setSamples(sample);
 
     m_handle = device->get_handle().createImage(create_info);
-    Context::Get_Singleton()->get_debugger()->set_handle_name(m_handle, "A img");
+    // Context::Get_Singleton()->get_debugger()->set_handle_name(m_handle, "A img");
     // std::cout << "create img" << m_handle << std::endl;
 
     AllocateMemory();

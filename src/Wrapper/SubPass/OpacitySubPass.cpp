@@ -1,14 +1,15 @@
 #include "Wrapper/SubPass/OpacitySubPass.hpp"
+#include "Context/raster_context.hpp"
 #include "Rendering/GraphicContext.hpp"
 #include "Rendering/Model.hpp"
 #include "Wrapper/Shader_module.hpp"
-#include "example/base/raster_context.hpp"
-#include "example/raster/raster_pbr_context.hpp"
-#include "shaders/Data_struct.h"
+// #include "Context/raster_pbr_context.hpp"
+// #include "shaders/Data_struct.h"
+
 namespace MCRT {
 using Shader_Stage = Graphic_Pipeline::Shader_Stage;
 OpacitySubPass::OpacitySubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index)
-    : BaseSubPass(graphicContext,subpass_index)
+    : BaseSubPass(graphicContext, subpass_index)
 {
 }
 void OpacitySubPass::prepare_vert_shader_module(std::string _vert_shader)
@@ -23,7 +24,6 @@ void OpacitySubPass::prepare_pipeline(int pc_size)
 {
     auto m_graphicContextp = m_graphicContext.lock();
     if (m_graphicContextp) {
- 
 
         m_pipeline.reset(new Graphic_Pipeline(shaders,
                                               { m_descriptorSet },
@@ -46,7 +46,7 @@ void OpacitySubPass::prepare_pipeline(int pc_size)
         m_pipeline->Make_DepthTest();
         m_pipeline->Make_Blend();
         m_pipeline->Make_Layout(m_descriptorSet->get_layout(),
-                                sizeof(PC_Raster),
+                                pc_size,
                                 vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment);
     }
 }

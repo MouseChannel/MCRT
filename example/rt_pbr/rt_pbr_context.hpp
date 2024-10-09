@@ -1,5 +1,5 @@
 #pragma once
-#include "Rendering/Context.hpp"
+#include "Context/Context.hpp"
 #include "example/base/raytracing_context.hpp"
 #include "example/rt_pbr/shader/Push_Constants.h"
 #include "shaders/PBR/IBL/push_constants.h"
@@ -12,9 +12,9 @@ class Texture;
 class rt_pbr_context : public ray_tracing_context {
 public:
     enum Pass_index { Graphic,
-                         Ray_tracing,
-                         //  Compute_LUT,
-                         Compute };
+                      Ray_tracing,
+                      //  Compute_LUT,
+                      Compute };
     rt_pbr_context();
     ~rt_pbr_context();
 
@@ -23,7 +23,7 @@ public:
 
     static float light_pos_x, light_pos_y, light_pos_z, roughness, met;
     static int apply_normal;
-    static bool use_normal_map,use_abedo,use_RM_map;
+    static bool use_normal_map, use_abedo, use_RM_map;
     void prepare(std::shared_ptr<Window> window) override;
     // vk::Extent2D last_extent2d;
     void re_create_context() override;

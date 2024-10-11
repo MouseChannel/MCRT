@@ -1,6 +1,8 @@
 #include "Wrapper/SubPass/GbufferSubPass.hpp"
 #include "Rendering/GraphicContext.hpp"
 #include "Wrapper/Shader_module.hpp"
+
+#include <Helper/DescriptorSetTarget/ImageDescriptorTarget.hpp>
 // #include "Context/raster_context.hpp"
 // #include "Shader/Data_struct.h"
 namespace MCRT {
@@ -39,8 +41,9 @@ void GbufferSubPass::prepare_pipeline(int pc_size)
         m_pipeline->Make_DepthTest(true,false);
         m_pipeline->Make_Blend();
         m_pipeline->Make_Layout(m_descriptorSet->get_layout(),
-                                sizeof(PC_Raster),
+                                pc_size,
                                 vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment);
+        m_pc_size = pc_size;
     }
 }
 void GbufferSubPass::prepare_vert_shader_module(std::string _vert_shader)
@@ -72,7 +75,8 @@ void GbufferSubPass::recreate()
                     std::vector { input_renderTarget->Get_Image()->Get_Image_View() },
                     std::vector { input_renderTarget->get_inputLayout() },
                     // Which_Set::Graphic,
-                    (int)Graphic_Binding::e_tonemap_input,
+                    // (int)Graphic_Binding::e_tonemap_input,
+                    8,
                     vk::ShaderStageFlagBits::eFragment,
                     vk::DescriptorType::eInputAttachment,
                     get_DescriptorSet(),
@@ -80,7 +84,7 @@ void GbufferSubPass::recreate()
             }
         });
     }
-    prepare_pipeline(sizeof(PC_Raster));
+    prepare_pipeline(m_pc_size);
     post_prepare();
 }
 

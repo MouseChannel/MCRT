@@ -109,11 +109,15 @@ void IBLManager::Init(std::string path)
     // irradiance.reset(new Skybox(irradiance_size, irradiance_size));
 
     auto pixel = stbi_loadf(path.c_str(), &width, &height, &channel, STBI_rgb_alpha);
-    auto sizes = width * height * 4 * 4;
+    auto sizes = width * height * STBI_rgb_alpha * sizeof(float);
+    
+    
+    // for(auto i:pixel){}
     {
         m_hdr_img.reset(new Image(width,
                                   height,
                                   vk::Format::eR32G32B32A32Sfloat,
+
                                   vk::ImageType::e2D,
                                   vk::ImageTiling::eOptimal,
                                   vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc,

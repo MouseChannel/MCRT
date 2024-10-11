@@ -3,7 +3,7 @@
 #endif
 #define EPSILON 0.00001f;
 
-#include "shaders/sampling.glsl"
+#include "include/Shader/sampling.glsl"
 // float radicalInverseVdC(uint bits)
 // {
 //     bits = (bits << 16u) | (bits >> 16u);
@@ -32,7 +32,8 @@ vec3 sampleGGX(float u1, float u2, float roughness)
 
     float cosTheta = sqrt((1.0 - u2) / (1.0 + (alpha * alpha - 1.0) * u2));
     float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-    float phi = 2 * PI * u1;
+    const float pi =3.1415926;
+    float phi = 2 * pi * u1;
 
     return vec3(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
 }
@@ -52,7 +53,9 @@ float ndfGGX(float cosLh, float roughness)
     float alphaSq = alpha * alpha;
 
     float denom = (cosLh * cosLh) * (alphaSq - 1.0) + 1.0;
-    return alphaSq / (PI * denom * denom);
+    const float pi = 3.1415926;
+
+    return alphaSq / (pi * denom * denom);
 }
 
 void computeBasisVectors(const vec3 N, out vec3 S, out vec3 T)

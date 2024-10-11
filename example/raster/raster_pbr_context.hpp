@@ -15,7 +15,7 @@ public:
     enum Pass_index { Graphic };
     enum SubPass_index {
         SkyboxSubPassIndex,
-        // GbufferSubPassIndex,
+        GbufferSubPassIndex,
         OpacitySubPassIndex,
         // TransparencySubPassIndex,
         ToneMapSubPassIndex,

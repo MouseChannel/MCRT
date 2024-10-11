@@ -100,9 +100,9 @@ Device::Device()
                                                 vk::PhysicalDeviceVulkan13Features,
                                                 vk::PhysicalDeviceVulkan12Features,
                                                 vk::PhysicalDeviceVulkan11Features,
-                                                vk::PhysicalDeviceRayTracingPipelineFeaturesKHR,
-                                                vk::PhysicalDeviceAccelerationStructureFeaturesKHR,
-                                                vk::PhysicalDeviceRayQueryFeaturesKHR,
+                                                // vk::PhysicalDeviceRayTracingPipelineFeaturesKHR,
+                                                // vk::PhysicalDeviceAccelerationStructureFeaturesKHR,
+                                                // vk::PhysicalDeviceRayQueryFeaturesKHR,
                                                 vk::PhysicalDeviceShaderClockFeaturesKHR>();
 
     new_create_info

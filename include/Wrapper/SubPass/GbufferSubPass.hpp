@@ -24,5 +24,6 @@ public:
     void recreate()override;
 private:
     std::vector<std::shared_ptr<GBuffer_RenderTarget>> m_render_Targets;
+    int m_pc_size;
 };
 }

@@ -150,7 +150,7 @@ std::shared_ptr<Mesh> Mesh::LoadFromFile(std::string path)
         }
         auto& rr = Texture::textures;
         for (int i = 0; i < scene->mNumMeshes; i++) {
-            Mesh::all_meshs.emplace_back(new Mesh { scene->mMeshes[0] });
+            Mesh::all_meshs.emplace_back(new Mesh { scene->mMeshes[i] });
         }
         int t = 0;
     } else {

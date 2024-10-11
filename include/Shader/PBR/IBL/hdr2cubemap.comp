@@ -44,8 +44,9 @@ void main(void)
     float phi = atan(v.z, v.x);
     float theta = acos(v.y);
 
+    const float pi = 3.1415926;
     // Sample equirectangular texture.
-    vec4 color = texture(inputHDR, vec2(phi / (2 * PI), theta / PI));
+    vec4 color = texture(inputHDR, vec2(phi / (2 * pi), theta / pi));
 
     // Write out color to output cubemap.
     imageStore(output_skybox, ivec3(gl_GlobalInvocationID), color);

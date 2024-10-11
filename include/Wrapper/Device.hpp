@@ -14,8 +14,9 @@ public:
     ~Device();
     const std::vector<const char*> device_extension {
         "VK_KHR_swapchain",
-//                "VK_EXT_scalar_block_layout"
+                // "VK_EXT_scalar_block_layout"
         //"VK_KHR_maintenance4"
+        "VK_KHR_shader_clock",
         "VK_KHR_shader_non_semantic_info",
 
     };

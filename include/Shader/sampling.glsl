@@ -88,6 +88,7 @@ vec2 sampleHammersley(uint i,float InvNumSamples)
 vec3 sampleHemisphere(float u1, float u2)
 {
 	const float u1p = sqrt(max(0.0, 1.0 - u1*u1));
-	return vec3(cos(2*PI*u2) * u1p, sin(2*PI*u2) * u1p, u1);
+    const float  pi = 3.1415926; 
+	return vec3(cos(2*pi*u2) * u1p, sin(2*pi*u2) * u1p, u1);
 }
 #endif

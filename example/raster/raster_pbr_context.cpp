@@ -34,6 +34,7 @@
 #include "Wrapper/SubPass/ToneMapSubpass.hpp"
 #include "Wrapper/SubPass/TransparencySubPass.hpp"
 #include <Helper/Model_Loader/ImageWriter.hpp>
+#include <Wrapper/SubPass/GbufferSubPass.hpp>
 
 namespace MCRT {
 std::unique_ptr<Context> Context::_instance { new MCRT::raster_context_pbr };
@@ -85,9 +86,9 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
             auto color_renderTarget = graphic_context->AddColorRenderTarget();
             auto depth_renderTarget = graphic_context->AddDepthRenderTarget();
             auto resolve_renderTarget = graphic_context->AddResolveRenderTarget();
-            // auto gbuffer_color_renderTarget = graphic_context->AddGbufferRenderTarget(vk::Format::eR8G8B8A8Unorm);
-            // auto gbuffer_depth_renderTarget = graphic_context->AddGbufferRenderTarget(vk::Format::eR8G8B8A8Unorm);
-            // auto gbuffer_normal_renderTarget = graphic_context->AddGbufferRenderTarget(vk::Format::eR8G8B8A8Unorm);
+            auto gbuffer_color_renderTarget = graphic_context->AddGbufferRenderTarget(vk::Format::eR8G8B8A8Unorm);
+            auto gbuffer_pos_renderTarget = graphic_context->AddGbufferRenderTarget(vk::Format::eR8G8B8A8Unorm);
+            auto gbuffer_normal_renderTarget = graphic_context->AddGbufferRenderTarget(vk::Format::eR8G8B8A8Unorm);
 
             graphic_context->subpasses.resize(SubPass_index::SubPassCount);
             {
@@ -130,6 +131,43 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                                                               .setDstStageMask(vk::PipelineStageFlagBits::eFragmentShader)
                                                               .setDstAccessMask(vk::AccessFlagBits::eShaderRead));
                 } // opacity pass
+
+                {
+                    graphic_context->subpasses[GbufferSubPassIndex].reset(new GbufferSubPass(graphic_context, GbufferSubPassIndex));
+                    auto& gbufferSubPass = graphic_context->subpasses[GbufferSubPassIndex];
+                    gbufferSubPass->link_renderTarget({ gbuffer_color_renderTarget,
+                                                        gbuffer_pos_renderTarget,
+                                                        gbuffer_normal_renderTarget },
+                                                      {},
+                                                      { resolve_renderTarget },
+                                                      {});
+                    gbufferSubPass->prepare_vert_shader_module("example/raster/shader/gbuffer.vert.spv");
+                    gbufferSubPass->prepare_frag_shader_module("example/raster/shader/gbuffer.frag.spv");
+
+                    gbufferSubPass->Prepare_DescriptorSet(
+                        [&]() {
+                            gbufferSubPass->AddDescriptorTarget(std::make_shared<BufferDescriptorTarget>(
+                                camera_matrix->buffer,
+                                (int)Graphic_Binding::e_camera_matrix,
+                                vk::ShaderStageFlagBits::eVertex,
+                                vk::DescriptorType::eUniformBuffer,
+                                gbufferSubPass->get_DescriptorSet()));
+                            gbufferSubPass->AddDescriptorTarget(std::make_shared<ImageDescriptorTarget>(
+                                Texture::get_image_handles(),
+                                (int)Graphic_Binding::e_textures,
+                                vk::ShaderStageFlagBits::eFragment,
+                                vk::DescriptorType::eCombinedImageSampler,
+                                gbufferSubPass->get_DescriptorSet()));
+                        });
+                    gbufferSubPass->prepare_pipeline(sizeof(PC_Raster));
+                    graphic_context->AddSubPassDependency(vk::SubpassDependency()
+                                                              .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+                                                              .setDstSubpass(GbufferSubPassIndex)
+                                                              .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                                                              .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+                                                              .setDstStageMask(vk::PipelineStageFlagBits::eFragmentShader)
+                                                              .setDstAccessMask(vk::AccessFlagBits::eShaderRead));
+                }
 
                 {
                     graphic_context->subpasses[OpacitySubPassIndex].reset(new OpacitySubPass(graphic_context, OpacitySubPassIndex));
@@ -175,9 +213,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                                 vk::ShaderStageFlagBits::eFragment,
                                 vk::DescriptorType::eCombinedImageSampler,
                                 opacitySubPass->get_DescriptorSet()));
-                        }
-
-                    );
+                        });
                     opacitySubPass->prepare_pipeline(sizeof(PC_Raster));
 
                     graphic_context->AddSubPassDependency(vk::SubpassDependency()
@@ -207,6 +243,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                     //                                           .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eColorAttachmentOutput)
                     //                                           .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite | vk::AccessFlagBits::eColorAttachmentWrite));
                 }
+
                 {
                     graphic_context->subpasses[ToneMapSubPassIndex].reset(new ToneMapSubPass(graphic_context, ToneMapSubPassIndex));
                     auto& tonemapSubPass = graphic_context->subpasses[ToneMapSubPassIndex];
@@ -226,7 +263,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                                     std::vector { input_renderTarget->Get_Image()->Get_Image_View() },
                                     std::vector { input_renderTarget->get_inputLayout() },
                                     (int)Graphic_Binding::e_tonemap_input,
-                                    
+
                                     vk::ShaderStageFlagBits::eFragment,
                                     vk::DescriptorType::eInputAttachment,
                                     tonemapSubPass->get_DescriptorSet(),
@@ -278,6 +315,9 @@ void raster_context_pbr::EndFrame()
 std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
 {
     // get_device()->get_handle().waitIdle();
+
+    // IBLManager::Get_Singleton()->Init("assets/Cubemap/hospital_room_2_8k.hdr");
+
     auto render_context = std::reinterpret_pointer_cast<GraphicContext>(PASS[Graphic]);
     std::shared_ptr<CommandBuffer> cmd = render_context->BeginFrame();
     {
@@ -345,7 +385,73 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                                               0,
                                               0);
             }
+            {
+                cmd->get_handle().nextSubpass(vk::SubpassContents::eInline);
+                auto& gbufferSubpass = render_context->get_subpasses()[GbufferSubPassIndex];
+                auto extent2d = Context::Get_Singleton()->get_extent2d();
 
+                cmd->get_handle().setViewport(0,
+                                              vk::Viewport()
+                                                  .setHeight(extent2d.height)
+                                                  .setWidth(extent2d.width)
+                                                  .setMinDepth(0)
+                                                  .setMaxDepth(1)
+                                                  .setX(0)
+                                                  .setY(0));
+                cmd->get_handle().setScissor(0,
+                                             vk::Rect2D()
+                                                 .setExtent(extent2d)
+                                                 .setOffset(vk::Offset2D()
+                                                                .setX(0)
+                                                                .setY(0)));
+                for (auto& mesh : Mesh::all_meshs) {
+                    cmd->get_handle().bindPipeline(vk::PipelineBindPoint::eGraphics,
+                                                   gbufferSubpass->get_pipeline()->get_handle());
+
+                    cmd->get_handle().bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                                         gbufferSubpass->get_pipeline()->get_layout(),
+                                                         0,
+                                                         gbufferSubpass->get_DescriptorSet()->get_handle()[0],
+                                                         {});
+
+                    cmd->get_handle().bindIndexBuffer(mesh
+                                                          ->get_indices_buffer()
+                                                          ->get_handle(),
+                                                      0,
+                                                      vk::IndexType::eUint32);
+
+                    cmd->get_handle().bindVertexBuffers(0,
+                                                        {
+                                                            mesh->get_vertex_buffer()->get_handle(),
+                                                        },
+                                                        { 0 });
+                    auto m = glm::mat4(1.f);
+
+                    cmd->get_handle()
+                        .pushConstants<PC_Raster>(
+                            gbufferSubpass->get_pipeline()->get_layout(),
+                            vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+                            0,
+                            PC_Raster {
+                                .model_matrix { m },
+                                .light_pos = { light_pos_x, light_pos_y, light_pos_z, 1 },
+                                .color_texture_index = mesh->m_material.color_texture_index,
+                                .metallicness_roughness_texture_index = mesh->m_material.metallicness_roughness_texture_index,
+                                .normal_texture_index = mesh->m_material.normal_texture_index,
+                                .use_normal_map = use_normal_map,
+                                .use_r_m_map = use_r_rm_map,
+                                .use_AO = use_ao,
+                                .gamma = gamma });
+                    // std::cout<<use_r_rm_map<<std::endl;
+
+                    cmd->get_handle()
+                        .drawIndexed(mesh->get_vertex_count(),
+                                     1,
+                                     0,
+                                     0,
+                                     0);
+                }
+            }
             {
                 cmd->get_handle().nextSubpass(vk::SubpassContents::eInline);
                 auto& opacitySubpass = render_context->get_subpasses()[OpacitySubPassIndex];
@@ -483,6 +589,8 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
             //     }
             // }
             {
+                vk::DebugUtilsLabelEXT a;
+                a.setPLabelName("tonemapping");
                 cmd->get_handle().nextSubpass(vk::SubpassContents::eInline);
                 auto tonemapSubpass = std::reinterpret_pointer_cast<ToneMapSubPass>(render_context->get_subpasses()[ToneMapSubPassIndex]);
 

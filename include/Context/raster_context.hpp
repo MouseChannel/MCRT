@@ -1,10 +1,11 @@
 #pragma once
+#include "Context/Context.hpp"
 #include "Helper/Uniform_Manager.hpp"
-#include "Rendering/Context.hpp"
-#include "example/base/shaders/raster/Data_struct.h"
-#include "shaders/Data_struct.h"
+#include "Shader/Data_struct.h"
+#include "Shader/Data_struct.h"
 #include <functional>
 #include <iostream>
+
 
 namespace MCRT {
 class Buffer;
@@ -14,7 +15,7 @@ public:
     // enum Pass_index { Graphic,
 
     //                   Compute };
-    
+
     raster_context();
     virtual ~raster_context();
     virtual std::shared_ptr<CommandBuffer> Begin_Frame() override;

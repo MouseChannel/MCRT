@@ -1,10 +1,11 @@
 #pragma once
+#include "Context/raster_context.hpp"
 #include "Wrapper/Texture.hpp"
-#include "example/base/raster_context.hpp"
+
 // #include "shaders/Data_struct.h"
 #include "Rendering/GraphicContext.hpp"
 #include "Rendering/Noise/NoiseManager.hpp"
-#include "example/raster/shader/Constants.h"
+// #include "example/raster/shader/Constants.h"
 
 namespace MCRT {
 class Buffer;
@@ -54,7 +55,6 @@ private:
     std::shared_ptr<CommandBuffer> BeginGraphicFrame() override;
 
     void EndGraphicFrame() override;
- 
 };
 
 }

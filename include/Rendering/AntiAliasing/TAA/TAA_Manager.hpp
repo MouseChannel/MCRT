@@ -1,7 +1,6 @@
 #include "Helper/Instance_base.hpp"
 #include "Helper/Uniform_Manager.hpp"
-#include "glm/glm.hpp"
-#include "shaders/AntiAliasing/TAA/binding_taa.h"
+#include "Shader/AntiAliasing/TAA/binding_taa.h"
 
 namespace MCRT {
 

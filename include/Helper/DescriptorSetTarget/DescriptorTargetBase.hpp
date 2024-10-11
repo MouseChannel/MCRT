@@ -44,10 +44,10 @@ public:
     virtual int get_descriptor_count() = 0;
     const static int MAX_DESCRIPTORSET_COUNT = 1000;
      
+    vk::DescriptorType m_type;
 protected:
     int m_binding_index;
     vk::ShaderStageFlags m_shader_stage;
-    vk::DescriptorType m_type;
     int m_descriptorSet_index = 0;
 
     std::shared_ptr<DescriptorSet> m_descriptorSet;

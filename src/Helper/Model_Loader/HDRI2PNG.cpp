@@ -8,7 +8,7 @@
 // #define STB_IMAGE_WRITE_IMPLEMENTATION
 // #endif
 // #include "stb_image.h"
-#include "stb_image_write.h"
+#include "Tool/stb_image_write.h"
 // #include
 
 namespace MCRT {

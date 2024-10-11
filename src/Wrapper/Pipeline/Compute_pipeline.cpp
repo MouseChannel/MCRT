@@ -1,7 +1,7 @@
 #include "Wrapper/Pipeline/Compute_Pipeline.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Shader_module.hpp"
-#include "shaders/Data_struct.h"
+#include "Shader/Data_struct.h"
 // #include "shaders/Set_binding.h"
 
 namespace MCRT {

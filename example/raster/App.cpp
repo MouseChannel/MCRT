@@ -1,10 +1,11 @@
-#include "example/raster/App.hpp"
+#include "App.hpp"
 // #include "Helper/ImGui_Context.hpp"
+#include "Context/Context.hpp"
 #include "Helper/Uniform_Manager.hpp"
 #include "Rendering/AppWindow.hpp"
-#include "Rendering/Context.hpp"
-#include "example/raster/raster_pbr_context.hpp"
-#include "lib/imgui/imgui.h"
+#include "raster_pbr_context.hpp"
+#include "imgui.h"
+
 inline void SetupImGuiStyle(bool bStyleDark_, float alpha_)
 {
     ImGuiStyle& style = ImGui::GetStyle();

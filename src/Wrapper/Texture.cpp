@@ -5,7 +5,7 @@
 // #define STB_IMAGE_IMPLEMENTATION
 // #endif
 #include "Tool/stb_image.h"
-#include "stb_image_write.h"
+#include "Tool/stb_image_write.h"
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 #include <android/asset_manager.h>

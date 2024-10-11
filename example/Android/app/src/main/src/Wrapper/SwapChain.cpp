@@ -1,5 +1,5 @@
 #include "Wrapper/SwapChain.hpp"
-#include "Rendering/Context.hpp"
+#include "Context/Context.hpp"
 #include "Wrapper/Window_Surface.hpp"
 #include <array>
 #include <cstdint>
@@ -64,11 +64,10 @@ void SwapChain::Query_info()
     // todo
     // surfaceInfo.count = 3;
     surfaceInfo.transform = capability.currentTransform;
-    surfaceInfo.extent =  capability.currentExtent;
-//            Query_surface_Extent(capability, 800, 800);
+    surfaceInfo.extent = capability.currentExtent;
+    //            Query_surface_Extent(capability, 800, 800);
 }
-vk::Extent2D SwapChain::Query_surface_Extent(const vk::SurfaceCapabilitiesKHR& capability, int windowWidth,
-    int windowHeight)
+vk::Extent2D SwapChain::Query_surface_Extent(const vk::SurfaceCapabilitiesKHR& capability, int windowWidth, int windowHeight)
 {
     if (capability.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         return capability.currentExtent;

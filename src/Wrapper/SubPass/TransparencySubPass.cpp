@@ -1,13 +1,14 @@
 #include "Wrapper/SubPass/TransparencySubPass.hpp"
 #include "Rendering/GraphicContext.hpp"
 
+#include "Context/raster_context.hpp"
 #include "Wrapper/Shader_module.hpp"
-#include "example/base/raster_context.hpp"
-#include "shaders/Data_struct.h"
+#include "Shader/Data_struct.h"
+
 namespace MCRT {
 using Shader_Stage = Graphic_Pipeline::Shader_Stage;
 TransparencySubPass::TransparencySubPass(std::weak_ptr<GraphicContext> graphicContext, int subpass_index)
-    : BaseSubPass(graphicContext,subpass_index)
+    : BaseSubPass(graphicContext, subpass_index)
 {
 }
 

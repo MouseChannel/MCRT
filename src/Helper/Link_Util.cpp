@@ -1,5 +1,5 @@
 #include "Helper/Link_Util.hpp"
-#include "Rendering/Context.hpp"
+#include "Context/Context.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Instance.hpp"
 #include <vulkan/vulkan.hpp>
@@ -78,8 +78,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetRayTracingShaderGroupHandlesKHR(
     void* pData)
 {
     auto func = (PFN_vkGetRayTracingShaderGroupHandlesKHR)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()
-                                                                              ->get_device()
-                                                                              ->get_handle(),
+                                                                                  ->get_device()
+                                                                                  ->get_handle(),
                                                                               "vkGetRayTracingShaderGroupHandlesKHR");
     return func(device, pipeline, firstGroup, groupCount, dataSize, pData);
 }
@@ -95,8 +95,8 @@ VKAPI_ATTR void VKAPI_CALL vkCmdTraceRaysKHR(
     uint32_t depth)
 {
     auto func = (PFN_vkCmdTraceRaysKHR)vkGetDeviceProcAddr(MCRT::Context::Get_Singleton()
-                                                           ->get_device()
-                                                           ->get_handle(),
+                                                               ->get_device()
+                                                               ->get_handle(),
                                                            "vkCmdTraceRaysKHR");
     return func(commandBuffer, pRaygenShaderBindingTable, pMissShaderBindingTable, pHitShaderBindingTable, pCallableShaderBindingTable, width, height, depth);
 }

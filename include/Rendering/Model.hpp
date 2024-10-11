@@ -1,7 +1,7 @@
 #pragma once
 #include "Rendering/Material.hpp"
 #include "glm/glm.hpp"
-#include "shaders/Data_struct.h"
+#include "Shader/Data_struct.h"
 #include <assimp/mesh.h>
 #include <memory>
 #include <string_view>

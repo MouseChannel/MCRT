@@ -1,9 +1,9 @@
 // #include "Wrapper/SubPass/ToneMapSubpass.hpp"
-#include "lib/imgui/imgui.h"
+#include "imgui.h"
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include "Helper/Camera.hpp"
 #include "Helper/CommandManager.hpp"
-#include "example/raster/raster_pbr_context.hpp"
+#include "raster_pbr_context.hpp"
 
 #include "Helper/Model_Loader/gltf_loader.hpp"
 #include "Rendering/ComputeContext.hpp"
@@ -11,18 +11,18 @@
 #include "Rendering/Model.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Ray_Tracing/AS_Builder.hpp"
- 
+
 // #include "Wrapper/Skybox.hpp"
 #include "Wrapper/Texture.hpp"
 
-#include "shaders/PBR/IBL/binding.h"
+#include "Shader/PBR/IBL/binding.h"
 
 #include "Wrapper/SubPass/IMGUISubPass.hpp"
 
-#include "example/raster/shader/Binding.h"
-#include "shaders/PBR/IBL/push_constants.h"
+#include "Shader/PBR/IBL/push_constants.h"
+#include "shader/Binding.h"
 
-#include "example/raster/shader/Constants.h"
+#include "shader/Constants.h"
 
 #include "Helper/DescriptorSetTarget/BufferDescriptorTarget.hpp"
 #include "Helper/DescriptorSetTarget/ImageDescriptorTarget.hpp"
@@ -93,7 +93,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
             {
 
                 {
-                    graphic_context->subpasses[SkyboxSubPassIndex].reset(new SkyboxSubPass(graphic_context,SkyboxSubPassIndex));
+                    graphic_context->subpasses[SkyboxSubPassIndex].reset(new SkyboxSubPass(graphic_context, SkyboxSubPassIndex));
 
                     auto& skyboxSubpass = graphic_context->subpasses[SkyboxSubPassIndex];
                     skyboxSubpass->link_renderTarget({ color_renderTarget },
@@ -225,8 +225,8 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                                     // IBLManager::Get_Singleton()->get_skybox(),
                                     std::vector { input_renderTarget->Get_Image()->Get_Image_View() },
                                     std::vector { input_renderTarget->get_inputLayout() },
-                                    // Which_Set::Graphic,
                                     (int)Graphic_Binding::e_tonemap_input,
+                                    
                                     vk::ShaderStageFlagBits::eFragment,
                                     vk::DescriptorType::eInputAttachment,
                                     tonemapSubPass->get_DescriptorSet(),
@@ -492,7 +492,6 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                                                      tonemapSubpass->get_pipeline()->get_layout(),
                                                      0,
                                                      tonemapSubpass->get_DescriptorSet()->get_handle()[get_graphic_context()->get_cur_index()],
-                                                     //  tonemapSubpass->get_DescriptorSet()->get_handle()[0],
 
                                                      {});
 

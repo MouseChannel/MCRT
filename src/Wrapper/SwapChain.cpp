@@ -1,6 +1,6 @@
 #include "Wrapper/SwapChain.hpp"
+#include "Context/Context.hpp"
 #include "Rendering/AppWindow.hpp"
-#include "Rendering/Context.hpp"
 #include "Wrapper/Image.hpp"
 #include "Wrapper/Window_Surface.hpp"
 #include <array>
@@ -10,6 +10,7 @@
 #include <set>
 #include <vector>
 #include <vulkan/vulkan_structs.hpp>
+
 
 namespace MCRT {
 vk::SwapchainKHR SwapChain::old_swapchian = VK_NULL_HANDLE;
@@ -38,7 +39,7 @@ SwapChain::SwapChain()
         .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
 #else
         .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
-        .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment )
+        .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
 #endif
         .setImageExtent(surfaceInfo.extent)
         .setImageColorSpace(surfaceInfo.format.colorSpace)

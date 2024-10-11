@@ -1,4 +1,4 @@
-#include "Rendering/Context.hpp"
+#include "Context/Context.hpp"
 #include "Rendering/Render_Target/MultiSampler_Render_Target.hpp"
 #include "Wrapper/Device.hpp"
 #include "Wrapper/Image.hpp"
@@ -19,16 +19,13 @@ std::unique_ptr<MultiSampler_RenderTarget> MultiSampler_RenderTarget::Create()
     auto swapchain_format = Context::Get_Singleton()->Get_SwapChain()->Get_Format();
     auto extent = Context::Get_Singleton()->Get_SwapChain()->Get_Extent2D();
     std::shared_ptr<Image> image {
-        new Image(extent.width, extent.height, swapchain_format, vk::ImageType::e2D,
-            vk::ImageTiling::eOptimal,
-            vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,
-            sampler_count)
+        new Image(extent.width, extent.height, swapchain_format, vk::ImageType::e2D, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, sampler_count)
     };
     image->SetImageLayout(vk::ImageLayout::eColorAttachmentOptimal,
-        vk::AccessFlagBits::eNone,
-        vk::AccessFlagBits::eColorAttachmentWrite,
-        vk::PipelineStageFlagBits::eTopOfPipe,
-        vk::PipelineStageFlagBits::eColorAttachmentOutput);
+                          vk::AccessFlagBits::eNone,
+                          vk::AccessFlagBits::eColorAttachmentWrite,
+                          vk::PipelineStageFlagBits::eTopOfPipe,
+                          vk::PipelineStageFlagBits::eColorAttachmentOutput);
 
     vk::AttachmentDescription des;
 
@@ -43,7 +40,7 @@ std::unique_ptr<MultiSampler_RenderTarget> MultiSampler_RenderTarget::Create()
     return std::unique_ptr<MultiSampler_RenderTarget>(new MultiSampler_RenderTarget(image, des));
 }
 void MultiSampler_RenderTarget::Make_Subpass(uint32_t attachment_index,
-    vk::SubpassDescription& subpass)
+                                             vk::SubpassDescription& subpass)
 {
     attach_reference.setAttachment(attachment_index)
         .setLayout(image->Get_image_layout());

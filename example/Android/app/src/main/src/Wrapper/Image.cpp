@@ -1,14 +1,12 @@
 #include "Wrapper/Image.hpp"
+#include "Context/Context.hpp"
 #include "Helper/CommandManager.hpp"
-#include "Rendering/Context.hpp"
 #include "Wrapper/Buffer.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Device.hpp"
+
 namespace MoCheng3D {
-Image::Image(uint32_t width, uint32_t height, vk::Format format,
-    vk::ImageType type, vk::ImageTiling tiling,
-    vk::ImageUsageFlags usage, vk::ImageAspectFlags aspect,
-    vk::SampleCountFlagBits sample)
+Image::Image(uint32_t width, uint32_t height, vk::Format format, vk::ImageType type, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::ImageAspectFlags aspect, vk::SampleCountFlagBits sample)
     : width(width)
     , height(height)
     , m_aspect(aspect)
@@ -31,12 +29,13 @@ Image::Image(uint32_t width, uint32_t height, vk::Format format,
     m_handle = device->Get_handle().createImage(create_info);
     AllocateMemory();
     Get_Context_Singleton()->Get_Device()->Get_handle().bindImageMemory(
-        m_handle, memory, 0);
+        m_handle,
+        memory,
+        0);
     Create_ImageView(format);
 }
 
-Image::Image(vk::Image other_image, vk::ImageLayout image_layout,
-    vk::Format format, vk::ImageAspectFlags aspect)
+Image::Image(vk::Image other_image, vk::ImageLayout image_layout, vk::Format format, vk::ImageAspectFlags aspect)
     : image_layout(image_layout)
     , m_aspect(aspect)
     , need_delete(false)
@@ -79,7 +78,7 @@ void Image::AllocateMemory()
                  .allocateMemory(allocate_info);
 }
 uint32_t Image::FindMemoryTypeIndex(std::uint32_t requirement_type,
-    vk::MemoryPropertyFlags flag)
+                                    vk::MemoryPropertyFlags flag)
 {
     auto memory_properties = Get_Context_Singleton()
                                  ->Get_Device()
@@ -114,16 +113,14 @@ void Image::SetImageLayout(vk::ImageLayout dst_layout, vk::AccessFlags src_acces
             .setDstAccessMask(dst_access_mask)
             .setSubresourceRange(range);
 
-        cmd.pipelineBarrier(src_stage_mask, dst_stage_mask, {}, {}, nullptr,
-            barrier);
+        cmd.pipelineBarrier(src_stage_mask, dst_stage_mask, {}, {}, nullptr, barrier);
         image_layout = dst_layout;
     });
 }
 void Image::FillImageData(size_t size, void* data)
 {
     std::unique_ptr<Buffer> image_buffer {
-        new Buffer(size, vk::BufferUsageFlagBits::eTransferSrc,
-            vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible)
+        new Buffer(size, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible)
     };
 
     image_buffer->Update(data, size);
@@ -141,9 +138,7 @@ void Image::FillImageData(size_t size, void* data)
             .setImageExtent({ width, height, 1 })
             .setBufferRowLength(0)
             .setImageSubresource(subsource);
-        cmd_buffer.copyBufferToImage(image_buffer->Get_handle(), m_handle,
-            vk::ImageLayout::eTransferDstOptimal,
-            region);
+        cmd_buffer.copyBufferToImage(image_buffer->Get_handle(), m_handle, vk::ImageLayout::eTransferDstOptimal, region);
     });
 }
 Image::~Image()

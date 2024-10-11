@@ -1,5 +1,5 @@
 #pragma once
-#include "Rendering/Context.hpp"
+#include "Context/Context.hpp"
 #include "example/base/raytracing_context.hpp"
 #include "shaders/Data_struct.h"
 #include <iostream>
@@ -15,7 +15,7 @@ public:
     ~Path_tracing_context();
     std::shared_ptr<CommandBuffer> Begin_Frame() override;
     void EndFrame() override;
-   
+
     void prepare(std::shared_ptr<Window> window) override;
 
 private:

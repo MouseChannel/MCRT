@@ -6,12 +6,12 @@
 #include "Wrapper/Sampler.hpp"
 namespace MCRT {
 BufferDescriptorTarget::BufferDescriptorTarget(std::shared_ptr<Buffer> buf,
-                                                     //  Which_Set _which_set,
-                                                     int binding_index,
-                                                     vk::ShaderStageFlags shader_stage,
-                                                     vk::DescriptorType type,
-                                                     std::shared_ptr<DescriptorSet> descriptorSet,
-                                                     int descriptorSet_index)
+                                               //  Which_Set _which_set,
+                                               int binding_index,
+                                               vk::ShaderStageFlags shader_stage,
+                                               vk::DescriptorType type,
+                                               std::shared_ptr<DescriptorSet> descriptorSet,
+                                               int descriptorSet_index)
     : m_buffer(buf)
     , DescriptorTargetBase(
           // _which_set,

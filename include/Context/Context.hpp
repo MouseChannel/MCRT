@@ -2,7 +2,7 @@
 
 // #include "Helper/Instance_base.hpp"
 // #include "Helper/Uniform_Manager.hpp"
-#include "shaders/Data_struct.h"
+#include "Shader/Data_struct.h"
 #include <exception>
 #include <memory>
 #include <vector>

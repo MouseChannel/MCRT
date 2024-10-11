@@ -10,6 +10,7 @@ layout(binding = e_skybox, rgba32f) uniform imageCube output_skybox;
 
 vec3 getSamplingVector()
 {
+    
     vec2 st = gl_GlobalInvocationID.xy / vec2(imageSize(output_skybox));
     // if (gl_GlobalInvocationID.x > 4000) {
     //     debugPrintfEXT("%f \n", vec2(imageSize(output_skybox)).x);

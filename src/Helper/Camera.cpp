@@ -1,10 +1,12 @@
 #include "Helper/Camera.hpp"
+#include "Context/Context.hpp"
 #include "Rendering/AppWindow.hpp"
-#include "Rendering/Context.hpp"
 #include "Rendering/RaytracingPass.hpp"
 #include "Wrapper/SwapChain.hpp"
+#include "imgui.h"
 #include "iostream"
-#include "lib/imgui/imgui.h"
+
+
 namespace MCRT {
 
 Camera::Camera()
@@ -131,16 +133,16 @@ void Camera::move(CAMERA_MOVE _mode)
         m_position += glm::normalize(glm::cross(m_front, m_up)) * m_speed * m_sensitivity;
         break;
     case CAMERA_MOVE::MOVE_TOP:
-        m_position += m_speed * m_top * m_sensitivity  ;
+        m_position += m_speed * m_top * m_sensitivity;
         break;
     case CAMERA_MOVE::MOVE_DOWN:
-        m_position -= m_speed * m_top * m_sensitivity  ;
+        m_position -= m_speed * m_top * m_sensitivity;
         break;
     case CAMERA_MOVE::MOVE_FRONT:
-        m_position += m_speed * m_front * m_sensitivity  ;
+        m_position += m_speed * m_front * m_sensitivity;
         break;
     case CAMERA_MOVE::MOVE_BACK:
-        m_position -= m_speed * m_front * m_sensitivity  ;
+        m_position -= m_speed * m_front * m_sensitivity;
         break;
     default:
         break;
@@ -299,7 +301,7 @@ void Camera::onMouseMove(double _xpos, double _ypos)
     switch (move_mode) {
     case MOVE_MODE::ORBIT:
         if (glfwGetMouseButton(Context::Get_Singleton()->get_window()->get_handle(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-            orbit(_xOffset * m_sensitivity*10, _yOffset * m_sensitivity*10);
+            orbit(_xOffset * m_sensitivity * 10, _yOffset * m_sensitivity * 10);
         }
         break;
     case MOVE_MODE::FREE:
@@ -339,7 +341,7 @@ void Camera::onMouseScroll(double _xpos, double _ypos)
 
 void Camera::orbit(float x_offset, float y_offset)
 {
-    x_offset*=-1;
+    x_offset *= -1;
     auto origin_pos = m_position;
     glm::vec3 look_point = m_position + m_front;
     vec4 cur_pos = { m_position, 1 };

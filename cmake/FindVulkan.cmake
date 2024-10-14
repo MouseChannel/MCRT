@@ -1,37 +1,18 @@
-IF(Clang OR GNU)
-    find_package(Vulkan REQUIRED)
-    ###
-# pacman -S mingw-w64-ucrt-x86_64-vulkan-devel
-    ##
+find_package(Vulkan QUIET)
+IF (NOT Vulkan_FOUND)
 
-	# find_library(Vulkan_LIBRARY NAMES vulkan-1 vulkan PATHS ${CMAKE_SOURCE_DIR}/libs/vulkan)
+    set(Vulkan_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdParty/vulkan)
+    set(Vulkan_LIB_LOCATION ${CMAKE_SOURCE_DIR}/thirdParty/vulkan-1.lib)
+    #     # message(${glfw3_LIB_LOCATION})
+    add_library(Vulkan::Vulkan STATIC IMPORTED GLOBAL)
+    set_target_properties(
+            Vulkan::Vulkan
+            PROPERTIES
+            IMPORTED_LOCATION ${Vulkan_LIB_LOCATION}
+            INTERFACE_INCLUDE_DIRECTORIES ${Vulkan_INCLUDE_DIR}
 
-    # MESSAGE(STATUS "Finding Windows Vulkan😊")
-    # set(VULKAN_DIR "${PROJECT_SOURCE_DIR}/lib/vulkan"  )
+            #    COMPILE_FLAGS "-Wno-unknown-pragmas -w"
+    )
+ENDIF ()
 
-    # set(VULKAN_INCLUDE_DIR "${VULKAN_DIR}/Include")
-    # set(VULKAN_LIB_LOCATION "${VULKAN_DIR}/Lib/vulkan-1.lib")
-    # add_library(Vulkan STATIC IMPORTED GLOBAL)
-    # set_target_properties(
-    #     Vulkan
-    #     PROPERTIES
-    #     IMPORTED_LOCATION ${VULKAN_LIB_LOCATION}
-    #     INTERFACE_INCLUDE_DIRECTORIES ${VULKAN_INCLUDE_DIR}
-    # )
-    # MESSAGE(STATUS "link Windows Vulkan down👌")
-ELSEIF(UNIX)
-    MESSAGE(STATUS "Find linux Vulkan........")
-    find_package(Vulkan REQUIRED)
-#    MESSAGE(STATUS "Finding Windows Vulkan😊")
-#    set(VULKAN_DIR "/home/mocheng/software/vulkansdk-linux-x86_64-1.3.268.0/1.3.268.0/x86_64" )
-#    set(VULKAN_INCLUDE_DIR "${VULKAN_DIR}/include")
-#    set(VULKAN_LIB_LOCATION "${VULKAN_DIR}/lib/libvulkan.so")
-#    add_library(Vulkan STATIC IMPORTED GLOBAL)
-#    set_target_properties(
-#            Vulkan
-#            PROPERTIES
-#            IMPORTED_LOCATION ${VULKAN_LIB_LOCATION}
-#            INTERFACE_INCLUDE_DIRECTORIES ${VULKAN_INCLUDE_DIR}
-#    )
-#    MESSAGE(STATUS "link Windows Vulkan down👌")
-ENDIF()
+ 

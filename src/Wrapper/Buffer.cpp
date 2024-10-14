@@ -314,6 +314,8 @@ std::shared_ptr<Buffer> Buffer::CreateExternalBuffer(void* data, size_t size, vk
     // std::shared_ptr<Buffer> res(new Buffer(size, usage_flags, properties, extMemHandleType));
     // res->CreateBuffer(size, usage_flags);
 #undef VK_USE_CUDA
+
+    return nullptr;
 }
 
 vk::DeviceAddress Buffer::get_address()

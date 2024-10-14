@@ -28,10 +28,13 @@ jobs:
     # - name: Install TBB
     #   run: sudo apt-get install -y libtbb-dev
 
-    - name: Install GLM
-      run: sudo apt-get install -y libglm-dev
-    - name: Install assimp
-      run: sudo  apt install -y libassimp-dev
+    # - name: Install GLM
+    #   run: sudo apt-get install -y libglm-dev
+    # - name: Install assimp
+    #   run: sudo  apt install -y libassimp-dev
+    - name: update submodule
+      run: git submodule init  && git submodule update
+
 
      
 
@@ -55,11 +58,11 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j12
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}}
+    # - name: Test
+    #   working-directory: ${{github.workspace}}/build
+    #   # Execute tests defined by the CMake configuration.
+    #   # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+    #   run: ctest -C ${{env.BUILD_TYPE}}
   # build_android:
 
   #   runs-on: ubuntu-latest

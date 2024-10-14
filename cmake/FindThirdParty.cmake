@@ -1,7 +1,10 @@
 
 MESSAGE(STATUS "Find Windows glfw😊")
 
-add_subdirectory(thirdParty/glfw)
+find_package(glfw3 QUIET)
+if(NOT glfw3_FOUND)
+    add_subdirectory(thirdParty/glfw)
+ENDIF()
 include_directories(${CMAKE_SOURCE_DIR}/thirdParty/glm)
 # find_package(assimp)
 IF (Clang)

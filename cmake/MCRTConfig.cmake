@@ -36,7 +36,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindThirdParty.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/FindVulkan.cmake)
 
 
-target_link_libraries(imgui PUBLIC glfw Vulkan::Vulkan)
+target_link_libraries(imgui PUBLIC glfw  Vulkan::Vulkan)
 
 
 target_link_libraries(MCRT imgui assimp)

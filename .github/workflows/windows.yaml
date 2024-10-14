@@ -29,20 +29,21 @@ jobs:
         cache: true
 
 
-    - name: ninja
-      uses: lukka/get-cmake@latest
+    # - name: ninja
+    #   uses: lukka/get-cmake@latest
 
 
     # - name: install glfw
     #   run: git clone -b 3.4 https://github.com/glfw/glfw.git 
     # - name: test
     #   run: ls ${{github.workspace}}
+    - name: update submodule
+      run: git submodule init  && git submodule update
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: >
-        cmake -GNinja -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
+      run:  cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
       
       
       #-Dglfw3_DIR=${{github.workspace}}/glfw/CMake

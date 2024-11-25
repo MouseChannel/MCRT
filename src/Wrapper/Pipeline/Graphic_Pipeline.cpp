@@ -45,7 +45,7 @@ Graphic_Pipeline::Graphic_Pipeline(std::shared_ptr<RenderPass> render_pass,
 
     auto binds = Vertex::make_bind();
     auto attrs = Vertex::make_attr();
-    Make_VertexInput(binds, attrs);
+    // Make_VertexInput(binds, attrs);
     Make_VertexAssembly();
     Make_viewPort();
     Make_MultiSample(sampleCount);

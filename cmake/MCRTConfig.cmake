@@ -23,7 +23,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindThirdParty.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/FindVulkan.cmake)
 
 
 set (MCRT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/..)

@@ -21,8 +21,8 @@ IF (NOT assimp_FOUND)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../thirdParty/assimp)
 ENDIF ()
 
-
-add_subdirectory(thirdParty/VulkanMemoryAllocator EXCLUDE_FROM_ALL)
+find_package(Vulkan REQUIRED)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../thirdParty/VulkanMemoryAllocator EXCLUDE_FROM_ALL)
    
 
 

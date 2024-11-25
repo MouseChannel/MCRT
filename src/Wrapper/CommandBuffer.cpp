@@ -10,11 +10,11 @@ CommandBuffer::CommandBuffer()
     auto command_pool = Get_Context_Singleton()->get_commandpool();
     allocate_info.setCommandBufferCount(1)
         .setLevel(vk::CommandBufferLevel::ePrimary)
-        .setCommandPool(command_pool->Get_handle());
-
+        .setCommandPool(command_pool->get_handle());
+    // allocate_info.commandBufferCount
     m_handle = Get_Context_Singleton()
                    ->get_device()
-                   ->Get_handle()
+                   ->get_handle()
                    .allocateCommandBuffers(allocate_info)[0];
 }
 CommandBuffer::~CommandBuffer()
@@ -23,12 +23,24 @@ CommandBuffer::~CommandBuffer()
 void CommandBuffer::Begin(vk::CommandBufferUsageFlags begin_flags)
 {
     vk::CommandBufferBeginInfo begin_info;
-    begin_info.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+    begin_info.setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse);
     m_handle.begin(begin_info);
 }
 void CommandBuffer::End()
 {
     m_handle.end();
+}
+void CommandBuffer::Reset()
+{
+    m_handle.reset();
+}
+void CommandBuffer::BeginRenderPass(vk::RenderPassBeginInfo renderPassInfo, vk::SubpassContents content)
+{
+    m_handle.beginRenderPass(renderPassInfo, content);
+}
+void CommandBuffer::EndRenderPass()
+{
+    m_handle.endRenderPass();
 }
 
 } // namespace MCRT

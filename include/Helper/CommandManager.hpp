@@ -8,6 +8,7 @@ class CommandBuffer;
 class CommandManager final {
 public:
     using RecordCmdFunc = std::function<void(vk::CommandBuffer& handle)>;
+    static std::shared_ptr<CommandBuffer> Get_one_time_cmd();
     static void ExecuteCmd(vk::Queue, RecordCmdFunc);
     static void submit_Cmd(vk::Queue, std::shared_ptr<CommandBuffer>);
 };

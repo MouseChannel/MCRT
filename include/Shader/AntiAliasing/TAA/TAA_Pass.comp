@@ -1,0 +1,61 @@
+#version 460
+#extension GL_GOOGLE_include_directive : enable
+#extension GL_EXT_debug_printf : enable
+
+#include "./binding_taa.h"
+#include "./Halton_2_3.h"
+#include "shaders/mat_common.h"
+layout(set = 0, binding = e_offscreen_image, rgba8) uniform readonly image2D offscreen_image;
+layout(set = 0, binding = e_pre_image, rgba8) uniform readonly image2D pre_image;
+layout(set = 0,binding = e_out_image,rgba8)uniform writeonly image2D out_image;
+layout(set = 0, binding = e_last_depth, r32f) uniform readonly image2D  last_depth;
+layout(set = 0, binding = e_gbuffer_position, rgba8) uniform readonly image2D gbuffer_position;
+
+
+/*
+    gbuffer contains
+    - cur_position
+    - last_depth
+*/
+
+
+layout (set = 0,binding =e_taa_data ) buffer _TAA_Data {
+    TAA_Data taa_data;
+} ;
+
+void main(){
+// pre_mvp.a = pre_mvp.a+1;
+    // debugPrintfEXT("message %d\n", pre_mvp.a );
+    int screenHeight = taa_data.screenHeight;
+    int screenWidth =  taa_data.screenWidth;
+
+
+    vec3 cur_color = imageLoad(offscreen_image, ivec2(gl_GlobalInvocationID.xy)).xyz;
+    vec3 cur_position = imageLoad(gbuffer_position, ivec2(gl_GlobalInvocationID.xy)).xyz;
+    mat4 jitter_p = jitterMat(taa_data.offset_index,taa_data.screenHeight,taa_data.screenWidth,taa_data.last_p);
+    vec4 last_frame_position = jitter_p *  taa_data.last_mv *  vec4( cur_position, 1.);
+    vec4 ndc_pos = to_NDC(last_frame_position);
+
+    vec4 screen_pos = to_ScreenPos(ndc_pos,screenHeight,screenWidth);
+    float inference_depth = ndc_pos.z;
+    float gt_depth = imageLoad( last_depth ,ivec2(screen_pos.x,screen_pos.y)).z;
+    float alpha = 0.05f;
+    vec3 res_color;
+    if(gt_depth -  inference_depth <1e-6 ){
+        vec3 pre_color = imageLoad(pre_image,ivec2(screen_pos.x,screen_pos.y)).xyz;
+        res_color = (1- alpha)* pre_color + alpha* cur_color;
+    }else{
+        res_color = cur_color;
+    }
+    imageStore(out_image,ivec2(gl_GlobalInvocationID.xy),vec4(res_color,1));
+    // barrier();
+    // update buffer
+    
+
+
+     
+     
+
+
+
+}

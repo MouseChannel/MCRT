@@ -7,7 +7,11 @@ public:
   ~CommandBuffer();
   void Begin(vk::CommandBufferUsageFlags begin_flags);
   void End();
+  void Reset();
+  void BeginRenderPass(vk::RenderPassBeginInfo renderPassInfo,
+                       vk::SubpassContents content);
+  void EndRenderPass();
 
-private:
+  private:
 };
 } // namespace MCRT

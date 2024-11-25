@@ -1,0 +1,58 @@
+#version 460
+
+#include "../common.glsl"
+#include "./binding.h"
+// const float Epsilon = 0.00001;
+
+layout(constant_id = e_numsample_count) const int NumSamples = 4096;
+
+// layout(constant_id = e_local_size) const int local_size = 32;
+float InvNumSamples = 1.0 / float(NumSamples);
+layout(binding = e_skybox) uniform samplerCube skybox;
+layout(binding = e_irradiance_image, rgba16f) uniform imageCube irradiance_image;
+
+vec3 getSamplingVector()
+{
+    vec2 st = gl_GlobalInvocationID.xy / vec2(imageSize(irradiance_image));
+    vec2 uv = 2.0 * vec2(st.x, 1.0 - st.y) - vec2(1.0);
+
+    vec3 ret;
+    if (gl_GlobalInvocationID.z == 0)
+        ret = vec3(1.0, uv.y, -uv.x);
+    else if (gl_GlobalInvocationID.z == 1)
+        ret = vec3(-1.0, uv.y, uv.x);
+    else if (gl_GlobalInvocationID.z == 2)
+        ret = vec3(uv.x, 1.0, -uv.y);
+    else if (gl_GlobalInvocationID.z == 3)
+        ret = vec3(uv.x, -1.0, uv.y);
+    else if (gl_GlobalInvocationID.z == 4)
+        ret = vec3(uv.x, uv.y, 1.0);
+    else if (gl_GlobalInvocationID.z == 5)
+        ret = vec3(-uv.x, uv.y, -1.0);
+    return normalize(ret);
+}
+
+layout(local_size_x = local_size, local_size_y = local_size, local_size_z = 1) in;
+void main(void)
+{
+    vec3 N = getSamplingVector();
+
+    vec3 S, T;
+    computeBasisVectors(N, S, T);
+
+    // Monte Carlo integration of hemispherical irradiance.
+    // As a small optimization this also includes Lambertian BRDF assuming perfectly white surface (albedo of 1.0)
+    // so we don't need to normalize in PBR fragment shader (so technically it encodes exitant radiance rather than irradiance).
+    vec3 irradiance = vec3(0);
+    for (uint i = 0; i < NumSamples; ++i) {
+        vec2 u = sampleHammersley(i, InvNumSamples);
+        vec3 Li = tangentToWorld(sampleHemisphere(u.x, u.y), N, S, T);
+        float cosTheta = max(0.0, dot(Li, N));
+
+        // PIs here cancel out because of division by pdf.
+        irradiance += 2.0 * textureLod(skybox, Li, 0).rgb * cosTheta;
+    }
+    irradiance /= vec3(NumSamples);
+
+    imageStore(irradiance_image, ivec3(gl_GlobalInvocationID), vec4(irradiance, 1.0));
+}

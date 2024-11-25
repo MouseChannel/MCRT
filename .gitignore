@@ -1,5 +1,11 @@
 .vs
 .vscode
+.idea
+cmake-build*
+assets
 .cache
 build
 out
+test
+*.glb
+*.gltf

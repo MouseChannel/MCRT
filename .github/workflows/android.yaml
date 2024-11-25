@@ -1,0 +1,132 @@
+# This starter workflow is for a CMake project running on a single platform. There is a different starter workflow if you need cross-platform coverage.
+# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-multi-platform.yml
+name: Android
+
+on:
+  push:
+    branches: [ "mocheng" ]
+  pull_request:
+    branches: [ "mocheng" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+   
+  # build_linux:
+  #   # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
+  #   # You can convert this to a matrix build if you need cross-platform coverage.
+  #   # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #   - uses: actions/checkout@v3
+
+  #   - name: Install cmake
+  #     run: sudo apt update &&  sudo apt install -y cmake
+  #   # - name: Install TBB
+  #   #   run: sudo apt-get install -y libtbb-dev
+
+  #   - name: Install GLM
+  #     run: sudo apt-get install -y libglm-dev
+
+        
+
+  #   - name: Install Vulkan
+  #     run: sudo apt-get install -y libvulkan1 libvulkan-dev
+      
+  #   - name: Install glfw
+  #     run: sudo apt-get install -y libglfw3 libglfw3-dev
+
+
+
+  #   - name: Configure CMake
+  #     # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+  #     # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+  #     run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+  #   - name: Build
+  #     # Build your program with the given configuration
+  #     run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j12
+
+  #   - name: Test
+  #     working-directory: ${{github.workspace}}/build
+  #     # Execute tests defined by the CMake configuration.
+  #     # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+  #     run: ctest -C ${{env.BUILD_TYPE}}
+  build_android:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Set Current Date As Env Variable
+      - name: Set current date as env variable
+        run: echo "date_today=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+      # Set Repository Name As Env Variable
+      - name: Set repository name as env variable
+        run: echo "repository_name=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')" >> $GITHUB_ENV
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu' # See 'Supported distributions' for available options
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Change wrapper permissions
+        run: chmod +x ${{github.workspace}}/example/Android/gradlew
+      # - name: cd 
+      #   run: ls ${{github.workspace}}/example/Android
+
+      # Run Tests Build
+      - name: Run gradle tests
+        run: ${{github.workspace}}/example/Android/gradlew test
+        working-directory: ${{github.workspace}}/example/Android
+
+      # Run Build Project
+      - name: Build gradle project
+        run: ${{github.workspace}}/example/Android/gradlew build
+        working-directory: ${{github.workspace}}/example/Android
+
+      # Create APK Debug
+      - name: Build apk debug project (APK) - ${{ env.main_project_module }} module
+        run: ${{github.workspace}}/example/Android/gradlew assembleDebug
+        working-directory: ${{github.workspace}}/example/Android
+
+      # # Create APK Release
+      # - name: Build apk release project (APK) - ${{ env.main_project_module }} module
+      #   run: ${{github.workspace}}/example/Android/gradlew assemble
+
+      # # Create Bundle AAB Release
+      # # Noted for main module build [main_project_module]:bundleRelease
+      # - name: Build app bundle release (AAB) - ${{ env.main_project_module }} module
+      #   run: ${{github.workspace}}/example/Android/gradlew ${{ env.main_project_module }}:bundleRelease
+
+      # # Upload Artifact Build
+      # # Noted For Output [main_project_module]/build/outputs/apk/debug/
+      # - name: Upload APK Debug - ${{ env.repository_name }}
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: ${{ env.date_today }} - ${{ env.playstore_name }} - ${{ env.repository_name }} - APK(s) debug generated
+      #     path: ${{ env.main_project_module }}/build/outputs/apk/debug/
+
+      # # Noted For Output [main_project_module]/build/outputs/apk/release/
+      # - name: Upload APK Release - ${{ env.repository_name }}
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: ${{ env.date_today }} - ${{ env.playstore_name }} - ${{ env.repository_name }} - APK(s) release generated
+      #     path: ${{ env.main_project_module }}/build/outputs/apk/release/
+
+      # # Noted For Output [main_project_module]/build/outputs/bundle/release/
+      # - name: Upload AAB (App Bundle) Release - ${{ env.repository_name }}
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: ${{ env.date_today }} - ${{ env.playstore_name }} - ${{ env.repository_name }} - App bundle(s) AAB release generated
+      #     path: ${{ env.main_project_module }}/build/outputs/bundle/release/
+
+
+

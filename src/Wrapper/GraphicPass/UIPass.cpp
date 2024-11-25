@@ -1,0 +1,100 @@
+#include "Wrapper/GraphicPass/UiPass.hpp"
+#include "Imgui/imgui.h"
+#include "Imgui/imgui_impl_glfw.h"
+#include "Imgui/imgui_impl_vulkan.h"
+#include "Rendering/AppWindow.hpp"
+#include "Wrapper/Device.hpp"
+#include "Wrapper/Instance.hpp"
+#include "Wrapper/RenderPass.hpp"
+#include "Wrapper/SwapChain.hpp"
+
+namespace MCRT {
+
+void UIPass::Init()
+{
+    using type = vk::DescriptorType;
+    std::vector<vk::DescriptorPoolSize> pool_sizes { { type::eSampler, 100 },
+                                                     { type::eCombinedImageSampler, 100 },
+                                                     { type::eStorageImage, 100 },
+                                                     { type::eUniformTexelBuffer, 100 },
+                                                     { type::eStorageTexelBuffer, 100 },
+                                                     { type::eUniformBuffer, 100 },
+                                                     { type::eStorageBuffer, 100 },
+                                                     { type::eUniformBufferDynamic, 100 },
+                                                     { type::eStorageBufferDynamic, 100 },
+                                                     { type::eInputAttachment, 100 } };
+    vk::DescriptorPoolCreateInfo create_info;
+    create_info.setPoolSizes(pool_sizes)
+        // .setPoolSizeCount(IM_ARRAYSIZE(pool_sizes))
+        .setMaxSets(100 * pool_sizes.size())
+        .setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
+
+    auto descriptor_pool = Context::Get_Singleton()->get_device()->get_handle().createDescriptorPool(
+        create_info);
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    auto& io { ImGui::GetIO() };
+
+    io.IniFilename = NULL;
+    io.LogFilename = NULL;
+    //    (void)io;
+
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+    ImGui::StyleColorsDark();
+
+    auto& context = Context::Get_Singleton();
+
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    ImGui_ImplAndroid_Init(context->get_window()->get_handle());
+#else
+
+    ImGui_ImplGlfw_InitForVulkan(Context::Get_Singleton()->get_window()->get_handle(), true);
+#endif
+    ImGui_ImplVulkan_InitInfo init_info = {};
+    init_info.Instance = context->get_instance()->get_handle();
+    init_info.PhysicalDevice = context->get_device()->Get_Physical_device();
+    init_info.Device = context->get_device()->get_handle();
+    init_info.QueueFamily = context->get_device()->get_queuefamily_index().graphic_queue.value();
+    init_info.Queue = context->get_device()->Get_Graphic_queue();
+    init_info.PipelineCache = VK_NULL_HANDLE;
+    init_info.DescriptorPool = VkDescriptorPool(descriptor_pool);
+    init_info.Subpass = get_subpass_index();
+    init_info.MinImageCount = 2;
+    init_info.ImageCount = context->get_swapchain()->Get_Swapchain_Image_size();
+    init_info.MSAASamples = (VkSampleCountFlagBits)vk::SampleCountFlagBits::e1;
+    // (VkSampleCountFlagBits)context->get_device()->Get_sampler_count();
+    init_info.Allocator = nullptr;
+    init_info.CheckVkResultFn = nullptr;
+    init_info.RenderPass = (VkRenderPass)Context::Get_Singleton()->get_renderpass()->get_handle();
+
+    // ImGui_ImplVulkan_Init(&init_info, (VkRenderPass)Context::Get_Singleton()->get_renderpass()->get_handle());
+    ImGui_ImplVulkan_Init(&init_info);
+}
+void UIPass::DrawUI(vk::CommandBuffer cmd, std::function<void()> func)
+{
+    ImGui_ImplVulkan_NewFrame();
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    ImGui_ImplAndroid_NewFrame();
+#else
+    ImGui_ImplGlfw_NewFrame();
+#endif
+
+    ImGui::NewFrame();
+    {
+
+        ImGui::Begin(
+            "setting",
+            NULL,
+            ImGuiWindowFlags_NoScrollbar); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        ImGui::SetWindowPos(ImVec2(0, 0), ImGuiCond_Once);
+        if (func)
+            func();
+
+        ImGui::End();
+    }
+    ImGui::Render();
+    ImDrawData* draw_data = ImGui::GetDrawData();
+    ImGui_ImplVulkan_RenderDrawData(draw_data, cmd);
+}
+}

@@ -4,37 +4,33 @@
 #include "Wrapper/Instance.hpp"
 #include <vulkan/vulkan.hpp>
 
-
-
 namespace MCRT {
 class Debugger {
 public:
-    // template <typename T, typename K>
-    // requires requires {
-    //              T::NativeType;
-    //          }
-    // void set_buffer_name(std::shared_ptr<Component<T, K>> obj, const std::string name)
-    // {
-    //     vk::DebugUtilsObjectNameInfoEXT info;
-    //     auto native = obj.get_c_type();
-    //     auto type = obj->Get_handle().objectType;
-    //     info.setObjectHandle((uint64_t)native)
-    //         .setPObjectName(name.c_str())
-    //         .setObjectType(type);
-    //     vkSetDebugUtilsObjectNameEXT(Context::Get_Singleton()->get_device()->Get_handle(), (VkDebugUtilsObjectNameInfoEXT*)&info);
-    // }
+ 
     template <typename T>
     void set_name(T obj, const std::string name)
     {
         vk::DebugUtilsObjectNameInfoEXT info;
         auto native = obj->get_c_type();
-        auto type = obj->Get_handle().objectType;
+        auto type = obj->get_handle().objectType;
         info.setObjectHandle((uint64_t)native)
             .setPObjectName(name.c_str())
             .setObjectType(type);
-        vkSetDebugUtilsObjectNameEXT(Context::Get_Singleton()->get_device()->Get_handle(),
-            (VkDebugUtilsObjectNameInfoEXT*)&info);
-         
+        vkSetDebugUtilsObjectNameEXT(Context::Get_Singleton()->get_device()->get_handle(),
+                                     (VkDebugUtilsObjectNameInfoEXT*)&info);
+    }
+    template <typename T>
+    void set_handle_name(T obj, const std::string name)
+    {
+        vk::DebugUtilsObjectNameInfoEXT info;
+        auto native = static_cast<typename T::NativeType>(obj);
+        auto type = obj.objectType;
+        info.setObjectHandle((uint64_t)native)
+            .setPObjectName(name.c_str())
+            .setObjectType(type);
+        vkSetDebugUtilsObjectNameEXT(Context::Get_Singleton()->get_device()->get_handle(),
+                                     (VkDebugUtilsObjectNameInfoEXT*)&info);
     }
 
 private:

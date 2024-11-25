@@ -1,5 +1,6 @@
 #pragma once
-#include "Rendering/Context.hpp"
+
+#include "Context/Context.hpp"
 #include "vulkan/vulkan.hpp"
 #include <iostream>
 #include <memory>
@@ -11,7 +12,7 @@ template <typename T, typename K>
 class Component {
 
 protected:
-    T m_handle { VK_NULL_HANDLE };
+    T m_handle;
 
     [[nodiscard]] auto& Get_Context_Singleton()
     {
@@ -19,7 +20,7 @@ protected:
     }
 
 public:
-    [[nodiscard]] T& Get_handle()
+    [[nodiscard]] virtual T& get_handle()
     {
         // assert(m_handle);
         return m_handle;
@@ -27,6 +28,10 @@ public:
     [[nodiscard]] auto get_c_type()
     {
         return static_cast<typename T::NativeType>(m_handle);
+    }
+    ~Component()
+    {
+        // std::cout << typeid(K).name()  << std::endl;
     }
 };
 } // namespace MCRT

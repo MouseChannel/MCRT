@@ -1,7 +1,17 @@
+#pragma once
+#include <iostream>
 #include <vulkan/vulkan.hpp>
+#include "Wrapper/Device.hpp"
 // #include ""
-namespace MCRT {
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallBack(
+    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    VkDebugUtilsMessageTypeFlagsEXT messageType,
+    VkDebugUtilsMessengerCallbackDataEXT const* pCallbackData,
+    void*)
+{
+    std::cout << pCallbackData->pMessage << std::endl;
 
+    return false;
 }
-// PFN_vkGetAccelerationStructureBuildSizesKHR pfnGetAccelerationStructureBuildSizesKHR;
-// pfnGetAccelerationStructureBuildSizesKHR = reinterpret_cast<PFN_vkGetAccelerationStructureBuildSizesKHR>(vkGetDeviceProcAddr(device, "vkGetAccelerationStructureBuildSizesKHR"));
+
+// static PFN_vkGetDeviceFaultInfoEXT pfn_vkGetDeviceFaultInfoEXT = 0;

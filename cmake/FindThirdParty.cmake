@@ -10,7 +10,7 @@ if (NOT glfw3_FOUND)
 ENDIF ()
 find_package(glm QUIET)
 IF (NOT glm_FOUND)
-    include_directories(${CMAKE_CURRENT_LIST_DIR}/../thirdParty/glm)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../thirdParty/glm)
 ENDIF ()
 
 find_package(assimp QUIET)

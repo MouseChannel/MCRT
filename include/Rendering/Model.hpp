@@ -2,7 +2,7 @@
 #include "Rendering/Material.hpp"
 #include "glm/glm.hpp"
 #include "Shader/Data_struct.h"
-#include <assimp/mesh.h>
+// #include <assimp/mesh.h>
 #include <memory>
 #include <string_view>
 #include <vulkan/vulkan.hpp>
@@ -48,7 +48,7 @@ public:
                1,
                0 } });
 
-    Mesh(aiMesh* mesh);
+    // Mesh(aiMesh* mesh);
     [[nodiscard]] auto get_vertex_buffer()
     {
         return vertexs_buffer;

@@ -792,8 +792,13 @@ Image::~Image()
     auto& device = Get_Context_Singleton()
                        ->get_device()
                        ->get_handle();
+
     for (auto i : m_image_views)
+
+    {
+        std::cout<<"delete"<<i<<std::endl;
         device.destroyImageView(i);
+    }
     if (memory) {
 
         device.freeMemory(memory);

@@ -60,6 +60,8 @@ void IBLManager::Init(std::string path)
     }
     
     auto pixel = stbi_loadf(path.c_str(), &width, &height, &channel, STBI_rgb_alpha);
+    // auto pixel = stbi_load(path.c_str(), &width, &height, &channel, STBI_rgb_alpha);
+
     auto sizes = width * height * STBI_rgb_alpha * sizeof(float);
 
     // for(auto i:pixel){}
@@ -67,6 +69,7 @@ void IBLManager::Init(std::string path)
         m_hdr_img.reset(new Image(width,
                                   height,
                                   vk::Format::eR32G32B32A32Sfloat,
+                                  // vk::Format::eR8G8B8A8Snorm,
 
                                   vk::ImageType::e2D,
                                   vk::ImageTiling::eOptimal,
@@ -92,7 +95,9 @@ void IBLManager::Init(std::string path)
     {
         m_skybox_img.reset(new Image(skybox_size,
                                      skybox_size,
-                                     vk::Format::eR32G32B32A32Sfloat,
+                                     // vk::Format::eR32G32B32A32Sfloat,
+                                     vk::Format::eR8G8B8A8Snorm,
+
                                      vk::ImageType::e2D,
                                      vk::ImageTiling::eOptimal,
                                      vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst,

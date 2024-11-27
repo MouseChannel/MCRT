@@ -212,25 +212,38 @@ std::vector<std::shared_ptr<Image>> Texture::get_image_handles()
         image_handles.emplace_back(i->image);
     }
 
-    // // add white textures
-    // std::shared_ptr<Image> white_image {
-    //     new Image(1,
-    //               1,
-    //               vk::Format::eR8G8B8A8Unorm,
-    //               vk::ImageType::e2D,
-    //               vk::ImageTiling::eOptimal,
-    //               vk::ImageUsageFlagBits::eSampled,
-    //               vk::ImageAspectFlagBits::eColor,
-    //               vk::SampleCountFlagBits::e8)
-    // };
-    // white_image->SetImageLayout(
-    //     vk::ImageLayout::eShaderReadOnlyOptimal,
-    //     vk::AccessFlagBits::eNone,
-    //     vk::AccessFlagBits::eShaderRead,
-    //     vk::PipelineStageFlagBits::eTopOfPipe,
-    //     vk::PipelineStageFlagBits::eFragmentShader);
-    // // | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
-    // image_handles.push_back(white_image);
+
+
+   //  white_image.reset(
+   // new Image(1,
+   //           1,
+   //           vk::Format::eR8G8B8A8Unorm,
+   //           vk::ImageType::e2D,
+   //           vk::ImageTiling::eOptimal,
+   //           vk::ImageUsageFlagBits::eSampled,
+   //           vk::ImageAspectFlagBits::eColor,
+   //           vk::SampleCountFlagBits::e1));
+
+
+
+    // add white textures
+   static  auto white_image = std::make_shared<Image>(1,
+    1,
+    vk::Format::eR8G8B8A8Unorm,
+    vk::ImageType::e2D,
+    vk::ImageTiling::eOptimal,
+    vk::ImageUsageFlagBits::eSampled,
+    vk::ImageAspectFlagBits::eColor,
+    vk::SampleCountFlagBits::e1);
+
+    white_image->SetImageLayout(
+        vk::ImageLayout::eShaderReadOnlyOptimal,
+        vk::AccessFlagBits::eNone,
+        vk::AccessFlagBits::eShaderRead,
+        vk::PipelineStageFlagBits::eTopOfPipe,
+        vk::PipelineStageFlagBits::eFragmentShader);
+    // | vk::PipelineStageFlagBits::eRayTracingShaderKHR);
+    image_handles.push_back(white_image);
     return image_handles;
 }
 }

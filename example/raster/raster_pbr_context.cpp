@@ -73,7 +73,12 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
 
     auto skybox_mesh = GLTF_Loader::load_skybox("assets/skybox.gltf");
 
-    Mesh::LoadFromFile("assets/pbr/korean_fire_extinguisher_01_4k/korean_fire_extinguisher_01_4k.gltf");
+    // Mesh::LoadFromFile("assets/pbr/korean_fire_extinguisher_01_4k/korean_fire_extinguisher_01_4k.gltf");
+    // GLTF_Loader::load_model("assets/pbr/korean_fire_extinguisher_01_4k/korean_fire_extinguisher_01_4k.gltf");
+
+    // Mesh::LoadFromFile("C:/Users/moche/Pictures/new/untitled.gltf");
+    GLTF_Loader::load_model("assets/korean_fire_extinguisher_01_4k.glb");
+
     IBLManager::Get_Singleton()->Init("assets/Cubemap/rainforest_trail_4k.hdr");
 
     PASS.resize(1);

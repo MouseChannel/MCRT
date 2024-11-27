@@ -149,7 +149,7 @@ void copy_data(std::vector<T>& data, const std::vector<unsigned char>& src, tiny
     std::memcpy(data.data(), src.data() + buffer_view.byteOffset, count * sizeof(T));
 }
 
-int handle_texture(tinygltf::Model model, tinygltf::TextureInfo texture_info, bool linear = false)
+int handle_texture(tinygltf::Model model, tinygltf::TextureInfo texture_info,  vk::Format format)
 {
 
     if (texture_info.index < 0)
@@ -164,6 +164,26 @@ int handle_texture(tinygltf::Model model, tinygltf::TextureInfo texture_info, bo
         return -1;
     // texture_lock.lock();
     Texture::textures.emplace_back(new Texture(image.image.data(), image.width, image.height, image.image.size(), vk::Format::eR8G8B8A8Unorm));
+    int index = Texture::textures.size() - 1;
+    // texture_lock.unlock();
+    return index;
+}
+
+int handle_texture(tinygltf::Model model,int texture_index,  vk::Format format)
+{
+
+    if (texture_index < 0)
+        return -1;
+
+    auto texture = model.textures[texture_index];
+    if (texture.source < 0)
+        return -1;
+    auto image = model.images[texture.source];
+    // texture
+    if (image.image.size() < 0)
+        return -1;
+    // texture_lock.lock();
+    Texture::textures.emplace_back(new Texture(image.image.data(), image.width, image.height, image.image.size(), format));
     int index = Texture::textures.size() - 1;
     // texture_lock.unlock();
     return index;
@@ -306,7 +326,7 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
             positions.begin(),
             positions.end(),
             [](glm::vec3& i) {
-                i.y = -i.y;
+                // i.y = -i.y;
             });
         // std::for_each(std::execution::par,
         //               positions.begin(),
@@ -372,7 +392,7 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
             vertexs.emplace_back(Vertex {
                 .pos = positions[indexs[i + j]],
                 .nrm = normals[indexs[i + j]],
-                .texCoord = texcoord.empty() ? glm::vec2 { 0 } : texcoord[indexs[i + j]],
+                .texCoord = texcoord.empty() ? glm::vec2 { 0 } :  texcoord[indexs[i + j]] ,
                 .tangent = tangents.empty() ? glm::vec3 { 0 } : tangents[indexs[i + j]],
                 .bitangent = tangents.empty() ? glm::vec4 { 0 } : glm::cross(normals[indexs[i + j]], glm::vec3(tangents[indexs[i + j]]) * tangents[indexs[i + j]].w)
 
@@ -405,9 +425,9 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
                 material.emissiveFactor[1],
                 material.emissiveFactor[2],
                 1 },
-            .color_texture_index = handle_texture(model, material.pbrMetallicRoughness.baseColorTexture, false),
-            .normal_texture_index = handle_texture(model, material.normalTexture, true),
-            .metallicness_roughness_texture_index = handle_texture(model, material.pbrMetallicRoughness.metallicRoughnessTexture, true)
+            .color_texture_index = handle_texture(model, material.pbrMetallicRoughness.baseColorTexture.index, vk::Format::eR8G8B8A8Srgb),
+            .normal_texture_index = handle_texture(model, material.normalTexture.index, vk::Format::eR8G8B8A8Unorm),
+            .metallicness_roughness_texture_index = handle_texture(model, material.pbrMetallicRoughness.metallicRoughnessTexture.index, vk::Format::eR8G8B8A8Unorm)
         };
 
         // std::cout << material.emissiveFactor[0] << std::endl;

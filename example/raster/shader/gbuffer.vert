@@ -34,7 +34,7 @@ void main()
 
     out_pos = vec3(in_pos);
     out_nrm = vec3(in_nrm);
-    out_texCoord = vec2(in_texCoord.x, 1 - in_texCoord.y);
+    out_texCoord = vec2(in_texCoord.x, in_texCoord.y);
 
     out_tangentMatrix = mat3(in_tangent, in_bitangent, in_nrm);
     gl_Position = camera_matrix.project * camera_matrix.view * vec4(in_pos, 1.);

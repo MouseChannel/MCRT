@@ -39,7 +39,7 @@ target_include_directories(MCRT PUBLIC ${MCRT_INCLUDE_DIR})
 
 
 
-target_link_libraries(MCRT PUBLIC glfw  Vulkan::Vulkan assimp::assimp glm::glm VulkanMemoryAllocator)
+target_link_libraries(MCRT PUBLIC glfw  Vulkan::Vulkan  glm::glm VulkanMemoryAllocator)
 
 
 

@@ -65,6 +65,56 @@ Graphic_Pipeline::Graphic_Pipeline(std::shared_ptr<RenderPass> render_pass,
     
     Build_Pipeline(render_pass);
 }
+
+Graphic_Pipeline::Graphic_Pipeline(std::shared_ptr<RenderPass> render_pass,
+                                   std::string vertShaderstr,
+                                   std::string fragShaderstr,
+                                   vk::CullModeFlagBits cullMode,
+                                   vk::PipelineDepthStencilStateCreateInfo depth_stencil_state,
+                                   vk::SampleCountFlagBits sampleCount,
+                                   int subpassIndex,
+                                   std::initializer_list<std::shared_ptr<DescriptorSet>> descriptorSets,
+                                   int pc_size,
+                                   vk::ShaderStageFlags push_stage,
+                                   int attachCount,
+                                   vk::PipelineColorBlendAttachmentState blendState)
+{
+
+    m_vertexShader = std::make_shared<ShaderModule>(vertShaderstr);
+    m_fragShader = std::make_shared<ShaderModule>(fragShaderstr);
+    shader_stage.resize(2);
+    shader_stage[0]
+        .setPName("main")
+        .setStage(vk::ShaderStageFlagBits::eVertex)
+        .setModule(m_vertexShader->get_handle());
+    shader_stage[1]
+        .setPName("main")
+        .setStage(vk::ShaderStageFlagBits::eFragment)
+        .setModule(m_fragShader->get_handle());
+
+    auto binds = Vertex::make_bind();
+    auto attrs = Vertex::make_attr();
+    Make_VertexInput(binds, attrs);
+    Make_VertexAssembly();
+    Make_viewPort();
+    Make_MultiSample(sampleCount);
+    Make_Resterization(cullMode);
+    Make_Subpass_index(subpassIndex);
+    depth_test = depth_stencil_state;
+    // Make_DepthTest(depthTest, depthWrite);
+
+
+    for (int i = 0; i < attachCount; i++) {
+
+        attachs.push_back(blendState);
+    }
+
+
+    Make_Blend();
+    Make_Layout(descriptorSets, pc_size, push_stage);
+
+    Build_Pipeline(render_pass);
+}
  
 void Graphic_Pipeline::Build_Pipeline(std::shared_ptr<RenderPass> render_pass)
 {
@@ -193,6 +243,8 @@ void Graphic_Pipeline::Make_DepthTest(bool enable_test, bool enable_write)
 {
     depth_test.setDepthTestEnable(enable_test)
         .setDepthWriteEnable(enable_write);
+    vk::StencilOpState stencil_op_state;
+
     if (enable_test)
         depth_test.setDepthCompareOp(vk::CompareOp::eLessOrEqual);
 }

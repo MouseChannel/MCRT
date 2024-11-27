@@ -22,19 +22,10 @@ layout(set = main_set, binding = e_skybox) uniform samplerCube specularTexture;
 layout(set = main_set, binding = e_irradiance_image) uniform samplerCube irradianceTexture;
 layout(set = main_set, binding = e_LUT_image) uniform sampler2D specularBRDF_LUT;
 
-// layout(set = input_set, input_attachment_index = e_gbuffer_albedo_renderTarget, binding = e_gbuffer_albedo_renderTarget) uniform subpassInput in_albedo;
-// layout(set = input_set, input_attachment_index = e_gbuffer_pos_renderTarget, binding = e_gbuffer_pos_renderTarget) uniform subpassInput in_pos;
-// layout(set = input_set, input_attachment_index = e_gbuffer_normal_renderTarget, binding = e_gbuffer_normal_renderTarget) uniform subpassInput in_nrm;
-// layout(set = input_set, input_attachment_index = e_gbuffer_arm_renderTarget, binding = e_gbuffer_arm_renderTarget) uniform subpassInput in_arm;
-
 layout(set = input_set, input_attachment_index = 0, binding = e_gbuffer_albedo_renderTarget) uniform subpassInput in_albedo;
 layout(set = input_set, input_attachment_index = 1, binding = e_gbuffer_pos_renderTarget) uniform subpassInput in_pos;
 layout(set = input_set, input_attachment_index = 2, binding = e_gbuffer_normal_renderTarget) uniform subpassInput in_nrm;
 layout(set = input_set, input_attachment_index = 3, binding = e_gbuffer_arm_renderTarget) uniform subpassInput in_arm;
-
-// layout(set = input_set, input_attachment_index = e_gbuffer_tangentMatrix0_renderTarget, binding = e_gbuffer_tangentMatrix0_renderTarget) uniform subpassInput in_tangentMatrix0;
-// layout(set = input_set, input_attachment_index = e_gbuffer_tangentMatrix1_renderTarget, binding = e_gbuffer_tangentMatrix1_renderTarget) uniform subpassInput in_tangentMatrix1;
-// layout(set = input_set, input_attachment_index = e_gbuffer_tangentMatrix2_renderTarget, binding = e_gbuffer_tangentMatrix2_renderTarget) uniform subpassInput in_tangentMatrix2;
 
 layout(std430, push_constant) uniform _PushContant
 {
@@ -46,37 +37,14 @@ layout(set = main_set, binding = e_camera_matrix) uniform _Camera_matrix
     Camera_matrix camera_matrix;
 };
 
-// void decode(uvec4 out_tangentMatrix, inout mat3 in_tangentMatrix)
-// {
-//     float target = uintBitsToFloat(out_tangentMatrix[0]);
-//         in_tangentMatrix[0][0] = uintBitsToFloat(in_tangentMatrix[0][0]);
-//     r << 8;
-//     r += floatBitsToUint(in_tangentMatrix[0][1]);
-//     r << 8;
-//     r += floatBitsToUint(in_tangentMatrix[0][2]);
-
-//     uint g = floatBitsToUint(in_tangentMatrix[1][0]);
-//     g << 8;
-//     g += floatBitsToUint(in_tangentMatrix[1][1]);
-//     g << 8;
-//     g += floatBitsToUint(in_tangentMatrix[1][2]);
-
-//     uint b = floatBitsToUint(in_tangentMatrix[2][0]);
-//     b << 8;
-//     b += floatBitsToUint(in_tangentMatrix[2][1]);
-//     b << 8;
-//     b += floatBitsToUint(in_tangentMatrix[2][2]);
-//     out_tangentMatrix = uvec4(r, g, b, 1);
-// }
-
 void main()
 {
     //     color = vec4(1, 1, 0, 1);
 
     vec3 pos = subpassLoad(in_pos).xyz;
-    if (pos.x == 0.f) {
-        discard;
-    }
+//    if (pos.x == 0.f) {
+//        discard;
+//    }
     
     vec3 N = subpassLoad(in_nrm).xyz;
     // N = normalize(2.0 * N - 1);

@@ -5,26 +5,7 @@
 // #include "Wrapper/RenderPass.hpp"
 #include "Wrapper/Pipeline/Pipeline_base.hpp"
 
-namespace vk {
-struct OpacityBlendAttachmentState : PipelineColorBlendAttachmentState {
 
-    OpacityBlendAttachmentState()
-    {
-        setBlendEnable(false)
-            .setColorWriteMask(
-                vk::ColorComponentFlagBits::eA |
-                vk::ColorComponentFlagBits::eB |
-                vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eR)
-            .setColorBlendOp(vk::BlendOp::eAdd)
-            .setSrcColorBlendFactor(vk::BlendFactor::eZero)
-            .setDstColorBlendFactor(vk::BlendFactor::eZero)
-            .setSrcAlphaBlendFactor(vk::BlendFactor::eZero)
-            .setDstAlphaBlendFactor(vk::BlendFactor::eZero)
-
-            .setAlphaBlendOp(vk::BlendOp::eAdd);
-    }
-};
-}
 namespace MCRT {
 class ShaderModule;
 class DescriptorSet;
@@ -39,6 +20,20 @@ public:
                      vk::CullModeFlagBits cullMode,
                      bool depthTest,
                      bool depthWrite,
+                     vk::SampleCountFlagBits sampleCount,
+                     int subpassIndex,
+                     std::initializer_list<std::shared_ptr<DescriptorSet>> descriptorSets,
+                     int pc_size,
+                     vk::ShaderStageFlags push_stage,
+                     int attachCount,
+                     vk::PipelineColorBlendAttachmentState blendState
+
+    );
+    Graphic_Pipeline(std::shared_ptr<RenderPass> render_pass,
+                     std::string vertShaderstr,
+                     std::string fragShaderstr,
+                     vk::CullModeFlagBits cullMode,
+                     vk::PipelineDepthStencilStateCreateInfo depth_stencil_state,
                      vk::SampleCountFlagBits sampleCount,
                      int subpassIndex,
                      std::initializer_list<std::shared_ptr<DescriptorSet>> descriptorSets,

@@ -11,8 +11,8 @@
 #include "Rendering/Model.hpp"
 #include "Wrapper/CommandBuffer.hpp"
 #include "Wrapper/Ray_Tracing/AS_Builder.hpp"
-#include <memory>
 #include "Wrapper/Texture.hpp"
+#include <memory>
 
 #include "Shader/PBR/IBL/binding.h"
 
@@ -28,9 +28,9 @@
 #include "Wrapper/GraphicPass/UiPass.hpp"
 #include "Wrapper/Pipeline/Graphic_Pipeline.hpp"
 #include <Helper/Model_Loader/ImageWriter.hpp>
-
+// #include <vulkan/vulkan.hpp>
 namespace MCRT {
-std::unique_ptr<Context> Context::_instance{ new MCRT::raster_context_pbr };
+std::unique_ptr<Context> Context::_instance { new MCRT::raster_context_pbr };
 float raster_context_pbr::light_pos_x = 0, raster_context_pbr::light_pos_y = 0, raster_context_pbr::light_pos_z = 5, raster_context_pbr::gamma = 2.2f;
 bool raster_context_pbr::use_normal_map = false, raster_context_pbr::use_r_rm_map = false, raster_context_pbr::use_ao = false;
 int irradiance_size = 512;
@@ -59,6 +59,61 @@ enum PIPELINE {
     PipelineCount
 };
 
+struct OpacityBlendAttachmentState : vk::PipelineColorBlendAttachmentState {
+
+    OpacityBlendAttachmentState()
+    {
+        setBlendEnable(false)
+            .setColorWriteMask(
+                vk::ColorComponentFlagBits::eA |
+                vk::ColorComponentFlagBits::eB |
+                vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eR)
+            .setColorBlendOp(vk::BlendOp::eAdd)
+            .setSrcColorBlendFactor(vk::BlendFactor::eZero)
+            .setDstColorBlendFactor(vk::BlendFactor::eZero)
+            .setSrcAlphaBlendFactor(vk::BlendFactor::eZero)
+            .setDstAlphaBlendFactor(vk::BlendFactor::eZero)
+            .setAlphaBlendOp(vk::BlendOp::eAdd);
+    }
+};
+
+struct GBufferDepthStencilState : vk::PipelineDepthStencilStateCreateInfo {
+    GBufferDepthStencilState()
+    {
+        setDepthTestEnable(true)
+            .setDepthWriteEnable(true)
+            .setDepthCompareOp(vk::CompareOp::eLessOrEqual);
+        setStencilTestEnable(true)
+            .setBack(vk::StencilOpState()
+                         .setReference(1)
+                         .setCompareOp(vk::CompareOp::eAlways)
+                         .setPassOp(vk::StencilOp::eReplace)
+                         .setDepthFailOp(vk::StencilOp::eReplace)
+                         .setFailOp(vk::StencilOp::eReplace)
+                         .setWriteMask(0xff)
+                         .setCompareMask(0xff))
+            .setFront(back);
+    }
+};
+struct PBRComposeDepthStencilState : vk::PipelineDepthStencilStateCreateInfo {
+    PBRComposeDepthStencilState()
+    {
+        setDepthTestEnable(false)
+            .setDepthWriteEnable(false);
+        setStencilTestEnable(true)
+            .setBack(vk::StencilOpState()
+                         .setReference(1)
+                         .setCompareOp(vk::CompareOp::eEqual)
+                         .setPassOp(vk::StencilOp::eKeep)
+                         .setDepthFailOp(vk::StencilOp::eKeep)
+                         .setFailOp(vk::StencilOp::eKeep)
+                         .setWriteMask(0xff)
+                         .setCompareMask(0xff))
+            .setFront(back);
+        ;
+    }
+};
+
 raster_context_pbr::raster_context_pbr()
 {
 }
@@ -77,14 +132,14 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
     // GLTF_Loader::load_model("assets/pbr/korean_fire_extinguisher_01_4k/korean_fire_extinguisher_01_4k.gltf");
 
     // Mesh::LoadFromFile("C:/Users/moche/Pictures/new/untitled.gltf");
-    GLTF_Loader::load_model("assets/korean_fire_extinguisher_01_4k.glb");
+    GLTF_Loader::load_model("assets/pbr/korean_fire_extinguisher_01_4k.glb");
 
     IBLManager::Get_Singleton()->Init("assets/Cubemap/rainforest_trail_4k.hdr");
 
     PASS.resize(1);
 
     {
-        PASS[Pass_index::Graphic] = std::shared_ptr<GraphicContext>{ new GraphicContext(m_device) };
+        PASS[Pass_index::Graphic] = std::shared_ptr<GraphicContext> { new GraphicContext(m_device) };
 
         auto graphic_context = std::reinterpret_pointer_cast<GraphicContext>(PASS[Graphic]);
         if (graphic_context == nullptr) {
@@ -173,7 +228,6 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                         graphic_context->descriptorSetPools[MAIN].reset(new DescriptorPool({ graphic_context->descriptorSets[MAIN] }, graphic_context->get_frame_count()));
                         graphic_context->descriptorSets[MAIN]->build(graphic_context->descriptorSetPools[MAIN], graphic_context->get_frame_count());
                         // graphic_context->descriptorSets[MAIN]->build(graphic_context->descriptorSetPools[MAIN], 1);
-
                     }
 
                     auto gbufferPass = graphic_context->graphicPass[eGbufferPass];
@@ -211,43 +265,43 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                 }
                 {
                     graphic_context->AddSubPassDependency(vk::SubpassDependency()
-                                                          .setSrcSubpass(VK_SUBPASS_EXTERNAL)
-                                                          .setDstSubpass(eGbufferPass)
-                                                          .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-                                                          .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
-                                                          .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-                                                          .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite));
+                                                              .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+                                                              .setDstSubpass(eGbufferPass)
+                                                              .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                                                              .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+                                                              .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                                                              .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite));
                     graphic_context->AddSubPassDependency(vk::SubpassDependency()
-                                                          .setSrcSubpass(VK_SUBPASS_EXTERNAL)
-                                                          .setDstSubpass(eGbufferPass)
-                                                          .setSrcStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests)
-                                                          .setSrcAccessMask(vk::AccessFlagBits::eNone)
-                                                          .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests)
-                                                          .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite));
+                                                              .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+                                                              .setDstSubpass(eGbufferPass)
+                                                              .setSrcStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests)
+                                                              .setSrcAccessMask(vk::AccessFlagBits::eNone)
+                                                              .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests)
+                                                              .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite));
                     graphic_context->AddSubPassDependency(vk::SubpassDependency()
-                                                          .setSrcSubpass(eGbufferPass)
-                                                          .setDstSubpass(eOpacityPass)
-                                                          .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-                                                          .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+                                                              .setSrcSubpass(eGbufferPass)
+                                                              .setDstSubpass(eOpacityPass)
+                                                              .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                                                              .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
 
-                                                          .setDstStageMask(vk::PipelineStageFlagBits::eFragmentShader)
-                                                          .setDstAccessMask(vk::AccessFlagBits::eInputAttachmentRead)
-                                                          .setDependencyFlags(vk::DependencyFlagBits::eByRegion));
+                                                              .setDstStageMask(vk::PipelineStageFlagBits::eFragmentShader)
+                                                              .setDstAccessMask(vk::AccessFlagBits::eInputAttachmentRead)
+                                                              .setDependencyFlags(vk::DependencyFlagBits::eByRegion));
                     graphic_context->AddSubPassDependency(vk::SubpassDependency()
-                                                          .setSrcSubpass(eOpacityPass)
-                                                          .setDstSubpass(eToneMapPass)
-                                                          .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-                                                          .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
-                                                          .setDstStageMask(vk::PipelineStageFlagBits::eFragmentShader)
-                                                          .setDstAccessMask(vk::AccessFlagBits::eInputAttachmentRead));
+                                                              .setSrcSubpass(eOpacityPass)
+                                                              .setDstSubpass(eToneMapPass)
+                                                              .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                                                              .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+                                                              .setDstStageMask(vk::PipelineStageFlagBits::eFragmentShader)
+                                                              .setDstAccessMask(vk::AccessFlagBits::eInputAttachmentRead));
 
                     graphic_context->AddSubPassDependency(vk::SubpassDependency()
-                                                          .setSrcSubpass(eUIPass - 1)
-                                                          .setDstSubpass(eUIPass)
-                                                          .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-                                                          .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
-                                                          .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-                                                          .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite));
+                                                              .setSrcSubpass(eUIPass - 1)
+                                                              .setDstSubpass(eUIPass)
+                                                              .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                                                              .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+                                                              .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                                                              .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite));
                 }
             }
         }
@@ -271,43 +325,50 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                                                                                      "example/raster/shader/skybox.vert.spv",
                                                                                      "example/raster/shader/skybox.frag.spv",
                                                                                      vk::CullModeFlagBits::eNone,
-                                                                                     false,
-                                                                                     false,
+                                                                                     vk::PipelineDepthStencilStateCreateInfo()
+                                                                                         .setDepthTestEnable(false)
+                                                                                         .setDepthWriteEnable(false)
+                                                                                         .setStencilTestEnable(false),
                                                                                      vk::SampleCountFlagBits::e1,
                                                                                      gbufferPass->get_subpass_index(),
                                                                                      { descriptorSets[MAIN] },
                                                                                      sizeof(PC_Raster),
                                                                                      vk::ShaderStageFlagBits::eFragment,
                                                                                      gbufferPass->color_references.size(),
-                                                                                     vk::OpacityBlendAttachmentState()));
+                                                                                     vk::PipelineColorBlendAttachmentState()
+                                                                                         .setBlendEnable(false)
+                                                                                         .setColorWriteMask(
+                                                                                             vk::ColorComponentFlagBits::eR |
+                                                                                             vk::ColorComponentFlagBits::eG |
+                                                                                             vk::ColorComponentFlagBits::eB |
+                                                                                             vk::ColorComponentFlagBits::eA)));
+            // OpacityBlendAttachmentState()));
 
             graphic_context->m_pipelines[eGbufferPipeline]
                 .reset(new Graphic_Pipeline(renderPass,
                                             "example/raster/shader/gbuffer.vert.spv",
                                             "example/raster/shader/gbuffer.frag.spv",
                                             vk::CullModeFlagBits::eBack,
-                                            true,
-                                            true,
+                                            GBufferDepthStencilState(),
                                             vk::SampleCountFlagBits::e1,
                                             gbufferPass->get_subpass_index(),
                                             { descriptorSets[MAIN], descriptorSets[INPUT] },
                                             sizeof(PC_Raster),
                                             vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex,
                                             gbufferPass->color_references.size(),
-                                            vk::OpacityBlendAttachmentState()));
+                                            OpacityBlendAttachmentState()));
             graphic_context->m_pipelines[eOpacityPipeline].reset(new Graphic_Pipeline(renderPass,
                                                                                       "example/raster/shader/tonemap.vert.spv",
                                                                                       "example/raster/shader/pbrfs.frag.spv",
                                                                                       vk::CullModeFlagBits::eNone,
-                                                                                      false,
-                                                                                      false,
+                                                                                      PBRComposeDepthStencilState(),
                                                                                       vk::SampleCountFlagBits::e1,
                                                                                       opacityPass->get_subpass_index(),
                                                                                       { descriptorSets[MAIN], descriptorSets[INPUT] },
                                                                                       sizeof(PC_Raster),
                                                                                       vk::ShaderStageFlagBits::eFragment,
                                                                                       opacityPass->color_references.size(),
-                                                                                      vk::OpacityBlendAttachmentState()));
+                                                                                      OpacityBlendAttachmentState()));
             graphic_context->m_pipelines[eToneMapPipeline].reset(new Graphic_Pipeline(renderPass,
                                                                                       "example/raster/shader/tonemap.vert.spv",
                                                                                       "example/raster/shader/tonemap.frag.spv",
@@ -320,7 +381,7 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                                                                                       sizeof(PC_Raster),
                                                                                       vk::ShaderStageFlagBits::eFragment,
                                                                                       toneMapPass->color_references.size(),
-                                                                                      vk::OpacityBlendAttachmentState()));
+                                                                                      OpacityBlendAttachmentState()));
         }
     }
 }
@@ -345,11 +406,11 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
 
         command->get_handle().updateBuffer<Camera_matrix>(camera_matrix->buffer->get_handle(),
                                                           0,
-                                                          Camera_matrix{
-                                                              .view{ m_camera->Get_v_matrix() },
-                                                              .project{ m_camera->Get_p_matrix() },
+                                                          Camera_matrix {
+                                                              .view { m_camera->Get_v_matrix() },
+                                                              .project { m_camera->Get_p_matrix() },
 
-                                                              .camera_pos{
+                                                              .camera_pos {
                                                                   m_camera->get_pos() } });
     }
 
@@ -364,18 +425,18 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
         {
             cmd.setViewport(0,
                             vk::Viewport()
-                            .setHeight(extent2d.height)
-                            .setWidth(extent2d.width)
-                            .setMinDepth(0)
-                            .setMaxDepth(1)
-                            .setX(0)
-                            .setY(0));
+                                .setHeight(extent2d.height)
+                                .setWidth(extent2d.width)
+                                .setMinDepth(0)
+                                .setMaxDepth(1)
+                                .setX(0)
+                                .setY(0));
             cmd.setScissor(0,
                            vk::Rect2D()
-                           .setExtent(extent2d)
-                           .setOffset(vk::Offset2D()
-                                      .setX(0)
-                                      .setY(0)));
+                               .setExtent(extent2d)
+                               .setOffset(vk::Offset2D()
+                                              .setX(0)
+                                              .setY(0)));
             {
 
                 cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, pipelines[eSkyboxPipeline]->get_handle());
@@ -402,11 +463,10 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                 vk::PipelineBindPoint::eGraphics,
                 pipelines[eGbufferPipeline]->get_layout(),
                 0,
-                {
-                    graphic_context->descriptorSets[MAIN]->get_handle()[graphic_context->get_cur_index_in_swapchain()],
-                    // graphic_context->descriptorSets[MAIN]->get_handle()[0],
+                { graphic_context->descriptorSets[MAIN]->get_handle()[graphic_context->get_cur_index_in_swapchain()],
+                  // graphic_context->descriptorSets[MAIN]->get_handle()[0],
 
-                    graphic_context->descriptorSets[INPUT]->get_handle()[graphic_context->get_cur_index_in_swapchain()] },
+                  graphic_context->descriptorSets[INPUT]->get_handle()[graphic_context->get_cur_index_in_swapchain()] },
                 {});
 
             for (auto mesh : Mesh::all_meshs) {
@@ -415,7 +475,7 @@ std::shared_ptr<CommandBuffer> raster_context_pbr::BeginGraphicFrame()
                 cmd.pushConstants<PC_Raster>(pipelines[eGbufferPipeline]->get_layout(),
                                              vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex,
                                              0,
-                                             PC_Raster{
+                                             PC_Raster {
                                                  .color_texture_index = mesh->m_material.color_texture_index,
                                                  .metallicness_roughness_texture_index = mesh->m_material.metallicness_roughness_texture_index,
                                                  .normal_texture_index = mesh->m_material.normal_texture_index });

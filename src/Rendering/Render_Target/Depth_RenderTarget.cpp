@@ -30,7 +30,7 @@ void Depth_RenderTarget::recreate(int index)
 Depth_RenderTarget::Depth_RenderTarget()
 {
     auto depth_format = Context::Get_Singleton()->get_device()->Get_supported_format(
-        { vk::Format::eD32Sfloat,
+        {
           vk::Format::eD32SfloatS8Uint,
           vk::Format::eD24UnormS8Uint },
         vk::ImageTiling::eOptimal,
@@ -40,7 +40,7 @@ Depth_RenderTarget::Depth_RenderTarget()
         .setSamples(vk::SampleCountFlagBits::e1)
         .setLoadOp(vk::AttachmentLoadOp ::eClear)
         .setStoreOp(vk::AttachmentStoreOp ::eDontCare)
-        .setStencilLoadOp(vk::AttachmentLoadOp ::eDontCare)
+        .setStencilLoadOp(vk::AttachmentLoadOp ::eClear)
         .setStencilStoreOp(vk::AttachmentStoreOp ::eDontCare)
         .setInitialLayout(vk::ImageLayout ::eUndefined)
         .setFinalLayout(vk::ImageLayout ::eDepthStencilAttachmentOptimal);
@@ -54,7 +54,7 @@ Depth_RenderTarget::Depth_RenderTarget()
         vk::ImageUsageFlagBits::eDepthStencilAttachment,
         vk::ImageAspectFlagBits::eDepth,
         vk::SampleCountFlagBits::e1));
-    clear_color.depthStencil.setDepth(1.f);
+    clear_color.depthStencil.setDepth(1.f).setStencil(0);
 }
  
 }

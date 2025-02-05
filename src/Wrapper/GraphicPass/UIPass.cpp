@@ -60,7 +60,7 @@ void UIPass::Init()
     init_info.PipelineCache = VK_NULL_HANDLE;
     init_info.DescriptorPool = VkDescriptorPool(descriptor_pool);
     init_info.Subpass = get_subpass_index();
-    init_info.MinImageCount = 2;
+    init_info.MinImageCount = context->get_swapchain()->Get_Swapchain_Image_size();
     init_info.ImageCount = context->get_swapchain()->Get_Swapchain_Image_size();
     init_info.MSAASamples = (VkSampleCountFlagBits)vk::SampleCountFlagBits::e1;
     // (VkSampleCountFlagBits)context->get_device()->Get_sampler_count();

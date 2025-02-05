@@ -10,7 +10,7 @@ SwapChainTarget::SwapChainTarget(std::shared_ptr<Image> swapchain_img)
 
     attachment_description.setFormat(format)
         .setSamples(vk::SampleCountFlagBits::e1)
-        .setLoadOp(vk::AttachmentLoadOp ::eDontCare)
+        .setLoadOp(vk::AttachmentLoadOp ::eClear)
         .setStoreOp(vk::AttachmentStoreOp ::eStore)
         .setStencilLoadOp(vk::AttachmentLoadOp ::eDontCare)
         .setStencilStoreOp(vk::AttachmentStoreOp ::eDontCare)

@@ -56,6 +56,10 @@ public:
     {
         return surfaceInfo.format.format;
     }
+    auto get_present_mode()
+    {
+        return present_mode;
+    }
     // [[nodiscard("Missing Images")]] auto Get_Swapchain_Images()
     // {
     //     return images;
@@ -78,6 +82,7 @@ private:
     //    std::vector<std::shared_ptr<Framebuffer>> framebuffers;
     vk::Extent2D Query_surface_Extent(const vk::SurfaceCapabilitiesKHR& capability, int windowWidth, int windowHeight);
     std::vector<vk::Image> swapchain_Image_handles;
+    vk::PresentModeKHR present_mode;
     void Query_info();
 };
 

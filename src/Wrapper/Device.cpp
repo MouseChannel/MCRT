@@ -126,6 +126,8 @@ Device::Device()
     std::cout << graphic_queue << std::endl;
     std::cout << present_queue << std::endl;
     std::cout << compute_queue << std::endl;
+
+    m_present_modes = physical_device.getSurfacePresentModesKHR(Context::Get_Singleton()->get_surface()->get_handle());
 }
 
 void Device::get_feature()

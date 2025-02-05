@@ -30,8 +30,19 @@ SwapChain::SwapChain()
 
     std::vector<uint32_t> queue_family_index_v;
     queue_family_index_v.assign(queue_family_index.begin(), queue_family_index.end());
+    auto present_modes = Get_Context_Singleton()
+                             ->get_device()
+                             ->get_present_mode();
     vk::SwapchainCreateInfoKHR createInfo;
-
+    present_mode = present_modes[0];
+    for (auto i : present_modes) {
+        if (i != vk::PresentModeKHR::eFifo)
+            present_mode = i;
+        if (i == vk::PresentModeKHR::eMailbox) {
+            present_mode = i;
+            break;
+        }
+    }
     createInfo.setClipped(true)
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
         .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eInherit)
@@ -46,8 +57,9 @@ SwapChain::SwapChain()
 
         .setMinImageCount(surfaceInfo.count)
         .setImageArrayLayers(1)
-        .setPresentMode(vk::PresentModeKHR::eMailbox)
+        // .setPresentMode(vk::PresentModeKHR::eMailbox)
         // .setPresentMode(vk::PresentModeKHR::eImmediate)
+        .setPresentMode(present_mode)
 
         .setPreTransform(surfaceInfo.transform)
         .setSurface(surface->get_handle())
@@ -86,7 +98,7 @@ void SwapChain::Query_info()
         std::clamp(capability.minImageCount + 1,
                    capability.minImageCount,
                    capability.maxImageCount);
-    surfaceInfo.count = capability.minImageCount + 1;
+    surfaceInfo.count = std::min(capability.minImageCount + 1,capability.maxImageCount);
     // todo
     // surfaceInfo.count = 3;
     surfaceInfo.transform = capability.currentTransform;

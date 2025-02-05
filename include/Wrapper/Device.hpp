@@ -61,7 +61,10 @@ public:
     {
         return queue_family_indices;
     }
-
+    auto get_present_mode()
+    {
+        return m_present_modes;
+    }
     auto get_deviceUUID()
     {
         return m_deviceUUID;
@@ -95,6 +98,8 @@ private:
     void get_feature();
 
     vk::PhysicalDevice physical_device;
+
+    std::vector<vk::PresentModeKHR> m_present_modes;
     vk::Queue graphic_queue;
     vk::Queue present_queue;
     vk::Queue compute_queue;

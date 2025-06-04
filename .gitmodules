@@ -5,6 +5,6 @@
 [submodule "thirdParty/glfw"]
 	path = thirdParty/glfw
 	url = https://github.com/glfw/glfw
-[submodule "thirdParty/VulkanMemoryAllocator"]
-	path = thirdParty/VulkanMemoryAllocator
-	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+[submodule "thirdParty/slang"]
+	path = thirdParty/slang
+	url = https://github.com/shader-slang/slang.git

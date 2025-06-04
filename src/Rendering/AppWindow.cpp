@@ -123,10 +123,10 @@ void Window::CreateWindowSurface()
 void Window::LoadIcon()
 {
     int width, height, channels;
-    uint8_t* icon = stbi_load("assets/icon.png", &width, &height, &channels, STBI_rgb_alpha);
+    uint8_t* icon = stbi_load("../assets/icon.png", &width, &height, &channels, STBI_rgb_alpha);
     if (icon) {
 
-        std::shared_ptr<GLFWimage> icon_p { new GLFWimage(width, height, icon) };
+        std::shared_ptr<GLFWimage> icon_p { new GLFWimage { width, height, icon } };
         glfwSetWindowIcon(m_window, 1, icon_p.get());
     }
 }

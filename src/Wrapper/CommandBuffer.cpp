@@ -23,7 +23,7 @@ CommandBuffer::~CommandBuffer()
 void CommandBuffer::Begin(vk::CommandBufferUsageFlags begin_flags)
 {
     vk::CommandBufferBeginInfo begin_info;
-    begin_info.setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse);
+    begin_info.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
     m_handle.begin(begin_info);
 }
 void CommandBuffer::End()

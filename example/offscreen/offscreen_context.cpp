@@ -63,7 +63,6 @@ void offscreen_context::prepare(std::shared_ptr<Window> window)
     };
     std::vector<uint32_t> faces { 0, 1, 2 };
     offscreen_mesh.reset(new Mesh("offscreen", vertexs, faces, {}));
- 
 
     PASS.resize(1);
 
@@ -95,7 +94,7 @@ void offscreen_context::prepare(std::shared_ptr<Window> window)
                 }
             }
 
-            target_texture.reset(new Texture("assets/icon.png"));
+            target_texture.reset(new Texture("../assets/icon.png"));
 
             {
                 graphic_context->descriptorSets[MAIN]->AddImageDescriptorTarget(target_texture->get_image(),
@@ -159,7 +158,6 @@ void offscreen_context::prepare(std::shared_ptr<Window> window)
                                                                                        graphic_context->graphicPass[eMainPass]->color_references.size(),
                                                                                        vk::OpacityBlendAttachmentState()));
             }
-            
         }
     }
 }
@@ -176,10 +174,10 @@ void offscreen_context::EndFrame()
 }
 
 std::shared_ptr<CommandBuffer> offscreen_context::BeginGraphicFrame()
-{ 
+{
     auto render_context = std::reinterpret_pointer_cast<GraphicContext>(PASS[Graphic]);
     std::shared_ptr<CommandBuffer> command = render_context->BeginFrame();
-    
+
     render_context->Begin_RenderPass(command);
     {
 
@@ -232,7 +230,7 @@ std::shared_ptr<CommandBuffer> offscreen_context::BeginGraphicFrame()
                     ImGui::Text("fps       : %7.3f", ImGui::GetIO().Framerate);
                 });
             }
-          
+
             return command;
         }
     }

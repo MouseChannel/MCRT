@@ -126,15 +126,11 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
 {
     raster_context::prepare(window);
 
-    auto skybox_mesh = GLTF_Loader::load_skybox("assets/skybox.gltf");
+    auto skybox_mesh = GLTF_Loader::load_skybox("../assets/skybox.gltf");
 
-    // Mesh::LoadFromFile("assets/pbr/korean_fire_extinguisher_01_4k/korean_fire_extinguisher_01_4k.gltf");
-    // GLTF_Loader::load_model("assets/pbr/korean_fire_extinguisher_01_4k/korean_fire_extinguisher_01_4k.gltf");
+    GLTF_Loader::load_model("../assets/pbr/korean_fire_extinguisher_01_4k.glb");
 
-    // Mesh::LoadFromFile("C:/Users/moche/Pictures/new/untitled.gltf");
-    GLTF_Loader::load_model("assets/pbr/korean_fire_extinguisher_01_4k.glb");
-
-    IBLManager::Get_Singleton()->Init("assets/Cubemap/rainforest_trail_4k.hdr");
+    IBLManager::Get_Singleton()->Init("../assets/Cubemap/rainforest_trail_4k.hdr");
 
     PASS.resize(1);
 
@@ -322,8 +318,8 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
             auto toneMapPass = graphic_context->graphicPass[eToneMapPass];
             auto& descriptorSets = graphic_context->descriptorSets;
             graphic_context->m_pipelines[eSkyboxPipeline].reset(new Graphic_Pipeline(renderPass,
-                                                                                     "example/raster/shader/skybox.vert.spv",
-                                                                                     "example/raster/shader/skybox.frag.spv",
+                                                                                     "../example/raster/shader/skybox.vert.spv",
+                                                                                     "../example/raster/shader/skybox.frag.spv",
                                                                                      vk::CullModeFlagBits::eNone,
                                                                                      vk::PipelineDepthStencilStateCreateInfo()
                                                                                          .setDepthTestEnable(false)
@@ -346,8 +342,8 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
 
             graphic_context->m_pipelines[eGbufferPipeline]
                 .reset(new Graphic_Pipeline(renderPass,
-                                            "example/raster/shader/gbuffer.vert.spv",
-                                            "example/raster/shader/gbuffer.frag.spv",
+                                            "../example/raster/shader/gbuffer.vert.spv",
+                                            "../example/raster/shader/gbuffer.frag.spv",
                                             vk::CullModeFlagBits::eBack,
                                             GBufferDepthStencilState(),
                                             vk::SampleCountFlagBits::e1,
@@ -358,8 +354,8 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                                             gbufferPass->color_references.size(),
                                             OpacityBlendAttachmentState()));
             graphic_context->m_pipelines[eOpacityPipeline].reset(new Graphic_Pipeline(renderPass,
-                                                                                      "example/raster/shader/tonemap.vert.spv",
-                                                                                      "example/raster/shader/pbrfs.frag.spv",
+                                                                                      "../example/raster/shader/tonemap.vert.spv",
+                                                                                      "../example/raster/shader/pbrfs.frag.spv",
                                                                                       vk::CullModeFlagBits::eNone,
                                                                                       PBRComposeDepthStencilState(),
                                                                                       vk::SampleCountFlagBits::e1,
@@ -370,8 +366,8 @@ void raster_context_pbr::prepare(std::shared_ptr<Window> window)
                                                                                       opacityPass->color_references.size(),
                                                                                       OpacityBlendAttachmentState()));
             graphic_context->m_pipelines[eToneMapPipeline].reset(new Graphic_Pipeline(renderPass,
-                                                                                      "example/raster/shader/tonemap.vert.spv",
-                                                                                      "example/raster/shader/tonemap.frag.spv",
+                                                                                      "../example/raster/shader/tonemap.vert.spv",
+                                                                                      "../example/raster/shader/tonemap.frag.spv",
                                                                                       vk::CullModeFlagBits::eNone,
                                                                                       false,
                                                                                       false,

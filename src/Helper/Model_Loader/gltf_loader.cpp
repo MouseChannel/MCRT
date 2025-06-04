@@ -1,5 +1,6 @@
 #include "Rendering/Model.hpp"
 #include "Wrapper/Texture.hpp"
+#include "glm/ext/matrix_transform.hpp"
 #include <iostream>
 #if !defined(TINYGLTF_IMPLEMENTATION)
 #define TINYGLTF_IMPLEMENTATION
@@ -10,25 +11,28 @@
 #if !defined(STB_IMAGE_WRITE_IMPLEMENTATION)
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #endif
-// #include "Helper/ThreadPool.hpp"
-#include "Context/Context.hpp"
-#include <glm/gtc/type_ptr.hpp>
-
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-#define TINYGLTF_ANDROID_LOAD_FROM_ASSETS
-#define TINYGLTF_IMPLEMENTATION
-#endif
+#include <fstream>
+// // #include "Helper/ThreadPool.hpp"
+// #include "Context/Context.hpp"
+// // #include <glm/gtc/type_ptr.hpp>
+//
+// #if defined(VK_USE_PLATFORM_ANDROID_KHR)
+// #define TINYGLTF_ANDROID_LOAD_FROM_ASSETS
+// #define TINYGLTF_IMPLEMENTATION
+// #endif
 // #include "Tool/tiny_gltf.h"
 #include "Helper/Model_Loader/gltf_loader.hpp"
-
-#include <execution>
-// #include <pstl/glue_execution_defs.h>
-
-#define using_threadpool1
-
+//
+// #include "glm/ext/matrix_transform.hpp"
+//
+// // #include <execution>
+// // #include <pstl/glue_execution_defs.h>
+//
+// #define using_threadpool1
+//
 namespace MCRT {
-// static std::mutex texture_lock;
-
+// // static std::mutex texture_lock;
+//
 int get_size(int componentType)
 {
     switch (componentType) {
@@ -149,7 +153,7 @@ void copy_data(std::vector<T>& data, const std::vector<unsigned char>& src, tiny
     std::memcpy(data.data(), src.data() + buffer_view.byteOffset, count * sizeof(T));
 }
 
-int handle_texture(tinygltf::Model model, tinygltf::TextureInfo texture_info,  vk::Format format)
+int handle_texture(tinygltf::Model model, tinygltf::TextureInfo texture_info, vk::Format format)
 {
 
     if (texture_info.index < 0)
@@ -169,7 +173,7 @@ int handle_texture(tinygltf::Model model, tinygltf::TextureInfo texture_info,  v
     return index;
 }
 
-int handle_texture(tinygltf::Model model,int texture_index,  vk::Format format)
+int handle_texture(tinygltf::Model model, int texture_index, vk::Format format)
 {
 
     if (texture_index < 0)
@@ -216,6 +220,7 @@ std::shared_ptr<Mesh> GLTF_Loader::load_skybox(std::string_view path)
     Mesh::all_meshs.pop_back();
     std::cout << "mesh :" << Mesh::all_meshs.size() << std::endl;
     return sky_box;
+    return nullptr;
 }
 
 glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
@@ -392,7 +397,7 @@ glm::mat4 GLTF_Loader::load_primitive(glm::mat4 father_matrix,
             vertexs.emplace_back(Vertex {
                 .pos = positions[indexs[i + j]],
                 .nrm = normals[indexs[i + j]],
-                .texCoord = texcoord.empty() ? glm::vec2 { 0 } :  texcoord[indexs[i + j]] ,
+                .texCoord = texcoord.empty() ? glm::vec2 { 0 } : texcoord[indexs[i + j]],
                 .tangent = tangents.empty() ? glm::vec3 { 0 } : tangents[indexs[i + j]],
                 .bitangent = tangents.empty() ? glm::vec4 { 0 } : glm::cross(normals[indexs[i + j]], glm::vec3(tangents[indexs[i + j]]) * tangents[indexs[i + j]].w)
 

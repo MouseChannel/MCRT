@@ -17,7 +17,9 @@ std::vector<char> ShaderModule::ReadBinary(const std::string& fileName)
     const size_t fileSize = file.tellg();
     std::vector<char> buffer(fileSize);
 
-    file.seekg(0);
+
+    // file.seekg(0);
+    file.seekg(0, std::ios::beg);
     file.read(buffer.data(), fileSize);
     file.close();
 

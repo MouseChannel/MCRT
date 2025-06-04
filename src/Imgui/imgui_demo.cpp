@@ -766,7 +766,7 @@ static void ShowDemoWindowMenuBar(ImGuiDemoWindowData* demo_data)
             ImGui::MenuItem("Main menu bar", NULL, &demo_data->ShowMainMenuBar);
 
             ImGui::SeparatorText("Mini apps");
-            ImGui::MenuItem("Assets Browser", NULL, &demo_data->ShowAppAssetsBrowser);
+            ImGui::MenuItem("../assets Browser", NULL, &demo_data->ShowAppAssetsBrowser);
             ImGui::MenuItem("Console", NULL, &demo_data->ShowAppConsole);
             ImGui::MenuItem("Custom rendering", NULL, &demo_data->ShowAppCustomRendering);
             ImGui::MenuItem("Documents", NULL, &demo_data->ShowAppDocuments);
@@ -3596,7 +3596,7 @@ static void ShowDemoWindowMultiSelect(ImGuiDemoWindowData* demo_data)
 
         // See ShowExampleAppAssetsBrowser()
         if (ImGui::TreeNode("Multi-Select (tiled assets browser)")) {
-            ImGui::Checkbox("Assets Browser", &demo_data->ShowAppAssetsBrowser);
+            ImGui::Checkbox("../assets Browser", &demo_data->ShowAppAssetsBrowser);
             ImGui::Text("(also access from 'Examples->Assets Browser' in menu)");
             ImGui::TreePop();
         }
@@ -7001,8 +7001,8 @@ static void ShowDemoWindowTables()
             if (show_headers)
                 ImGui::TableHeadersRow();
 
-                // Show data
-                // FIXME-TABLE FIXME-NAV: How we can get decent up/down even though we have the buttons here?
+            // Show data
+            // FIXME-TABLE FIXME-NAV: How we can get decent up/down even though we have the buttons here?
 #if 1
             // Demonstrate using clipper for large vertical lists
             ImGuiListClipper clipper;
@@ -10230,7 +10230,7 @@ struct ExampleAssetsBrowser {
 
         ImGuiIO& io = ImGui::GetIO();
         ImGui::SetNextWindowContentSize(ImVec2(0.0f, LayoutOuterPadding + LayoutLineCount * (LayoutItemSize.x + LayoutItemSpacing)));
-        if (ImGui::BeginChild("Assets", ImVec2(0.0f, -ImGui::GetTextLineHeightWithSpacing()), ImGuiChildFlags_Borders, ImGuiWindowFlags_NoMove)) {
+        if (ImGui::BeginChild("../assets", ImVec2(0.0f, -ImGui::GetTextLineHeightWithSpacing()), ImGuiChildFlags_Borders, ImGuiWindowFlags_NoMove)) {
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
             const float avail_width = ImGui::GetContentRegionAvail().x;
@@ -10328,7 +10328,7 @@ struct ExampleAssetsBrowser {
                                 else
                                     while (Selection.GetNextSelectedItem(&it, &id))
                                         payload_items.push_back(id);
-                                ImGui::SetDragDropPayload("ASSETS_BROWSER_ITEMS", payload_items.Data, (size_t)payload_items.size_in_bytes());
+                                ImGui::SetDragDropPayload("../assets_BROWSER_ITEMS", payload_items.Data, (size_t)payload_items.size_in_bytes());
                             }
 
                             // Display payload content in tooltip, by extracting it from the payload data

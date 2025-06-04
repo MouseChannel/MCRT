@@ -124,8 +124,8 @@ void Context::Build_pipeline()
 
     pipeline.reset(new Pipeline);
 
-    vert_shader.reset(new ShaderModule("include/Shader/cube.vert.spv"));
-    frag_shader.reset(new ShaderModule("include/Shader/cube.frag.spv"));
+    vert_shader.reset(new ShaderModule("../include/Shader/cube.vert.spv"));
+    frag_shader.reset(new ShaderModule("../include/Shader/cube.frag.spv"));
 
     auto attr = Model::Vertex::make_attr();
     auto binding = Model::Vertex::make_bind(
